@@ -17,6 +17,12 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
           
+      - name: set lower case owner name
+        run: |
+          echo "REPOSITORY_LC=${REPOSITORY,,}" >>${GITHUB_ENV}
+        env:
+          REPOSITORY: '${{ github.repository }}'
+          
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
@@ -25,6 +31,6 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/${{ github.action_repository }}:latest
-            ghcr.io/${{ github.action_repository }}:${{ github.ref_name }}
+            ghcr.io/${{ env.REPOSITORY_LC }}:latest
+            ghcr.io/${{ env.REPOSITORY_LC }}:${{ github.ref_name }}
           
