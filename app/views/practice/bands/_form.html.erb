@@ -1,0 +1,37 @@
+<%= form_with(model: [:practice, band], local: true) do |form| %>
+  <% if band.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(band.errors.count, "error") %> prohibited this band from being saved:</h2>
+
+      <ul>
+      <% band.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label 'Nom' %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div class="field">
+    <%= form.label 'Type de groupe' %>
+    <%= form.collection_select :band_type_id, @band_types, :id, :name, prompt: true %>
+  </div>
+
+  <div class="field">
+    <%= form.label 'Genre musical' %>
+    <%= form.collection_select :music_genre_id, @music_genres, :id, :name, prompt: true %>
+  </div>
+
+  <div class='field'>
+    <%= form.label 'Blacklisté' %>
+    <%= form.check_box :blacklisted %>
+  </div>
+
+  <div class='actions'>
+    <%= form.submit %>
+  </div>
+<% end %>

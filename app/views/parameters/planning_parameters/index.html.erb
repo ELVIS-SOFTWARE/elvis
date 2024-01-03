@@ -1,0 +1,13 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+  <h2>
+    Paramétrage du planning
+  </h2>
+</div>
+
+        <%= react_component("parameters/Plannings/PlanningsParameters", {
+          availabilityChecked: @show_availabilities,
+          planningChecked: @teacher_can_edit_planning,
+          planningId: @school.planning_id,
+          seasons: @seasons,
+          auth_token: current_user.authentication_token,
+        }) %>

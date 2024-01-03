@@ -1,0 +1,19 @@
+
+<%= react_component("activityApplications/summary/Summary", {
+    application: @activity_application,
+    student_evaluations: @student_evaluations,
+    admins: User.admins,
+    activityRefs: @activity_refs,
+    isAdmin: current_user.admin?,
+    statuses: @statuses,
+    student_evaluation_questions: @student_evaluation_questions,
+    application_change_questions: @application_change_questions,
+    application_change_questionnaires: @application_change_questionnaires,
+    new_student_level_questions: @new_student_level_questions,
+    new_student_level_questionnaires: @new_student_level_questionnaires,
+    seasons: @seasons,
+    evaluation_level_refs: @evaluation_level_refs, 
+    levels: @levels,
+    payer: @payer,
+    user_id: current_user.id
+}) %>

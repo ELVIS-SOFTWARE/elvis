@@ -1,0 +1,44 @@
+<div class="row m-t">
+    <div class="col-lg-6 col-sm-12">
+        <div class="ibox">
+            <div class="ibox-title">
+                <div class="flex flex-space-between-justified">
+                    <h2>
+                        Types de tarifs
+                    </h2>
+                    <div>
+                        <%= link_to new_pricing_path, class: "btn btn-primary" do %>
+                            <i class="fas fa-plus"></i>
+                            Nouveau type de tarif
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox-content no-padding">
+                <table class="table table-striped" style="margin-bottom: 0">
+                    <thead>
+                        <th>#</th>
+                        <th>Libellé</th>
+                    </thead>
+                    <tbody>
+                        <%= render partial: "pricing_for_index", collection: @pricings, as: :pricing %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="ibox-footer">
+                <% if @error %>
+                    <div class="alert alert-danger">
+                        <h3>Erreur</h3>
+                        <%= @error %>
+                    </div>
+                <% end %>
+                <% if @message %>
+                    <div class="alert alert-info">
+                        <h3>Message</h3>
+                        <%= @message %>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+    </div>
+</div>

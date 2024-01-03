@@ -1,0 +1,41 @@
+
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+  <h2>Localisations</h2>
+  <%= link_to 'Créer une localisation', new_location_path, :class => 'btn btn-primary pull-right' %>
+</div>
+
+<p id="notice"><%= notice %></p>
+
+<table class="table table-bordered bg-white">
+  <thead>
+  <tr>
+    <th>Nom</th>
+    <th colspan="2">Actions</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  <% @locations.each do |location| %>
+    <tr>
+      <td><%= location.label %></td>
+      <td><%= link_to 'Éditer', edit_location_path(location), :class => 'btn btn-primary' %></td>
+      <td><%= link_to 'Supprimer', location, method: :delete, data: { confirm: 'Êtes vous sur ?' }, :class => 'btn btn-danger' %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<% if flash[:error] %>
+  <div class="ibox-footer">
+      <div class="alert alert-danger">
+        <ul>
+          <% flash[:error].each do |message| %>
+            <li>
+              <h3>Erreur</h3>
+              <%= message %>
+            </li>
+            <% end %>
+        </ul>
+      </div>
+  </div>
+<% end %>

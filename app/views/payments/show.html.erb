@@ -1,0 +1,23 @@
+<%= react_component("userPayments/PaymentsManagement", {
+  paymentMethods: @payment_methods,
+  activities: @activities_json,
+  options: @options,
+  desiredActivities: @desired_activities,
+  adhesions: @adhesions,
+  schedules: @schedules,
+  schedule_statuses: @schedule_statuses,
+  payments: @payments,
+  payers: @payers,
+  user_id: current_user.id,
+  paymentStatuses: @payment_statuses,
+  duePaymentStatuses: @due_payment_statuses,
+  locations: @locations,
+  seasons: @seasons,
+  currentSeason: @current_season,
+  pricings: @pricings,
+  user: @user,
+  adhesionEnabled: @adhesion_enabled,
+  adhesions: @adhesions,
+  adhesionPrices: @adhesion_prices,
+  coupons: @coupons
+}) %>

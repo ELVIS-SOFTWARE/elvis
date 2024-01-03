@@ -1,0 +1,29 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+  <h2>Rooms Features</h2>
+  <%= link_to 'Créer feature', new_practice_room_feature_path, :class => 'btn btn-primary pull-right' %>
+</div>
+
+<p id="notice"><%= notice %></p>
+
+<table class="table table-bordered bg-white">
+  <thead>
+  <tr>
+    <th>Nom</th>
+    <th>Actif</th>
+    <th colspan="2">Actions</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  <% @room_features.each do |feature| %>
+    <tr>
+      <td><%= feature.name %></td>
+      <td class="<%= feature.active ? "text-success" : "text-danger" %>"><%= feature.active %></td>
+      <td><%= link_to 'Éditer', edit_practice_room_feature_path(feature), :class => 'btn btn-primary' %></td>
+      <td><%= link_to 'Supprimer', [:practice, feature], method: :delete, data: { confirm: 'Êtes vous sur ?' }, :class => 'btn btn-primary' %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<br>

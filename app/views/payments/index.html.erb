@@ -1,0 +1,15 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>Suivi des paiements</h2>
+</div>
+
+<%= react_component "generalPayments/GeneralPayments", {
+        paymentMethods: @payment_methods,
+        locations: @locations,
+        minYear: @min_year,
+        maxYear: @max_year,
+        failedCount: @failed_count,
+        paymentStatuses: @payment_statuses,
+        duePaymentStatuses: @due_statuses,
+        seasons: @seasons,
+    } %>
+

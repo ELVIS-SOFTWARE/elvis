@@ -1,0 +1,24 @@
+<%= form_with(model: location, local: true) do |form| %>
+  <% if flash[:error]&.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(flash[:error].count, "error") %> prohibited this location from being saved:</h2>
+
+      <ul>
+        <% flash[:error].each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="row">
+    <div class="field form-group col-sm-12">
+      <%= form.label :Nom_du_site %>
+      <%= form.text_field :label, :class => 'form-control', :required => true %>
+    </div>
+  </div>
+
+  <div class="actions">
+    <%= link_to 'Retour', parameters_rooms_parameters_path, :class => 'btn btn-primary' %>
+    <%= form.submit "Sauvegarder", :class => 'btn btn-primary' %>
+  </div>
+<% end %>

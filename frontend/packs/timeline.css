@@ -1,0 +1,239 @@
+
+
+  .fc .fc-timeline-body {
+    min-height: 100%;
+    position: relative;
+    z-index: 1; /* scope slots, bg, etc */
+  }
+/*
+vertical slots in both the header AND the body
+*/
+.fc .fc-timeline-slots {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    bottom: 0
+  }
+.fc .fc-timeline-slots > table {
+      height: 100%;
+    }
+.fc .fc-timeline-slot-minor {
+    border-style: dotted;
+  }
+.fc .fc-timeline-slot-frame {
+    display: flex;
+    align-items: center; /* vertical align */
+    justify-content: center; /* horizontal align */
+  }
+.fc .fc-timeline-header-row-chrono { /* a row of times */
+  }
+.fc .fc-timeline-header-row-chrono .fc-timeline-slot-frame {
+      justify-content: flex-start; /* horizontal align left or right */
+    }
+.fc .fc-timeline-slot-cushion {
+    padding: 4px 5px; /* TODO: unify with fc-col-header? */
+    white-space: nowrap;
+  }
+/* only owns one side, so can do dotted */
+.fc-direction-ltr .fc-timeline-slot { border-right: 0 !important }
+.fc-direction-rtl .fc-timeline-slot { border-left: 0 !important }
+.fc .fc-timeline-now-indicator-container {
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 0;
+  }
+.fc .fc-timeline-now-indicator-arrow,
+  .fc .fc-timeline-now-indicator-line {
+    position: absolute;
+    top: 0;
+    border-style: solid;
+    border-color: red;
+    border-color: var(--fc-now-indicator-color, red);
+  }
+.fc .fc-timeline-now-indicator-arrow {
+    margin: 0 -6px; /* 5, then one more to counteract scroller's negative margins */
+
+    /* triangle pointing down. TODO: mixin */
+    border-width: 6px 5px 0 5px;
+    border-left-color: transparent;
+    border-right-color: transparent;
+  }
+.fc .fc-timeline-now-indicator-line {
+    margin: 0 -1px; /* counteract scroller's negative margins */
+    bottom: 0;
+    border-width: 0 0 0 1px;
+  }
+.fc .fc-timeline-events {
+    position: relative;
+    z-index: 3;
+    width: 0; /* for event positioning. will end up on correct side based on dir */
+  }
+.fc .fc-timeline-event-harness {
+    position: absolute;
+    top: 0; /* for when when top can't be computed yet */
+    /* JS will set tht left/right */
+  }
+/* z-index, scoped within fc-timeline-events */
+.fc-timeline-event { z-index: 1 }
+.fc-timeline-event.fc-event-mirror { z-index: 2 }
+.fc-timeline-event {
+  position: relative; /* contains things. TODO: make part of fc-h-event and fc-v-event */
+  display: flex; /* for v-aligning start/end arrows and making fc-event-main stretch all the way */
+  align-items: center;
+  border-radius: 0;
+  padding: 2px 1px;
+  margin-bottom: 1px;
+  font-size: .85em;
+  font-size: var(--fc-small-font-size, .85em)
+
+  /* time and title spacing */
+  /* ---------------------------------------------------------------------------------------------------- */
+
+}
+.fc-timeline-event .fc-event-main {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0; /* important for allowing to shrink all the way */
+  }
+.fc-timeline-event .fc-event-time {
+    font-weight: bold;
+  }
+.fc-timeline-event .fc-event-time,
+  .fc-timeline-event .fc-event-title {
+    white-space: nowrap;
+    padding: 0 2px;
+  }
+/* move 1px away from slot line */
+.fc-direction-ltr .fc-timeline-event.fc-event-end { margin-right: 1px }
+.fc-direction-rtl .fc-timeline-event.fc-event-end { margin-left: 1px }
+/* make event beefier when overlap not allowed */
+.fc-timeline-overlap-disabled .fc-timeline-event {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 0;
+}
+/* arrows indicating the event continues into past/future */
+/* ---------------------------------------------------------------------------------------------------- */
+/* part of the flexbox flow */
+.fc-timeline-event:not(.fc-event-start):before,
+.fc-timeline-event:not(.fc-event-end):after {
+  content: "";
+  flex-grow: 0;
+  flex-shrink: 0;
+  opacity: .5;
+
+  /* triangle. TODO: mixin */
+  width: 0;
+  height: 0;
+  margin: 0 1px;
+  border: 5px solid #000; /* TODO: var */
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+}
+/* pointing left */
+.fc-direction-ltr .fc-timeline-event:not(.fc-event-start):before,
+.fc-direction-rtl .fc-timeline-event:not(.fc-event-end):after {
+  border-left: 0;
+}
+/* pointing right */
+.fc-direction-ltr .fc-timeline-event:not(.fc-event-end):after,
+.fc-direction-rtl .fc-timeline-event:not(.fc-event-start):before {
+  border-right: 0;
+}
+.fc .fc-timeline-bg { /* a container for bg content */
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    left: 0; /* will take precedence when LTR */
+    right: 0; /* will take precedence when RTL */ /* TODO: kill */
+  }
+.fc .fc-timeline-bg .fc-non-business { z-index: 1 }
+.fc .fc-timeline-bg .fc-bg-event { z-index: 2 }
+.fc .fc-timeline-bg .fc-highlight { z-index: 3 }
+.fc .fc-timeline-bg-harness {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+  }
+
+  .fc .fc-resource-timeline-divider {
+    width: 0px;
+  }
+
+  .fc .fc-resource-timeline .fc-resource-group:not([rowspan]) {
+    background: rgba(208, 208, 208, 0.3);
+    background: var(--fc-neutral-bg-color, rgba(208, 208, 208, 0.3));
+  }
+
+  .fc .fc-resource-timeline .fc-resource-group:not([rowspan]) {
+    background: rgba(208, 208, 208, 0.3);
+    background: var(--fc-neutral-bg-color, rgba(208, 208, 208, 0.3));
+  }
+.fc .fc-timeline-lane-frame {
+  position: relative; /* contains the fc-timeline-bg container, which liquidly expands */
+  /* the height is explicitly set by row-height-sync */
+}
+.fc .fc-timeline-overlap-enabled .fc-timeline-lane-frame .fc-timeline-events { /* has height set on it */
+  box-sizing: content-box; /* padding no longer part of height */
+  padding-bottom: 10px; /* give extra spacing underneath for selecting */
+}
+/* the "frame" */
+.fc-datagrid-cell-frame-liquid {
+height: 100%; /* needs liquid hack */
+}
+.fc-liquid-hack .fc-datagrid-cell-frame-liquid {
+height: auto;
+position: absolute;
+top: 0;
+right: 0;
+bottom: 0;
+left: 0;
+}
+
+.fc .fc-datagrid-header .fc-datagrid-cell-frame {
+    position: relative; /* for resizer */
+    display: flex;
+    justify-content: flex-start; /* horizontal align (natural left/right) */
+    align-items: center; /* vertical align */
+}
+
+.fc .fc-datagrid-cell-resizer {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    cursor: col-resize;
+}
+
+.fc .fc-datagrid-cell-cushion {
+    padding: 8px;
+    white-space: nowrap;
+    overflow: hidden; /* problem for col resizer :( */
+}
+
+.fc .fc-datagrid-expander {
+    cursor: pointer;
+    opacity: 0.65
+
+  }
+.fc .fc-datagrid-expander .fc-icon { /* the expander and spacers before the expander */
+      display: inline-block;
+      width: 1em; /* ensure constant width, esp for empty icons */
+    }
+.fc .fc-datagrid-expander-placeholder {
+    cursor: auto;
+  }
+.fc .fc-resource-timeline-flat .fc-datagrid-expander-placeholder {
+      display: none;
+    }
+.fc-direction-ltr .fc-datagrid-cell-resizer { right: -3px }
+.fc-direction-rtl .fc-datagrid-cell-resizer { left: -3px }
+.fc-direction-ltr .fc-datagrid-expander { margin-right: 3px }
+.fc-direction-rtl .fc-datagrid-expander { margin-left: 3px }

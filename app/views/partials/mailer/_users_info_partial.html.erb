@@ -1,0 +1,9 @@
+
+<% if (@user || user)&.adherent_number? %>
+<div style="text-align: center; font-size: 14px">
+    <i>
+        <p>Votre numéro d'identification: <b><%= (@user || user).adherent_number %></b></p>
+        <p>Ce numéro vous permet de vous authentifier sur Elvis</p>
+    </i>
+</div>
+<% end %>

@@ -1,0 +1,31 @@
+<div class="page-heading">
+    <h1>
+        <strong>Feuille de présence</strong>
+    </h1>
+</div>
+<h2>Professeur: <%= @user.first_name %> <%= @user.last_name %></h2>
+ <div class="calendar-header">
+    <div class="calendar-header-group">
+        <div class="date-component">
+            <%= link_to presence_sheet_path(@user.id, date: @prev_week.strftime("%F")), class: "btn btn-primary m-r-sm", title: "Semaine précédente" do %>
+              <i class="fas fa-arrow-left"></i><i class="fas fa-arrow-left"></i>
+            <% end %>
+            <%= link_to presence_sheet_path(@user.id, date: @prev_date.strftime("%F")), class: "btn btn-primary", title: "Jour précédent" do %>
+                <i class="fas fa-arrow-left"></i>
+            <% end %>
+
+            <h4 class="auto p-sm">
+                <%= @date.strftime("%d/%m/%Y") %>
+            </h4>
+
+            <%= link_to presence_sheet_path(@user.id, date: @next_date.strftime("%F")), class: "btn btn-primary", title: "Jour suivant" do %>
+                <i class="fas fa-arrow-right"></i>
+            <% end %>
+          <%= link_to presence_sheet_path(@user.id, date: @next_week.strftime("%F")), class: "btn btn-primary m-l-sm", title: "Semaine suivantes" do %>
+            <i class="fas fa-arrow-right"></i><i class="fas fa-arrow-right"></i>
+          <% end %>
+        </div>
+    </div>
+</div>
+
+<%= react_component("PresenceSheet", { instances: @instances }) %>

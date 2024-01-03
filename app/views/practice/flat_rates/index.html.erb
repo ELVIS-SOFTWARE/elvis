@@ -1,0 +1,33 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>Forfaits</h2>
+  <%= link_to 'Créer forfait', new_practice_flat_rate_path, :class => 'btn btn-primary pull-right' %>
+</div>
+
+<p id="notice"><%= notice %></p>
+
+<table class="table table-bordered bg-white">
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Nb d'heures</th>
+      <th>Prix Solo / Duo</th>
+      <th>Prix groupe</th>
+      <th colspan="2">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @flat_rates.each do |flat_rate| %>
+      <tr>
+        <td><%= flat_rate.name %></td>
+        <td><%= flat_rate.nb_hour %></td>
+        <td><%= flat_rate.solo_duo_rate %> €</td>
+        <td><%= flat_rate.group_rate %> €</td>
+        <td><%= link_to 'Éditer', edit_practice_flat_rate_path(flat_rate), :class => 'btn btn-primary' %></td>
+        <td><%= link_to 'Supprimer', [:practice, flat_rate], method: :delete, data: { confirm: 'Are you sure?' }, :class => 'btn btn-primary' %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>

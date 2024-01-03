@@ -1,0 +1,95 @@
+.alert, .navbar-default, .weekCalendar, .dropdown-toggle, .dropdown-menu {
+    display: none !important;
+}
+
+.raw-planning {
+    margin-top: -50px;
+}
+
+// .row {
+//     display: flex;
+//     flex-wrap: wrap;
+// }
+
+.col-lg-2 {
+    width: calc(50% - 40px);
+    margin-right: 40px;
+    margin-top: 30px;
+}
+.border-bottom {
+    border: 0 !important;
+}
+
+h4 {
+    font-size: 22px;
+}
+
+
+.taureau {
+    display: none;
+}
+.chevre {
+    display: block;
+}
+
+/* ========================================================================== */
+/* Règlement */
+/* ========================================================================== */
+
+.payment-print {
+    display: block;
+}
+.payment-page {
+    display: none;
+}
+
+.payment-print-identity {
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin: 20px 0 30px;
+}
+
+.payment-print-student {
+    margin: 0 0 10px;
+    line-height: 1;
+}
+
+.payment-print-student-number {
+    margin: 0;
+}
+
+.payment-print-content {
+    margin: 0 20px;
+}
+
+.payment-print-checkbox {
+    border: 2px solid black;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    margin: 0 10px 0 0;
+}
+
+.payment-print-list {
+    list-style: none;
+    margin: 10px;
+    padding: 0;
+
+    li {
+        margin: 0 0 20px;
+        display: flex;
+        font-size: 1.4rem;
+        color: black;
+    }
+}
+
+.payment-print-student {
+    font-size: 30px;
+    font-weight: 600;
+}
+
+h5 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}

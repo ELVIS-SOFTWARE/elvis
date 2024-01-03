@@ -1,0 +1,17 @@
+
+<%= react_component("UserEdit", {
+    schoolName: @school_name,
+    countryCode: @country_code,
+    user: @userjson,
+    current_user: @current_user,
+    seasons: Season.all, 
+    activity_refs: ActivityRef.all, 
+    evaluation_levels: @levels,
+    addresses: @addresses,
+    currentUserIsAdmin: current_user.is_admin,
+    currentUserIsTeacher: current_user.is_teacher,
+    btnBack: url_for(:back),
+    lessonsPlanned: @lessons_planned,
+    consent_docs: @consent_docs,
+    organizationOptions: @organizationOptions,
+}) %>

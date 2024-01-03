@@ -1,0 +1,13 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>
+        Informations sur les profs
+    </h2>
+</div>
+
+<div class="row wrapper ">
+    <div class="teacher-card-list">
+        <% @teachers.each do |teacher|%>
+            <%= render partial: "teacher", locals: {teacher: teacher} %>
+        <% end %>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+<%= form_with(model: [:practice, material], local: true) do |form| %>
+  <% if material.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(material.errors.count, "error") %> prohibited this materials from being saved:</h2>
+
+      <ul>
+      <% material.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+    <div class="row">
+        <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+            <%= form.label :name %>
+            <%= form.text_field :name, :class => 'form-control', :required => true %>
+        </div>
+
+        <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+          <%= form.label :prix %>
+          <%= form.number_field :prix, :class => 'form-control', :required => true, step: "any", min: 0 %>
+        </div>
+
+        <div class="col-lg-8 col-md-8 col-sm-12">
+            <div class="field form-group pull-left m-r-xl m-t-md">
+                <%= form.radio_button :active, true %>
+                <%= form.label :active, "Actif" %>
+            </div>
+
+            <div class="field form-group pull-left m-t-md">
+                <%= form.radio_button :active, false %>
+                <%= form.label :active, "Inactif" %>
+            </div>
+        </div>
+    </div>
+
+  <div class="actions">
+    <%= link_to 'Retour', parameters_practice_parameters_path + "#tab-3", :class => 'btn btn-primary' %>
+    <%= form.submit "Sauvegarder", :class => 'btn btn-primary' %>
+  </div>
+<% end %>

@@ -1,0 +1,37 @@
+<mjml>
+  <mj-head>
+    <mj-title>Elvis - Confirmation du Compte</mj-title>
+    <mj-attributes>
+      <mj-text font-size="16px" align="center" padding="10px 20px"></mj-text>
+      <mj-class name="red" color="#d63031"></mj-class>
+      <mj-class name="big" font-size="25px"></mj-class>
+      <mj-all font-family="Arial"></mj-all>
+      <mj-button inner-padding="0px"></mj-button>
+    </mj-attributes>
+    <mj-style inline="inline">
+      .btn-link a {
+        display: inline-block;
+        padding: 10px 25px;
+        border-radius: 3px;
+      }
+    </mj-style>
+  </mj-head>
+  <mj-body>
+    <mj-column>
+      <mj-raw>
+        <!-- <mj-image src="<%= asset_pack_path 'images/picto-ziggy.svg' %>" alt="" width="150" height="150" class="picto-loginscreen"/> -->
+      </mj-raw>
+      <mj-image width="100px" src="<%= asset_pack_path 'images/logo.jpg' %>"></mj-image>
+      <mj-divider border-color="#d63031"></mj-divider>
+      <mj-text>Bienvenue <b>
+          <%= @resource.first_name %>
+          <%= @resource.last_name %>!</b></mj-text>
+      <mj-text>Vous pouvez confirmer votre email via le lien ci-dessous:</p>
+      </mj-text>
+      <mj-button href="<%=confirm_url(@resource, confirmation_token: @token)%>" css-class="btn-link">Confirmer mon compte</mj-button>
+      <mj-text> 
+        <!-- <%=render partial: "/partials/mailer/users_info_partial", locals: {user: @resource}%> -->
+      </mj-text>
+    </mj-column>
+  </mj-body>
+</mjml>

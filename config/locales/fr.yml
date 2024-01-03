@@ -1,0 +1,17 @@
+fr:
+    time:
+        formats:
+            date_month_concise: '%d %B %Y'
+            long_date: '%e %B %Y'
+    date:
+        formats:
+            date_month_concise: '%d %B %Y'
+    activerecord:
+        attributes:
+            activity_ref:
+                activity_type_list:
+                    child: Enfance
+                    cham: CHAM
+                    chorale_ma: Chorale MA
+                    eveil_musical: Éveil musical
+                    actions_culturelles: Actions culturelles

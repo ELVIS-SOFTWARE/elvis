@@ -1,0 +1,13 @@
+export const TREATMENT_PENDING_ID = 1;
+export const ACTIVITY_ATTRIBUTED_ID = 5;
+export const ACTIVITY_PENDING_ID = 7;
+export const STOPPED_ID = 9;
+export const EVALUATION_PENDING = 10;
+export const CANCELED_ID = 12;
+export const TREATMENT_IMPOSSIBLE_ID = 13;
+export const STOPPED = 14;
+export const CANCELED = 15;
+export const TREATMENT_IMPOSSIBLE = 16;
+export const PROPOSAL_ACCEPTED_ID = 17;
+export const PROPOSAL_REFUSED_ID = 18;
+export const ACTIVITY_PROPOSED_ID = 19;

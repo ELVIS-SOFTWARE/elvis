@@ -1,0 +1,76 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <% if current_user.admin? %>
+      <%= button_to({ :action => "toggle_lock"}, {:form_class => "pull-right", :class => "btn btn-primary btn-xs m-l-lg"}) do %>
+        <i class="fas fa-<%=@planning[:is_locked] ? "un" : ""%>lock"></i>
+        <%= @planning[:is_locked] ? "Déverrouiller" : "Verrouiller"%> le planning
+      <% end %>
+      <h2>
+        <div class="dropdown">
+          Planning de
+          <button data-toggle="dropdown" class="dropdown-toggle transparentSelector font-underlined img-rounded" aria-expanded="false">
+            <%=@planning[:user][:first_name] %> <%= @planning[:user][:last_name]%> <b class="caret"></b>
+          </button>
+          <ul class="dropdown-menu m-t-xs">
+            <% @users_for_navigation.each do |user| %>
+              <li><%= link_to "#{user['last_name']} #{user['first_name']}", planning_path(user['planning']['id'], ouid: user['is_teacher'] ? @planning.dig(:user, :id) : nil) %></li>
+            <% end %>
+          </ul>
+        </div>
+      </h2>
+    <% else %>
+      <h2>
+        Mon Planning
+        <% if !@planning[:is_locked] and current_user.teacher? %>
+          <%= button_to({ :action => "lock"}, {:form_class => "pull-right", :class => "btn btn-primary"}) do %>
+            <i class="fas fa-lock"></i> Verrouiller le planning
+          <% end %>
+        <% end %>
+      </h2>
+    <% end %>
+</div>
+
+<% unless @validation_date.nil? %>
+  <% if ((@validation_date - Time.now()) / 1.day).round.between?(0,30) %>
+      <% if current_user.teacher? %>
+          <div class="alert alert-danger" role="alert">
+              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+              <strong>Attention</strong>
+              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+              Vous avez jusqu'au <%= @validation_date.to_s(:french) %> pour valider votre planning !
+          </div>
+      <% elsif current_user.admin? %>
+          <div class="alert alert-warning" role="alert">
+              <i class="fas fa-info-circle" aria-hidden="true"></i>
+              Les professeurs ont jusqu'au <%= @validation_date.to_s(:french) %> pour valider leur planning. Ils en sont informés.
+          </div>
+      <% end %>
+  <% end %>
+<% end %>
+
+<%= react_component("planning/Planning", {
+  user: @planning[:user],
+  detailsModal: true,
+  isAdmin:  current_user.admin?,
+  isTeacher: current_user.teacher?,
+  displayOnly: (@planning[:is_locked] && current_user.teacher?),
+  planningId: @planning[:id],
+  rooms: @rooms, room_refs: @room_refs,
+  modal: @planning[:user][:is_teacher],
+  user_act: @planning[:user][:activity_refs],
+  levels: @levels,
+  locations: @locations,
+  evaluation_level_refs: @evaluation_level_refs,
+  planning: @planning,
+  teachers: @teachers,
+  additionalStudents: @additional_students,
+  season: @season,
+  nextSeason: @next_season,
+  day: @day,
+  seasons: @seasons,
+  activity_refs: @activity_refs,
+  displayRaw: (current_user.admin? || current_user.teacher?),
+  new_student_level_questions: @new_student_level_questions,
+  planningOwners: @planning_owners,
+  show_availabilities: @show_availabilities,
+  teacher_can_edit: @teacher_can_edit
+}) %>

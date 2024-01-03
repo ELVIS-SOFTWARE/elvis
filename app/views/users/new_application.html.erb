@@ -1,0 +1,14 @@
+<%= react_component('PreApplication', {
+  user: @user,
+  current_activity_applications: @current_activity_applications,
+  new_activities_applications: @new_activities_applications,
+  previous_season: @previous_season,
+  pre_application: @pre_application,
+  family_users: @family_users,
+  pre_applications_for_family: @pre_applications_for_family,
+  season: @season,
+  current_user: current_user,
+  hasFamily: (@user.family.length > 0 && can?(:read, @user)),
+  confirm_activity_text: @confirm_activity_text
+})
+%>

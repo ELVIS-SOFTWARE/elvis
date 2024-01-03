@@ -1,0 +1,9 @@
+development:
+    host: '127.0.0.1:9200'
+    prefix: "ziggy"
+
+kubernetes:
+    host: <%= ENV['ES_DB_HOST'] %>
+    prefix: <%= ENV['ES_PREFIX'] %>
+    user: <%= ENV['ES_USER'] %>
+    password: <%= ENV['ES_PASSWORD'] %>

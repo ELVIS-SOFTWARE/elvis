@@ -1,0 +1,30 @@
+
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>Matériels</h2>
+    <%= link_to 'Créer matériel', new_practice_material_path, :class => 'btn btn-primary pull-right' %>
+</div>
+
+<p id="notice"><%= notice %></p>
+
+<table class="table table-bordered bg-white">
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Prix location</th>
+      <th colspan="2">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @materials.each do |material| %>
+      <tr>
+        <td><%= material.name %></td>
+        <td><%= material.prix %> €</td>
+        <td><%= link_to 'Éditer', edit_practice_material_path(material), :class => 'btn btn-primary' %></td>
+        <td><%= link_to 'Supprimer', [:practice, material], method: :delete, data: { confirm: 'Êtes vous sur ?' }, :class => 'btn btn-primary' %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>

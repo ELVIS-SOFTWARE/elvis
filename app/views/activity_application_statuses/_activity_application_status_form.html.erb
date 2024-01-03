@@ -1,0 +1,18 @@
+<%= form_with scope: :activity_application_status, model: status, local: true do |f| %>
+    <div class="form-group">
+        <%= f.label "Libellé", for: "label" %><br />
+        <%= f.text_field :label, id: "label", class: "form-control", required:true %>
+    </div>
+
+    <div class="flex flex-center-aligned m-b">
+        <%= f.label "Arrêt ?", for: "is_stopping", class: "form-check-label m-r", style: "margin-bottom: 0" %><br />
+        <%= f.check_box :is_stopping, class: "form-check-input" %>
+    </div>
+
+    <div class="flex flex-center-aligned m-b">
+        <%= f.label "Actif", for: "is_active", class: "form-check-label m-r", style: "margin-bottom: 0" %><br />
+        <%= f.check_box :is_active, class: "form-check-input" %>
+    </div>
+
+    <%= f.submit "Sauvegarder", class: "btn btn-primary block full-width m-b" %>
+<% end %>

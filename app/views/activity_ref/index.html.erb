@@ -1,0 +1,60 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <h2>Référentiel des activités
+    <%= link_to new_activity_ref_path do %>
+      <button class="btn btn-primary btn-sm pull-right m-sm"><i class="fas fa-plus"></i> Ajouter une activité</button>
+    <% end %>
+    <%= link_to activity_ref_index_path(format: :csv) do %>
+      <button class="btn btn-primary btn-sm pull-right m-sm"><i class="fas fa-download"></i> Exporter </button>
+    <% end %>
+  </h2>
+</div>
+
+<br/>
+
+<% @activities.each do |kind, acts| %>
+  <h3><%= kind.name %></h3>
+
+  <div class="row">
+    <% acts.each do |a| %>
+      <div class="col-xl-4 col-md-6 col-xs-12">
+        <div class="contact-box d-flex vertical-align align-items-center align-content-center" style="height: 200px;">
+          <div class="col-sm-4">
+            <% if a.picture.attached? %>
+              <%= image_tag url_for(a.picture), class: "m-t-xs img-responsive" %>
+            <% end %>
+          </div>
+          <div class="col-sm-8">
+            <h4><strong><%= a.label %></strong></h4>
+            <p>Type: <%= kind.name %></p>
+            <p>Places possibles: <%= a.occupation_limit %> (max: <%= a.occupation_hard_limit %>)</p>
+
+            <div class="d-flex">
+              <%= link_to edit_activity_ref_path(a), class: "mr-2" do %>
+                <button class="btn btn-sm btn-primary">Éditer</button>
+              <% end %>
+              <%#= link_to a, method: :delete, data: { confirm: "Êtes vous sûr ?" } do %>
+              <!--              <button class="btn btn-sm btn-warning">Supprimer</button>-->
+              <%# end %>
+
+              <%= react_component("RemoveComponent", {
+                classname: "activity_ref",
+                id: a.id,
+                validationText: "Êtes-vous sûr ?",
+                btnProps: {
+                  className: "btn btn-sm btn-warning"
+                },
+                children: "Supprimer"
+              }) %>
+            </div>
+          </div>
+
+          <div class="clearfix"></div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% unless flash[:destroy_error].nil? %>
+  <%= react_component("utils/SwalBackEndModal", { swal_props: { title: 'Error', type: 'error', text: "Vous ne pouvez pas supprimer l'activité car elle est liée à d'autres données." } }) %>
+<% end %>

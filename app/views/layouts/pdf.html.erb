@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Echéancier</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
+        <%= wicked_pdf_stylesheet_link_tag "application" %>
+        <%= wicked_pdf_stylesheet_link_tag "pdf" %>
+    </head>
+    <body style="background-color: white;">
+        <div class="container">
+            <%= yield %>
+        </div>
+    </body>
+</html>
+

@@ -1,0 +1,26 @@
+<%= form_with(model: [:practice, band_type], local: true) do |form| %>
+  <% if band_type.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(band_type.errors.count, "error") %> prohibited this band_type from being saved:</h2>
+
+      <ul>
+      <% band_type.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+
+    <div class="row">
+        <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+            <%= form.label :name %>
+            <%= form.text_field :name, :class => 'form-control' %>
+        </div>
+    </div>
+
+    <div class="actions">
+        <%= link_to 'Retour', parameters_practice_parameters_path + "#tab-0", :class => 'btn btn-primary' %>
+        <%= form.submit "Sauvegarder", :class => 'btn btn-primary' %>
+    </div>
+<% end %>

@@ -1,0 +1,57 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <h2>Editer la salle "<%= @room.label %>"</h2>
+    <%= link_to 'retour', rooms_url(location: @room.location_id), class: 'btn btn-primary' %>
+</div>
+
+<br />
+
+<div class="col-lg-6">
+<!--    <a class="btn btn-primary" href="/rooms/<%#=@room.id%>/activities">Editer les activités de la salle</a>-->
+
+    <%= form_with scope: :room, url: room_path, model: @room, local: true, multipart: true do |f| %>
+          <div class="form-group">
+            <%= react_component("common/SelectMultiple", {
+              all_features: @locations,
+              features: [@location_id],
+              isMulti: false,
+              title: "Localisation",
+              name: "room[location_id]"
+            }) %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :nom %><span class="text-danger">*</span><br />
+            <%= f.text_field :label, autofocus: false, id: "label", class: "form-control", required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :type %><br />
+            <%= f.text_field :kind, autofocus: false, id: "kind", class: "form-control" %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :Etage %><br />
+            <%= f.number_field :floor, autofocus: false, id: "floor", class: "form-control" %>
+          </div>
+
+          <!--<div class="form-group">
+            <%#= f.label :area, "Surface (m²)" %> <br />
+            <%#= f.number_field :area, autofocus: false, class: "form-control", step: "any", min: 0, required: true %>
+          </div>-->
+
+          <div class="form-group">
+              <%= react_component("rooms/GestionImage", {title: 'Image', name: 'room[picture]', picture_url: @room.picture.attached? ? url_for(@room.picture) : nil}) %>
+          </div>
+
+          <div class="form-group">
+            <%= react_component("common/SelectMultiple", {all_features: ActivityRef.all.collect {|ar| [ar.label, ar.id]}, name: "room[activity_refs]", title: "Activités", features: @room.activity_refs.collect { |a| a.id }, isMulti: true}) %>
+          </div>
+
+          <!--<div class="form-group">
+            <%#= react_component("practice/rooms/RepetWithFeature_Fom", {all_features: @all_features, features: @selected_features, isRepet: @room.is_practice_room}) %>
+          </div>-->
+
+          <%= f.submit "Sauvegarder", class: "btn btn-primary block full-width m-b" %>
+    <% end %>
+</div>
+

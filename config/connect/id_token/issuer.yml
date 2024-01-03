@@ -1,0 +1,5 @@
+development: &defaults
+  issuer: https://15edc7d32e8e.eu.ngrok.io/oidc
+
+test:
+  <<: *defaults

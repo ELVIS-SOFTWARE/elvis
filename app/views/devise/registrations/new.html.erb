@@ -1,0 +1,88 @@
+<%
+  @season = Season.current_apps_season
+  @is_pre_application_period = Season.is_pre_application_period
+  @display_registration = Season.registration_opened
+%>
+
+<style>
+    @media screen and (max-width: 768px) {
+        .loginscreen {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            text-align: left !important;
+        }
+
+        .col-sm-12 {
+            padding: 0 !important;
+
+        }
+
+        .form.loginscreen {
+            margin: 1rem !important;
+            width: 90vw !important;
+        }
+
+        .ibox {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<div class="text-center loginscreen middle-box pt-2 mb-5 mt-5">
+  <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen my-auto"/>
+</div>
+
+
+<div class="row">
+  <div class="col-sm-12 d-flex justify-content-center">
+    <% if @display_registration %>
+      <div class="text-center form loginscreen middle-box pt-0 ">
+        <div class="ibox ">
+          <div class="ibox-title">
+            <h5>Inscription</h5>
+          </div>
+          <div class="ibox-content">
+            <%= render "devise/registrations/registration" %>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="p-xs">
+        <div class="no-registrations p-sm bg-white b-r-md">
+          <h2 class="font-bold text-uppercase">Inscriptions</h2>
+          <hr/>
+          <% if @is_pre_application_period %>
+            <p class="m-t-sm lead">
+              La période des ré-inscriptions en ligne est ouverte.
+              Si vous êtes déjà adhérent, vous pouvez vous rendre dans votre
+              <%= link_to "espace personnel", root_path, { class: "alert-link" } %>.
+            </p>
+
+            <hr/>
+
+            <% @next_season = Season.current_apps_season
+               if @next_season&.opening_date_for_applications
+            %>
+              <p class="m-t-sm lead">
+                Pour les nouvelles inscriptions, rendez-vous le
+                <strong>
+                  <%= I18n.with_locale("fr") { I18n.l(@next_season.opening_date_for_new_applications, format: :long_date) } %>
+                </strong>
+                sur cette page.
+              </p>
+            <%
+              end
+            %>
+          <% else %>
+            <p class="m-t-sm lead">
+              Les inscriptions en ligne pour la nouvelle saison sont actuellement fermées.
+              Vous pouvez nous contacter par téléphone pour que nous traitions votre demande.
+            </p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+

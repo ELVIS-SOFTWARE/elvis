@@ -1,0 +1,26 @@
+<p id="notice"><%= notice %></p>
+
+<table class="table w-50 table-striped table-hover table-bordered">
+  <tr>
+    <td><strong>Name:</strong></td>
+    <td><%= @band.name %></td>
+  </tr>
+
+  <tr>
+    <td><strong>Type de groupe:</strong></td>
+    <td><%= @band.band_type.name %></td>
+  </tr>
+
+  <tr>
+    <td><strong>Genre musical:</strong></td>
+    <td><%= @band.music_genre.name %></td>
+  </tr>
+
+  <tr>
+    <td><strong>Blacklisted:</strong></td>
+    <td><%= @band.blacklisted %></td>
+  </tr>
+</table>
+
+<%= link_to 'Back', practice_bands_path, class: 'btn btn-primary' %>
+<%= link_to 'Edit', edit_practice_band_path(@band), class: 'btn btn-primary' %>

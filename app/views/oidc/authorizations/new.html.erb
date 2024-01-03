@@ -1,0 +1,32 @@
+<%
+  common_params = {
+    client: @client,
+    response_type: @response_type,
+    redirect_uri: @redirect_uri,
+    scopes: @scopes,
+    state: params[:state],
+    nonce: params[:nonce],
+    _request_: @_request_,
+    request_uri: @request_uri
+  }
+%>
+
+<article>
+  <h2>Autorisez vous l'accès de <%= @client.name %> à ces informations ?</h2>
+  <dl>
+    <dt>Informations demandées</dt>
+    <% @scopes.each do |scope| %>
+      <dd><%= scope.name %></dd>
+    <% end %>
+  </dl>
+  <nav>
+    <ul>
+      <li>
+        <%= render 'oidc/authorizations/form', common_params.merge(action: :approve) %>
+      </li>
+      <li>
+        <%= render 'oidc/authorizations/form', common_params.merge(action: :deny) %>
+      </li>
+    </ul>
+  </nav>
+</article>

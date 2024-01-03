@@ -1,0 +1,59 @@
+<%#
+  Fonction spécifique aux vue qui doit être inclus avec render 'partials/menu_deoulant_fonction'.
+  Cette fonction prend en paramètre dans l'ordre:
+    - Un tableau de string qui représente les partie d'url pour lesquel le menu sera deroulé. (exemple: 'recherche_avancee')
+    - une string qui représente le titre du menu (exemple: 'Répétition')
+    - une string qui représente la class du logo à utilisé (exemple: 'fa-guitar')
+    - un tableau d'objet spécifique: {title: string, path: string} qui représente les différents balises 'a' à ajouter
+    - des donnée supplémentaire permettant à la fonction d'être récursive. Les données doivent être:
+      { url_parts: [string, string], title: string, logo: string, links: le même tab d'objet que links }
+
+
+  Pour information, seul 1 niveaux de récursivité est pris en compte. cela fait un menu à trois niveaux, ce qui est le max (esthétique)
+%>
+<% def render_menu_item(url_parts, title, logo, links = [], sup_data = [], is_third_level = false) %>
+  <%
+    is_current = false
+
+    url_parts.each do |part|
+      is_current = true if request.url.end_with?(part)
+    end
+
+    sup_data.each do |data|
+      data[:url_parts].each do |part|
+        is_current = true if request.url.end_with?(part)
+      end
+    end 
+  %>
+  <li class='<%= is_current ? "active" : "" %>'>
+    <a class="m-l-sm m-r-sm img-rounded" <%=  %>>
+      <% if is_third_level %>
+        <i class="fas <%= logo %>"></i>
+        <%= title %>
+        <i class='pull-right fas <%= is_current ? "fa-angle-down" : "fa-angle-left" %>'></i>
+      <% else %>
+        <i class='fas <%= logo %>'></i>
+        <span class='nav-label'><%= title %></span>
+        <span class='pull-right fas <%= is_current ? "fa-angle-down" : "fa-angle-left" %>'></span>
+      <% end %>
+    </a>
+    <ul class='nav nav-<%= is_third_level ? "third" : "second" %>-level <%= is_current ? "collapse in" : "" %>'>
+      <% links.each do |link| %>
+        <li class="m-l-sm m-r-sm img-rounded">
+          <%
+            html_options = {style: (request.url.end_with?(link[:path]) ? 'color: white!important;' : ''),
+                            class: "img-rounded"}
+            html_options = html_options.merge link[:a_options]
+          %>
+          <%= link_to link[:title], link[:path], html_options %>
+        </li>
+      <% end %>
+
+      <% sup_data.each do |data| %>
+          <%= render_menu_item data[:url_parts], data[:title], data[:logo], data[:links], [], true %>
+      <% end %>
+
+    </ul>
+  </li>
+  <%= "" %>
+<% end %>

@@ -1,0 +1,60 @@
+{
+  "admin": {
+    "first_name": "anais",
+    "last_name": "francois",
+    "email": "afrancois@sixmon.net",
+    "phone_number": "0102030405"
+  },
+  "school": {
+    "name": "Quesnoy-sur-Deule",
+    "activities": [
+      {
+        "name": "Guitare 1h",
+        "kind": "Guitare"
+      },
+      {
+        "name": "Guitare 20m",
+        "kind": "Guitare"
+      },
+      {
+        "name": "Piano 1h",
+        "kind": "Piano"
+      }
+    ],
+    "teachers": [
+      {
+        "first_name": "Wolfgang Amadeus",
+        "last_name": "Mozart",
+        "activities": [
+          "Piano 1h"
+        ]
+      },
+      {
+        "first_name": "Paco ",
+        "last_name": "de Lucia",
+        "activities": [
+          "Guitare 1h",
+          "Guitare 20m"
+        ]
+      }
+    ],
+    "location": {
+      "name": "Quesnoy-sur-Deule",
+      "rooms": [
+        {
+          "name": "Salle de piano",
+          "activities": [
+            "Piano 1h"
+          ]
+        },
+        {
+          "name": "Salle de guitare",
+          "activities": [
+            "Guitare 1h",
+            "Guitare 20m"
+          ]
+        }
+      ]
+    }
+  }
+}

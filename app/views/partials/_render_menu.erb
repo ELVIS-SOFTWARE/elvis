@@ -1,0 +1,58 @@
+<%#
+  Fonction spécifique aux vue qui doit être inclus avec render 'partials/menu_deoulant_fonction'.
+  Cette fonction prend en paramètre dans l'ordre:
+    - Un tableau de string qui représente les partie d'url pour lesquel le menu sera deroulé. (exemple: 'recherche_avancee')
+    - une string qui représente le titre du menu (exemple: 'Répétition')
+    - une string qui représente la class du logo à utilisé (exemple: 'fa-guitar')
+    - un tableau d'objet spécifique: {title: string, path: string} qui représente les différents balises 'a' à ajouter
+    - des donnée supplémentaire permettant à la fonction d'être récursive. Les données doivent être:
+      { url_parts: [string, string], title: string, logo: string, links: le même tab d'objet que links }
+
+
+  Pour information, seul 1 niveaux de récursivité est pris en compte. cela fait un menu à trois niveaux, ce qui est le max (esthétique)
+%>
+<% def render_menu(items) %>
+  
+  <% 
+    format_dropdown_menu = -> (menu_title, menu_logo, menu_leaves){
+      {
+        url_parts:
+          menu_leaves.map {|me| me.url(self).split('/').filter{|s| !s.empty?}[-1]}.uniq,
+          title: menu_title,
+          logo: menu_logo,
+          links: menu_leaves.map {|me| {title: me.caption, path: me.url(self), a_options: me.a_options } }
+      }
+    }
+   %>
+
+  <% items.each do |item|%>
+
+    <% if item.name==:divider %>
+      <li class="divider"></li>
+
+    <% elsif item.action.empty?%>
+      <% unless item.children.empty? %>
+
+        <% 
+          leaves = item.children.select {|c| !c.action.blank? || !c.url.blank?}
+          sub_menus = item.children - leaves
+
+          dropdown_menu = format_dropdown_menu. (item.caption, item.icon, leaves)
+        %>
+        <%= render_menu_item dropdown_menu[:url_parts], dropdown_menu[:title], dropdown_menu[:logo], dropdown_menu[:links], sub_menus.map {|subMenu| format_dropdown_menu.(subMenu.caption, subMenu.icon, subMenu.children)} %>
+      <%end%>
+
+    <% elsif item.parent.nil? && item.children.empty? %>
+      <li class='<%= request.url.end_with?(item.url(self)) ? "active" : "" %>'>
+        <%
+          html_options = { class: "m-l-sm m-r-sm img-rounded"}.merge item.a_options
+        %>
+        <%= link_to item.url(self), html_options do %>
+          <i class='fas <%= item.icon %>'></i>
+          <span><%= item.caption %></span>
+        <% end %>
+      </li>
+    <% end %>
+
+  <% end%>
+<% end %>

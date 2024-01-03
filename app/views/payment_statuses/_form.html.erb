@@ -1,0 +1,29 @@
+<%= form_with(model: ps, local: true) do |form| %>
+  <% if ps.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(ps.errors.count, "error") %> prohibited this payment_status from being saved:</h2>
+
+      <ul>
+        <% ps.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div class="row">
+    <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+      <%= form.label :label %>
+      <%= form.text_field :label, :class => 'form-control', :required => true %>
+    </div>
+
+    <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+      <%= form.label :color %>
+      <%= form.color_field :color, :class => 'form-control', :required => true %>
+    </div>
+  </div>
+
+  <div class="actions">
+    <%= link_to 'Retour', parameters_payment_parameters_url, :class => 'btn btn-primary' %>
+    <%= form.submit "Sauvegarder", :class => 'btn btn-primary' %>
+  </div>
+<% end %>

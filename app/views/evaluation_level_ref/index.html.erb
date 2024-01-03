@@ -1,0 +1,25 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <h2>Niveaux d'évaluation
+        <%= link_to new_evaluation_level_ref_path do %>
+            <button class="btn btn-primary btn-sm pull-right" ><i class="fas fa-plus"></i> Ajouter un niveau</button>
+        <% end %>
+    </h2>
+</div>
+
+<br />
+
+<div class="row">
+    <div class="col-lg-4">
+        <table class="table">
+            <tbody>
+                <% @evaluation_level_refs.sort_by{|l| l.id}.each do |level| %>
+                    <tr>
+                        <td><%= level.value %></td>
+                        <td><%= level.label %></td>
+                        <td><%= link_to "Éditer", edit_evaluation_level_ref_path(level), class: "btn btn-xs btn-primary pull-right" %></td>
+                    </tr>
+                <% end %>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,419 @@
+<div class="provile-view">
+  <div class="ibox">
+
+    <div class="profile-left-col">
+      <div class="ibox-heading ibox-content">
+        <div class="profile-image">
+          <% if @user.avatar.attached? %>
+            <img alt="profile" class="img-circle" src="<%= url_for(@user.avatar) %>"/>
+          <% else %>
+            <img alt="profile" class="img-circle" src="<%= asset_pack_path 'images/default_avatar.png' %>"/>
+          <% end %>
+
+          <%if @current_user.is_admin || @current_user == @user %>
+            <%= react_component("AvatarUpload", { userId: @user.id }) %>
+          <% end %>
+        </div>
+
+        <div class="profile-info">
+          <h2 class="no-margins"><%= @user.first_name %> <b><%= @user.last_name %></b></h2>
+          <p>Adhérent n°<%= unless @user.adherent_number.nil?;
+                              @user.adherent_number;
+                            end %></p>
+
+          <% if @user.is_admin %>
+            <span class="label d-inline-block label-success m-t-xs w-auto">Administrateur</span>
+          <% end %>
+
+          <% if @user.is_teacher %>
+            <span class="label d-inline-block label-warning m-t-xs w-auto">Professeur</span>
+          <% end %>
+
+          <% unless @user.activities.empty? %>
+            <span class="label d-inline-block label-purple m-t-xs w-auto" >Élève</span>
+          <%  end %>
+
+          <% unless @adhesion.nil? %>
+            <span class="label d-inline-block label-purple m-t-xs w-auto">Adhérent</span>
+          <%  end %>
+
+          <% if @adhesion.nil? && !@user.is_teacher && !@user.is_admin && @user.activities.empty? %>
+            <span class="label d-inline-block label-primary w-auto">Utilisateur</span>
+          <% end %>
+        </div>
+      </div>
+
+      <% unless @adhesion.nil? %>
+        <div class="ibox-content">
+          <div class="info-group no-margin">
+            <%# <i class="fas fa-bell"></i> %>
+            <p> Adhésion valide jusqu'au <b><%= @user.get_last_adhesion.validity_end_date.strftime("%d/%m/%Y") %></b></p>
+            <% if !@distance_to_end_date.nil? && @distance_to_end_date < 30 && @distance_to_end_date > 0 %>
+              <div class="alert alert-danger m-t-md text-center">
+                <i class="fas fa-exclamation-circle"></i>
+                Expire dans <%= @distance_to_end_date.ceil %> jours
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="ibox-content">
+        <%# AGE %>
+        <% unless @user.birthday.nil? %>
+          <div class="info-group">
+            <p class="info-label">Date de naissance</p>
+            <p>
+              <%= @user.birthday.strftime("%d/%m/%Y") %> | <b><%= @age %> ans</b>
+            </p>
+          </div>
+        <% end %>
+        <% if @user.is_paying_for?(nil, @season) %>
+          <div class="flex flex-center-aligned m-b-sm">
+                    <span class="round-icon is-paying m-r-sm">
+                        <i class="fas fa-euro-sign"></i>
+                    </span>
+            <span>
+                        <% @user.get_users_self_is_paying_for(@season).each do |u, i| %>
+                            <%= u.first_name %> <strong><%= u.last_name %></strong>&nbsp;
+                        <% end %>
+                    </span>
+          </div>
+        <% end %>
+        <% if @user.is_legal_referent?(nil, @season) %>
+          <div class="flex flex-center-aligned m-b-sm">
+                    <span class="round-icon is-legal-referent m-r-sm">
+                        <i class="fas fa-balance-scale"></i>
+                    </span>
+            <span>
+                        <% @user.get_is_legal_referent_users(@season).each do |u, i| %>
+                            <%= u.first_name %> <strong><%= u.last_name %></strong>&nbsp;
+                        <% end %>
+                    </span>
+          </div>
+        <% end %>
+        <% if @user.is_to_call? %>
+          <div class="flex flex-center-aligned m-b-sm">
+                    <span class="round-icon is-to-call m-r-sm">
+                        <i class="fas fa-phone"></i>
+                    </span>
+            <span>
+                        <% @user.get_is_to_call_users(@season).each do |u, i| %>
+                            <%= u.first_name %> <strong><%= u.last_name %></strong>&nbsp;
+                        <% end %>
+                    </span>
+          </div>
+        <% end %>
+        <%# MAIL %>
+        <div class="info-group">
+          <p class="info-label">Mail</p>
+          <p>
+            <a href="mailto:<%= @user.email %>"><%= @user.email %></a>
+          </p>
+        </div>
+
+        <%# PHONE %>
+        <div class="info-group">
+          <p class="info-label">Téléphone</p>
+          <% if @user.telephones.empty? %>
+            <p><i><small>Pas de numéro de téléphone</small></i></p>
+          <% else %>
+            <% @user.telephones.each do |tel| %>
+              <p><b><%= tel.label.nil? ? "" : tel.label.capitalize %> : </b> <%= tel.number %></p>
+            <% end %>
+          <% end %>
+        </div>
+
+        <%# ADRESSES %>
+        <% unless @user.addresses.empty? %>
+          <div class="info-group">
+            <p class="info-label"><%= "Adresse".pluralize(@user.addresses.count) %></p>
+
+            <% @user.addresses.each do |address| %>
+              <div class="info-adress">
+                <% if !address.street_address.nil? %>
+                  <p><%= address.street_address %></p>
+                <% end %>
+                <% if !address.postcode.nil? && !address.city.nil? %>
+                  <p><%= address.postcode %> <%= address.city %></p>
+                <% end %>
+                <% if !address.department.blank? && !address.country.blank? %>
+                  <p><%= address.department %>, <%= address.country %></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="">
+          <% if @current_user == @user || !@current_user.teacher? %>
+            <%= link_to("/inscriptions/new?user_id=#{current_user.id}", class: "btn btn-primary btn-block m-t-sm") do %>
+              <i class="fas fa-plus"></i> S'inscrire
+            <% end %>
+        <% end %>
+
+          <% if @current_user == @user || @current_user.admin? or can?(:read, @user) %>
+            <% if can?(:manage, @user) %>
+              <%= link_to edit_user_path(@user), class: "btn btn-primary btn-outline btn-block m-t" do %>
+                <i class="fas fa-edit"></i> Éditer le profil
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <% if @current_user == @user %>
+            <%= link_to edit_registration_path(@user), class: "btn btn-primary btn-outline btn-block m-t" do %>
+              <i class="fas fa-keyboard"></i> Éditer le Mot de passe
+            <% end %>
+          <% end %>
+
+          <% if @current_user.is_admin || (@user.teacher? && can?(:read, @user.planning)) %>
+            <% unless @user.planning.nil? %>
+              <%= link_to planning_path(@user.planning), class: "btn btn-primary btn-block m-t" do %>
+                <i class="fas  fa-calendar"></i> Planning
+              <% end %>
+            <% end %>
+          <% end %>
+
+          <% if @user.teacher? and @current_user.admin? %>
+            <%= link_to "/users/#{@user.id}/hours_sheet", class: "btn btn-primary btn-block m-t" do %>
+              <i class="fas  fa-calendar"></i> Feuille d'heures
+            <% end %>
+            <%= link_to({ controller: "users", action: "season_activities", id: @user.id }, class: "btn btn-primary btn-block m-t") do %>
+              <i class="fas fa-music"></i> Cours de la saison
+            <% end %>
+          <% end %>
+
+        </div>
+      </div>
+
+      <% if current_user.admin? and !@user.teacher? %>
+        <% if (@user.get_first_paying_family_member.present? and @user.get_list_of_activities.present?) or @user.any_users_self_is_paying_for? %>
+          <div class="ibox-content">
+
+            <%# PAYMENT %>
+            <%# <div class="info-group"> %>
+            <%#     <p class="info-label">Règlement</p> %>
+            <%#     <p class="space-between"> %>
+            <%#         Total à régler <b>65€</b> %>
+            <%#     </p> %>
+            <%#     <p class="space-between"> %>
+            <%#         Total à régler <b>65€</b> %>
+            <%#     </p> %>
+            <%#     <hr /> %>
+            <%#     <p class="space-between"> %>
+            <%#         Reste à payer <b>50€</b> %>
+            <%#     </p> %>
+            <%# </div> %>
+            <%# PAYMENT BTN LINK %>
+            <%= link_to payment_summary_path(@user.id), class: "btn btn-primary btn-block" do %>
+              <i class="fas fa-euro-sign"></i> Règlements
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+      <% if current_user.admin? and !@user.teacher? and !@user.admin? %>
+        <% unless @user.activity_applications.empty? %>
+          <div class="ibox-content">
+            <%# PAYMENT %>
+            <%# <div class="info-group"> %>
+            <%# <p class="info-label">Demande d'inscription</p> %>
+            <%# <p> %>
+            <%#     Réglé %>
+            <%# </p> %>
+            <%# </div> %>
+            <%# ACTIVITY APPLICATION LINK %>
+            <% if current_user.admin? and !@user.teacher? and !@user.admin? %>
+              <%= link_to(activities_application_path(@user.activity_applications.sort_by { |aa| aa.created_at }.last), class: "btn btn-primary btn-block") do %>
+                <i class="fas  fa-clipboard"></i>
+                Demande d'inscription
+              <% end %>
+              <%= link_to(new_application_path(@user), class: "btn btn-primary btn-block m-t-sm") do %>
+                <%# <i class="fas  fa-plus"></i> %>
+                Pré-inscriptions
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% if current_user.is_admin || @current_user.is_paying_for?(@user) %>
+        <div class="ibox-content">
+          <% if @user.has_no_password? %>
+            <%= react_component("userForm/BtnResendEmail", {
+              user_id: @user.id
+            }) %>
+          <% end %>
+
+          <%#= link_to "/users/#{@user.id}", class: "btn btn-danger btn-block m-t-sm", method: :delete, data: { confirm: "Cela supprimera l'utilisateur, ses liens familiaux ainsi que son adhésion. Êtes-vous sûr ?" } do %>
+<!--            <i class="fas fa-trash m-r-sm"></i> Supprimer cet utilisateur-->
+          <%# end %>
+
+          <%= react_component("RemoveComponent", {
+            classname: "User",
+            id: @user.id,
+            text: "Supprimer cet utilisateur",
+            validationText: "Cela supprimera l'utilisateur, ses liens familiaux ainsi que son adhésion. Êtes-vous sûr ?",
+            btnProps: {
+              className: "btn btn-danger btn-block m-t-sm"
+            }
+          }) %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+
+  <div class="profile-right-col">
+    <div class="tabs-container">
+      <ul class="nav nav-tabs flex" role="tablist">
+        <li style="height: auto;" class="<%= @tab.nil? || @tab == "act" ? "active" : "" %>"><a class="nav-link" data-toggle="tab" href="#tab-act">Activités</a> </li>
+        <li style="height: auto;" class="<%= @tab == "family" ? "active" : "" %>"><a class="nav-link" data-toggle="tab" href="#tab-family">Liens familiaux</a></li>
+        <% if @any_abs %>
+          <li style="height: auto;" class="<%= @tab == "abs" ? "active" : "" %>"><a class="nav-link" data-toggle="tab" href="#tab-abs">Absences</a></li>
+        <% end %>
+      </ul>
+
+      <div class="tab-content p-2 bg-white" style="border-color: #e7eaec; border-style: solid; border-width: 0px 1px 1px 1px;">
+        <div class="tab-pane <%= @tab == "family" ? "active" : "" %>" role="tabpanel" id="tab-family">
+          <%= render "family" %>
+        </div>
+
+        <div class="tab-pane pt-1 <%= @tab.nil? || @tab == "act" ? "active" : "" %>" id="tab-act" role="tabpanel">
+          <% if @user.is_teacher %>
+            <h2 class="title-profile" style="display:flex; flex-direction:column;">
+              <div class="m-r-md">
+                Activités
+                <% if current_user.is_admin %>
+                  <%= link_to "Editer", edit_user_activities_path(@user), class: "btn btn-primary btn-xs" %>
+                <% end %>
+              </div>
+            </h2>
+            <div class="row">
+              <% if @user.activity_refs.empty? %>
+                <div class="col-sm-12">
+                  Aucune activité
+                </div>
+              <% else %>
+                <% @user.activity_refs.each do |activity| %>
+                  <div class="col-xs-4">
+                    <div class="file">
+                      <div class="image">
+                        <% if activity.picture.attached? %>
+                          <%= image_tag url_for(activity.picture), class: "m-t-xs img-responsive" %>
+                        <% end %>
+                      </div>
+                      <div class="file-name">
+                        <strong><%= activity.label %></strong><br/>
+                        <small><%= activity.kind %></small>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+
+
+            </div>
+          <% end %>
+          <% if !@user.is_teacher and !@user.is_admin %>
+
+            <% if @user.activities.empty? %>
+              <div class="activity-thumb-list align-middle d-flex justify-content-center my-5">
+                <p><i>Aucune activité</i></p>
+              </div>
+            <% else %>
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="tabs-container">
+                    <ul class="nav nav-tabs" role="tablist">
+                      <% @activities.keys.each_with_index do |s, i| %>
+                        <li class="<%= "active" if i == 0 %>">
+                          <a class="nav-link <%= "active" if i == 0 %>" data-toggle="tab" href="#season-<%= s.id %>">
+                            <%= s.label %>
+                          </a>
+                        </li>
+                      <% end %>
+                    </ul>
+                    <div class="tab-content">
+                      <% @activities.keys.each_with_index do |s, i| %>
+                        <div id="season-<%= s.id %>" role="tabpanel" class="tab-pane <%= "active" if i == 0 %>">
+                          <div class="panel-body">
+                            <div class="row">
+                              <% @activities[s].each do |a| %>
+                                <div class="col-lg-4 col-xl-4 col-md-12 col-xs-12">
+                                  <div class="ibox activity-thumb">
+                                    <% if a.activity_ref.picture.attached? %>
+                                      <div class="image" style="background-image: url(<%= url_for(a.activity_ref.picture) %>)">
+                                      </div>
+                                    <% else %>
+                                      <div class="image">
+                                      </div>
+                                    <% end %>
+                                    <% if a.teacher.avatar.attached? %>
+                                      <span> <img alt="image" class="img-circle" src="<%= url_for(a.teacher.avatar) %>" width="50" height="50"/> </span>
+                                    <% else %>
+                                      <span> <img alt="image" class="img-circle" src="<%= asset_pack_path 'images/default_avatar.png' %>" width="50" height="50"/> </span>
+                                    <% end %>
+                                    <div class="file-name">
+                                      <p class="activity-professor-name"><%= a.teacher.full_name %></p>
+                                      <p class="activity-name"><strong><%= a.activity_ref.label %></strong></p>
+                                      <p class="activity-category"><%= a.activity_ref.kind %></p>
+                                      <% label = a.activity_instances.nil? || a.activity_instances.empty? ? a.room.label : nil %>
+                                      <% tmp = label.nil? ? a.activity_instances.find {|ai| ai.time_interval_id == a.time_interval_id} : nil %>
+                                      <p class="activity-room"><%= label.nil? ? tmp.nil? || tmp.room.nil? ? a.room.label : tmp.room.label : label %></p>
+                                      <% if a.time_interval.nil? %>
+                                        <p class="activity-date">Horaire inconnu</p>
+                                      <% else %>
+                                        <p class="activity-date"><%= I18n.localize(a.time_interval.start.in_time_zone("Europe/Paris"), format: "%A") %>
+                                          | <%= a.time_interval.start.in_time_zone("Europe/Paris").strftime("%H:%M") %>
+                                          - <%= a.time_interval.end.in_time_zone("Europe/Paris").strftime("%H:%M") %></p>
+                                      <% end %>
+                                      <% unless @applications[@applications.keys.find { |acts| acts.include?(a.id) }].stopped_at.nil? %>
+                                        <p class="text-danger">
+                                          <span>Arrêt le</span>
+                                          <%= @applications[@applications.keys.find { |acts| acts.include?(a.id) }].stopped_at.in_time_zone("Europe/Paris").strftime(" %d/%m/%Y") %>
+                                        </p>
+                                        <% if @current_user.is_admin %>
+                                          <%= react_component("activityApplications/AddPreAppFromStopApp", {
+                                            activity: a,
+                                            user: @user,
+                                            current_user: @current_user,
+                                            tmp: @applications,
+                                            season: s,
+                                            next_season: Season.current_apps_season,
+                                          }) %>
+                                        <% end %>
+                                      <% end %>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% end %>
+                            </div>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+
+        <% if @any_abs %>
+          <div class="tab-pane pt-1 <%= @tab == "abs" ? "active" : "" %>" id="tab-abs" role="tabpanel">
+            <%= react_component('userForm/Absences', {
+              user_id: @user.id,
+              seasons: @seasons.as_json
+            }) %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<% unless flash[:destroy_error].nil? %>
+  <%= react_component("utils/SwalBackEndModal", {swal_props: { title: 'Error', type: 'error', html: flash[:destroy_error] }})  %>
+<% end %>

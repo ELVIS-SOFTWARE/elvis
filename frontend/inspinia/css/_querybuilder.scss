@@ -1,0 +1,421 @@
+/*!
+ * jQuery QueryBuilder 1.3.0
+ * Copyright 2014-2015 Damien "Mistic" Sorel (http://www.strangeplanet.fr)
+ * Licensed under MIT (http://opensource.org/licenses/MIT)
+ */
+
+
+$theme-name: default !default;
+$schoolred: #d63031;
+
+// common
+$item-vertical-spacing: 10px !default;
+$item-border-radius: 2px !default;
+
+// groups
+$group-background-color: #dddddd !default;
+$group-border-color: #dddddd !default;
+$group-border: 0px solid $group-border-color !default;
+$group-padding: 10px !default;
+
+// rules
+$rule-background-color: #dddddd !default;
+$rule-border-color: #dddddd !default;
+$rule-border: 1px solid $rule-border-color !default;
+$rule-padding: 5px !default;
+$rule-value-separator: 1px solid #ddd !default;
+
+// errors
+$error-icon-color: #F00 !default;
+$error-border-color: #ED5565 !default;
+$error-background-color: #FDD !default;
+
+// ticks
+$ticks-width: 2px !default;
+$ticks-color: #dddddd !default;
+$ticks-position: 5px, 10px !default;
+$ticks-group-color: #fff !default;
+
+// ABSTRACTS
+%base-container {
+    position: relative;
+    margin: $item-vertical-spacing 0;
+    border-radius: $item-border-radius;
+    padding: $rule-padding;
+    border: $rule-border;
+    //background: $rule-background-color;
+}
+
+%rule-component {
+    display: inline-block;
+    margin: 0 5px 0 0;
+    vertical-align: middle;
+}
+
+#query_builder_component_group_0 {
+    background:transparent;
+    border:none;
+}
+
+.rule-container.dragging {
+    position: fixed !important;
+}
+
+.query-builder {
+
+    .group-actions {
+        margin-right:6px;
+
+        .btn {
+            padding: 10px;
+
+            i {
+                margin-right: 5px;
+            }
+        }
+    }
+
+    .radio {
+        margin: 6px 20px 0 0;
+    }
+
+    .btn-radius {
+        width:30px;
+        height:30px;
+        position:relative;
+
+        .fa {
+            font-size: 18px;
+            line-height: 25px;
+        }
+
+        .querybuilder-add {
+            position:absolute;
+            top:4px;
+            right:3px;
+            font-size: 9px;
+            line-height: 6px;
+        }
+
+    }
+
+    .drag-handle {
+        float:left;
+        margin: 0px 5px;
+    }
+
+
+    // GROUPS
+    > .rules-group-container {
+        @extend %base-container;
+        border: none !important;
+        background: transparent !important;
+
+        padding: $group-padding 0 $group-padding $group-padding;
+        padding-bottom: #{$group-padding - $item-vertical-spacing};
+
+        .rules-group-container {
+            padding: $group-padding 0 $group-padding $group-padding;
+            padding-left:30px;
+            border-radius: 0;
+            border-right: none;
+            border: 1px solid #ffffff;
+            background: #dddddd;
+
+            .group-actions {
+                margin-right:0px;
+            }
+
+            .rules-group-header {
+                margin-left: -25px;
+                margin-right: 10px;
+            }
+
+            .rules-group-body .btn-danger {
+                margin-right:-3px;
+            }
+
+            .group-conditions {
+                margin-left: 8px;
+            }
+        }
+
+        .rules-group-container .rule-container {
+            background: white;
+            border-color:#fff;
+            margin-right: 10px;
+        }
+
+        .rules-group-container .rules-list>* {
+            &:before,
+            &:after {
+                border-color: $ticks-group-color;
+            }
+        }
+        .rules-group-header {
+            margin-bottom: 11px;
+
+            input[name$=_cond] {
+                display: none;
+            }
+        }
+
+        .rules-list {
+            list-style: none;
+            padding: 0 0 0 #{nth($ticks-position, 1) + nth($ticks-position, 2)};
+            margin: 0;
+        }
+
+    }
+
+    // RULES
+    .rule-container {
+        @extend %base-container;
+        background: $group-background-color;
+        display: flex;
+        align-items: center;
+
+        .rule-header {
+            position: absolute;
+            right: 10px;
+        }
+
+        .rule-filter-container,
+        .rule-operator-container,
+        .rule-value-container {
+            @extend %rule-component;
+        }
+
+        .rule-value-container {
+            border-left: $rule-value-separator;
+            padding-left: 5px;
+
+            label {
+                margin-bottom: 0;
+                font-weight: normal;
+
+                &.block {
+                    display: block;
+                }
+            }
+        }
+
+        [class^="col-xs-"],
+        [class*=" col-xs-"]  {
+            padding: 0px;
+        }
+
+        select, input[type=text], input[type=number] {
+            padding: 0px 30px 0 8px;
+            font-size: 1em;
+            width:100%;
+            min-width:10px !important;
+            border-radius: 4px;
+        }
+
+        input[type="number"] {
+            padding-right: 10px;
+        }
+
+
+        input[type="checkbox"] {
+            display: none;
+
+            + span {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                margin-right: 20px;
+            }
+
+            + span::before {
+                content: "";
+                display: block;
+                width: 20px; height: 20px;
+                border-radius: 2px;
+                border: 2px solid white;
+                background-color: white;
+                box-shadow: 0 0 0 1px $schoolred;
+                margin-right: 10px;
+            }
+
+            &:checked + span::before {
+                background-color: $schoolred;
+            }
+        }
+
+        input[type="radio"] {
+            @extend input[type="checkbox"];
+
+            + span::before {
+                border-radius: 50%;
+            }
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: 32px;
+        }
+
+        .btn-danger {
+            padding: 0 1.5px;
+        }
+
+        i.glyphicon-remove::before {
+            font-family: 'icomoon' !important;
+            content: "\e915";
+            font-size: 2.8rem;
+        }
+    }
+
+    > .rules-group-container > .rules-group-body > .rules-list > .rule-container {
+        margin-right: 7px;
+    }
+
+
+    // ERRORS
+    .error-container {
+        @extend %rule-component;
+        display: none;
+        cursor: help;
+        margin: 6px;
+        color: $red;
+    }
+
+    .has-error {
+        background-color: $error-background-color !important;
+        border-color: $error-border-color !important;
+
+        .error-container {
+            display: inline-block !important;
+        }
+    }
+
+    // TICKS
+    .rules-list>* {
+        &:before,
+        &:after {
+            content: '';
+            position: absolute;
+            left: #{-1 * nth($ticks-position, 2) };
+            width: nth($ticks-position, 2);
+            height: calc(50% + #{$item-vertical-spacing/2});
+            border-color: $ticks-color;
+            border-style: solid;
+        }
+
+        &:before {
+            top: #{-2 * $ticks-width};
+            border-width: 0 0 $ticks-width $ticks-width;
+        }
+        &:after {
+            top: 50%;
+            border-width: 0 0 0 $ticks-width;
+            height: calc(50% + 8px);
+        }
+
+        &:first-child:before {
+            top: -12px;
+            height: calc(50% + 12px);
+        }
+        &:last-child:before {
+            border-radius: 0 0 0 #{2 * $ticks-width};
+        }
+        &:last-child:after {
+            display: none;
+        }
+    }
+
+
+    // CONDITIONS
+    .group-conditions {
+        z-index:1;
+
+        .btn {
+            color:#ccc;
+            height: 35px;
+            width: 35px;
+            line-height: 30px;
+
+            &:not(.active) {
+                background:#fff !important;
+            }
+
+            &.active {
+                color:#fff;
+            }
+        }
+    }
+
+    .group-actions {
+        .glyphicon {
+            top:0;
+        }
+
+        .glyphicon-plus:before {
+            content:"\f067";
+        }
+        .glyphicon-plus-sign:before {
+            content:"\f055";
+        }
+        .glyphicon-remove:before {
+            content:"\f1f8";
+        }
+    }
+
+
+    .rule-actions {
+        .btn-danger  {
+            font-size:0px;
+            width: 30px;
+            height: 30px;
+            margin:1px;
+
+            i {
+                font-size: 1rem;
+            }
+        }
+    }
+
+    .btn-danger {
+        background-color: #f8ac59;
+        border-color: #f8ac59;
+    }
+    .btn-success {
+        background-color: #d63031;
+        border-color: #d63031;
+    }
+
+    .btn-group .btn + .btn, .btn-group .btn + .btn-group, .btn-group .btn-group + .btn, .btn-group .btn-group + .btn-group {
+        margin-left: 0px;
+    }
+}
+
+// DATATABLE
+.dataTables_paginate {
+    display: none;
+}
+
+.form-control-date {
+    width:45% !important;
+}
+
+
+@media (max-width: 1100px) {
+    .query-builder {
+        .drag-handle {
+            margin: 10px 5px;
+        }
+
+        .rule-container {
+            flex-direction: column;
+            align-items: flex-start;
+
+            [class^="col-xs-"],
+            [class*=" col-xs-"]  {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
+    }
+}
+

@@ -1,0 +1,46 @@
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <h2>Editer "<%= @season.label %>"</h2>
+</div>
+
+<div class="row">
+  <div class="col-sm-12">
+
+    <%
+      if flash.any? && flash.alert.is_a?(Hash)
+        @invalid = flash.alert[:errors]
+        @invalid = {} if @invalid.nil? || ! @invalid.is_a?(Hash)
+
+    %>
+      <div class="m-t h-auto bg-danger rounded p-sm text-white">
+        Impossible de sauvegarder la saison
+      </div>
+    <%
+      else
+        @invalid = {}
+      end
+    %>
+
+    <br />
+
+    <div class="row">
+      <div class="col col-lg-4">
+        <%= render "seasons/season_form" %>
+
+        <div class="form-group">
+          <div class="m-t h-auto bg-green rounded p-sm text-white">
+            Attention: <br/>
+            Toutes modifications sur le tableau seront directement enregistrées, même sans appuyer sur les boutons de sauvegarde.
+          </div>
+        </div>
+      </div>
+
+      <div class="col col-lg-8">
+        <div class="form-group">
+          <%= react_component("seasons/Holidays", {datas: @holidays, sid: @season.id}) %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

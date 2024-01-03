@@ -1,0 +1,17 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <h1>  Règlement intérieur  </h1>
+</div>
+
+
+<br/>
+
+<div class="col-lg-10 col-sm-12">
+  <%= react_component("editParameters/RulesSettings", {
+    rulesUrl: @rules_url,
+    rulesPdf: @pdf_file,
+    documentUrl: @document_url,
+    method: @method_selected,
+    file_url: @document_url
+  }) %>
+
+</div>

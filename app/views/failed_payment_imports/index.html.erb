@@ -1,0 +1,9 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>
+        Liste des imports de paiements ratés
+    </h2>
+</div>
+
+<div class="row">
+    <%= react_component("FailedPaymentImportsPage", {data: @failed_imports, reasons: @reasons}) %>
+</div>

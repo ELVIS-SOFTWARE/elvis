@@ -1,0 +1,2 @@
+class IntervalTakenError < StandardError
+end

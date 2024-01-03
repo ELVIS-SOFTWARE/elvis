@@ -1,0 +1,22 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+<h2>
+    Liste des Adhésions
+
+  <%= link_to({controller: "adhesion", action: "new"}, {class: "btn btn-primary pull-right"}) do %>
+    <i class="fas fa-plus"></i> Nouvelle adhésion
+  <% end %>
+</h2>
+  <% unless flash[:error].nil? %>
+    <%= react_component("utils/SwalBackEndModal", { swal_props: { title: 'Erreur', type: 'error', text: flash[:error] } }) %>
+  <% end %>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="ibox">
+            <div class="ibox-content no-padding">
+                <%= react_component("AdhesionList") %>
+            </div>
+        </div>
+    </div>
+</div>

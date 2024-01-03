@@ -1,0 +1,14 @@
+<tr>
+    <td><%= status.id %></td>
+    <td><%= status.label %></td>
+    <td><%= status.is_stopping ? "Oui" : "Non" %></td>
+    <td><%= status.is_active ? "Oui" : "Non" %></td>
+    <td>
+        <%= link_to edit_activity_application_status_path(status), class: "btn-sm btn-primary m-r-sm" do %>
+            <i class="fas fa-edit"></i>
+        <% end %>
+        <%= link_to activity_application_status_path(status), method: :delete, class: "btn-sm btn-warning" do %>
+            <i class="fas fa-trash"></i>
+        <% end %>
+    </td>
+</tr>

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# file is a hook for dockerhub build
+
+# get all env vars && filter by name with start with dockerhub_
+DOCKERHUB_ENV_VARS=$(env | grep ^dockerhub_)
+
+# add all DOCKERHUB_ENV_VARS to docker build command without dockerhub_ prefix
+DOCKER_BUILD_ARGS=""
+for VAR in $DOCKERHUB_ENV_VARS
+do
+  DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg ${VAR#dockerhub_}"
+done
+
+docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN $DOCKER_BUILD_ARGS -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+

@@ -1,0 +1,63 @@
+<%= form_with(model: [:practice, flat_rate], local: true) do |form| %>
+  <% if flat_rate.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(flat_rate.errors.count, "error") %> prohibited this flat rates from being saved:</h2>
+
+      <ul>
+      <% flat_rate.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+
+
+  <div class="row">
+      <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+          <%= form.label :name%>
+          <%= form.text_field :name, :class => 'form-control' %>
+      </div>
+      <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+        <div class="field form-group pull-left m-r-xl m-t-md">
+            <%= form.radio_button :enable, true %>
+            <%= form.label :enable, "Actif", for: :enable %>
+        </div>
+
+        <div class="field form-group pull-left m-t-md">
+            <%= form.radio_button :enable, false %>
+            <%= form.label :enable, "Inactif", :for => :enable %>
+        </div>
+      </div>
+  </div>
+
+  <div class="row">
+    <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+        <div class="field">
+            <%= form.label :nb_hour %>
+            <%= form.number_field :nb_hour, :class => 'form-control' %>
+        </div>
+    </div>
+
+    <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+        <div class="field">
+            <%= form.label :solo_duo_rate %>
+            <%= form.number_field :solo_duo_rate, :class => 'form-control', step: :any %>
+        </div>
+    </div>
+  </div>
+
+  <div class="row">
+      <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+          <div class="field">
+              <%= form.label :group_rate %>
+              <%= form.number_field :group_rate, :class => 'form-control', step: :any %>
+          </div>
+      </div>
+  </div>
+
+  <div class="actions">
+    <%= link_to 'Retour', parameters_practice_parameters_path + "#tab-4", :class => 'btn btn-primary' %>
+    <%= form.submit "Sauvegarder", :class => 'btn btn-primary' %>
+  </div>
+<% end %>

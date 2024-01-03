@@ -1,0 +1,72 @@
+<div class="page-heading">
+    <h1>
+        <strong>Simulation de planning</strong> <%= @teacher.last_name%> <%= @teacher.first_name%>
+        <br />
+       <small><%= @season["label"] %></small> 
+    </h1>
+</div>
+
+
+<div class="flex">
+    <p class="alert alert-info">
+        <span class="font-bold m-r-sm">
+            <i style="font-size: large" class="fas fa-info-circle "></i>
+        </span>
+        Cet aperçu est produit à partir des réponses portant sur les
+        changements de groupes. Ces réponses sont trouvables dans les
+        questionnaires d'évaluation des élèves remplis en fin d'année
+        par le professeur.
+    </p>
+</div>
+
+<div class="flex-column">
+    <h2>Légende</h2><br/>
+    <div class="flex ibox-content col-lg-4 col-xs-12 m-b">
+        <ul class="list-group">
+            <button class="list-group-item student-item" type="button">
+                <span class="font-bold">
+                    Pas de changement de groupe
+                </span>
+            </button>
+            <button class="list-group-item change-informed student-item" type="button">
+                <span class="font-bold">
+                    Changement de groupe informé
+                </span>
+            </button>
+            <button class="list-group-item change-uninformed student-item" type="button">
+                <span class="font-bold">
+                    Changement de groupe non informé
+                </span>
+            </button>
+        </ul>
+        <ul class="list-group">
+            <button class="list-group-item" type="button">
+                <span class="font-bold">
+                    L'élève continue la saison prochaine
+                </span>
+            </button>
+            <button class="list-group-item" type="button">
+                <span class="font-bold font-strike">
+                    L'élève ne continue pas la saison prochaine
+                </span>
+            </button>
+            <button class="list-group-item" type="button">
+                <span class="font-bold font-underlined">
+                    L'élève est incertain
+                </span>
+            </button>
+        </ul>
+    </div>
+</div>
+
+<%= react_component("PrevisionalGroups", {
+    season: @season,
+    questions: @questions,
+    changes: @changes,
+    pursue_answers: @pursue_answers,
+    evaluation_level_refs: @evaluation_level_refs,
+    activities_students: @activities_students,
+    activities: @activities,
+    students: @students,
+    current_user: current_user,
+}) %>

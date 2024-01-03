@@ -1,0 +1,267 @@
+<%= render 'partials/render_menu' %>
+<%= render 'partials/render_menu_item' %>
+
+<% if Elvis::MenuManager.menus_items? %>
+  <% MenuGenerator.regenerate_menus %>
+<% end %>
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <title>Elvis</title>
+  <%= csrf_meta_tags %>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+
+  <script src="https://cdn.jsdelivr.net/npm/interactjs@1.3.4/dist/interact.min.js"></script>
+  <%= stylesheet_pack_tag 'application', media: nil %>
+  <%= stylesheet_pack_tag 'application_print', media: "print" %>
+
+  <%= call_hook :view_layouts_application_html_head %>
+</head>
+
+<body class="pace-done <%= @current_user.first_connection ? "mini-navbar" : "" %> <%= @hide_navigation && "hide-navigation" %>">
+
+<%= react_component("LoadingComponent") %>
+
+<%= call_hook :view_layouts_application_html_body %>
+
+
+<div id="wrapper">
+
+  <nav class="navbar-default navbar-static-side position-fixed full-height" role="navigation" style="z-index: 3;">
+    <div class="sidebar-collapse">
+
+      <ul class="nav metismenu" id="side-menu">
+
+        <%# L'en-tête avec le logo e l'école  %>
+        <li class="text-center">
+          <div class="nav-header dropdown profile-element">
+
+            <% if @school_informations&.logo&.attached? %>
+              <span><%= image_tag @school_informations.logo, class: "img-circle", width: 64, height: 64 %></span>
+            <% else %>
+              <span><img alt="Elvis" src="/powered_by.png" width="64" height="64" class="img-circle"/></span>
+            <% end %>
+
+          </div>
+
+          <div class="logo-element">
+            <% if @school_informations&.logo&.attached? %>
+              <%= image_tag @school_informations.logo, class: "img-circle", width: 40 %>
+            <% else %>
+              <img src="/powered_by.png" alt="Elvis" width="40">
+            <% end %></div>
+        </li>
+
+        <% render_menu Elvis::MenuManager.get_menu_with_role(:side_menu, if @current_user.is_admin?
+                                                                           "admin"
+                                                                         else
+                                                                           @current_user.is_teacher? ? "teacher" : "simple"
+                                                                         end) %>
+
+        <% unless @current_user.admin? or @current_user.teacher? %>
+          <% unless @current_user.first_connection %>
+            <% unless @current_user.simple? %>
+              <li>
+                <%= link_to planning_path(@current_user.planning), class: "m-l-sm m-r-sm img-rounded" do %>
+                  <i class="fas fa-calendar"></i> <span class="nav-label">Mon Planning</span>
+                <% end %>
+              </li>
+            <% end %>
+
+            <!--<li>
+              <%= link_to users_adherent_card_path, class: "m-l-sm m-r-sm img-rounded" do %>
+                <% if @current_user.sex and @current_user.sex.downcase == "f" %>
+                  <i class="fas fa-card"></i> <span class="nav-label">Ma Carte d'adhérente</span>
+                <% else %>
+                  <i class="fas fa-id-card"></i> <span class="nav-label">Ma Carte d'adhérent</span>
+                <% end %>
+              <% end %>
+            </li>-->
+          <% end %>
+        <% end %>
+
+
+        <%# Le numéro de version %>
+        <li id="nav-footer" class="text-center">
+          <% if ENV["RELEASE_NUMBER"].nil? %>
+            <p class="nav-label img-rounded">version dev</p>
+          <% else %>
+            <a class="nav-label img-rounded" target="_blank" href="https://github.com/SIXMON/ziggy/releases/tag/<%= ENV["RELEASE_NUMBER"] %>">
+              version <%= ENV["RELEASE_NUMBER"] %>
+            </a>
+          <% end %>
+          <span class="nav-label img-rounded" style="vertical-align: text-bottom">propulsé par <img src="/powered_by.png" height="20" alt="Elvis"/> </span>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+
+
+  <div id="<%= !@hide_navigation and "page-wrapper" %>" style="<%= @hide_navigation and "min-height: 100vh" %>" class="gray-bg">
+    <div class="row border-bottom">
+      <nav class="navbar navbar-top white-bg m-b-none" role="navigation" style="z-index: 3;">
+        <% unless @current_user.first_connection or @hide_navigation %>
+          <div class="navbar-header">
+            <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fas fa-bars"></i> </a>
+          </div>
+        <% end %>
+        <% if @current_user.is_admin? %>
+          <%= react_component("Omnisearch") %>
+        <% end %>
+        <div class="row m-n">
+          <div class="col-sm-12 col-auto pull-right m-t-sm text-right">
+            <%
+              my_menu = Elvis::MenuManager.get_menu_with_role(:my_menu, if @current_user.is_admin?
+                                                                          "admin"
+                                                                        else
+                                                                          @current_user.is_teacher? ? "teacher" : "simple"
+                                                                        end)
+            %>
+
+            <% if my_menu.length > 0 %>
+              <div>
+                <a id="a-profile" data-toggle="dropdown" class="dropdown-toggle" href="#">
+                  <% if @current_user.avatar.attached? %>
+                    <img alt="image" class="img-circle m-t-none" src="<%= url_for(@current_user.avatar) %>" width="30" height="30"/>
+                  <% else %>
+                    <img alt="image" class="img-circle m-t-none" src="<%= asset_pack_path 'images/default_avatar.png' %>" width="30" height="30"/>
+                  <% end %>
+
+                  <span class="text-dark text-center m-r-sm" style="font-size: 15px; vertical-align: text-top"><%= @current_user.last_name %> <%= @current_user.first_name %></span>
+                  <span class='pull-right fas fa-angle-left m-t-xs text-secondary rotate-fa' style="font-size: 15px;"></span>
+                </a>
+
+
+                <% unless @current_user.first_connection %>
+                  <% @same_email_users = User.where(email: @current_user.email).to_a - [@current_user] %>
+
+                  <ul id="profile-menu" class="dropdown-menu m-t-sm p-sm m-r-sm" style="border-radius: 10px; right: 0; left: initial!important;">
+                    <% render_menu my_menu %>
+
+                    <% if @same_email_users.any? %>
+                      <li class="divider"></li>
+                      <span>Autres comptes:</span>
+                      <% @same_email_users.each do |other_user| %>
+                        <li>
+                          <a class="m-l-sm m-r-sm img-rounded" href="/pick_user/<%= other_user.id %>"><%= "#{other_user.last_name} #{other_user.first_name}" %></a>
+                        </li>
+                      <% end %>
+                    <% end %>
+                  </ul>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <% if @current_user.is_admin %>
+            <div class="col-sm-3 text-right pull-right">
+              <a target="_blank" class="btn btn-rounded btn-info m-t-sm" href="https://elvis.stonly.com/">Centre d'aide
+                <i class="fas fa-question"></i> </a>
+            </div>
+          <% end %>
+        </div>
+      </nav>
+    </div>
+
+    <%= yield %>
+
+    <div class="row m-b-sm">
+      <div class="col-sm-12" style="z-index: 2;">
+        <%= react_component("Toaster") %>
+      </div>
+    </div>
+    <div class="row m-n p-0" style="z-index: 1;">
+      <div class="app-footer m-n m-t-sm">
+        <div class="link-footer">
+          <%= link_to :cgu do %>
+            Politique de confidentialité (CGU)
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<%= javascript_pack_tag 'app' %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.2/tippy-bundle.umd.min.js"></script>
+
+<script type="application/javascript">
+    function whenAvailable(name, callback) {
+        const interval = 10; // ms
+        window.setTimeout(function () {
+            if (window[name]) {
+                callback(window[name]);
+            } else {
+                whenAvailable(name, callback);
+            }
+        }, interval);
+    }
+
+    function debounce(f, ms) {
+        let lastHandle;
+
+        return (...args) => {
+            lastHandle && clearTimeout(lastHandle);
+
+            setTimeout(() => {
+                f(...args);
+                lastHandle = null;
+            }, ms);
+        };
+    }
+
+    const isTippyRelated = n => Object.getPrototypeOf(n) instanceof HTMLElement && (n.dataset.tippyContent || n.querySelector("[data-tippy-content]"));
+
+    const getTippyNodes = () => document.body.querySelectorAll("[data-tippy-content]");
+
+    const loadTippy = debounce(tippy, 50);
+
+    let tippyNodes = [];
+
+    whenAvailable("tippy", () => {
+        loadTippy(getTippyNodes());
+
+        const tooltipsObserver = new MutationObserver(
+            m => m
+                .reduce((arr, mr) => arr.concat([...mr.addedNodes, ...mr.removedNodes]), [])
+                .find(isTippyRelated) && loadTippy(getTippyNodes())
+        );
+
+        tooltipsObserver.observe(
+            document.body,
+            {subtree: true, childList: true},
+        );
+    });
+
+    const footer = $(".app-footer");
+    footer.parent().height(footer[0].offsetHeight);
+
+    $("#a-profile").on("click", function () {
+        const rotates = $(".rotate-fa");
+
+        rotates.addClass("down");
+
+        setTimeout(() => $("body").click(function () {
+            rotates.removeClass("down");
+            $("body").off("click");
+        }), 500);
+
+    });
+</script>
+<%= react_component("utils/SwalBackEndModal", { swal_props: { title: 'Message', type: 'info', text: '3 saisons ont été créées par défault en fonction de la date actuelle' } }) if @base_season_created %>
+</body>
+</html>

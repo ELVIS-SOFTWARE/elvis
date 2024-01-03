@@ -1,0 +1,34 @@
+require 'date'
+require 'active_support/inflector'
+
+namespace :generate do
+
+  # rake generate:migration[migration_name]
+  task :migration do |_, args|
+    migration_name = ARGV[1] || args.to_a[0]
+
+    if migration_name.nil? || migration_name.empty?
+      raise "Please provide a migration name"
+    end
+
+    Dir.glob("db/migrate/*.rb").each do |exist_file|
+      raise "migration with name #{migration_name} already exist" if exist_file.include? migration_name
+    end
+
+    file_path = File.join "db", "migrate", "#{DateTime.now.strftime("%Y%m%d%H%M%S")}_#{migration_name}.rb"
+
+    file = File.open file_path, "w"
+
+    file.write "class #{migration_name.classify} < ActiveRecord::Migration[4.2]\n"
+    file.write "\tdef self.up\n"
+    file.write "\n"
+    file.write "\tend\n\n"
+
+    file.write "\tdef self.down\n"
+    file.write "\n"
+    file.write "\tend\n"
+    file.write "end\n"
+
+    file.close
+  end
+end

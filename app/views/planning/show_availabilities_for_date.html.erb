@@ -1,0 +1,43 @@
+<div class="row wrapper border-bottom white-bg page-heading sticked">
+    <h2>
+        Mes disponibilités : 
+        <% if @for_season %>
+            <%= @next_season.label %>
+        <% else %>
+            Evaluations du <%= @day.strftime("%d/%m/%Y") %> au <%= @day_end.strftime("%d/%m/%Y") %>
+        <% end %>
+    </h2>
+</div>
+
+<% if @for_season and !@planning[:is_locked] and current_user.teacher? %>
+    <div class="clearfix p-xs flex flex-wrap">
+        <div class="m-b-sm">
+            <%= react_component("common/ConfirmLink", { 
+                link: @copy_link,
+                icon: "fa-copy",
+                label: "Copier le planning de la saison en cours",
+                message: "Voulez-vous vraiment importer le planning de la saison en cours ? Cela supprimera toutes les modifications pour la saison prochaine."
+            }) %>
+        </div>
+
+        <div class="m-b-xs">
+            <%= react_component("common/ConfirmLink", { 
+                link: @lock_link,
+                icon: "fa-lock",
+                label: "Verrouiller le planning",
+                message: "Voulez-vous vraiment verouiller le planning ? Vous devrez vous adresser à un.e permanent.e pour tout changement."
+            }) %>
+        </div>
+    </div>
+<% end %>
+
+<%= react_component("availability/AvailabilityManager", {
+    isTeacher: current_user.teacher?,
+    day: @day,
+    user: @planning[:user],
+    kinds: @for_season ? ["c", "o"] : ["e"],
+    forSeason: @for_season,
+    planningId: @planning[:id],
+    intervals: @time_intervals,
+    locked: @locked
+}) %>

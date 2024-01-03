@@ -1,0 +1,179 @@
+/* @import url('https://fonts.googleapis.com/css?family=Ubuntu:300,400,700'); */
+
+/* ======================================================== */
+/* GENERAL */
+/* ======================================================== */
+
+html {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+}
+
+body {
+    padding: 0 20px;
+    margin: 0;
+    font-family: 'Ubuntu', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+}
+
+body input[type='number'] {
+    -moz-appearance: textfield;
+}
+
+body input::-webkit-outer-spin-button,
+body input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+ul li {
+    margin: 0 0 10px;
+    padding: 0;
+}
+
+ul li:last-child {
+    margin-bottom: 0;
+}
+
+/* ======================================================== */
+/* HEADER */
+/* ======================================================== */
+.bill-container {
+    max-width: 1000px;
+    margin: auto;
+    display: block;
+    min-height: 100vh;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+}
+
+.logo {
+    width: 150px;
+}
+
+.bill-header {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.bill-header h2 {
+    margin: 0;
+}
+
+.first-column {
+    width: 60%;
+}
+
+.bill-sub-header {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: start;
+    -ms-flex-align: start;
+    align-items: flex-start;
+    -webkit-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    background: #f0f0f0;
+    padding: 20px;
+    border: 1px solid #ce292a;
+    border-top: 5px solid #ce292a;
+    border-radius: 4px;
+}
+
+.bill-sub-header h3 {
+    margin: 0 0 15px;
+}
+
+/* ======================================================== */
+/* TABLE */
+/* ======================================================== */
+
+
+
+/* ======================================================== */
+/* BODY */
+/* ======================================================== */
+.complementary-infos {
+    text-align: left;
+    padding: 30px 0;
+}
+
+.complementary-infos p:first-child {
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.rib {
+    margin-top: 110px;
+    font-size: 14px;
+}
+
+/* ======================================================== */
+/* FOOTER */
+/* ======================================================== */
+footer {
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: end;
+    -ms-flex-align: end;
+    align-items: flex-end;
+    text-align: center;
+}
+
+footer p {
+    color: #808080;
+}
+
+footer a {
+    color: #BA6C00;
+}
+
+.footer-container {
+    width: 100%;
+    margin-top: 10px;
+    border-top: 5px solid #ce292a;
+}
+
+.school-address,
+.school-infos {
+    font-size: 12px;
+}
+
+.school-address {
+    float: left;
+    text-align: left;
+}
+
+.school-infos {
+    float: right;
+    text-align: right;
+}
+
+.min {
+    color: #999;
+    font-weight: 300;
+}

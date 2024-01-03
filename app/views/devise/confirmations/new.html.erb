@@ -1,0 +1,19 @@
+<div class="middle-box text-center loginscreen">
+    <div>
+        <div>
+            <h1 class="logo-name">⚡</h1>
+            <br />
+            <h2>Envoyer à nouveau les instructions de confirmation</h2>
+        </div>
+        <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), class: "m-t", html: { method: :post }) do |f| %>
+            <div class="form-group">
+                <%= f.label :email %><br />
+                <%= f.email_field :email, autofocus: true, autocomplete: "email", value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email), class: "form-control" %>
+            </div>
+
+            <%= f.submit "Ré-envoi des instructions de confirmation", class: "btn btn-primary block full-width m-b" %>
+
+            <%= render "devise/shared/links" %>
+        <% end %>
+    </div>
+</div>

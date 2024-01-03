@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Elvis</title>
+        <%= csrf_meta_tags %>
+        <meta name="viewport" content="width=device-width, user-scalable=no">
+
+        <%= stylesheet_pack_tag 'application' %>
+    </head>
+
+    <body class="gray-bg">
+        <div id="wrapper">
+          <div id="page-wrapper" style="margin: 0!important;">
+            <div class="row">
+              <div class="col-sm-12" style="z-index: 1;">
+                <%= yield %>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="app-footer m-n" style="z-index: 0;">
+                <div class="link-footer">
+                  <%= link_to :cgu do %>
+                    Politique de confidentialité (CGU)
+                  <% end%>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <%= javascript_pack_tag 'app' %>
+
+      <script type="text/javascript">
+          const footer = $(".app-footer");
+          footer.parent().height(footer[0].offsetHeight);
+      </script>
+    </body>
+</html>

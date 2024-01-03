@@ -1,0 +1,2 @@
+class IntervalError < StandardError
+end

@@ -1,0 +1,37 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+  <h2>
+    Paramètres
+  </h2>
+</div>
+
+<% @parameters.each_key do |key| %>
+  <div class="row">
+    <div class="col-sm-12">
+      <h3 class="font-bold text-dark"><%= key.to_s.humanize %></h3>
+    </div>
+  </div>
+
+  <div class="row">
+    <% @parameters[key].each do |parameter| %>
+      <div class="col-sm-12 col-auto">
+        <div class="ibox" style="width: 375px;">
+          <div class="ibox-title">
+            <h5><%= parameter[:title] %></h5>
+          </div>
+          <div class="ibox-content">
+            <p>
+              <% if parameter[:text].present? && parameter[:text].to_s.length > 54 %> <%# 54 = nb max cataract in 375px %>
+                <%= parameter[:text] %>
+              <% else %>
+                <%= parameter[:text] %> <br/> &nbsp;
+              <% end %>
+            </p>
+            <div class="w-100 text-right">
+              <a class="btn btn-primary" href="<%= parameter[:link] %>">Editer</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>

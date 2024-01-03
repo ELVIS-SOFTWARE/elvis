@@ -1,0 +1,60 @@
+<% 
+    @minimum_password_length = User.password_length.min
+%>
+
+<div>
+    <% if !resource.errors[:uniqueness].empty?%>
+        <div class="alert alert-danger">
+            <% resource.errors[:uniqueness].each do |msg| %>
+                <li><%= msg%></li>
+            <% end %>
+        </div>
+    <% end %>
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+        <div class="form-group">
+            <%= f.label "Votre Nom" %><br />
+            <%= f.text_field :last_name, required: true, autofocus: true, autocomplete: "last name", id: "last_name", class: "form-control" %>
+        </div>
+
+        <div class="form-group">
+            <%= f.label "Votre Prénom" %><br />
+            <%= f.text_field :first_name, required: true, autofocus: true, autocomplete: "first name", id: "first_name", class: "form-control" %>
+        </div>
+
+        <div class="form-group w-100">
+            <%= f.label "Votre date de naissance" %><br />
+            <%= f.date_field :birthday, required: true, autofocus: true, autocomplete: "birthday", id: "birthday", class: "form-control w-100" %>
+        </div>
+
+        <div class="form-group">
+            <%= f.label "Email" %><br />
+            <%= f.email_field :email, required: true, autofocus: true, autocomplete: "email", class: "form-control" %>
+        </div>
+
+        <div class="form-group mb-0">
+            <%= f.label "Mot de passe" %>
+            <%= f.password_field :password, required: true, minlength: @minimum_password_length, autocomplete: "off", class: "form-control" %>
+            <% if @minimum_password_length %>
+                <p class="help-text mb-0">(<%= @minimum_password_length %> caractères minimum)</p>
+            <% end %><br />
+        </div>
+
+        <div class="form-group">
+            <%= f.label "Confirmer mot de passe" %><br />
+            <%= f.password_field :password_confirmation, required: true ,autocomplete: "off", class: "form-control" %>
+            <% resource.errors[:password_confirmation].each do |msg| %>
+                <li class="alert alert-danger"><%= msg %></li>
+            <% end %>
+        </div>
+
+        <% unless Recaptcha.configuration.site_key.nil? %>
+          <div class="form-group">
+            <%= recaptcha_v3(action: "sign_up") %>
+          </div>
+        <% end %>
+
+        <%= f.submit "Inscription", class: "btn btn-primary block full-width m-b" %>
+
+        <%= render "devise/shared/links" %>
+    <% end %>
+</div>

@@ -1,0 +1,24 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>
+        Liste des utilisateurs
+        <div class="btn-group pull-right">
+            <%= link_to new_user_path, class: "btn btn-sm btn-primary m-r-sm m-b-sm" do %>
+                <i class="fas fa-plus"></i> Créer un utilisateur
+            <% end %>
+            
+            <%= link_to "import_users", class: "btn btn-sm btn-primary m-r-sm m-b-sm" do %>
+                <i class="fas fa-plus"></i> Importer utilisateurs
+            <% end %>
+        </div>
+    </h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="ibox">
+            <div class="ibox-content no-padding">
+                <%= react_component("UserList", { users: @current_user, filter: @filter}) %>
+            </div>
+        </div>
+    </div>
+</div>

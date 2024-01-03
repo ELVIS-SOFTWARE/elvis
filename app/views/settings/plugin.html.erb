@@ -1,0 +1,35 @@
+<% partial = render :template => @partial, :locals => { :settings => @settings } %>
+
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+  <h2>
+    <% if @title.nil? %>
+      Plugins - <%= @plugin.name %>
+    <% else %>
+      <%= @title %>
+    <% end %>
+  </h2>
+</div>
+
+  <div>
+    <div id="settings" class="plugin plugin-<%= @plugin.id %>">
+      <%= form_tag({ :action => 'plugin' }) do %>
+        <div class="box tabular settings">
+          <%= partial %>
+        </div>
+        <% if @hide_btn_validation.nil? || !@hide_btn_validation %>
+          <%= submit_tag "Appliquer" %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,25 @@
+require_relative 'constants'
+
+Gem::Specification.new do |spec|
+  spec.name        = <%= plugin_pretty_name %>::GEM_NAME
+  spec.version     = <%= plugin_pretty_name %>::VERSION
+  spec.authors     = ["dev"]
+  spec.email       = ["dev@dev.dev"]
+  spec.homepage    = ""
+  spec.summary     = ""
+  spec.description = ""
+  spec.license     = "MIT"
+
+  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
+  # to allow pushing to a single host or delete this section to allow pushing to any host.
+  #spec.metadata["allowed_push_host"] = "/"
+
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = "git url"
+  #spec.metadata["changelog_uri"] = "changelog url (readme)"
+
+  spec.files = Dir["{app,config,db,lib,assets,react_component}/**/*", "README.rdoc", "init.rb", "Rakefile", "constants.rb"]
+
+  spec.add_dependency "rails", "~> 6.1.4", ">= 6.1.4.4"
+  spec.add_dependency "activesupport", "~> 6.1.6.1", ">= 6.1.6.1"
+end

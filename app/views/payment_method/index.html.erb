@@ -1,0 +1,32 @@
+
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+  <h2>Méthodes de paiement</h2>
+  <%= link_to 'Créer une méthode de paiement', new_payment_method_path, :class => 'btn btn-primary pull-right' %>
+</div>
+
+<p id="notice"><%= notice %></p>
+
+<table class="table table-bordered bg-white">
+  <thead>
+  <tr>
+    <th>Label</th>
+    <th>Est spécial</th>
+    <th>A crédit</th>
+    <th colspan="2">Actions</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  <% @payment_methods.each do |pm| %>
+    <tr>
+      <td><%= pm.label %></td>
+      <td><%= pm.is_special %></td>
+      <td><%= pm.is_credit_note %></td>
+      <td><%= link_to 'Éditer', edit_payment_method_path(pm), :class => 'btn btn-primary' %></td>
+      <td><%= link_to 'Supprimer', payment_method_path(pm), method: :delete, data: { confirm: 'Êtes vous sur ?' }, :class => 'btn btn-primary' %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<br>

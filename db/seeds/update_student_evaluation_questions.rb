@@ -1,0 +1,2 @@
+Question.find_by(name: "slow_progression_rate_reason")
+    .update(select_values: "Assiduité:0;Difficulté de compréhension:1;Investissement / engagement:2;Relationnel dans le cours collectif:3;Élève particulièrement engagé et motivé:4;Difficulté de motricité / coordination:5;Ne possède pas d'instrument:6")

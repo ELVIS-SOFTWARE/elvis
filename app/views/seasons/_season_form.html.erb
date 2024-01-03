@@ -1,0 +1,111 @@
+  <%  
+      if flash.any? && flash.alert.is_a?(Hash)
+        @invalid = flash.alert[:errors] 
+        @invalid = {} if @invalid.nil? || ! @invalid.is_a?(Hash)
+  %>
+    <div class="m-t h-auto bg-danger rounded p-sm text-white m-b-xs">
+      Impossible de sauvegarder la saison
+    </div>
+  <% 
+      else
+        @invalid = {}     
+      end 
+  %>
+
+<%= form_with scope: :season, model: @season, local: true, multipart: false do |f| %>
+  <div class="form-group">
+    <%= f.label :Nom_de_la_saison %><br />
+    <%= f.text_field :label, autofocus: false, id: "label", class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label "Nombre de leçons (prorata par défaut)", for: "nb_lessons" %><br />
+    <%= f.number_field :nb_lessons, autofocus: false, id: "nb_lessons", class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label "Début" %><br />
+    <%= f.date_field :start, autofocus: false, id: "start", class: "form-control" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label "Fin" %><br />
+    <% invalid = @invalid[:end] %>
+    <%= f.date_field :end, autofocus: false, id: "end", class: "form-control #{'is-invalid' if invalid}" %>
+      <div class="invalid-feedback">
+        <%= invalid ? invalid : nil %>
+      </div>
+  </div>
+
+
+  <fieldset><legend>Pour la saison</legend>
+    <div style="margin-left: 1em">
+      <div class="form-group">
+        <%= f.label "Date d'ouverture des ré-inscriptions" %><br />
+        <% invalid = @invalid[:opening_date_for_applications] %>
+        <%= f.date_field :opening_date_for_applications, autofocus: false, id: "start", class: "form-control #{'is-invalid' if invalid}", required: true %>
+        <div class="invalid-feedback">
+         <%= invalid ? invalid : nil %>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <%= f.label "Date d'ouverture des nouvelles inscriptions" %><br />
+        <%= f.date_field :opening_date_for_new_applications, autofocus: false, id: "start", class: "form-control #{'is-invalid' if invalid}", required: true %>
+        <% invalid = @invalid[:opening_date_for_new_applications] %>
+        <div class="invalid-feedback">
+         <%= invalid ? invalid : nil %>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <%= f.label "Date de clôture des inscriptions" %><br />
+        <% invalid = @invalid[:closing_date_for_applications] %>
+        <%= f.date_field :closing_date_for_applications, autofocus: false, id: "end", class: "form-control #{'is-invalid' if invalid}", required: true %>
+        <div class="invalid-feedback">
+         <%= invalid ? invalid : nil %>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <%= f.label "Date de validation de planning par les professeurs" %><br />
+        <%= f.date_field :date_for_teacher_planning_validation, autofocus: false, id: "date_for_teacher_planning_validation", class: "form-control" %>
+      </div>
+    </div>
+  </fieldset>
+
+
+  <div class="form-group">
+    <div class="checkbox checkbox-primary">
+      <%= f.check_box :is_current, autocomplete: "off", id: "is_current", disabled: true %>
+      <%= f.label "Saison en cours", for: "is_current", class: "control-label" %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="select">
+      <%= f.label "Saison suivante", for: "next_season_id", class: "control-label" %>
+      <% 
+        # on va constituer la liste des saisons qui peuvent être "saison suivante", en incluant la saison "aucune"
+        seasons = []        
+        # on ajoute, en 1ère position, un élément "aucune saison", avec next_season_id=0 
+        seasons.unshift (Season.new(id: 0, label: "<aucune>"))
+        # on ajoute ensuite la saison suivante, si elle est déclarée
+        seasons << @season.next_season if @season.next_season_id
+        # on ajoute enfin les saisons candidates (celles qui ne sont pas déjà saisons suivantes d'une autre)
+        seasons.concat Season.get_next_season_candidates(exclude_id: @season.id).to_a
+      %>
+      <%= f.collection_select(:next_season_id, seasons, :id, :label, {:selected => @season.next_season_id }, { class: 'form-control' }) %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="checkbox checkbox-primary">
+      <%= f.check_box :is_off, autocomplete: "off", id: "is_off", disabled: @season.is_current%>
+      <%= f.label "Archivée", for: "is_off", class: "control-label" %>
+    </div>
+  </div>
+  <div class="form-group">
+    <%= f.submit "Sauvegarder", class: "btn btn-primary block full-width m-b" %>
+  </div>
+<% end %>

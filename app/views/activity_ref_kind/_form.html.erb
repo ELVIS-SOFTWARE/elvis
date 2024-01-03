@@ -1,0 +1,26 @@
+<%= form_with scope: :activity_ref_kind, model: @activity_ref_kind, local: true, multipart: false do |f| %>
+  <% unless @errors.nil? %>
+    <div class="bg-danger m-b-sm img-rounded color-black p-h-xs">
+      <ul>
+        <% @errors.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label "Nom"%><br />
+    <%= f.text_field :name, autofocus: true, id: "label", class: "form-control", required: true, minLength: 3 %>
+  </div>
+
+  <!--<div class="form-group">
+    <%= f.label "cours pour enfant : ", for: "is_for_child" %>
+    &nbsp;
+    <%= f.check_box :is_for_child, id:"is_for_child",  required: false %> 
+  </div>-->
+
+  <div class="form-group">
+    <%= f.submit "Sauvegarder", class: "btn btn-primary block full-width m-b" %>
+  </div>
+<% end %>

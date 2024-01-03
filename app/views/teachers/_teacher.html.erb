@@ -1,0 +1,14 @@
+<div class="teacher-card">
+    <div class="ibox">
+        <div class="ibox-title">
+            <h5><%= link_to "#{teacher.first_name} #{teacher.last_name}", user_path(teacher) %></h5>
+        </div>
+        <div class="ibox-content no-padding">
+            <ul class="list-group">
+                <% teacher.activity_refs.each do |act|%>
+                    <li class="list-group-item"><%= act.label %></li>
+                <% end %>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,8 @@
+<%= form_with scope: :pricing, model: pricing, local: true do |f| %>
+    <div class="form-group">
+        <%= f.label "Libellé", for: "label" %><br />
+        <%= f.text_field :label, id: "label", class: "form-control", required:true %>
+    </div>
+
+    <%= f.submit "Sauvegarder", class: "btn btn-primary block full-width m-b" %>
+<% end %>

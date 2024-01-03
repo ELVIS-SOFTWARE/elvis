@@ -1,0 +1,30 @@
+<h1><strong><%="#{@user.first_name} #{@user.last_name}"%></strong><br><%= format_for_display(@activity_ref) %></h1>
+
+<h3>Évaluations des élèves</h3>
+
+<div class="row">
+    <div class="col-lg-8 col-md-10 col-sm-12">
+        <div class="alert alert-info">
+            Ces évaluations serviront pour inscrire les élèves sur la prochaine saison
+        </div>
+        <div>
+            <%= react_component("evaluation/Evaluation", {
+                user: @user,
+                season: @season,
+                activity: @activity_json,
+                evaluations: @evaluations_json,
+                activity_refs: @activity_refs,
+                questions: @questions,
+                referenceData: {
+                    rooms: @rooms,
+                    seasons: @seasons,
+                    teachers: @teachers,
+                    locations: @locations,
+                    activities: @activities,
+                    payment_methods: @payment_methods,
+                    evaluation_level_refs: @evaluation_level_refs,
+                },
+            }) %>
+        </div>
+    </div>
+</div>

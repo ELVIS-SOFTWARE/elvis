@@ -1,0 +1,25 @@
+<style>
+  .param {
+    margin-bottom: 5rem;
+  }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+  <h2><%= @school_informations&.name || "Pas de nom" %></h2>
+</div>
+
+<br/>
+
+  <%= react_component("editParameters/SchoolParameters", {
+    cessionHour: @evaluation_interval,
+    adhesionFee: @adhesion_fee,
+    bankHolidaysZones: @bank_holidays_zones,
+    bankHolidaysZone: @bank_holidays_zone,
+    countries: @countries,
+    min_score_recaptcha: @min_score_recaptcha,
+    school: @school_informations.nil? ? {} : @school_informations,
+    schoolAddress: @school_address.nil? ? {} : @school_address,
+    picture_url: @school_informations.nil? || !@school_informations&.logo&.attached? ? nil : url_for(@school_informations.logo),
+    zones: @zones,
+    zone_set_by_user: @zone_set_by_user
+  }) %>

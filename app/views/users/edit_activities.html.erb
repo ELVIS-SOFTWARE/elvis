@@ -1,0 +1,10 @@
+<h1>Activités de l'utilisateur <%= "#{@user.first_name} #{@user.last_name}" %></h1>
+<div class="col-lg-6">
+    <%= react_component("EditActivities", {
+            modelId: @user.id,
+            ajaxUrl: "/users/#{@user.id}/activities",
+            redirectUrl: "/users/#{@user.id}",
+            values: @user.activity_refs.map {|act| {key: act.id, value: act.id, label: act.label}},
+            options: @activity_refs.map { |act| {key: act.id, value: act.id, label: act.label} }
+        }) %>
+</div>

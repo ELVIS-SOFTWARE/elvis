@@ -1,0 +1,37 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <h2>Editer l'activité "<%= @activity_ref.label %>"</h2>
+
+    <br />
+
+    <div class="row m-t">
+        <%= react_component "activityRef/ActivityRefContainer", {
+            postTo: "update",
+            seasons: @seasons,
+            activityRef: @activity_ref,
+            activityTypes:ActivityRef.translated_activity_types.map {|translation, value, index|  {label:translation, value:value}},
+            activityRefImage: @activity_ref.picture.attached? ?  url_for(@activity_ref.picture) : nil,
+            activityRefKinds: @activity_kinds,
+            activityRefApplicationOptions: { applicationOptions: @activity_ref_application_options},
+            nextCycles: @next_cycles,
+            activityRefs: @activity_refs,
+            pricings: @pricings,
+            activityRefSeasonPricings: @activity_ref_season_pricings,
+            activityInstruments: @activity_ref.instruments,
+            instruments: Instrument.all,
+            currentSeasonId: Season.current.id,
+            teachers: @teachers
+        } %>
+    </div>
+
+  <% unless @activity_ref.errors.empty? %>
+    <div class="bg-danger img-rounded color-black p-h-xs">
+      <ul>
+        <% @activity_ref.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+
+</div>

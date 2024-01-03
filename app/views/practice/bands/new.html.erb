@@ -1,0 +1,10 @@
+<h1>New Band</h1>index
+
+<%= react_component('practice/BandCreator', {
+    bandTypes: @band_types,
+    musicGenres: @music_genres,
+    instruments: @instruments,
+    season: Season.current_apps_season,
+}) %>
+
+<%= link_to 'Back', parameters_practice_parameters_path + "#tab-2", class: 'btn btn-primary' %>

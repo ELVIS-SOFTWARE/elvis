@@ -1,0 +1,50 @@
+<div class="middle-box text-center loginscreen">
+    <div>
+        <div>
+            <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen" />
+            <br />
+        </div>
+
+        <% if resource.errors.added?(:email, :password_already_set) %> 
+
+            <div >
+                <h2> Mot de passe déjà défini, veuillez vous connecter avec votre login/mot de passe</h2>
+                <%= link_to 'Redirection vers la page de login', '/u/sign_in', class:"btn btn-primary" %>
+            </div>
+
+        <% else%> 
+
+            <%= form_for(resource, as: resource_name, url: confirm_path, class: "m-t") do |f| %>
+                <h2>Presque fini,  il ne reste plus que le mot de passe à déterminer</h2>
+
+                <div class="form-group">
+                    <%= f.label "Mot de Passe" %><br />
+                    <%= f.password_field :password, autofocus: true, class: "form-control" %>
+                    <% if resource.errors.messages[:password] %>
+                        <% resource.errors[:password].each do |error| %>
+                            <li><%= error%></li>
+                        <% end %>
+                    <%end%>
+                </div>
+
+                <div class="form-group">
+                    <%= f.label "Confirmation" %><br />
+                    <%= f.password_field :password_confirmation, class: "form-control" %>
+                    <% if resource.errors.messages[:password_confirmation] %>
+                        <% resource.errors[:password_confirmation].each do |error| %>
+                            <li><%= error%></li>
+                        <% end %>
+                    <%end%>
+                </div>
+
+                <%= f.hidden_field :confirmation_token, input_html: @original_token %>
+                <%= f.hidden_field :id, input_html: @confirmable.id %>
+                
+                
+
+                <%= f.submit "Créer mon compte", class: "btn btn-primary m-b" %>
+            <% end %>
+        <% end %>
+
+    </div>
+</div>

@@ -1,0 +1,31 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>
+        Liste des cours
+        <%= link_to addCourse_path, class: "btn btn-sm btn-primary pull-right" do %>
+            <i class="fas fa-plus"></i> Ajouter un cours
+        <% end %>
+
+    </h2>
+</div>
+
+<div class="row">
+
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="ibox">
+            <div class="ibox-content no-padding">
+                <%seasons_json = @seasons.as_json( methods: [:is_next])%>
+                <%= react_component "courses/LessonList", {
+                    activityRefs: @activity_refs,
+                    teachers: @teachers,
+                    seasons: seasons_json,
+                    rooms: @rooms,
+                    locations: @locations,
+                    evaluationLevelRefs: @evaluation_level_refs,
+                } %>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+<div class="middle-box text-center loginscreen">
+    <div>
+        <div>
+            <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen" />
+            <br />
+        </div>
+        <div >
+            <h2>Utilisateur inconnu et/ou jeton de confirmation inconnu ou expiré</h2>
+            <%= link_to 'Redirection vers la page de login', '/u/sign_in', class:"btn btn-primary" %>
+        </div>
+    </div>
+</div>

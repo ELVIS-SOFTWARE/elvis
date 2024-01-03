@@ -1,0 +1,39 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <h2>
+        <div class="dropdown">
+            Planning de la salle
+            <button data-toggle="dropdown" class="dropdown-toggle no-padding transparentSelector" aria-expanded="false">
+                <%= @room.label %> <b class="caret"></b>
+            </button>
+            <ul class="dropdown-menu m-t-xs">
+                <% @rooms.each do |room| %>
+                    <li><%= link_to "#{room.label}", room_planning_path(room.id)%></li>
+                <% end %>
+            </ul>
+        </div>
+    </h2>
+
+</div>
+
+<%= react_component("planning/Planning", { 
+    season: @season,
+    nextSeason: @next_season,
+    seasons: @seasons,
+    room: @room_json, 
+    isTeacher: current_user.teacher?,
+    isAdmin: current_user.admin?,
+    displayOnly: true,
+    rooms: @rooms,
+    modal: false,
+    detailsModal: true,
+    levels: @levels,
+    locations: @locations,
+    room_refs: @room_refs,
+    isRoom: true,
+    planning: @intervals,
+    day: @day,
+    activity_refs: @activity_refs,
+    evaluation_level_refs: @evaluation_level_refs,
+    teachers: @teachers,
+    displayRaw: true,
+}) %>

@@ -1,0 +1,32 @@
+<div class="page-heading">
+    <h1>
+        <strong>Evaluation des élèves</strong>
+        <br />
+        <small><%= Season.current.label %></small>
+    </h1>
+</div>
+
+<div class=flex>
+    <p class="alert alert-info">
+        <i style="font-size: large" class="fas fa-info-circle m-r-xs"></i>
+        Les niveaux affichés sont ceux préconisés pour la saison suivante (<%= @season ? @season["label"]: "" %>).
+    </p>
+</div>
+
+
+<%= react_component("evaluation/EvaluationMenu", {
+    activities: @activities_json,
+    questions: @questions,
+    season: @season,
+    user: @user,
+    referenceData: {
+        rooms: @rooms,
+        seasons: @seasons,
+        teachers: @teachers,
+        locations: @locations,
+        activities: @activities,
+        activity_refs: @activity_refs,
+        payment_methods: @payment_methods,
+        evaluation_level_refs: @evaluation_level_refs,
+    }
+}) %>

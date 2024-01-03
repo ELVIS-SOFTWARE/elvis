@@ -1,0 +1,52 @@
+name: Auto-release
+
+on:
+  push:
+    branches: 
+      - 'master'
+    paths:
+      - 'lib/elvis/version.rb'
+
+jobs:
+  build:
+    name: Create release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get gemspec version
+        id: gemspec_version
+        run: echo tag=$(echo $(cat lib/elvis/version.rb | grep VERSION) | cut -d "=" -f 2 | tr \" ' ' | tr \' ' ' | sed -e 's/^[[:space:]]*//') >> $GITHUB_OUTPUT
+      - name: Get latest tag
+        id: get_latest_tag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 1.0
+      - name: Test output
+        id: output
+        run: echo ${{ steps.gemspec_version.outputs.tag }} -- ${{ steps.get_latest_tag.outputs.tag }}
+      - name: Create release
+        if: ${{ steps.gemspec_version.outputs.tag != steps.get_latest_tag.outputs.tag }}
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ steps.gemspec_version.outputs.tag }}
+          release_name: Release ${{ steps.gemspec_version.outputs.tag }}
+          body: |
+            Auto generated release
+            You have to change this description...
+          draft: false
+          prerelease: false
+      - name: Notify plugins marketplace
+        uses: indiesdev/curl@v1.1
+        id: notify_plugins_marketplace
+        with:
+          url: "https://elvis-plugins-marketplace.callingelvis.com/Webhook/newElvisVersion/${{ steps.gemspec_version.outputs.tag }}?secret=${{ secrets.plugin_marketplace_auth_secret }}"
+          method: "GET"
+          accept: 200
+          timeout: 5000
+          retries: 3

@@ -1,0 +1,36 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>
+        Plannings des Salles de Cours
+
+      <div class="btn-group pull-right">
+        <%= link_to new_room_url(location_id: Location.first.id), class: "btn btn-sm btn-primary m-r-sm m-b-sm" do %>
+          <i class="fas fa-plus"></i> Creer une nouvelle salle
+        <% end %>
+      </div>
+    </h2>
+</div>
+
+<div class="row wrapper ">
+    <div class="classroom-list">
+        <% if @rooms.nil? || @rooms.empty? %>
+            <div class="w-100 text-center">
+              <div class="alert alert-warning m-auto" style="width: fit-content;">
+                <p>Aucune salle de cours n'est enregistrée.</p>
+              </div>
+            </div>
+        <% else %>
+          <% @rooms.each do | room| %>
+            <%= link_to room_planning_path(room), class: "ibox classroom" do %>
+              <div class="ibox-title no-padding">
+                <% if room.picture.attached? %>
+                  <img src="<%= url_for(room.picture) %>" class="classroom-picture" />
+                <% else %>
+                  <img src="https://www.encyclopedie-hp.org/wp-content/uploads/sites/4/2016/08/dada-classroom-film.jpg" class="classroom-picture" />
+                <% end %>
+                <h5><%= room.label %></h5>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+    </div>
+</div>

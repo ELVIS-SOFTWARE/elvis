@@ -1,0 +1,18 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+        <h2>
+            Resolution du conflit 
+        </h2>
+</div>
+
+<%= react_component("planning/Planning", {
+    modal: true,
+    detailsModal: true,
+    isAdmin:  current_user.admin?,
+    isTeacher: current_user.teacher?,
+    displayOnly: false,
+    intervals: @intervals,
+    modal: false,
+    plannings: @plannings,
+    season: @season,
+    conflict: @conflict
+}) %>

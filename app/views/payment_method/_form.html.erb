@@ -1,0 +1,54 @@
+<%= form_with(model: pm, local: true) do |form| %>
+  <% if pm.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(pm.errors.count, "error") %> prohibited this payment_method from being saved:</h2>
+
+      <ul>
+        <% pm.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if pm.built_in %>
+    <div class="row">
+      <div class="col-sm-10 alert alert-info mx-3">
+        <i class="fa fa-info-circle"></i> Comme il s'agit d'un moyen de paiement intégré, vous ne pouvez pas modifier son nom.
+      </div>
+    </div>
+  <% end %>
+
+  <div class="row">
+    <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+      <%= form.label :label %>
+      <%= form.text_field :label, :class => 'form-control', :required => true, disabled: pm.built_in %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <% unless pm.built_in%>
+        <div class="checkbox checkbox-primary">
+          <%= form.check_box :is_special, :class => 'form-control' %>
+          <%= form.label "Est spécial" %>
+        </div>
+
+        <div class="checkbox checkbox-primary">
+          <%= form.check_box :is_credit_note, :class => 'form-control' %>
+          <%= form.label "A crédit" %>
+        </div>
+      <% end %>
+
+      <div class="checkbox checkbox-primary">
+        <%= form.check_box :show_payment_method_to_user, :class => 'form-control' %>
+        <%= form.label "Afficher au client ?" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <%= link_to 'Retour', parameters_payment_parameters_path, :class => 'btn btn-primary' %>
+    <%= form.submit "Sauvegarder", :class => 'btn btn-primary' %>
+  </div>
+<% end %>

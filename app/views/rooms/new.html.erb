@@ -1,0 +1,94 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+  <h2>Ajouter une salle</h2>
+</div>
+
+<br/>
+
+<div class="col-lg-4">
+  <% if @room.errors.any? %>
+    <div id="error_explanation" class="alert alert-warning">
+      <p><%= pluralize(@room.errors.count, "erreur") %> a empêché la création de cette école :</p>
+
+      <ul>
+        <% @room.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_with model: @room, url: rooms_path, local: true, multipart: true do |f| %>
+    <div class="form-group">
+      <%= react_component("common/SelectMultiple", {
+        all_features: @locations,
+        features: [@location_id],
+        isMulti: false,
+        title: "Localisation",
+        name: "room[location_id]",
+      }) %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :nom %><span class="text-danger">*</span><br/>
+      <%= f.text_field :label, autofocus: false, class: "form-control", required: true %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :type %><br/>
+      <%= f.text_field :kind, autofocus: false, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :Etage %><br/>
+      <%= f.number_field :floor, autofocus: false, class: "form-control" %>
+    </div>
+
+    <!--<div class="form-group">
+      <%#= f.label :area, "Surface (m²)" %> <br />
+      <%#= f.number_field :area, autofocus: false, class: "form-control", step: "any", min: 0, required: true %>
+    </div>-->
+
+    <div class="form-group">
+      <%= f.label :image %>
+      <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+        <div class="form-control" data-trigger="fileinput">
+          <i class="glyphicon glyphicon-file fileinput-exists"></i>
+          <span class="fileinput-filename"></span>
+        </div>
+        <span class="input-group-addon btn btn-default btn-file">
+                      <span class="fileinput-new">Choisir Image</span>
+                      <span class="fileinput-exists">Changer</span>
+          <%= f.file_field :picture %>
+                  </span>
+        <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Supprimer</a>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <%#= f.label 'Activités' %>
+      <%#= f.select(:activity_refs, [], { include_hidden: false }, { multiple: true, class: "form-control" }) do %>
+      <%# ActivityRef.all.each do |a| -%>
+      <%#= content_tag(:option, a.label, value: a.id) %>
+      <%# end %>
+      <%# end %>
+      <%= react_component("common/SelectMultiple", {
+        all_features: ActivityRef.all.collect { |ar| [ar.label, ar.id] },
+        name: "act_str",
+        title: "Activités",
+        features: @room.activity_refs.collect { |a| a.id },
+        isMulti: true,
+      }) %>
+    </div>
+
+    <!--<div class="form-group">
+      <%= react_component("practice/rooms/RepetWithFeature_Fom", {
+        all_features: @all_features,
+        features: @selected_features,
+        isRepet: @room.is_practice_room
+      }) %>
+    </div>-->
+
+
+    <%= f.submit "Ajouter", class: "btn btn-primary block full-width m-b" %>
+  <% end %>
+</div>

@@ -1,0 +1,78 @@
+
+.alignr {
+    text-align: right;
+}
+
+
+.bill-table {
+    margin-top: 50px;
+    width: 100%;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+
+.bill-table th {
+    text-align: left;
+    font-size: 1.2rem;
+    border-bottom: 2px solid black;
+}
+
+.bill-table th,
+.bill-table td {
+    padding: 10px;
+}
+
+.bill-table th:nth-last-child(-n+2),
+.bill-table td:nth-last-child(-n+2) {
+    text-align: right;
+}
+
+.bill-table tbody tr:nth-child(even) {
+    background: #f0f0f0;
+}
+
+.bill-table tr:nth-last-child(-n+1) td:first-child {
+    /* background: white; */
+}
+
+.bill-table .quantity,
+.bill-table .amount {
+    color: #808080;
+}
+
+.bill-table tr.sub-total td {
+    border-top: 2px solid black;
+    color: #808080;
+}
+
+.bill-table tr.final-total {
+    border-top: 2px solid black;
+    font-weight: bold;
+    /* background-color: #ce292a !important; */
+    color: black;
+}
+
+.row {
+    margin-left: -15px;
+    margin-right: -15px;
+}
+
+.col-6 {
+    max-width: 50%;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 50%;
+}
+
+.col {
+    max-width: 100%;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 100%;
+}
+
+.col, .col-6 {
+    position: relative;
+    width: 100%;
+    padding-left: 15px;
+    padding-right: 15px;
+    float: left;
+}

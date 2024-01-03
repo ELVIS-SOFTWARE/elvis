@@ -1,0 +1,34 @@
+<div class="middle-box text-center loginscreen">
+    <div>
+        <div>
+            <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen" />
+        </div>
+
+        <div class="ibox">
+            <div class="ibox-title">
+              <h5>Bienvenue !</h5>
+            </div>
+
+            <div class="ibox-content">
+        
+                <%= form_for(current_user, url: {action: "update_email"}) do |f| %>
+                    <div class="form-group">
+                        <% if current_user.email.nil? %>
+                            <%= f.label "Veuillez completer votre email" %><br />
+                        <% else %>
+                            <%= f.label "Est-ce bien votre email ?" %><br />
+                        <% end %>
+                        <%= f.email_field :email, autocomplete: "off", class: "form-control", placeholder: "example@example.org" %>
+                    </div>
+
+                    <%= f.submit "Valider", class: "btn btn-primary block full-width m-b" %>
+                <% end %>
+            
+            </div>
+        </div>
+
+
+
+        
+    </div>
+</div>

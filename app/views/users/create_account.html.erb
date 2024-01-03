@@ -1,0 +1,28 @@
+<div class="padding-page">
+
+  <h1><%= @user.full_name %></h1>
+
+  <div class="row">
+    <%= form_for(@user, url: {action: "save_new_account"}, html: {class: "col-md-4"}) do |f| %>
+    <div class="form-group">
+      <% if @user.email.nil? %>
+        <%= f.label "Veuillez completer votre email" %><br />
+      <% else %>
+        <%= f.label "Est-ce bien votre email ?" %><br />
+      <% end %>
+      <%= f.email_field :email, autocomplete: "off", class: "form-control", placeholder: "example@example.org" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label "Mot de passe" %><br />
+      <%= f.password_field :password, autocomplete: "off", class: "form-control" %>
+    </div>
+    <div class="form-group">
+      <%= f.label "Confirmation de votre mot de passe" %><br />
+      <%= f.password_field :password_confirmation, autocomplete: "off", class: "form-control" %>
+    </div>
+
+    <%= f.submit "Valider", class: "btn btn-primary block full-width m-b" %>
+  <% end %>
+  </div>
+</div>

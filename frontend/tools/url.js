@@ -1,0 +1,1 @@
+export const redirectTo = url => window.location = url;

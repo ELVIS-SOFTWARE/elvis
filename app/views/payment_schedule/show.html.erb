@@ -1,0 +1,83 @@
+    <div class="bill-container">
+        <header>
+            <div class="bill-header">
+                <div>
+                    <h1>
+                        <%
+                            school = School.first
+                            logo_url = ""
+                            if school
+                                logo_url = school.logo.attached? ? rails_blob_url(school.logo) : nil
+                            end
+                        %>
+                        <img src="<%= logo_url %>" height="100px" class="logo" alt="logo">
+
+                    </h1>
+                </div>
+                <h2><%= @schedule.user.full_name %> <br/>
+                    <% if (@schedule.user.instance_of? User) && !@schedule.user.addresses.nil? %>
+                      <% @schedule.user.addresses.each do |addr| %>
+                        <%= addr.street_address %> <br/>
+                        <%= addr.postcode %> <%= addr.city %> <br/>
+                      <% end %>
+                    <% end %>
+                </h2>
+            </div>
+            <div class="bill-sub-header">
+                <div>
+                    <h3>Objet</h3>
+                    <ul>
+                        <% @activities.each do |a| %>
+                            <li><%= a.activity.activity_ref.label %> - <%= a.activity.season.label %></li>
+                        <% end %>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        <table class="bill-table">
+            <thead>
+                <tr>
+                    <th>Echéance</th>
+                    <th>Date</th>
+                    <th>Mode de Règlement</th>
+                    <th>Montant</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% @due_payments.each do |dp| %>
+                    <tr>
+                        <td><%= dp.number %></td>
+                        <% if !dp.previsional_date.nil? %>
+                            <td>
+                                <%= l(dp.previsional_date, format: "%d %B %Y") %>
+                            </td>
+                        <% end %>
+                        <td>
+                            <%= dp.payment_method ? dp.payment_method.label : "--"  %>
+                        </td>
+                        <td>
+                            <%= dp.amount %> €
+                        </td>
+                    </tr>
+                <% end %>
+                    <tr class="final-total">
+                        <td colspan="2"></td>
+                        <td>Total</td>
+                        <td><%= @total_due %> €</td>
+                    </tr>
+            </tbody>
+        </table>
+        <div class="complementary-infos">
+            <p>Payable par chèque ou par virement</p>
+        </div>
+
+        <footer>
+            <div class="footer-container">
+                <div class="school-infos">
+                  <% if @school.activities_not_subject_to_vat %>
+                    Prestation non assujettie à la TVA
+                  <% end %>
+                </div>
+            </div>
+        </footer>
+    </div>

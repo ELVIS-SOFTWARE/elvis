@@ -1,0 +1,38 @@
+<h1>Fusionner des utilisateurs</h1>
+<p>
+  La fusion importera toutes les données du premier utilisateur sélectionné (rouge) pour les ajouter au second (bleu). <br/>
+  Le rôle d'administrateur ne sera jamais transmis pour des questions de sécurité.
+</p>
+
+<style>
+    .onoffswitch-inner:before {
+        content: "Supprimer l'ancien utilisateur (rouge)";
+        padding-left: 10px;
+        background-color: #1AB394;
+        color: #FFFFFF;
+    }
+
+    .onoffswitch-inner:after {
+        content: "Garder l'ancien utilisateur (rouge)";
+        padding-right: 10px;
+        background-color: #FFFFFF;
+        color: #999999;
+        text-align: right;
+    }
+
+    .onoffswitch-switch {
+        display: block;
+        width: 18px;
+        margin: 0;
+        background: #FFFFFF;
+        border: 2px solid #1AB394;
+        border-radius: 3px;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 192px;
+        transition: all 0.3s ease-in 0s;
+    }
+</style>
+
+<%= react_component("scripts/mergeUsers/MergeUsers", {season: @season}) %>

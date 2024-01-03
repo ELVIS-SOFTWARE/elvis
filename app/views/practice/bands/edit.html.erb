@@ -1,0 +1,11 @@
+
+<%= react_component('practice/BandEdit', {
+    band: @band,
+    bandTypes: @band_types,
+    musicGenres: @music_genres,
+    instruments: @instruments,
+    season: Season.current_apps_season,
+}) %>
+
+<!-- Bonne idée/fàçon de faire ?-->
+<a href="<%= parameters_practice_parameters_path + "#tab-2" %>" class="btn btn-primary">Back</a>

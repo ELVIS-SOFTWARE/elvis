@@ -1,0 +1,43 @@
+<div class="adhesion_card">
+    <div class="card-left">
+
+        <% if @user.avatar.attached? %>
+            <img src="<%= url_for(@user.avatar) %>" class="card-image" alt="User Avatar">
+        <% else %>
+            <img src="<%= asset_pack_path 'images/default_avatar.png' %>" class="card-image" alt="User Avatar">
+        <% end %>
+
+
+        <%# <img src="https://www.stevensegallery.com/110/110" class="card-qrcode" alt="QR code"> %>
+        <div class="code">
+            <%= raw @qr.as_html %>
+        </div>
+    </div>
+    <div class="card-right">
+        <div class="card-header">
+            <div class="card-header-text">
+                <h2>Carte adhérent</h2>
+                <p><b><%= @user.full_name %> (#<%= @user.adherent_number %>)</b></p>
+                <% unless @user.birthday.nil? %>
+                    <p><%= @user.birthday.strftime("%d/%m/%Y") %></p>
+                <% end %>
+            </div>
+            <div class="card-header-logo">
+                <%
+                    school = School.first
+                    logo_url = ""
+                    if school
+                        logo_url = school.logo.attached? ? url_for(school.logo) : nil
+                    end
+                %>
+                <img src="<%= logo_url %>" class="card-header-logo-image" alt="logo">
+            </div>
+        </div>
+        <% @user.activities.each do |a| %>
+            <div class="card-lesson">
+                <p><b>> Cours de <%= a.activity_ref.label %> (<%= a.teacher.sex == "m" ? "M" : "Mme" %> <%= a.teacher.last_name %>)</b></p>
+                <p>Salle <%= a.room.label %> à <%= a.location.label %> / <%= l(a.time_interval.start, format: "%A").capitalize %>, <%= a.time_interval.start.strftime("%H:%M") %></p>
+            </div>
+        <% end %>
+    </div>
+</div>

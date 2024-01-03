@@ -1,0 +1,139 @@
+<style>
+    @media screen and (max-width: 768px) {
+        .contact {
+            flex-direction: row !important;
+            flex-wrap: wrap;
+        }
+        .addNewFamily {
+            justify-content: start!important;
+            padding: 0!important;
+        }
+        .addNewFamily div.col {
+            padding: 0px !important;
+        }
+        .lienFamilial {
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        .profil {
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
+
+<div class="m-b-lg px-4">
+    <% if @user.family(@season).length > 0 %>
+        <% family = @user.family_links_with_user(@season) %>
+        <div class="contact-thumb-list">
+            <div class="d-flex contact align-items-center mb-2">
+                <h2 class="title-profile">Membres de la famille :</h2>
+                <div class="addNewFamily col-lg d-flex justify-content-end mt-2 pr-0">
+                    <% if @current_user.is_admin or @current_user.id == @user.id %>
+                        <%= react_component("userForm/HandleFamilyMember", {
+                              user: @user_json,
+                              current_user: current_user,
+                              familyMember: nil,
+                              season: @season,
+                              shouldCheckGdpr: !@user.is_admin,
+                              content_label: "Ajouter un contact",
+                              toggle_title: true,
+                              toggle_add_button: true,
+                            }) %>
+                    <% end %>
+                </div>
+            </div>
+            <% @user.family(@season).uniq.sort_by { |u| -2 * (u.family_link_with(@user, @season)&.is_to_call || false).to_i - (u.family_link_with(@user, @season)&.is_paying_for || false).to_i }.each do |m| %>
+                <div class="contact-thumb">
+                    <div class="col-sm" style="flex:1">
+                        <div class="contact-info">
+                            <h3><%= m.first_name %> <b><%= m.last_name %></b></h3>
+                            <span class="relation"><%= "#{m.display_family_link(@user, @season)} #{@user.genitive_first_name}" %></span>
+                            <% m.telephones.each do |t| %>
+                                <p><%= t.label.nil? ? "" : t.label.capitalize %>: <%= t.number %></p>
+                            <% end %>
+                        </div>
+                    </div>
+                    <div class="member-status-icons" style="width: 100%">
+                        <% if m.is_to_call?(@user, @season) %>
+                            <span class="round-icon is-to-call">
+                                <i title="À contacter en premier" class="fas fa-phone"></i>
+                            </span>
+                        <% end %>
+                        <div class="flex flex-end-justified" style="flex:1">
+                            <% if m.is_paying_for?(@user, @season) %>
+                                <span class="round-icon is-paying">
+                                    <i title="Payeur" class="fas fa-euro-sign"></i>
+                                </span>
+                            <% end %>
+                            <% if m.is_legal_referent?(@user, @season) %>
+                                <span class="round-icon is-legal-referent">
+                                    <i title="Représentant légal" class="fas fa-balance-scale"></i>
+                                </span>
+                            <% end %>
+                        </div>
+                    </div>
+                    <%# if @current_user.is_admin or @current_user.is_teacher or (@user.id == @current_user.id) or (m.id == @current_user.id) %>
+                    <% if @current_user.is_admin or (@user.id == @current_user.id) or (m.id == @current_user.id) %>
+                        <div class="col-sm lienFamilial" style="flex:1">
+                            <h4> Lien Familial </h4>
+                                <%= react_component("userForm/HandleFamilyMember", {
+                                      user: @user_json,
+                                      current_user: current_user,
+                                      familyMember: family.select { |fmu| fmu[:id] == m.id }.first,
+                                      season: @season,
+                                      shouldCheckGdpr: !@user.is_admin,
+                                      content_label: "Edition du lien familial",
+                                      toggle_title: true,
+                                      toggle_edit_buton: true,
+                                      toggle_delete_button: true,
+                                    }) %>
+                        </div>
+                        <div class="col-sm profil border-left <%= @season.closing_date_for_applications >= DateTime.now ? "border-right" : "" %>" style="flex:1"->
+                            <h4 class="mt-3 mb-2"> Profil </h4>
+                            <% if !(m.id == @current_user.id) || @current_user.is_admin %>
+                                <%= link_to(user_path(m), class: "btn btn-primary btn-outline") do %>
+                                    
+                                    <i class="fas fa-eye"></i> Voir
+                                    
+                                <% end %>
+                                <%= link_to edit_user_path(m.id), class: "btn btn-outline btn-primary m-2" do %>
+                                    <i class="fas fa-edit"></i> Éditer
+                                <% end %>
+                            <% end %>
+                        </div>
+                        <% if Season.registration_opened %>
+                          <div class="col-sm border-dark" style="flex: 1;">
+                            <h4> Activités </h4>
+                            <% if !(m.id == @current_user.id) || @current_user.is_admin %>
+                              <%= link_to new_application_path(m), class: "btn btn-primary" do %>
+                                <i class="fas fa-graduation-cap"></i> Pré-inscrire
+                              <% end %>
+                            <% end %>
+                          </div>
+                        <% end %>
+                    <% end %>
+                </div>
+            <% end %>
+        </div>
+    <% else %>
+        <div class="alert alert-danger"> Si vous souhaitez inscrire un membre de votre famille à une activité, cliquez sur le bouton <b>ajouter un nouveau membre</b>, puis cliquez sur le bouton <b>pré-inscrire</b> correspondant</div>
+        <div class="d-flex family-member">
+            <h2 class="title-profile">Pas de membres de famille renseignés pour le moment</h2>
+            <div class="col-sm-4" style="margin-top: -10px"> 
+                <% if @current_user.is_admin or @current_user.id == @user.id %>
+                    <%= react_component("userForm/HandleFamilyMember", {
+                          user: @user_json,
+                          current_user: current_user,
+                          familyMember: nil,
+                          season: @season,
+                          shouldCheckGdpr: !@user.is_admin,
+                          content_label: "Ajouter un contact",
+                          toggle_title: true,
+                          toggle_add_button: true,
+                        }) %>
+                <% end %>
+            </div>
+        </div>
+    <% end %>
+</div>

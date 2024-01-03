@@ -1,0 +1,91 @@
+version: '3.9'
+
+name: elvis
+
+x-base_elvis: &base_elvis
+  image: elvis:build
+  build:
+    context: .
+    dockerfile: Dockerfile
+    args:
+      - GITHUB_TOKEN=${GITHUB_TOKEN:?GITHUB_TOKEN is required}
+  environment:
+    - Rails_ENV=kubernetes
+    - STORAGE_ACCOUNT=${STORAGE_ACCOUNT:-local}
+    - ELVIS_DB=${POSTGRES_DB_NAME:-elvis}
+    - ELVIS_DB_USER=${POSTGRES_DB_USER:-postgres}
+    - ELVIS_DB_PASS=${POSTGRES_DB_PASS:-12345678}
+    - ELVIS_DB_HOST=${POSTGRES_DB_HOST:-database}
+    - ELVIS_DB_PORT=${POSTGRES_DB_PORT:-5432}
+    - ELVIS_DB_SSLMODE=${POSTGRES_DB_SSLMODE:-disable}
+    - ES_DB_HOST=${ELASTICSEARCH_HOST:-http://elasticsearch:9200}
+    - PLUGINS_LIST_DOWNLOAD_URL=${PLUGINS_LIST_DOWNLOAD_URL}
+    - ES_PREFIX=elvis
+    - RAILS_SERVE_STATIC_FILES=true
+  networks:
+    - elvis
+
+services:
+  elvis_init:
+    <<: *base_elvis
+    container_name: elvis_init
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    entrypoint: "./entrypoints/init.sh"
+
+  elvis:
+    <<: *base_elvis
+    container_name: elvis
+    depends_on:
+      elvis_init:
+        condition: service_completed_successfully
+    ports:
+      - "7212:80"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - cluster.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: curl -s http://localhost:9200 >/dev/null || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - elvis
+
+  database:
+    image: postgres:14.0
+    container_name: database
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_DB_PASS:-12345678}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - elvis
+
+networks:
+  elvis:
+
+volumes:
+  postgres_data:
+  elasticsearch_data:

@@ -1,0 +1,26 @@
+<%= form_with(model: [:practice, music_genre], local: true) do |form| %>
+
+    <% if music_genre.errors.any? %>
+        <div id="error_explanation">
+            <h2><%= pluralize(music_genre.errors.count, "error") %> prohibited this music_genre from being saved:</h2>
+            <ul>
+                <% music_genre.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+                <% end %>
+            </ul>
+        </div>
+    <% end %>
+
+    <div class="row">
+        <div class="field form-group col-lg-3 col-md-4 col-sm-12">
+            <%= form.label :name %>
+            <%= form.text_field :name, :class => 'form-control' %>
+        </div>
+    </div>
+
+    <div class="actions">
+        <%= link_to 'Retour', parameters_practice_parameters_path + "#tab-1", :class => 'btn btn-primary' %>
+        <%= form.submit "Sauvegarder", :class => 'btn btn-primary' %>
+    </div>
+
+<% end %>

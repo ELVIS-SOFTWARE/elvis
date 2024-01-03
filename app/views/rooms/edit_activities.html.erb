@@ -1,0 +1,10 @@
+<h1>Activités de la salle <%= @room.label %></h1>
+<div class="col-lg-6">
+    <%= react_component("EditActivities", {
+            modelId: @room.id,
+            ajaxUrl: "/rooms/#{@room.id}/activities",
+            redirectUrl: "/rooms/#{@room.id}/edit",
+            values: @room.activity_refs.map {|act| {key: act.id, value: act.id, label: act.label}},
+            options: @activities.map { |act| {key: act.id, value: act.id, label: act.label} }
+        }) %>
+</div>

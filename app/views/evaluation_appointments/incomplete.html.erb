@@ -1,0 +1,13 @@
+<div class="row wrapper border-bottom white-bg page-heading">
+    <h1>Liste des nouveaux élèves sans créneau d'évaluation</h1>
+</div>
+
+<h2><%= @season.label %></h2>
+
+<%= react_component("EvaluationAppointmentsList", {
+    availableIntervals: @available_intervals,
+    unassigned_students: @unassigned_students,
+    activityRefs: @activity_refs,
+    teachers: @teachers,
+    season: @season_json
+}) %>

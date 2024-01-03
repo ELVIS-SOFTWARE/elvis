@@ -1,0 +1,149 @@
+<style>
+  body {
+      font-size: 18px;
+  }
+
+  h1 {
+      font-size: 30px!important;
+  }
+
+  h3 {
+      font-size: 22px!important;
+  }
+
+  h2 {
+      font-size: 25px!important;
+  }
+</style>
+
+<div class="bill-container">
+        <header>
+            <div class="bill-header">
+              <div class="text-center">
+                <%
+                  logo_url = ""
+                  if @school
+                    logo_url = @school.logo.attached? ? rails_blob_url(@school.logo) : nil
+                  end
+                %>
+                <img src="<%= logo_url %>" height="150px" class="logo" alt="logo" >
+              </div>
+
+              <div class="row">
+                <div class="col-6">
+                  <h1>
+                    <strong><%= @school_name %></strong>
+                  </h1>
+
+                  <p>
+                    <%= @school.address&.street_address %> <br />
+                    <%= @school.address&.postcode %>, <%= @school.address&.city %>
+                    <% if @school.phone_number %>
+                      <br />
+                      Téléphone: <%= Phonelib.parse(@school.phone_number.strip).full_national %>
+                    <% end %>
+                  </p>
+                </div>
+
+                <div class="col-6 alignr">
+                  <h3>
+                    <strong> <%= @payer["last_name"] %> <%= @payer["first_name"] %> </strong> <br />
+                  </h3>
+
+                  <p>
+                    <% if @payer.key?("address") && @payer["address"] %>
+                      <%= @payer["address"]["street_address"]  %> <br />
+                      <%= @payer["address"]["postcode"] %> <%= @payer["address"]["city"] %>
+                    <% end %>
+
+                    <% if @payer.key?("phone_number") && @payer["phone_number"] %>
+                      <br />
+                      Téléphone: <%= Phonelib.parse(@payer["phone_number"]).full_national %>
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div  class="alignr">
+                <p><u>Le <%= I18n.with_locale("fr") { I18n.l(DateTime.now.to_date, format: :long) } %></u></p>
+                <p>   
+                    <%  season_label = @season.label.downcase
+                        season_label = "saison #{season_label}" unless season_label.include?("saison") 
+                    %>
+                    Reçu pour la <%= season_label %>
+                </p>
+              <p>Préparé par <%= @current_user.full_name %></p>
+            </div>
+
+          <h2><strong>Attestation de paiement</strong></h2>
+          <p>Pour les activités: <%= @data&.map {|d| d[:activity]}.join(", ") %></p>
+        </header>
+
+        <%if @payments_objects.any? %>
+
+
+            <table class="bill-table" style="width: 100%; border: 1px solid black;">
+                <thead style="border: 1px solid black;">
+                    <tr >
+                        <th class="first-column" style="width: 50%;" >Date</th>
+                        <th>Mode de paiement</th>
+                        <th>Statut</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                <% @payments_objects
+                     .filter {|p| [PaymentStatus::PAID_ID, PaymentStatus::PENDING_ID].include?(p.payment_status_id)}
+                     .each do |payment| %>
+                    <tr>
+                        <td>
+                        <%= I18n.with_locale("fr") { I18n.l(payment.cashing_date, format: :long) } %><br />
+                        
+                        </td>
+
+                        <td>
+                          <%= payment.payment_method&.label || "Inconnu" %>
+                        </td>
+
+                        <td>
+                          <%= payment.payment_status&.label || "Inconnu" %>
+                        </td>
+                    
+                        <td>
+                            <%= payment.adjusted_amount %> €
+                        </td>
+                    </tr>
+                <% end %>
+
+                <tr class="final-total" style="font-weight: bold!important; color: black;">
+                  <td colspan="2" ></td>
+                  <td>Total réglé</td>
+                  <td><%= @calculated_total[:total_payments_to_day] %> €</td>
+                </tr>
+
+                <tr style="font-weight: bold;">
+                  <td colspan="2" ></td>
+                  <td>Total dû</td>
+                  <td><%= @calculated_total[:total_due] %> €</td>
+                </tr>
+            </tbody>
+            </table>
+        <%else%>
+            Aucune paiements pour cette saison
+        <%end%>
+
+        <div class="complementary-infos">
+
+        </div>
+
+        <footer style="margin-top: 50px;">
+            <div class="footer-container">
+              <% if @school.activities_not_subject_to_vat %>
+                Prestation non assujettie à la TVA
+              <% else %>
+                Numéro de Siret/RNA: <%= @school.siret_rna %>
+              <% end %>
+            </div>
+        </footer>
+    </div>
