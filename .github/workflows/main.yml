@@ -3,7 +3,7 @@ name: Auto-release
 on:
   push:
     branches: 
-      - 'master'
+      - 'main'
     paths:
       - 'lib/elvis/version.rb'
 
