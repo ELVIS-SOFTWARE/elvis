@@ -1,8 +1,8 @@
 
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" height="200px" srcset="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_300,w_300,f_auto,q_auto/1632721/366670_626248.png">
-    <img alt="logo" height="200px" src="https://custom-images.strikinglycdn.com/res/hrscywv4p/image/upload/c_limit,fl_lossy,h_300,w_300,f_auto,q_auto/1632721/366670_626248.png">
+    <source media="(prefers-color-scheme: dark)" height="200px" srcset="./public/logo.png">
+    <img alt="logo" height="200px" src="./public/logo.png">
   </picture>
 </div>
 
