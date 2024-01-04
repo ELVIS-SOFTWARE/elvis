@@ -1,6 +1,7 @@
 import React, {Fragment} from "react";
 import _ from "lodash";
 import swal from "sweetalert2";
+import * as api from "../../tools/api";
 
 const moment = require("moment");
 require("moment/locale/fr");
@@ -45,27 +46,31 @@ class PaymentsList extends React.Component {
     }
 
     handleChangeOperation(e) {
-        this.setState({ operation: e.target.value });
+        this.setState({operation: e.target.value});
     }
 
     handleChangeAmount(e) {
-        this.setState({ amount: e.target.value });
+        this.setState({amount: e.target.value});
     }
+
     handleChangeReceptionDate(e) {
-        this.setState({ reception_date: e.target.value });
+        this.setState({reception_date: e.target.value});
     }
+
     handleChangeCashingDate(e) {
-        this.setState({ cashing_date: e.target.value });
+        this.setState({cashing_date: e.target.value});
     }
+
     handleChangeCheckNumber(e) {
-        this.setState({ check_number: e.target.value });
+        this.setState({check_number: e.target.value});
     }
+
     handleChangeCheckIssuerName(e) {
-        this.setState({ check_issuer_name: e.target.value });
+        this.setState({check_issuer_name: e.target.value});
     }
 
     handleSelectStatus(e) {
-        this.setState({ payment_status_id: e.target.value });
+        this.setState({payment_status_id: e.target.value});
     }
 
     handleCreatePayment() {
@@ -106,7 +111,7 @@ class PaymentsList extends React.Component {
         const selectedRows = e.target.checked
             ? this.props.payments.map(p => p.id)
             : [];
-        this.setState({ selectedRows });
+        this.setState({selectedRows});
     }
 
     handleRowSelected(e) {
@@ -123,7 +128,7 @@ class PaymentsList extends React.Component {
     }
 
     handleBulkEditChange(e) {
-        const bulkEdit = { ...this.state.bulkEdit };
+        const bulkEdit = {...this.state.bulkEdit};
 
         let val = e.target.value;
 
@@ -169,6 +174,41 @@ class PaymentsList extends React.Component {
                     );
             });
     }
+
+    handleIssuedPaidInvoice(payerId) {
+        const payer_id = payerId;
+
+        api.set()
+            .success(res => {
+                const pdfUrl = res.url;
+
+                if (pdfUrl) {
+                    window.open(pdfUrl, "_blank");
+                }
+
+                swal({
+                    title: "Succès !",
+                    type: "success",
+                    text: "La facture a été éditée avec succès !"
+                });
+            })
+            .error((res) => {
+                swal({
+                    title: "Erreur !",
+                    type: "error",
+                    text: "Une erreur est survenue lors de l'édition de la facture."
+                });
+                this.setState({isFetching: false});
+            })
+            .post(
+                `/api/student_payments/invoice/${payer_id}/issued_paid_invoice`,
+                {
+                    payer: payer_id
+                }
+            );
+
+    }
+
 
     renderStatus(cell) {
         if (cell.value) {
@@ -337,7 +377,7 @@ class PaymentsList extends React.Component {
                         }
 
                         {(this.props.extraButtons || []).map((button) => {
-                            if (button.shouldDisplay!=undefined && button.shouldDisplay(row.original.id))
+                            if (button.shouldDisplay != undefined && button.shouldDisplay(row.original.id))
                                 return (
                                     <button
                                         className={button.class}
@@ -354,8 +394,8 @@ class PaymentsList extends React.Component {
             },
         ];
 
-        if(this.props.isStudentView!=true)
-            columns =  headSelectorColumn.concat(columns);
+        if (this.props.isStudentView != true)
+            columns = headSelectorColumn.concat(columns);
 
         return (
             <div className="ibox">
@@ -411,6 +451,14 @@ class PaymentsList extends React.Component {
                                         Suppression de masse
                                     </a>
                                 </li>
+                                <li>
+                                    <a onClick={() => this.handleIssuedPaidInvoice(
+                                        this.props.payer.id
+                                    )}>
+                                        <i className="fas fa-receipt m-r-sm"/>
+                                        Éditer facture (acquittée)
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     }
@@ -420,7 +468,7 @@ class PaymentsList extends React.Component {
                     data={this.props.payments}
                     columns={columns}
                     resizable={false}
-                    defaultSorted={[{ id: "due_payment_number", desc: true }]}
+                    defaultSorted={[{id: "due_payment_number", desc: true}]}
                     previousText="Précedent"
                     nextText="Suivant"
                     loadingText="Chargement..."
@@ -462,7 +510,7 @@ class PaymentsList extends React.Component {
                                         <option value="placeholder" disabled>
                                             Selectionnez un mode de paiement
                                         </option>
-                                        <option value="" />
+                                        <option value=""/>
                                         {_.map(
                                             this.props.paymentMethods,
                                             (pm, i) => {
@@ -525,7 +573,7 @@ class PaymentsList extends React.Component {
                                                 this.handleChangeAmount(e)
                                             }
                                             className="form-control"
-                                            placeholder="XX €" />
+                                            placeholder="XX €"/>
                                     </div>
                                 </div>
                                 <div className="form-group">
@@ -646,7 +694,7 @@ class PaymentsList extends React.Component {
                             <div className="modal-header">
                                 <h3>Edition de règlements</h3>
                             </div>
-                            <BulkEditModalAlert />
+                            <BulkEditModalAlert/>
                             <div className="modal-body">
                                 <div className="form-group">
                                     <label>Montant</label>
@@ -656,7 +704,7 @@ class PaymentsList extends React.Component {
                                             value={this.state.bulkEdit.operation}
                                             defaultValue={""}
                                             onChange={e => this.handleBulkEditChange(e)}>
-                                            <option value=""></option>    
+                                            <option value=""></option>
                                             <option value="+">+</option>
                                             <option value="-">-</option>
                                             <option value="0">0</option>
@@ -666,7 +714,7 @@ class PaymentsList extends React.Component {
                                             name="amount"
                                             onChange={e => this.handleBulkEditChange(e)}
                                             className="form-control"
-                                            placeholder="XX €" />
+                                            placeholder="XX €"/>
                                     </div>
                                 </div>
                                 <div className="form-group">
@@ -682,7 +730,7 @@ class PaymentsList extends React.Component {
                                         <option value="placeholder" disabled>
                                             Selectionnez un mode de paiement
                                         </option>
-                                        <option value="" />
+                                        <option value=""/>
                                         {_.map(
                                             this.props.paymentMethods,
                                             (pm, i) => {
