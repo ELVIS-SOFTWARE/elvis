@@ -32,7 +32,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.SIXMON_SERVICE_ACCOUNT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SERVICE_ACCOUNT_GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.gemspec_version.outputs.tag }}
           release_name: Release ${{ steps.gemspec_version.outputs.tag }}
