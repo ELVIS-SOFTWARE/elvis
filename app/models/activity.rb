@@ -107,8 +107,15 @@ class Activity < ApplicationRecord
       end
     end
 
-    TimeInterval.transaction do
-      time_interval_instances += TimeInterval.where(id: TimeInterval.insert_all(time_inter_to_add.map { |ti| ti.attributes.except("id").merge("created_at" => DateTime.now, "updated_at" => DateTime.now) }).rows.map { |row| row[0] })
+    if time_inter_to_add.length > 0
+      TimeInterval.transaction do
+        time_intervals = time_inter_to_add.map { |ti|
+          ti.attributes.except("id").merge("created_at" => DateTime.now, "updated_at" => DateTime.now)
+        }
+        time_interval_instances += TimeInterval.where(id: TimeInterval.insert_all(time_intervals)
+                                                                      .rows
+                                                                      .map { |row| row[0] })
+      end
     end
 
     activity_instance_to_add = []
@@ -138,7 +145,7 @@ class Activity < ApplicationRecord
 
     time_slots_to_add = []
 
-    self.users.map{|u| u.planning_id}.each do |planning_id|
+    self.users.map { |u| u.planning_id }.each do |planning_id|
       time_interval_instances.each do |ti|
         time_slots_to_add << {
           planning_id: planning_id,
