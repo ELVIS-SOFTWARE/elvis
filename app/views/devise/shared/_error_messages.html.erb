@@ -1,9 +1,12 @@
 <% if resource.errors.any? %>
   <div id="error_explanation">
-    <ul>
-      <% resource.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
+    <% resource.errors.full_messages.each do |message| %>
+      <% unless message.include?("ne concorde pas avec") %>
+      <p class="text-danger"><%= message %></p>
       <% end %>
-    </ul>
+      <% if resource.errors.include?(:password_confirmation) %>
+        <p class="text-danger">Le mot de passe ne concorde pas</p>
+      <% end %>
+    <% end %>
   </div>
 <% end %>
