@@ -6,11 +6,17 @@ export default function activityCards(props) {
     const activity_ref = pack.activity_ref;
     const [isHovered, setIsHovered] = useState(false);
 
+    console.log(pack)
+
     function getRemainingLessons() {
         if (pack.lessons_remaining === 1)
             return "1 séance restante";
         else
             return pack.lessons_remaining + " séances restantes";
+    }
+
+    function checkIfActivities() {
+        return pack.activity_ref.activities.length > 1;
     }
 
     function checkForMultipleTeachers() {
@@ -53,9 +59,9 @@ export default function activityCards(props) {
                         {activity_ref.label}
                     </h4>
                     <p className="card-text pl-4" style={{ color: '#00334A' }}>
-                        {checkForMultipleRooms()
-                            ? 'Multiples salles'
-                            : activity_ref.activities[0].room.label
+                        {checkIfActivities() ? checkForMultipleRooms() ?
+                            'Multiples salles' : activity_ref.activities[0].room.label
+                            : "Aucune salle"
                         }
                     </p>
                     <div className="d-flex align-items-center pl-3">
@@ -66,11 +72,9 @@ export default function activityCards(props) {
                             style={{ height: '30px', width: '30px' }}
                         />
                         <p className="card-text ml-2" style={{ color: '#00334A' }}>
-                            {checkForMultipleTeachers()
-                                ? 'Multiples professeurs'
-                                : activity_ref.activities[0].teacher.first_name +
-                                  ' ' +
-                                  activity_ref.activities[0].teacher.last_name
+                            {checkIfActivities() ? checkForMultipleTeachers() ?
+                                'Multiples professeurs' : activity_ref.activities[0].teacher.first_name + " " + activity_ref.activities[0].teacher.last_name
+                                : "Aucun professeur"
                             }
                         </p>
                     </div>
