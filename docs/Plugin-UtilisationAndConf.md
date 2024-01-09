@@ -43,6 +43,10 @@ Le plus important est que la colonne name corresponde bien au nom de la gem pour
 
 Ces étapes sont l'équivalent de l'instruction "discover" décrite plus bas. Il sera donc pris en compte pour tout le reste de la procédure.
 
+### Génération d'in fichier plugin.json
+Il est possible de généré un fichier plugin.json à partir de la liste des plugins installés. Pour cela, il faut lancer la commande `rake elvis:plugins:generate_pluginjson_from_url`.  
+Attention tous de même, le fichier généré écrit par dessus le fichier existant.
+
 ## Préparation de la bdd avant démarrage
 Cette étape est très importante afin que les commandes suivantes s'éxécutent correctement.  
 Ajouter le plugin à la table plugins de la bdd grace à la commande `rake elvis:plugins:discover`  

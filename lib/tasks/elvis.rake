@@ -222,6 +222,26 @@ namespace :elvis do
       end
     end
 
+    task :generate_pluginjson_from_url do
+      if "#{ENV['PLUGINS_LIST_DOWNLOAD_URL']}".empty?
+        raise "PLUGINS_LIST_DOWNLOAD_URL is empty"
+      end
+
+      puts "Downloading plugins list from #{ENV['PLUGINS_LIST_DOWNLOAD_URL']}"
+
+      plugins_from_internet = PluginGemUtils.get_plugins_to_install(include_libraries: true)
+
+      plugins = plugins_from_internet.map {|p| p.as_json.deep_transform_keys{|k| k.camelize(:lower) }.except(:id, :installed_path)}
+
+      puts "Writing plugins list to plugins.json"
+
+      File.open("plugins.json", "w") do |f|
+        f.write(plugins.to_json)
+      end
+
+      puts "Plugins list written to plugins.json"
+    end
+
     desc "Migrates installed plugins."
     task migrate: %i[environment logged] do |_, args|
       params = args.to_a
