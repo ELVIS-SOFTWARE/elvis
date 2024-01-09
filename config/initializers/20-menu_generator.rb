@@ -11,18 +11,10 @@ module MenuGenerator
       parent_menu = Elvis::MenuManager::MenuItem.new(
         :plugins,
         "plugins",
-        "",
+        "index",
         { caption: "Plugins", icon:"fa-puzzle-piece", user_role:"admin", position: 8 }
       )
 
-      plugin_list = Elvis::MenuManager::MenuItem.new(
-        :plugins_list,
-        "plugins",
-        "index",
-        { caption: "Liste des plugins" }
-      )
-
-      parent_menu.add plugin_list
       Elvis::MenuManager.insert_menu_item :side_menu, parent_menu
     end
 
