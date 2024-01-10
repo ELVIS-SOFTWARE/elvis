@@ -19,7 +19,6 @@ Parameter.create!(label: "app.devise.config.mailer_sender", value: "no-reply@cal
 Parameter.create!(label: "app.application_mailer.default_from", value: "no-reply@callingelvis.com",
                   value_type: "string")
 Parameter.create!(label: "app.email.footer", value: "Elvis", value_type: "string")
-Parameter.create!(label: "vat_rate", value: "20", value_type: "float")
 
 # =============================================================================
 # CREATE QUESTIONS
