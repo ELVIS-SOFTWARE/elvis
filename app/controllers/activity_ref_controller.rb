@@ -11,7 +11,7 @@ class ActivityRefController < ApplicationController
         @activities = ActivityRef.all
                                  .joins(:activity_ref_kind)
                                  .group_by(&:activity_ref_kind)
-                                 .sort
+                                 .sort_by { |kind, _| kind.name }
       end
 
       format.json do

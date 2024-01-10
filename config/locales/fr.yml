@@ -15,3 +15,9 @@ fr:
                     chorale_ma: Chorale MA
                     eveil_musical: Éveil musical
                     actions_culturelles: Actions culturelles
+        errors:
+            models:
+                user:
+                    attributes:
+                        password_confirmation:
+                            confirmation: "Le mot de passe ne concorde pas."

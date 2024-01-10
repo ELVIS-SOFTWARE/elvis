@@ -1096,7 +1096,7 @@ class ActivityDetailsModal extends React.Component {
 
         return (
             <div>
-                {!this.props.generic && this.props.isAdmin ? (
+                {!this.props.generic && (this.props.isAdmin || this.props.isTeacher) ? (
                     <React.Fragment>
                         <h3>Création d'une activité</h3>
                         <hr/>
