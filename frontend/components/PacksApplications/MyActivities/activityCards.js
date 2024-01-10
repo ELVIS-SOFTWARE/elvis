@@ -4,9 +4,7 @@ import teacherImgDefault from "../../../images/default_teacher.png";
 export default function activityCards(props) {
     const {pack} = props;
     const activity_ref = pack.activity_ref;
-    const [isHovered, setIsHovered] = useState(false);
-
-    console.log(pack)
+    // const [isHovered, setIsHovered] = useState(false);
 
     function getRemainingLessons() {
         if (pack.lessons_remaining === 1)
@@ -40,8 +38,8 @@ export default function activityCards(props) {
     return (
         <div
             className="col-md-4 mt-3 activity-card"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            // onMouseEnter={() => setIsHovered(true)}
+            // onMouseLeave={() => setIsHovered(false)}
         >
             <div className="card" style={{ height: '100%' }}>
                 <div className="card-img-wrapper">
@@ -78,7 +76,7 @@ export default function activityCards(props) {
                             }
                         </p>
                     </div>
-                    {isHovered && (
+                    {/*{isHovered && (*/}
                         <div className="card-banner-bottom animated fadeIn">
                             <a
                                 className="text-white font-bold pl-4"
@@ -87,7 +85,7 @@ export default function activityCards(props) {
                                 RÉSERVER <span className="pull-right pr-3"> > </span>
                             </a>
                         </div>
-                    )}
+                    {/*)}*/}
                 </div>
             </div>
         </div>
