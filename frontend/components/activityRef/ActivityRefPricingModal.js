@@ -59,7 +59,7 @@ export default class ActivityRefPricingModal extends React.Component {
         return (
             <Fragment>
                 <div className="mt-3">
-                    <label className="ml-4">Choisir la catégorie de tarif :</label>
+                    <label className="ml-4">Type de tarif :</label>
                     <Field
                         label="Choisir une catégorie de tarif"
                         name="name"
@@ -74,10 +74,7 @@ export default class ActivityRefPricingModal extends React.Component {
                 </div>
 
                 <div className="pl-4 col-12 mt-3">
-                    <label>
-                        Prix&nbsp;
-                        <span style={{color: "red"}}>*</span>
-                    </label>
+                    <label>Prix</label>
                     <Field
                         name="price"
                         type="text"
@@ -87,9 +84,7 @@ export default class ActivityRefPricingModal extends React.Component {
                 </div>
 
                 <div className="mt-3">
-                    <label className="ml-4">
-                        à partir de la : <span style={{color: "red"}}>*</span>
-                    </label>
+                    <label className="ml-4">à partir de :</label>
                     <Field
                         className="col-12"
                         name="fromSeason"
@@ -97,17 +92,19 @@ export default class ActivityRefPricingModal extends React.Component {
                         options={seasons}
                         required
                         defaultValue={selectedFrom}
+                        maxMenuHeight={100}
                     />
                 </div>
 
-                <div className="mt-3">
-                    <label className="ml-4">jusqu'à la :</label>
+                <div className="mt-3 mb-5">
+                    <label className="ml-4">jusqu'à (optionnel) :</label>
                     <Field
                         className="col-12"
                         name="toSeason"
                         component={this.ReactSelectAdapter}
                         options={seasons}
                         defaultValue={selectedTo}
+                        maxMenuHeight={100}
                     />
                 </div>
             </Fragment>
