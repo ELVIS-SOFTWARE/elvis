@@ -181,29 +181,27 @@ class PaymentsList extends React.Component {
         api.set()
             .success(res => {
                 const pdfUrl = res.url;
-
                 if (pdfUrl) {
                     window.open(pdfUrl, "_blank");
                 }
 
                 swal({
-                    title: "Succès !",
+                    title: "La facture a été éditée avec succès !",
                     type: "success",
-                    text: "La facture a été éditée avec succès !"
                 });
             })
             .error((res) => {
                 swal({
-                    title: "Erreur !",
+                    title: "Une erreur est survenue lors de l'édition de la facture.",
                     type: "error",
-                    text: "Une erreur est survenue lors de l'édition de la facture."
+                    text: res.error
                 });
                 this.setState({isFetching: false});
             })
             .post(
                 `/api/student_payments/invoice/${payer_id}/issued_paid_invoice`,
                 {
-                    payer: payer_id
+                    payer: payer_id,
                 }
             );
 
