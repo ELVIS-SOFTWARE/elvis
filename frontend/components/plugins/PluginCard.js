@@ -12,7 +12,8 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                 borderRadius: "3px",
                 border: "0px",
                 width: "324px",
-                height: "435px",
+                height: "auto",
+                maxHeight: "500px",
             }}
         >
             <div
@@ -49,7 +50,7 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                     >
                         {plugin.display_name}
                     </p>
-                    <p className="m-0 pr-0">{plugin.author}</p>
+                    <img src={plugin.logo} className="m-0 pr-0"></img>
                 </div>
                 <div
                     className="card-text pt-3 w-100 mb-3"
@@ -58,7 +59,7 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                         fontWeight: "400",
                         fontSize: "14px",
                         lineHeight: "26.4px",
-                        height: "80px",
+                        height: "auto",
                         overflow: "hidden",
                     }}
                 >
