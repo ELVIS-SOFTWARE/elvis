@@ -12,7 +12,8 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                 borderRadius: "3px",
                 border: "0px",
                 width: "324px",
-                height: "435px",
+                height: "auto",
+                maxHeight: "500px",
             }}
         >
             <div
@@ -58,7 +59,7 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                         fontWeight: "400",
                         fontSize: "14px",
                         lineHeight: "26.4px",
-                        height: "80px",
+                        height: "auto",
                         overflow: "hidden",
                     }}
                 >
