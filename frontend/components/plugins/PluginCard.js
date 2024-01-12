@@ -3,7 +3,7 @@ import pluginImgDefault from "./icons8-puzzle-150.svg";
 import Switch from "react-switch";
 
 export default function PluginCard({plugin, setting_path, handleToggleActivation, pluginActivated, initialyActivated}) {
-
+const plugin_id = plugin.id;
     return (
         <div
             key={plugin.id}
@@ -58,7 +58,7 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                         fontWeight: "400",
                         fontSize: "14px",
                         lineHeight: "26.4px",
-                        height: "80px",
+                        height: "auto",
                         overflow: "hidden",
                     }}
                 >
@@ -76,14 +76,17 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                         {plugin.description}
                     </p>
                     <div className="d-flex justify-content-center">
-                        <a
-                            href={plugin.author_url}
-                            target="_blank"
-                            className="btn btn-sm"
-                        >
-                            <i className="fa fa-external-link-alt mr-1" />
-                            En savoir plus
-                        </a>
+                        {/* Conditionally render the button */}
+                        {plugin.name === "elvis_plugin_student_payments" && (
+                            <a
+                                href={`/student_payments/${plugin.id}/description`}
+                                target="_blank"
+                                className="btn btn-sm"
+                            >
+                                <i className="fa fa-external-link-alt mr-1" />
+                                En savoir plus
+                            </a>
+                        )}
                     </div>
                 </div>
 
