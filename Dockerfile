@@ -18,12 +18,10 @@ RUN mkdir -p $RAILS_ROOT
 # all the contents are going to be stored.
 WORKDIR $RAILS_ROOT
 
+COPY nodesetup_14.x .
+RUN chmod +x ./nodesetup_14.x && ./nodesetup_14.x
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends libjemalloc2
 
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
-
-RUN gem install bundler
 RUN apt-get install -y \
   curl \
   python \
@@ -31,11 +29,15 @@ RUN apt-get install -y \
   libpq-dev postgresql-client \
   git \
   shared-mime-info \
-    &&\
-  curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
-  curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-  apt-get update && apt-get install -y nodejs yarn
+  nodejs
+
+RUN npm install -g yarn
+
+RUN apt-get install -y --no-install-recommends libjemalloc2
+
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
+RUN gem install bundler
 
 RUN rm -rf vendor/cache
 RUN bundle config set force_ruby_platform true
@@ -83,9 +85,9 @@ RUN bundle exec bootsnap precompile --gemfile app/ lib/
 RUN rm -rf log/*
 RUN rm -rf tmp/cache
 RUN rm -rf frontend
+RUN rm -rf package.json yarn.lock nodesetup_14.x
 
 # remove yarn dependencies and modules
-RUN yarn cache clean
 RUN rm -rf node_modules
 
 # remove git files
@@ -93,6 +95,8 @@ RUN rm -rf .git
 
 COPY entrypoints /Elvis/entrypoints
 COPY config.ru /Elvis/
+
+
 
 
 
@@ -118,16 +122,7 @@ RUN apt update
 # ~ 63mb => pdf generation
 RUN apt-get install -y --no-install-recommends libjemalloc2 curl shared-mime-info postgresql-client libfontconfig1 libxrender1 libxtst6 libxi6 libpng16-16 libjpeg62 cron
 
-# ~ 35mb
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
-          curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-          echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-          apt-get update
-
-# need to install nodejs for rails to start because rails use it to run js in back-office. see https://github.com/rails/execjs
-# ~ 97mb
-RUN apt-get install -y nodejs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+COPY --from=build /usr/bin/node /usr/bin/
 
 ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
