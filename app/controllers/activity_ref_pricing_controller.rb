@@ -7,7 +7,7 @@ class ActivityRefPricingController < ApplicationController
 
   def create
     to_season_value = params.dig(:toSeason, :value).presence || nil
-    @activity_ref_pricings = ActivityRefPricing.new(activity_ref_id: params[:activity_ref_id], from_season_id: params[:fromSeason][:value], to_season_id: to_season_value, price: params[:price], pricing_category_id: params[:name][:value])
+    @activity_ref_pricings = ActivityRefPricing.new(activity_ref_id: params[:activity_ref_id], from_season_id: params[:fromSeason][:value], to_season_id: to_season_value, price: "#{params[:price]}".gsub(',', '.').to_f, pricing_category_id: params[:name][:value])
     from_season = Season.find(@activity_ref_pricings.from_season_id)
     to_season = Season.find(@activity_ref_pricings.to_season_id) unless @activity_ref_pricings.to_season_id.nil?
     activity_ref = ActivityRef.find(params[:activity_ref_id])
@@ -55,6 +55,8 @@ class ActivityRefPricingController < ApplicationController
         return
       end
     end
+
+    @activity_ref_pricing.price = "#{params[:price]}".gsub(',', '.').to_f
 
     @activity_ref_pricing.save!
 
