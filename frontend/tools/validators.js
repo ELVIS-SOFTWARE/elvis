@@ -48,7 +48,9 @@ export const isValidNN = value => {
     if (value == null) return undefined
 
     const regex = /^[0-9]{11}$/
-    return regex.test(value) ? undefined : "err_invalid_NN"
+
+    // Remove " " from input mask for validation
+    return regex.test(value.replaceAll(" ", "")) ? undefined : "err_invalid_NN"
 }
 
 export const required = value =>
