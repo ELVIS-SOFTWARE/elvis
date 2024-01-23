@@ -77,14 +77,14 @@ export default function activityCards(props) {
                         </p>
                     </div>
                     {/*{isHovered && (*/}
-                        <div className="card-banner-bottom animated fadeIn">
-                            <a
-                                className="text-white font-bold pl-4"
-                                href={`${window.location.pathname}/bookActivity/${pack.id}`}
-                            >
+                        <a
+                            className="card-banner-bottom animated fadeIn"
+                            href={`${window.location.pathname}/bookActivity/${pack.id}`}
+                        >
+                            <div className="text-white font-bold pl-4">
                                 RÉSERVER <span className="pull-right pr-3"> > </span>
-                            </a>
-                        </div>
+                            </div>
+                        </a>
                     {/*)}*/}
                 </div>
             </div>
