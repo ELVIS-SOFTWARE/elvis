@@ -70,9 +70,9 @@ export default function ActivityBooking() {
     }
 
     function addToWishList(activity) {
-        if (!wishList.includes(activity)) {
-            setWishList([...wishList, activity]);
-        }
+        wishList.length >= pack.lessons_remaining ?
+            swal("Nombre de séances dépassé", "Vous avez déjà sélectionné toutes vos séances", "error")
+            : !wishList.includes(activity) && setWishList([...wishList, activity]);
     }
 
     function removeFromWishList(activity) {

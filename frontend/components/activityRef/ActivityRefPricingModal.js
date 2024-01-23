@@ -93,6 +93,7 @@ export default class ActivityRefPricingModal extends React.Component {
                         required
                         defaultValue={selectedFrom}
                         maxMenuHeight={100}
+                        placeholder="sélectionner une saison"
                     />
                 </div>
 
@@ -105,6 +106,7 @@ export default class ActivityRefPricingModal extends React.Component {
                         options={seasons}
                         defaultValue={selectedTo}
                         maxMenuHeight={100}
+                        placeholder="sélectionner une saison"
                     />
                 </div>
             </Fragment>
