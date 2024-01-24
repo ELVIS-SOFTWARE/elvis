@@ -19,6 +19,10 @@ export default function BookingCardsList(props) {
 
     return <Fragment>
         <div className="div-scrollable">
+            <div className="row mt-2 ml-1">
+                <p>Pour rappel, il vous reste <span className={"font-bold"}>{props.pack.lessons_remaining} séances à réserver pour le cours de {props.activity_ref.label}</span></p>
+            </div>
+
             {Object.keys(activities).map((month, index) => (
                 activities[month].length > 0 && (
                     <div key={index}>

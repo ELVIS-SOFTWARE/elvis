@@ -170,6 +170,7 @@ export default function ActivityBooking() {
                             body: <BookingCardsList
                                 activities={activities}
                                 activity_ref={activity_ref}
+                                pack={pack}
                                 addToWishList={addToWishList}
                                 removeFromWishList={removeFromWishList}
                             />
