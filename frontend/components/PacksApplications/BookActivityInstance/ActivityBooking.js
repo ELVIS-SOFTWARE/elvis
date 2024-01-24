@@ -191,7 +191,7 @@ export default function ActivityBooking() {
                 />
             </div>
 
-            <div className="app-footer" style={{zIndex: "1"}}>
+            <div className="app-footer" style={{zIndex: "1", position: "fixed"}}>
                 <button className="btn btn-primary pull-right" onClick={submitWishList}>Réserver</button>
             </div>
         </Fragment>
