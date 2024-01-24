@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_12_15_131425) do
+ActiveRecord::Schema.define(version: 2024_01_23_141007) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -123,7 +123,7 @@ ActiveRecord::Schema.define(version: 2023_12_15_131425) do
 
   create_table "activity_ref_pricings", force: :cascade do |t|
     t.bigint "activity_ref_id", null: false
-    t.integer "price", null: false
+    t.float "price", null: false
     t.bigint "pricing_category_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
@@ -922,6 +922,7 @@ ActiveRecord::Schema.define(version: 2023_12_15_131425) do
     t.string "author_url"
     t.string "partial"
     t.string "image"
+    t.string "logo"
   end
 
   create_table "practice_room_parameters", force: :cascade do |t|

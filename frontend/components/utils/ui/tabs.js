@@ -1,5 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import _ from "lodash";
 
 /**
  *
@@ -9,7 +10,7 @@ export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, def
     const [tabs, setTabs] = useState([]);
 
     useEffect(() => {
-        const activeTabs = tabsProps.map((t, i) => {
+        const activeTabs = _.compact(tabsProps).map((t, i) => {
             return {
                 ...t,
                 active: (tabs && tabs[i] ? tabs[i].active || false : t.active === undefined ? i === defaultActiveTab : t.active)
