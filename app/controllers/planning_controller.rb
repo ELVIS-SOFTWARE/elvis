@@ -74,6 +74,7 @@ class PlanningController < ApplicationController
 
   def show_simple
     redirect_to root_path and return unless current_user.is_teacher
+    redirect_to planning_path(current_user.planning.id) if Parameter.get_value("planning.teacher_can_edit_planning") == true
 
     @current_planning_id = User.find(current_user.id).planning.id
     @teachers = User.teachers.order(:last_name, :first_name).includes(:teachers_activity_refs,
