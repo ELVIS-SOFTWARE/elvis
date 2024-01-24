@@ -22,7 +22,7 @@ export default function BookingCardsList(props) {
             {Object.keys(activities).map((month, index) => (
                 activities[month].length > 0 && (
                     <div key={index}>
-                        <h2 className="animated fadeInRight">{month}</h2>
+                        <h3 className="animated fadeInRight">{month}</h3>
                         {activities[month].map((item, itemIndex) => (
                             <div key={itemIndex}>
                                 <BookingCard
