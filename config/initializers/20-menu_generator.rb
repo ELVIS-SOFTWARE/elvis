@@ -256,16 +256,28 @@ module MenuGenerator
     Elvis::MenuManager.prepend_menu_item :side_menu, evaluation
     Elvis::MenuManager.prepend_menu_item :side_menu, planning_simulation
 
+    # User menu
+
+    homepage = Elvis::MenuManager::MenuItem.new(
+      :user_homepage,
+      "my_activities",
+      "show",
+      { caption: "Accueil", icon: "fa-home", user_role: "simple", position: 1 },
+      ) do
+      { id: current_user&.id }
+    end
+
     applications = Elvis::MenuManager::MenuItem.new(
       :user_applications,
       "users",
       "new_application",
-      { caption: "Mes demandes d'inscription", icon: "fa-table", user_role: "simple", position: 1 },
+      { caption: "Mes demandes d'inscription", icon: "fa-table", user_role: "simple", position: 2 },
       ) do
       { id: current_user&.id }
     end
 
     Elvis::MenuManager.prepend_menu_item :side_menu, applications
+    Elvis::MenuManager.prepend_menu_item :side_menu, homepage
   end
 
   def self.generate_my_menu
