@@ -27,18 +27,11 @@ module MenuGenerator
       { caption: "Utilisateurs", icon: "fa-user-friends", user_role: "admin", position: 0 }
     )
 
-    monitor_students = Elvis::MenuManager::MenuItem.new(
-      :monitor_students,
-      "packs",
-      "index",
-      { caption: "Suivi des élèves", icon: "fa-user-graduate", user_role: "admin", position: 1 }
-    )
-
     inscriptions = Elvis::MenuManager::MenuItem.new(
       :inscriptions,
       "inscriptions",
       "",
-      { caption: "Inscriptions", icon: "fa-table", user_role: "admin", position: 2 }
+      { caption: "Inscriptions", icon: "fa-table", user_role: "admin", position: 1 }
     )
     inscriptions.add(Elvis::MenuManager::MenuItem.new(
       :adherents,
@@ -51,6 +44,13 @@ module MenuGenerator
       "activities_applications",
       "index",
       { caption: "Demandes d'inscription" }
+    ))
+
+    inscriptions.add(Elvis::MenuManager::MenuItem.new(
+      :monitor_students,
+      "packs",
+      "index",
+      { caption: "Packs", icon: "fa-user-graduate", user_role: "admin" }
     ))
     inscriptions.add(Elvis::MenuManager::MenuItem.new(
       :new_activities_applications,
@@ -69,7 +69,7 @@ module MenuGenerator
       :plannings,
       "plannings",
       "",
-      { caption: "Plannings", icon: "fa-calendar", user_role: "admin", position: 3 }
+      { caption: "Plannings", icon: "fa-calendar", user_role: "admin", position: 2 }
     )
     plannings.add(Elvis::MenuManager::MenuItem.new(
       :seasons,
@@ -112,7 +112,7 @@ module MenuGenerator
       :payments,
       "payments",
       "",
-      { caption: "Paiements", icon: "fa-euro-sign", user_role: "admin", position: 4 }
+      { caption: "Paiements", icon: "fa-euro-sign", user_role: "admin", position: 3 }
     )
     payments.add(Elvis::MenuManager::MenuItem.new(
       :payment,
@@ -131,14 +131,14 @@ module MenuGenerator
       :rooms,
       "parameters/rooms_parameters",
       "index",
-      { caption: "Salles et sites", icon: "fa-calendar", user_role: "admin", position: 5 }
+      { caption: "Salles et sites", icon: "fa-calendar", user_role: "admin", position: 4 }
     )
 
     activities = Elvis::MenuManager::MenuItem.new(
       :activities,
       "activities",
       "",
-      { caption: "Activités musicales", icon: "fa-music", user_role: "admin", position: 6 }
+      { caption: "Activités musicales", icon: "fa-music", user_role: "admin", position: 5 }
     )
     activities.add(Elvis::MenuManager::MenuItem.new(
       :activity_ref_kind,
@@ -169,7 +169,7 @@ module MenuGenerator
       :evaluations,
       "evaluations",
       "",
-      { caption: "Évaluation", icon: "fa-graduation-cap", user_role: "admin", position: 7 }
+      { caption: "Évaluation", icon: "fa-graduation-cap", user_role: "admin", position: 6 }
     )
     evaluations.add(Elvis::MenuManager::MenuItem.new(
       :student_evaluations_stats,
@@ -205,7 +205,6 @@ module MenuGenerator
 
 
     Elvis::MenuManager.insert_menu_item :side_menu, users
-    Elvis::MenuManager.insert_menu_item :side_menu, monitor_students
     Elvis::MenuManager.insert_menu_item :side_menu, inscriptions
     Elvis::MenuManager.insert_menu_item :side_menu, plannings
     Elvis::MenuManager.insert_menu_item :side_menu, payments
