@@ -70,6 +70,7 @@ export default class ActivityRefPricingModal extends React.Component {
                         isDisabled={this.props.isUpdate}
                         options={pricingCategories}
                         defaultValue={selectedPricingCategory}
+                        placeholder="sélectionner une catégorie de tarif"
                     />
                 </div>
 
