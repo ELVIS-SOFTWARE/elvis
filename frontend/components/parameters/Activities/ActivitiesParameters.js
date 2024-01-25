@@ -21,3 +21,8 @@ export default function ActivitiesParameters()
         </Fragment>
     );
 }
+
+
+/*****************************************************
+* DEPRECATED / Moved to PaymentsParameters.js
+*****************************************************/

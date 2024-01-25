@@ -158,12 +158,6 @@ module MenuGenerator
       "index",
       { caption: "Activités" }
     ))
-    activities.add(Elvis::MenuManager::MenuItem.new(
-      :activities_parameters,
-      "parameters/activities_parameters",
-      "index",
-      { caption: "Paramétrage" }
-    ))
 
     evaluations = Elvis::MenuManager::MenuItem.new(
       :evaluations,

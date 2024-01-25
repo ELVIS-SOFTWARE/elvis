@@ -1,11 +1,10 @@
 import React from "react";
-import PaymentsStatus from "./PaymentsStatus";
 import PaymentsMethods from "./PaymentsMethods";
-import Pricings from "./Pricings";
 import BaseParameters from "../BaseParameters";
 import AdhesionSettings from './AdhesionSettings';
 import EditPaymentTerms from "./EditPaymentTerms";
 import Coupons from "./Coupons";
+import PricingCategoriesEdit from "../Activities/PricingCategoriesEdit";
 
 export default class PaymentsParameters extends BaseParameters {
     constructor(props) {
@@ -15,7 +14,7 @@ export default class PaymentsParameters extends BaseParameters {
             'Adhésion',
             /*'Statuts de paiements',*/
             'Méthodes de paiements',
-            'Types de tarifs',
+            'Catégories de prix',
             'Modalités de paiement',
             'Taux de remise'
         ];
@@ -31,10 +30,7 @@ export default class PaymentsParameters extends BaseParameters {
                 urlListData="/parameters/payment_parameters/list_methods"
                 urlNew="/payment_method/new"
             />,
-            <Pricings
-                urlListData="/parameters/payment_parameters/list_pricings"
-                urlNew="/pricings/new"
-            />,
+            <PricingCategoriesEdit />,
             <EditPaymentTerms />,
             <Coupons />
         ];
