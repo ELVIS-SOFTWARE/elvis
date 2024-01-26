@@ -137,7 +137,11 @@ export default function ActivityBooking() {
                     .error(res => {
                         swal("Une erreur est survenue lors de la désinscription", res.error, "error");
                     })
-                    .post(`/remove_wished_attendance`, {activity_instance: activity, user: user});
+                    .post(`/remove_wished_attendance`, {
+                        activity_instance: activity,
+                        user: user,
+                        pack_id: pack.id
+                    });
             }
         }).then(() => {
             fetchData();
