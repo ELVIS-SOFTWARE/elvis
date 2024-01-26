@@ -6,6 +6,11 @@ class ActivityRefPricingController < ApplicationController
   end
 
   def create
+    if params[:name].nil? || params[:fromSeason].nil? || params[:price].present?
+      render json: { errors: ["Veuillez remplir tous les champs"] }, status: :unprocessable_entity
+      return
+    end
+
     to_season_value = params.dig(:toSeason, :value).presence || nil
     @activity_ref_pricings = ActivityRefPricing.new(activity_ref_id: params[:activity_ref_id], from_season_id: params[:fromSeason][:value], to_season_id: to_season_value, price: "#{params[:price]}".gsub(',', '.').to_f, pricing_category_id: params[:name][:value])
     from_season = Season.find(@activity_ref_pricings.from_season_id)
