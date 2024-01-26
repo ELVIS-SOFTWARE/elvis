@@ -3451,12 +3451,48 @@ body {
     position: absolute;
     bottom: 0;
     width: 100%;
-    background: rgba(0, 121, 191, 1);
+
     color: white;
     padding: 10px;
 }
 
+.background-blue {
+    background: rgba(0, 121, 191, 1);
+}
+
+.background-lightred {
+    background: rgba(255, 96, 102, 1);
+}
 
 .errors-list {
     list-style-type: none;
+}
+
+.placeholder-card {
+    height: 350px;
+    position: relative;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-text {
+    color: white;
+}
+
+.overlay-text-container {
+    position: absolute;
+    top: 66%;
+    left: 38%;
+    transform: translate(-50%, -50%);
+    text-align: start;
+    color: white;
 }

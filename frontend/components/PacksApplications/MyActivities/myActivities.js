@@ -4,6 +4,7 @@ import swal from "sweetalert2";
 import ActivityCard from "./activityCards";
 import RegularActivityCard from "./regularActivityCards";
 import IncomingActivityInstancesList from "../IncomingActivityInstances/upcomingActivityInstancesList";
+import PlaceholderCard from "./placeholderCard";
 
 export default function myActivities()
 {
@@ -105,6 +106,10 @@ export default function myActivities()
 
                     <div className="row mt-3">
                         <div className="col-md-8 no-padding h-100">
+                            <PlaceholderCard
+                                user={user}
+                            />
+
                             {regularActivities.length > 0 &&
                                 regularActivities.map((activity, index) => (
                                     isDesiredActivitySet(activity.desired_activities) &&

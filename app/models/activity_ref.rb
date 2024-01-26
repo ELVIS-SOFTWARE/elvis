@@ -180,6 +180,6 @@ class ActivityRef < ApplicationRecord
   end
 
   def picture_path
-    picture.attached? ? Rails.application.routes.url_helpers.rails_blob_path( picture_attachment.blob, only_path: true) : "default_activity.png"
+    picture.attached? ? Rails.application.routes.url_helpers.rails_blob_path( picture_attachment.blob, only_path: true) : ""
   end
 end

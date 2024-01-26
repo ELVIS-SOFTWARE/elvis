@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import teacherImgDefault from "../../../images/default_teacher.png";
+import packImgDefault from "../../../images/default_activity.png";
 
 export default function activityCards(props) {
     const {pack} = props;
@@ -35,6 +36,8 @@ export default function activityCards(props) {
         return rooms.length > 1;
     }
 
+    console.log(activity_ref.picture_path)
+
     return (
         <div
             className="col-md-4 mt-3 activity-card"
@@ -45,7 +48,7 @@ export default function activityCards(props) {
                 <div className="card-img-wrapper">
                     <img
                         className="card-img-packs img-fluid"
-                        src={activity_ref.picture_path}
+                        src={activity_ref.picture_path ? activity_ref.picture_path : packImgDefault}
                         alt="Card image cap"
                     />
                     <div className="card-banner-title background-red">
@@ -78,7 +81,7 @@ export default function activityCards(props) {
                     </div>
                     {/*{isHovered && (*/}
                         <a
-                            className="card-banner-bottom animated fadeIn"
+                            className="card-banner-bottom background-blue animated fadeIn"
                             href={`${window.location.pathname}/bookActivity/${pack.id}`}
                         >
                             <div className="text-white font-bold pl-4">
