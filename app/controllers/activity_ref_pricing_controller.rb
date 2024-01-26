@@ -6,7 +6,7 @@ class ActivityRefPricingController < ApplicationController
   end
 
   def create
-    if params[:name].nil? || params[:fromSeason].nil? || params[:price].present?
+    if params[:name].nil? || params[:fromSeason].nil?
       render json: { errors: ["Veuillez remplir tous les champs"] }, status: :unprocessable_entity
       return
     end
