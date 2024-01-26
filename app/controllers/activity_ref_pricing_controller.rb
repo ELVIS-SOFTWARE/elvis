@@ -6,7 +6,7 @@ class ActivityRefPricingController < ApplicationController
   end
 
   def create
-    if params[:name].nil? || params[:fromSeason].nil?
+    if verify_inputs
       render json: { errors: ["Veuillez remplir tous les champs"] }, status: :unprocessable_entity
       return
     end
@@ -41,6 +41,11 @@ class ActivityRefPricingController < ApplicationController
   end
 
   def update
+    if verify_inputs
+      render json: { errors: ["Veuillez remplir tous les champs"] }, status: :unprocessable_entity
+      return
+    end
+
     @activity_ref_pricing = ActivityRefPricing.find(params[:id])
     to_season_value = params.dig(:toSeason, :value).presence || nil
     activity_ref = @activity_ref_pricing.activity_ref
@@ -141,6 +146,10 @@ class ActivityRefPricingController < ApplicationController
 
   def pricing_category_already_used?(pricing_category, activity_ref_id)
     ActivityRefPricing.where(activity_ref_id: activity_ref_id, pricing_category_id: pricing_category.id).count > 0
+  end
+
+  def verify_inputs
+    params[:name].nil? || params[:fromSeason].nil?
   end
 
 end
