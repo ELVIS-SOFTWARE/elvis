@@ -70,7 +70,7 @@ class ActivityRefController < ApplicationController
 
     pricings = params[:activity_ref][:pricings]
     pricings.each do |pricing|
-      p = ActivityRefPricing.create(activity_ref_id: @activity_ref.id, price: pricing[:price], from_season_id: pricing[:from_season_id], to_season_id: pricing[:to_season_id], pricing_category_id: pricing[:pricing_category][:id])
+      p = ActivityRefPricing.create(activity_ref_id: @activity_ref.id, price: "#{pricing[:price]}".gsub(',', '.').to_f, from_season_id: pricing[:from_season_id], to_season_id: pricing[:to_season_id], pricing_category_id: pricing[:pricing_category][:id])
       p.save!
 
       unless p
