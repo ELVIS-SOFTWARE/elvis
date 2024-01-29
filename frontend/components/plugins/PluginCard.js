@@ -41,7 +41,7 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
             <div className="card-body p-4 d-flex align-content-between flex-wrap">
                 <div className="d-flex justify-content-between align-items-baseline w-100 h-25">
                     <p
-                        className="h4 p-0 m-0 col-6"
+                        className="h5 p-0 m-0 col-8"
                         style={{
                             color: "#00334A",
                             fontWeight: "700",
