@@ -719,7 +719,10 @@ class ActivitiesApplicationsController < ApplicationController
         unless params[:application][:selectedPacks].empty?
           params[:application][:selectedPacks].each do |key, value|
             pc = PricingCategory.find(value).first
-            activity_ref_pricing = pc.activity_ref_pricing.first
+            activity_ref_pricing = nil
+            pc.activity_ref_pricing.each do |arp|
+                activity_ref_pricing = arp if arp.activity_ref.label == key
+            end
 
             Pack.create!(user_id: @user.id, activity_ref_pricing_id: activity_ref_pricing.id, season_id: season.id, lessons_remaining: pc.number_lessons)
             @pack_created = true

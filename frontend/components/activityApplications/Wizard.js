@@ -383,7 +383,6 @@ class Wizard extends React.Component {
         api.set()
             .success((data) =>
             {
-                console.log(data)
                 this.setState({buttonDisabled: false});
 
                 let user = this.state.user;
