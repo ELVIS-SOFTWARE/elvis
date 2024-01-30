@@ -82,7 +82,7 @@ export default function myActivities() {
                                 <h4 className="title font-bold">MES ACTIVITÉS</h4>
                             </div>
 
-                            <div className="col-md-2 text-right">
+                            <div className="col-md-2 text-right px-2">
                                 {season_list.length > 1 &&
                                     <select className="custom-select" value={selectedSeason.id} onChange={handleSeasonChange}>
                                         <option value="">Selectionner une saison</option>
