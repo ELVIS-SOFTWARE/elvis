@@ -16,6 +16,7 @@ export default function ActivityBooking() {
     const [hoursBeforeCancelling, setHoursBeforeCancelling] = useState(0);
     const [activityRefPricing, setActivityRefPricing] = useState(null);
     const [pack, setPack] = useState(null);
+    const [secondTabActive, setSecondTabActive] = useState(false);
 
     const fetchData = async () => {
         await api.set()
@@ -148,6 +149,10 @@ export default function ActivityBooking() {
         });
     }
 
+    function setSecondTab() {
+        secondTabActive ? setSecondTabActive(false) : setSecondTabActive(true);
+    }
+
     if(loading)
         return "Loading..."
 
@@ -177,6 +182,7 @@ export default function ActivityBooking() {
                                 pack={pack}
                                 addToWishList={addToWishList}
                                 removeFromWishList={removeFromWishList}
+                                setSecondTab={setSecondTab}
                             />
                         },
                         {
@@ -189,6 +195,7 @@ export default function ActivityBooking() {
                                 activity_ref={activity_ref}
                                 removeAttendance={removeAttendance}
                                 hoursBeforeCancelling={hoursBeforeCancelling}
+                                setSecondTab={setSecondTab}
                             />
                         },
                     ]}
@@ -196,9 +203,11 @@ export default function ActivityBooking() {
                 />
             </div>
 
-            <div className="app-footer" style={{zIndex: "1", position: "fixed"}}>
-                <button className="btn btn-primary pull-right" onClick={submitWishList}>Réserver</button>
-            </div>
+            { secondTabActive &&
+                <div className="app-footer" style={{zIndex: "1", position: "fixed"}}>
+                    <button className="btn btn-primary pull-right" onClick={submitWishList}>Réserver</button>
+                </div>
+            }
         </Fragment>
     );
 }

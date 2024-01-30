@@ -1,9 +1,12 @@
-import React, {Fragment, useState} from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import BookingCard from "./bookingCards";
 
 export default function BookingCardsList(props) {
 
     const activities = props.activities;
+    useEffect(() => {
+        props.setSecondTab();
+    }, []);
 
     if (Object.keys(activities).length === 0) {
         return <div className="col-md-12">
