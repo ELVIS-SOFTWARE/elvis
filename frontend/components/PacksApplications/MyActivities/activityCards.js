@@ -36,11 +36,9 @@ export default function activityCards(props) {
         return rooms.length > 1;
     }
 
-    console.log(activity_ref.picture_path)
-
     return (
         <div
-            className="col-md-4 mt-3 activity-card"
+            className="col-md-4 mt-lg-3 px-lg-4 p-0  activity-card"
             // onMouseEnter={() => setIsHovered(true)}
             // onMouseLeave={() => setIsHovered(false)}
         >
