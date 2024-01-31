@@ -1,4 +1,4 @@
-import React, {Fragment} from "react";
+import React, { Fragment } from "react";
 import _ from "lodash";
 import EvaluationChoice from "./EvaluationChoice";
 import ItemPreferences from "./ItemPreferences";
@@ -22,6 +22,34 @@ const ChildhoodActivities = ({activityRef, preferences}) => {
     );
 };
 
+const displayPacks = ({ packs, selectedPacks }) => {
+    return _.map(selectedPacks, (pack, activityRef) => {
+        let packToDisplay;
+        if (packs && packs[activityRef]) {
+            packToDisplay = packs[activityRef].filter(p => pack.includes(p.pricing_category_id));
+        }
+
+        if (!packToDisplay)
+            return null;
+
+        return _.map(packToDisplay, (activityRefPricing, i) => (
+            <li className="list-group-item" key={i}>
+                <div className="row">
+                    <div className="col-lg-10">
+                        <strong>{activityRefPricing.activity_ref.label}</strong>
+                        <br />
+                        <small>{activityRefPricing.pricing_category.name}</small>
+                    </div>
+                    <div className="col-lg-2 text-right">
+                        <strong>{activityRefPricing.price}€</strong>
+                    </div>
+                </div>
+            </li>
+        ));
+    });
+};
+
+
 const Validation = ({
                         application,
                         activityRefs,
@@ -30,7 +58,9 @@ const Validation = ({
                         handleSubmit,
                         additionalStudents,
                         buttonDisabled,
-                        handleComment
+                        handleComment,
+                        selectedPacks,
+                        packs
                     }) => {
     const addStudents = [...additionalStudents];
 
@@ -101,14 +131,14 @@ const Validation = ({
                                     (element, i) => {
                                         const sa = _.find(
                                             selectedActivities,
-                                            act => act.id == element[0]
+                                            act => act.id == element[0],
                                         );
 
                                         const amount = element[1];
 
                                         const ind = _.includes(
                                             activitiesWithEveilIds,
-                                            sa.id
+                                            sa.id,
                                         )
                                             ? _.findIndex(addStudents, p => {
                                                 const a = p[0] == sa.id;
@@ -120,7 +150,7 @@ const Validation = ({
                                         if (ind != undefined && ind > -1) {
                                             const child = _.pullAt(
                                                 addStudents,
-                                                ind
+                                                ind,
                                             )[0][1];
                                             param = child
                                                 ? "Avec " + child
@@ -137,7 +167,7 @@ const Validation = ({
                                                         <strong>
                                                             {sa.display_name}
                                                         </strong>
-                                                        <br/>
+                                                        <br />
                                                         <small>{param}</small>
                                                     </div>
                                                     <div className="col-lg-2 text-right">
@@ -148,10 +178,19 @@ const Validation = ({
                                                 </div>
                                             </li>
                                         );
-                                    }
+                                    },
+                                )}
+
+                                {Object.keys(selectedPacks).length > 0 && (
+                                    <div>
+                                        <div className="ibox-title mt-3">
+                                            <h4>Packs souscrits</h4>
+                                        </div>
+                                        {displayPacks({ packs: packs, selectedPacks: selectedPacks })}
+                                    </div>
                                 )}
                             </ul>
-                            <div className="clearfix"/>
+                            <div className="clearfix" />
                         </div>
                     </div>
 

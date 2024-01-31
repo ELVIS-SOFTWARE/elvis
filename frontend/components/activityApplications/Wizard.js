@@ -872,6 +872,8 @@ class Wizard extends React.Component {
                         handleComment={(text) => this.handleComment(text)}
                         additionalStudents={this.state.additionalStudents}
                         errors={this.state.errors}
+                        selectedPacks={this.state.selectedPacks}
+                        packs={this.props.packs}
                     />
                 ),
             },
