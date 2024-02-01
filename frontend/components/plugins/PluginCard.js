@@ -77,10 +77,9 @@ const plugin_id = plugin.id;
                     </p>
                     <div className="d-flex justify-content-center">
                         {/* Conditionally render the button */}
-                        {plugin.name === "elvis_plugin_student_payments" && (
+                        {plugin.name === "elvis_plugin_student_payments" && pluginActivated && (
                             <a
                                 href={`/student_payments/${plugin.id}/description`}
-                                target="_blank"
                                 className="btn btn-sm"
                             >
                                 <i className="fa fa-external-link-alt mr-1" />
@@ -93,19 +92,19 @@ const plugin_id = plugin.id;
                 <div className="card-text d-flex justify-content-between align-items-center w-100">
                     <div>PAYANT</div>
                     <div className="d-flex align-items-center">
-                        {pluginActivated && initialyActivated ? (
-                            <a
-                                href={setting_path}
-                                className="btn btn-sm mr-2"
-                                style={{
-                                    color: "#006fb0",
-                                    borderColor: "#006fb0",
-                                }}
-                            >
-                                <i className="fa fa-cog mr-1" />
-                                Configurer
-                            </a>
-                        ) : null}
+                        {/*{pluginActivated && initialyActivated ? (*/}
+                        {/*    <a*/}
+                        {/*        href={setting_path}*/}
+                        {/*        className="btn btn-sm mr-2"*/}
+                        {/*        style={{*/}
+                        {/*            color: "#006fb0",*/}
+                        {/*            borderColor: "#006fb0",*/}
+                        {/*        }}*/}
+                        {/*    >*/}
+                        {/*        <i className="fa fa-cog mr-1" />*/}
+                        {/*        Configurer*/}
+                        {/*    </a>*/}
+                        {/*) : null}*/}
                         {typeof pluginActivated !== "undefined" && (
                             <Switch
                                 checked={pluginActivated}
