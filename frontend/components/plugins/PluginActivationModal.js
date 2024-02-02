@@ -33,16 +33,19 @@ export default function PluginActivationModal({
         <Modal
             isOpen={isOpen}
             contentLabel="Activation/Deactivation Confirmation Modal"
+            className="position-relative"
         >
-            <h1>Confirmation</h1>
-            <p>Êtes-vous sûr de vouloir {!isActivated ? "désactiver" : "activer"} ce plugin ?</p>
+            <h2>Êtes-vous sûr(e) de vouloir {!isActivated ? "désactiver" : "activer"} ce plugin ?</h2>
             <p>Le redémarrage de la page va prendre un instant.</p>
-            <div style={rollbackContainerStyle}>
+            <div className="mt-5" style={rollbackContainerStyle}>
                 <input className="my-auto" id="rollback" name="rollback" type="checkbox"/>
                 <label className="my-auto ml-2" htmlFor="rollback">Supprimer les données du plugin</label>
             </div>
-            <button onClick={handleConfirm}>Confirmer</button>
-            <button onClick={onCancel}>Annuler</button>
+            <div className="d-flex justify-content-between mt-5">
+                <button className="btn" onClick={onCancel}>Annuler</button>
+                <button className="btn btn-primary" onClick={handleConfirm}>Confirmer</button>
+            </div>
+
         </Modal>
     );
 }
