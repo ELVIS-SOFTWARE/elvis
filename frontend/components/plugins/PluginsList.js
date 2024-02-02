@@ -1,8 +1,20 @@
 import React, {useState} from "react";
 import PluginCard from "./PluginCard";
 import RestartingMessage from "./RestartingMessage";
+import PluginActivationModal from "./PluginActivationModal";
 
-export default function PluginsList({ plugins, selectedPlugins, handleStatus, handleSave, toggle, activatedPlugins, firstActivatedState }) {
+
+export default function PluginsList({
+                                        plugins,
+                                        selectedPlugins,
+                                        handleStatus,
+                                        handleSave,
+                                        toggle,
+                                        activatedPlugins,
+                                        firstActivatedState,
+                                        isModalOpen,
+                                    }) {
+
 
     return (
         <div>
@@ -26,21 +38,6 @@ export default function PluginsList({ plugins, selectedPlugins, handleStatus, ha
                         initialyActivated={firstActivatedState[plugin.id]}
                     />
                 ))}
-            </div>
-
-            <div style={{
-                marginRight: '25rem',
-                marginBottom: '5rem'
-            }}>
-                <div className="d-flex justify-content-end mb-3">
-                    <input className="my-auto" id="rollback" name="rollback" type="checkbox"/>
-                    <label className="my-auto ml-2" htmlFor="rollback">Supprimer les données des plugins
-                        décochés</label>
-                </div>
-                <div className="d-flex justify-content-end ml-5">
-                    <input className="btn btn-success" type="submit" value="enregistrer et redémarrer"
-                           onClick={handleSave}/>
-                </div>
             </div>
         </div>
     );
