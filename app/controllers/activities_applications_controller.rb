@@ -288,22 +288,22 @@ class ActivitiesApplicationsController < ApplicationController
                               .transform_values { |values| values.max_by(&:display_price) }
                               .values
 
-    @activity_refs = display_activity_refs.flatten.sort_by { |a| a.activity_ref_kind.name }.as_json(methods: [:display_price, :display_name, :kind, :max_display_prices_by_season])
-    @activity_refs_childhood = activity_refs.select { |ar| ar.child? }.as_json(methods: [:display_price, :display_name, :kind, :max_display_prices_by_season])
+    @activity_refs = display_activity_refs.flatten.sort_by { |a| a.activity_ref_kind.name }.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @activity_refs_childhood = activity_refs.select { |ar| ar.child? }.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
 
     @activity_refs_cham = if current_user&.is_admin
                             ActivityRef
                               .includes(:activity_ref_kind)
                               .where(activity_type: "cham")
-                              .as_json(methods: [:display_price, :kind, :max_display_prices_by_season])
+                              .as_json(methods: [:display_price, :kind, :display_prices_by_season])
                           else
                             activity_refs
                               .includes(:activity_ref_kind)
                               .where(activity_type: "cham")
-                              .as_json(methods: [:display_price, :kind, :max_display_prices_by_season])
+                              .as_json(methods: [:display_price, :kind, :display_prices_by_season])
                           end
 
-    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(methods: [:display_price, :display_name, :kind, :max_display_prices_by_season])
+    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
     @application_change_questions = Question.application_change_questionnaire
     @new_student_level_questions = Question.new_student_level_questionnaire
     @locations = Location.all
@@ -426,9 +426,9 @@ class ActivitiesApplicationsController < ApplicationController
                             .uniq
 
     @current_user_is_admin = current_user ? current_user.is_admin : false
-    @activity_refs = display_activity_refs.flatten.sort_by(&:kind).as_json(methods: [:display_price, :display_name, :kind, :max_display_prices_by_season])
-    @activity_refs_childhood = display_activity_refs_childhood.flatten.as_json(methods: [:display_price, :display_name, :kind, :max_display_prices_by_season])
-    @all_activity_refs = ActivityRef.all.as_json(methods: [:display_price, :display_name, :kind, :max_display_prices_by_season])
+    @activity_refs = display_activity_refs.flatten.sort_by(&:kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @activity_refs_childhood = display_activity_refs_childhood.flatten.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @all_activity_refs = ActivityRef.all.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
     @all_activity_ref_kinds = ActivityRefKind.all.as_json
     @activity_refs_cham = []
     @season = season.as_json({ include: :holidays })

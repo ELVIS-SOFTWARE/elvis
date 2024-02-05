@@ -121,42 +121,55 @@ class ActivityRef < ApplicationRecord
     return :F
   end
 
-  def display_price
-    season = Season.current_apps_season || Season.current # au cas la saison est null (ne devrait pas arriver)
-
-    return 0 unless self.activity_ref_pricing
-
-    # pricings qui rentrent forcément en jeu car pas de date de fin
-    nil_to_season = self.activity_ref_pricing.where("from_season_id <= ? AND to_season_id IS NULL", season.id)
-
-    # pricings qui ont forcément une date de fin et qui sont entre les dates de début et de fin
-    pricings = self.activity_ref_pricing.where("from_season_id >= ? AND to_season_id <= ?", season.id, season.id).where.not(to_season_id: nil)
-
-    # on combine les deux et on prends le prix le plus élevé
-    array = nil_to_season + pricings
-    max_price = array.max_by(&:price)&.price
-
-    max_price.nil? ? 0 : max_price
-  end
-
-  def max_display_prices_by_season
-    self.activity_ref_pricing
-        .group_by(&:from_season_id)
-        .transform_values { |values| values.max_by(&:price)&.price }
+  # Indique si l'activité est *substituable* au sein d'une famille d'activités.
+  # Une activité *substituable* est une activité qui, dans le processus d'inscription, peut être remplacée indifféremment
+  # par une autre activité de la même famille.
+  #
+  # Toutes les activités sont considérées substituables sauf
+  # * les activités enfance,
+  # * les activités CHAM
+  # * et les activités qui autorisent le choix d'un créneau
+  def substitutable?
+    !(
+      allows_timeslot_selection ||
+        activity_type == "child" ||
+        activity_type == "cham"
+    )
   end
 
   # Retourne le nom à afficher pour une activité
   # Renvoie le nom de la famille d'activités ou le nom de l'activité pour les activités enfance, CHAM
   # et celles qui autorisent le choix d'un créneau
   def display_name
-    if allows_timeslot_selection ||
-      activity_type == "child" ||
-      activity_type == "cham"
-
-      return label
+    if substitutable?
+      activity_ref_kind.name
+    else
+      label
     end
+  end
 
-    return activity_ref_kind.name
+  def display_price(season = Season.current_apps_season || Season.current)
+    if substitutable?
+      activity_ref_kind&.display_price(season)
+    else
+      max_price_for_activity_ref(season)
+    end
+  end
+
+  def max_price_for_activity_ref(season = Season.current_apps_season || Season.current)
+    ActivityRefPricing.for_activity_ref(self).for_season(season).max_by(&:price)&.price || 0
+  end
+
+  def display_prices_by_season
+    substitutable = substitutable?
+
+    Season.all.each_with_object({}) do |season, hash|
+      hash[season.id] = if substitutable
+                          activity_ref_kind&.display_price(season)
+                        else
+                          max_price_for_activity_ref(season)
+                        end
+    end
   end
 
   def kind
@@ -186,6 +199,6 @@ class ActivityRef < ApplicationRecord
   end
 
   def picture_path
-    picture.attached? ? Rails.application.routes.url_helpers.rails_blob_path( picture_attachment.blob, only_path: true) : ""
+    picture.attached? ? Rails.application.routes.url_helpers.rails_blob_path(picture_attachment.blob, only_path: true) : ""
   end
 end

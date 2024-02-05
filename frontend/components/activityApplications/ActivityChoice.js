@@ -11,7 +11,7 @@ const getDisplayPrice = (ref, season) => {
     if (ref == undefined || season == undefined)
         return (ref || {}).display_price || "--";
 
-    return ref.max_display_prices_by_season[season.id] || ref.display_price || "--";
+    return ref.display_prices_by_season[season.id] || ref.display_price || "--";
 };
 
 const ActivityChoice = ({
