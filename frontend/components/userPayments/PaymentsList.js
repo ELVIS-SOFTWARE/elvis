@@ -175,38 +175,6 @@ class PaymentsList extends React.Component {
             });
     }
 
-    handleIssuedPaidInvoice(payerId) {
-        const payer_id = payerId;
-
-        api.set()
-            .success(res => {
-                const pdfUrl = res.url;
-                if (pdfUrl) {
-                    window.open(pdfUrl, "_blank");
-                }
-
-                swal({
-                    title: "La facture a été éditée avec succès !",
-                    type: "success",
-                });
-            })
-            .error((res) => {
-                swal({
-                    title: "Une erreur est survenue lors de l'édition de la facture.",
-                    type: "error",
-                    text: res.error
-                });
-                this.setState({isFetching: false});
-            })
-            .post(
-                `/api/student_payments/invoice/${payer_id}/issued_paid_invoice`,
-                {
-                    payer: payer_id,
-                }
-            );
-
-    }
-
 
     renderStatus(cell) {
         if (cell.value) {
@@ -449,14 +417,7 @@ class PaymentsList extends React.Component {
                                         Suppression de masse
                                     </a>
                                 </li>
-                                <li>
-                                    <a onClick={() => this.handleIssuedPaidInvoice(
-                                        this.props.payer.id
-                                    )}>
-                                        <i className="fas fa-receipt m-r-sm"/>
-                                        Éditer facture (acquittée)
-                                    </a>
-                                </li>
+
                             </ul>
                         </div>
                     }
