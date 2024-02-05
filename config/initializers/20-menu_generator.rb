@@ -11,18 +11,10 @@ module MenuGenerator
       parent_menu = Elvis::MenuManager::MenuItem.new(
         :plugins,
         "plugins",
-        "",
+        "index",
         { caption: "Plugins", icon:"fa-puzzle-piece", user_role:"admin", position: 8 }
       )
 
-      plugin_list = Elvis::MenuManager::MenuItem.new(
-        :plugins_list,
-        "plugins",
-        "index",
-        { caption: "Liste des plugins" }
-      )
-
-      parent_menu.add plugin_list
       Elvis::MenuManager.insert_menu_item :side_menu, parent_menu
     end
 
@@ -52,6 +44,13 @@ module MenuGenerator
       "activities_applications",
       "index",
       { caption: "Demandes d'inscription" }
+    ))
+
+    inscriptions.add(Elvis::MenuManager::MenuItem.new(
+      :monitor_students,
+      "packs",
+      "index",
+      { caption: "Packs", icon: "fa-user-graduate", user_role: "admin" }
     ))
     inscriptions.add(Elvis::MenuManager::MenuItem.new(
       :new_activities_applications,
@@ -159,12 +158,6 @@ module MenuGenerator
       "index",
       { caption: "Activités" }
     ))
-    activities.add(Elvis::MenuManager::MenuItem.new(
-      :activities_parameters,
-      "parameters/activities_parameters",
-      "index",
-      { caption: "Paramétrage" }
-    ))
 
     evaluations = Elvis::MenuManager::MenuItem.new(
       :evaluations,
@@ -264,16 +257,28 @@ module MenuGenerator
     Elvis::MenuManager.prepend_menu_item :side_menu, evaluation
     Elvis::MenuManager.prepend_menu_item :side_menu, planning_simulation
 
+    # User menu
+
+    homepage = Elvis::MenuManager::MenuItem.new(
+      :user_homepage,
+      "my_activities",
+      "show",
+      { caption: "Accueil", icon: "fa-home", user_role: "simple", position: 1 },
+      ) do
+      { id: current_user&.id }
+    end
+
     applications = Elvis::MenuManager::MenuItem.new(
       :user_applications,
       "users",
       "new_application",
-      { caption: "Mes demandes d'inscription", icon: "fa-table", user_role: "simple", position: 1 },
+      { caption: "Mes demandes d'inscription", icon: "fa-table", user_role: "simple", position: 2 },
       ) do
       { id: current_user&.id }
     end
 
     Elvis::MenuManager.prepend_menu_item :side_menu, applications
+    Elvis::MenuManager.prepend_menu_item :side_menu, homepage
   end
 
   def self.generate_my_menu

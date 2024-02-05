@@ -6,6 +6,13 @@
   </picture>
 </div>
 
+# About
+The Elvis project is open-source software maintained by the [Elvis](https://www.callingelvis.com/) team.
+
+The codebase of 'Elvis' was originally developed as 'Ziggy' for [Le CEM](https://www.le-cem.com/) by the [Sixmon](https://www.sixmon.net/) team.
+
+The Elvis team would like to express their gratitude to Le CEM for making Ziggy open source and for their ongoing support of the Elvis project.
+
 # Description
 
 Elvis is a web application that allows you to manage your music school and their associated tasks.

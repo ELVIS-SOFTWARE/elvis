@@ -126,11 +126,17 @@ class ActivityRef < ApplicationRecord
 
     return 0 unless self.activity_ref_pricing
 
-    maxprice = self.activity_ref_pricing
-                   .where(from_season_id: season)
-                   .maximum(:price)
+    # pricings qui rentrent forcément en jeu car pas de date de fin
+    nil_to_season = self.activity_ref_pricing.where("from_season_id <= ? AND to_season_id IS NULL", season.id)
 
-    maxprice.nil? ? 0 : maxprice
+    # pricings qui ont forcément une date de fin et qui sont entre les dates de début et de fin
+    pricings = self.activity_ref_pricing.where("from_season_id >= ? AND to_season_id <= ?", season.id, season.id).where.not(to_season_id: nil)
+
+    # on combine les deux et on prends le prix le plus élevé
+    array = nil_to_season + pricings
+    max_price = array.max_by(&:price)&.price
+
+    max_price.nil? ? 0 : max_price
   end
 
   def max_display_prices_by_season
@@ -180,6 +186,6 @@ class ActivityRef < ApplicationRecord
   end
 
   def picture_path
-    picture.attached? ? Rails.application.routes.url_helpers.rails_blob_path( picture_attachment.blob, only_path: true) : "default_activity.png"
+    picture.attached? ? Rails.application.routes.url_helpers.rails_blob_path( picture_attachment.blob, only_path: true) : ""
   end
 end

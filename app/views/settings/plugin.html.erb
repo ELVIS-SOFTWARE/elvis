@@ -10,10 +10,10 @@
   </h2>
 </div>
 
-  <div>
-    <div id="settings" class="plugin plugin-<%= @plugin.id %>">
+  <div class="row">
+    <div id="settings" class="col-lg-12 plugin plugin-<%= @plugin.id %>">
       <%= form_tag({ :action => 'plugin' }) do %>
-        <div class="box tabular settings">
+        <div class="ibox tabular settings">
           <%= partial %>
         </div>
         <% if @hide_btn_validation.nil? || !@hide_btn_validation %>
@@ -22,8 +22,6 @@
       <% end %>
     </div>
   </div>
-
-</div>
 
 
 

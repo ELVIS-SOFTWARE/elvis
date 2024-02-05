@@ -27,7 +27,7 @@ class FamilyMemberUser < ApplicationRecord
     belongs_to :season_csv, -> { select(:id) }, class_name: "Season", required: false
 
     # get all family members for a
-    scope :for_season, ->(season) {for_season_id(1)}
+    scope :for_season, ->(season) {for_season_id(season&.id)}
 
     # get all family members for a season (get from this season or previous seasons if no link for this season)
     scope :for_season_id, ->(season_id) {

@@ -698,10 +698,12 @@ class UsersController < ApplicationController
 
         # par sécurité on force la valeur à false si l'utilisateur actuel n'est pas un admin && qu'il modifie sa page
         up[:is_admin] = false if !@user.is_admin && !current_user.is_admin && current_user.id == @user.id
+        up[:identification_number] = nil if "#{up[:identification_number]}".empty?
 
         @user.update!(up)
 
         params.dig(:user, :consent_docs)&.each do |doc|
+          next if doc.nil? || (doc.class == Array && doc.length < 2)
 
           consentement = @user.consent_document_users.find_or_create_by(consent_document_id: "#{doc[0]}".gsub("id_", ""))
 

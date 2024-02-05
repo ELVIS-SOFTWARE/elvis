@@ -6,8 +6,13 @@ class ActivityRefPricingController < ApplicationController
   end
 
   def create
+    if verify_inputs
+      render json: { errors: ["Veuillez remplir tous les champs"] }, status: :unprocessable_entity
+      return
+    end
+
     to_season_value = params.dig(:toSeason, :value).presence || nil
-    @activity_ref_pricings = ActivityRefPricing.new(activity_ref_id: params[:activity_ref_id], from_season_id: params[:fromSeason][:value], to_season_id: to_season_value, price: params[:price], pricing_category_id: params[:name][:value])
+    @activity_ref_pricings = ActivityRefPricing.new(activity_ref_id: params[:activity_ref_id], from_season_id: params[:fromSeason][:value], to_season_id: to_season_value, price: "#{params[:price]}".gsub(',', '.').to_f, pricing_category_id: params[:name][:value])
     from_season = Season.find(@activity_ref_pricings.from_season_id)
     to_season = Season.find(@activity_ref_pricings.to_season_id) unless @activity_ref_pricings.to_season_id.nil?
     activity_ref = ActivityRef.find(params[:activity_ref_id])
@@ -36,6 +41,11 @@ class ActivityRefPricingController < ApplicationController
   end
 
   def update
+    if verify_inputs
+      render json: { errors: ["Veuillez remplir tous les champs"] }, status: :unprocessable_entity
+      return
+    end
+
     @activity_ref_pricing = ActivityRefPricing.find(params[:id])
     to_season_value = params.dig(:toSeason, :value).presence || nil
     activity_ref = @activity_ref_pricing.activity_ref
@@ -49,12 +59,16 @@ class ActivityRefPricingController < ApplicationController
       end
     end
 
-    activity_ref.activity_ref_pricing.where(pricing_category_id: params[:name][:value]).each do |activity_ref_pricing|
-      if activity_ref_pricing.overlaps?(@activity_ref_pricing)
-        render json: { errors: ["Les périodes se chevauchent"] }, status: :unprocessable_entity
-        return
+    if @activity_ref_pricing.from_season_id != params[:fromSeason][:value].to_i
+      activity_ref.activity_ref_pricing.where(pricing_category_id: params[:name][:value]).each do |activity_ref_pricing|
+        if activity_ref_pricing.overlaps?(@activity_ref_pricing)
+          render json: { errors: ["Les périodes se chevauchent"] }, status: :unprocessable_entity
+          return
+        end
       end
     end
+
+    @activity_ref_pricing.price = "#{params[:price]}".gsub(',', '.').to_f
 
     @activity_ref_pricing.save!
 
@@ -134,6 +148,10 @@ class ActivityRefPricingController < ApplicationController
 
   def pricing_category_already_used?(pricing_category, activity_ref_id)
     ActivityRefPricing.where(activity_ref_id: activity_ref_id, pricing_category_id: pricing_category.id).count > 0
+  end
+
+  def verify_inputs
+    params[:name].nil? || params[:fromSeason].nil?
   end
 
 end

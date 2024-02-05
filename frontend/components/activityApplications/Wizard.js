@@ -383,7 +383,6 @@ class Wizard extends React.Component {
         api.set()
             .success((data) =>
             {
-                console.log(data)
                 this.setState({buttonDisabled: false});
 
                 let user = this.state.user;
@@ -873,6 +872,8 @@ class Wizard extends React.Component {
                         handleComment={(text) => this.handleComment(text)}
                         additionalStudents={this.state.additionalStudents}
                         errors={this.state.errors}
+                        selectedPacks={this.state.selectedPacks}
+                        packs={this.props.packs}
                     />
                 ),
             },

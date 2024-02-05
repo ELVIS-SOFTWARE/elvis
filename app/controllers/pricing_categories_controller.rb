@@ -39,13 +39,12 @@ class PricingCategoriesController < ApplicationController
   def destroy
     @pricing_category = PricingCategory.find(params[:id])
 
-    res = @pricing_category.destroy
-
-    respond_to do |format|
-      format.json do
-        render status: :ok, json: {} and return if res
-        render status: :unprocessable_entity, json: { errors: @pricing_category.errors.full_messages }
-      end
+    begin
+      @pricing_category.destroy!
+      render status: :ok, json: {}
+    rescue StandardError => e
+      render status: :unprocessable_entity,
+             json: { message: "Erreur lors de la suppression, la catégorie de prix est encore référencée" }
     end
   end
 

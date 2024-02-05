@@ -2,11 +2,18 @@
 
 class ActivityRefPricing < ApplicationRecord
   acts_as_paranoid
+
   belongs_to :activity_ref
   belongs_to :from_season, class_name: :Season, optional: false
   belongs_to :to_season, class_name: :Season, optional: true
   belongs_to :pricing_category
+
   has_many :packs
+
+  scope :for_season, ->(season) { where("from_season_id <= ? AND (to_season_id IS NULL OR to_season_id >= ?)", season.id, season.id) }
+  scope :for_activity_ref, ->(activity_ref) { where(activity_ref_id: activity_ref.id) }
+  scope :for_pricing_category, ->(pricing_category) { where(pricing_category_id: pricing_category.id) }
+
 
   def self.display_class_name(singular= true)
     singular ? "Tarif" : "Tarifs"

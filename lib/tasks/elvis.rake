@@ -64,32 +64,25 @@ namespace :elvis do
     end
   end
 
-  desc "Fetch changesets from the repositories"
-  task fetch_changesets: :environment do
-    Repository.fetch_changesets
-  end
-
-  desc "Migrates and copies plugins assets."
-  task :plugins do
-    Rake::Task["redmine:plugins:migrate"].invoke
-    Rake::Task["redmine:plugins:assets"].invoke
-  end
-
   task clean_big_tables: %i[environment] do
-    table_to_clean = %w[event_store_events error_histories]
+    table_to_clean = Parameter.get_value("app.clean_big_tables.tables_to_clean")&.split(",") || %w[event_store_events error_histories]
     logger = Logger.new(STDOUT)
 
-    time_of_retention = (ENV["DAYS_OF_BIG_TABLE_RETENTION"] || "14").to_i.days
+    max_nb_lines = Parameter.get_value("app.clean_big_tables.max_nb_lines")&.to_i || 300_000
 
     table_to_clean.each do |table|
-      logger.info "Cleaning #{table} table"
+      logger.info "Verify #{table} table"
 
       begin
-        res = ActiveRecord::Base.connection.execute <<-SQL
-          DELETE FROM #{table} WHERE created_at < '#{time_of_retention.ago.utc}';
-        SQL
+        nb_lines = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM #{table}").first["count"].to_i
 
-        logger.info "Deleted #{res.cmd_tuples} rows from #{table} table"
+        if nb_lines > max_nb_lines
+          logger.info "Cleaning #{table} table"
+
+          ActiveRecord::Base.connection.execute("DELETE FROM #{table} WHERE id IN (SELECT id FROM #{table} ORDER BY id ASC LIMIT #{nb_lines - max_nb_lines})")
+        else
+          logger.info "No cleaning needed for #{table} table"
+        end
       rescue StandardError => e
         logger.error "Error while cleaning #{table} table: #{e.message}"
       end
@@ -220,6 +213,26 @@ namespace :elvis do
 
         `yarn add #{dependencies}`
       end
+    end
+
+    task :generate_pluginjson_from_url do
+      if "#{ENV['PLUGINS_LIST_DOWNLOAD_URL']}".empty?
+        raise "PLUGINS_LIST_DOWNLOAD_URL is empty"
+      end
+
+      puts "Downloading plugins list from #{ENV['PLUGINS_LIST_DOWNLOAD_URL']}"
+
+      plugins_from_internet = PluginGemUtils.get_plugins_to_install(include_libraries: true)
+
+      plugins = plugins_from_internet.map {|p| p.as_json.deep_transform_keys{|k| k.camelize(:lower) }.except(:id, :installed_path)}
+
+      puts "Writing plugins list to plugins.json"
+
+      File.open("plugins.json", "w") do |f|
+        f.write(plugins.to_json)
+      end
+
+      puts "Plugins list written to plugins.json"
     end
 
     desc "Migrates installed plugins."

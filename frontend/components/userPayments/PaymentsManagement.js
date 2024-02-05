@@ -96,13 +96,15 @@ function generateDataForPaymentSummaryTable({
         if (des) {
             const activity_nb_lessons = a.intended_nb_lessons
             const season = seasons.find(s => s.id === seasonId);
-            const priceAssociation = []
+            const priceAssociations = []
 
             a.activity_ref.activity_ref_pricing.forEach(arp => {
-                if (arp.from_season.start <= season.start && (!arp.to_season || arp.to_season.end >= season.end)) {
-                    priceAssociation.push(arp);
+                if (new Date(arp.from_season.start) <= new Date(season.start) && (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
+                    priceAssociations.push(arp);
                 }
             })
+
+            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id)
 
             let amount = 0;
             if (priceAssociation && priceAssociation.price) {
@@ -123,7 +125,7 @@ function generateDataForPaymentSummaryTable({
                 coupon: {...coupon},
                 studentId: act.id,
                 user: act.user,
-                pricingId: des.pricing_id,
+                pricingId: des.pricing_category_id,
                 activityId: a.id,
                 paymentLocation: act.payment_location,
                 due_total: amount || 0,
@@ -148,13 +150,15 @@ function generateDataForPaymentSummaryTable({
 
             const activity_nb_lessons = a.intended_nb_lessons
             const season = seasons.find(s => s.id === seasonId);
-            const priceAssociation = []
+            const priceAssociations = []
 
             a.activity_ref.activity_ref_pricing.forEach(arp => {
                 if (arp.from_season.start <= season.start && (!arp.to_season || arp.to_season.end >= season.end)) {
-                    priceAssociation.push(arp);
+                    priceAssociations.push(arp);
                 }
             })
+
+            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id)
 
             let amount = 0;
             if (priceAssociation && priceAssociation.price) {
@@ -174,7 +178,7 @@ function generateDataForPaymentSummaryTable({
                 coupon: coupon,
                 studentId: option.id,
                 user: option.desired_activity.activity_application.user,
-                pricingId: des.pricing_id,
+                pricingId: des.pricing_category_id,
                 paymentLocation: option.payment_location,
                 due_total: amount || 0,
                 discountedTotal: (amount || 0) * (1 - percent_off / 100),
@@ -447,7 +451,7 @@ class PaymentsManagement extends React.Component {
         if (pricing && des) {
             dess = _.filter(dess, i => i.id != des.id);
 
-            des.pricing_id = pricing.id;
+            des.pricing_category_id = pricing.id;
 
             dess = [...dess, des];
 

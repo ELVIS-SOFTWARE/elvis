@@ -295,6 +295,7 @@ class MyActivitiesController < ApplicationController
   # Retirer une activité de la liste des activités souhaitées
   def remove_wished_attendance
     attendance = StudentAttendance.find_by(user_id: params[:user]["id"], activity_instance_id: params[:activity_instance]["id"], is_pack: true)
+    user_pack = Pack.find(params[:pack_id])
 
     if attendance.nil?
       render json: {
@@ -314,6 +315,8 @@ class MyActivitiesController < ApplicationController
     )
 
     attendance.destroy!
+    user_pack.lessons_remaining += 1
+    user_pack.save!
 
     render json: {
       status: "ok"
