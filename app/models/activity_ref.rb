@@ -161,14 +161,8 @@ class ActivityRef < ApplicationRecord
   end
 
   def display_prices_by_season
-    substitutable = substitutable?
-
     Season.all.each_with_object({}) do |season, hash|
-      hash[season.id] = if substitutable
-                          activity_ref_kind&.display_price(season)
-                        else
-                          max_price_for_activity_ref(season)
-                        end
+      hash[season.id] = display_price(season)
     end
   end
 
