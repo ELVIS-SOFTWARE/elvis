@@ -19,24 +19,29 @@ export default function ActivityBooking() {
     const [secondTabActive, setSecondTabActive] = useState(false);
 
     const fetchData = async () => {
-        await api.set()
-            .useLoading()
-            .success(res =>
-            {
-                setUser(res.user);
-                setActivities(sortActivitiesByMonth(res.availabilities));
-                setMyActivities(sortActivitiesByMonth(res.my_activities));
-                setActivityRef(res.activity_ref);
-                setHoursBeforeCancelling(res.hours_before_cancelling)
-                setActivityRefPricing(res.activity_ref_pricing);
-                setPack(res.pack);
-                setLoading(false);
-            })
-            .error(res =>
-            {
-                swal("Une erreur est survenue lors de la récupération des données", res.error, "error");
-            })
-            .get(`/get_bookings_and_availabilities` + window.location.pathname, {});
+        try {
+            await api.set()
+                .useLoading()
+                .success(res =>
+                {
+                    setUser(res.user);
+                    setActivities(sortActivitiesByMonth(res.availabilities));
+                    setMyActivities(sortActivitiesByMonth(res.my_activities));
+                    setActivityRef(res.activity_ref);
+                    setHoursBeforeCancelling(res.hours_before_cancelling)
+                    setActivityRefPricing(res.activity_ref_pricing);
+                    setPack(res.pack);
+                })
+                .error(res =>
+                {
+                    swal("Une erreur est survenue lors de la récupération des données", res.error, "error");
+                })
+                .get(`/get_bookings_and_availabilities` + window.location.pathname, {});
+        } catch (error) {
+            swal("Une erreur est survenue lors de la récupération des données", error, "error");
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {

@@ -298,29 +298,29 @@ class MyActivitiesController < ApplicationController
     user_pack = Pack.find(params[:pack_id])
 
     if attendance.nil?
-      render json: {
-        status: "error"
-      }
+      render json: { status: "error" }
       return
     end
 
-    EventHandler.notification.activity_cancelled.trigger(
-      sender: {
-        controller_name: self.class.name,
-      },
-      args: {
-        user: attendance.user,
-        activity: attendance.activity_instance.activity,
-      }
-    )
-
     attendance.destroy!
     user_pack.lessons_remaining += 1
-    user_pack.save!
+    saved = user_pack.save!
 
-    render json: {
-      status: "ok"
-    }
+    if saved
+      EventHandler.notification.activity_cancelled.trigger(
+        sender: {
+          controller_name: self.class.name,
+        },
+        args: {
+          user: attendance.user,
+          activity: attendance.activity_instance.activity,
+        }
+      )
+
+      render json: { status: "ok" }
+    else
+      render json: { status: "error" }
+    end
   end
 
   private
