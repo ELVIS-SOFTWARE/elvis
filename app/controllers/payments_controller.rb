@@ -242,6 +242,16 @@ class PaymentsController < ApplicationController
       only: %i[id label percent_off enabled]
     )
 
+    @packs = Pack.all.as_json(include: {
+      activity_ref: {},
+      activity_ref_pricing: {
+        include: {
+          pricing_category: {}
+        }
+      },
+      user: {}
+    })
+
     respond_to do |format|
       format.html
 
