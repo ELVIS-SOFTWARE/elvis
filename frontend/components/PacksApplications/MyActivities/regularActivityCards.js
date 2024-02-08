@@ -11,7 +11,7 @@ export default function regularActivityCards(props) {
     const activity_ref = desired_activity.activity_ref;
 
     return (
-        <div className="col-md-4 mt-3 activity-card">
+        <div className="col-md-4 mt-lg-3 px-lg-4 p-0  activity-card">
             <div className="card" style={{ height: '100%' }}>
                 <div className="card-img-wrapper">
                     <img className="card-img-packs" src={activity_ref.picture_path} alt="Card image cap" />
