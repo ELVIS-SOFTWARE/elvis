@@ -102,7 +102,10 @@ export default function Plugins(props) {
 
     function handleSaveAndRestart() {
         api.set()
+            .useLoading()
             .success(res => {
+                if(res.restart)
+                    setIsRestarting(true);
                 swal(`Les plugins ont été enregistrés avec succès`, res.message, "success");
             })
             .error(res => {
@@ -111,10 +114,6 @@ export default function Plugins(props) {
             .post('/plugins', {
                 data: selectedPlugins,
                 rollback: document.getElementById('rollback').checked ? 'on' : 'off'
-            })
-            .finally(() => {
-                setIsRestarting(true);
-                getPlugins();
             });
     }
 
