@@ -275,35 +275,37 @@ class ActivitiesApplicationsController < ApplicationController
     # when current_user is nil and params[:user_id] is nil => cannot create inscription for nothing
     redirect_to "/" and return if @pre_selected_user.nil?
 
+    # etant donnée que l'on récupère toutes les activity_refs pour le front
+    # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
+    # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
+    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+
     activity_refs = if current_user&.is_admin
-                      ActivityRef.where(is_lesson: true)
+                      @all_activity_refs.filter { |ar| ar["is_lesson"] }
                     else
-                      ActivityRef.where(is_lesson: true, is_visible_to_admin: false)
+                      @all_activity_refs.filter { |ar| ar["is_lesson"] && !ar["is_visible_to_admin"] }
                     end
 
     # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
-                              .select { |ar| !ar.child? and !ar.cham? and !ar.allows_timeslot_selection }
-                              .group_by(&:kind)
-                              .transform_values { |values| values.max_by(&:display_price) }
+                              .select { |ar| ar["activity_type"] != "child"  and ar["activity_type"] != "cham" and !ar["allows_timeslot_selection"] }
+                              .group_by { |ar| ar["kind"] }
+                              .transform_values { |values| values.max_by { |ar| ar["display_price"] } }
                               .values
 
-    @activity_refs = display_activity_refs.flatten.sort_by { |a| a.activity_ref_kind.name }.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
-    @activity_refs_childhood = activity_refs.select { |ar| ar.child? }.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @activity_refs = display_activity_refs
+                       .flatten
+                       .sort_by { |a| a["kind"] }
+
+    @activity_refs_childhood = activity_refs
+                                 .select { |ar| ar["activity_type"] == "child" }
 
     @activity_refs_cham = if current_user&.is_admin
-                            ActivityRef
-                              .includes(:activity_ref_kind)
-                              .where(activity_type: "cham")
-                              .as_json(methods: [:display_price, :kind, :display_prices_by_season])
+                            @all_activity_refs.filter { |ar| ar["activity_type"] == "cham" }
                           else
-                            activity_refs
-                              .includes(:activity_ref_kind)
-                              .where(activity_type: "cham")
-                              .as_json(methods: [:display_price, :kind, :display_prices_by_season])
+                            @all_activity_refs.filter { |ar| ar["activity_type"] == "cham" }
                           end
 
-    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
     @application_change_questions = Question.application_change_questionnaire
     @new_student_level_questions = Question.new_student_level_questionnaire
     @locations = Location.all
