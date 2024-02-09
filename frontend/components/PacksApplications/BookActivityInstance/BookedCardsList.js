@@ -14,7 +14,7 @@ export default function BookedCardsList(props) {
             <div className="ibox">
                 <div className="ibox-content text-center">
                     <h3 className="font-bold">Vous n'avez pas encore réservé de séances</h3>
-                    <p>Les séances que vous réservez se verront affichées ici</p>
+                    <p>Les séances réservées s'afficheront ici.</p>
                     <i className="fa fa-pause" aria-hidden="true"></i>
                 </div>
             </div>
