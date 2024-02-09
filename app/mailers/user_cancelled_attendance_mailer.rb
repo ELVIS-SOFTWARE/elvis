@@ -14,10 +14,11 @@ class UserCancelledAttendanceMailer < ApplicationMailer
 
   def liquid_assigns
     {
-      "logo_url" => getSchoolLogo,
+      "school_logo" => getSchoolLogo,
       'first_name' => @user.first_name.capitalize,
       'last_name' => @user.last_name.capitalize,
       'activity' => @activity,
+      'school_link' => get_button_school_link,
     }
   end
 end
