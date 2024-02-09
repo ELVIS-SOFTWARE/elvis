@@ -1642,7 +1642,7 @@ body {
 
 @media (max-width: 650px) {
     .card {
-        margin: 15px;
+
         transform: scale(.8);
     }
 }
@@ -3469,9 +3469,12 @@ body {
 }
 
 .placeholder-card {
-    height: 350px;
+    max-width: 333px;
+    height: 348px;
     position: relative;
 }
+
+
 
 .image-overlay {
     position: absolute;
