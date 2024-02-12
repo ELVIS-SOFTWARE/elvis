@@ -94,32 +94,20 @@ export default function ActivityBooking() {
             return;
         }
 
-        swal({
-            title: "Êtes-vous sûr?",
-            text: "Voulez-vous vraiment réserver ces activités?",
-            type: "info",
-            buttons: true,
-            dangerMode: true,
-            showCancelButton: true,
-            confirmButtonText: "Je confirme",
-            cancelButtonText: "Annuler",
-        }).then((willPost) => {
-            if (willPost.value) {
-                api.set()
-                    .useLoading()
-                    .success(res => {
-                        swal("Vos souhaits ont bien été enregistrés", "", "success");
-                    })
-                    .error(res => {
-                        swal(res.message, res.error, "error");
-                    })
-                    .post(`/submit_user_wish_list`, {
-                        user_id: user.id,
-                        wish_list: wishList,
-                        pack_id: pack.id,
-                    });
-            }
-        }).then(() => {
+        api.set()
+            .useLoading()
+            .success(res => {
+                swal("Vos souhaits ont bien été enregistrés", "", "success");
+            })
+            .error(res => {
+                swal(res.message, res.error, "error");
+            })
+            .post(`/submit_user_wish_list`, {
+                user_id: user.id,
+                wish_list: wishList,
+                pack_id: pack.id,
+            })
+        .then(() => {
             fetchData();
         });
     }

@@ -127,7 +127,7 @@ namespace :elvis do
           exist.update_description_fields database_plugin
 
           # reset the activated_at value only if plugin is currently hidden && currently unactivated
-          # exist.activated_at = plugin.activated_at if exist.activated_at.nil? && exist.hidden
+          exist.activated_at = database_plugin.activated_at if exist.activated_at.nil? && exist.hidden
           exist.updated_at = DateTime.now
 
           exist.save
