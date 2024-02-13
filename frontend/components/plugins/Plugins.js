@@ -5,6 +5,8 @@ import swal from "sweetalert2";
 import {EditorState, convertToRaw, convertFromRaw, ContentState} from 'draft-js';
 import PluginsList from "./PluginsList";
 import RestartingMessage from "./RestartingMessage";
+import PluginActivationModal from "./PluginActivationModal";
+import Modal from "react-modal";
 
 
 export default function Plugins(props) {
@@ -13,8 +15,9 @@ export default function Plugins(props) {
     const [activatedPlugins, setActivatedPlugins] = useState({});
     const [firstActivatedState, setFirstActivatedState] = useState({});
     const [is_restarting, setIsRestarting] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [pluginID, setPluginID] = useState(null); // Utiliser un état local pour stocker pluginID
     let interval;
-
 
     useEffect(() => {
         getPlugins()
@@ -120,24 +123,55 @@ export default function Plugins(props) {
     function toggleActivation(pluginID) {
         setActivatedPlugins((prevActivatedPlugins) => ({
             ...prevActivatedPlugins,
-            [pluginID]: !prevActivatedPlugins[pluginID], // Inversion de l'état actuel du plugin
+            [pluginID]: !prevActivatedPlugins[pluginID],
         }));
 
         handlePluginStatusChange(pluginID, !activatedPlugins[pluginID]);
+
+        setPluginID(pluginID);
+
+        setTimeout(() => {
+            Modal.setAppElement('body');
+            setIsModalOpen(true);
+        }, 500);
     }
+
+    function closeModal() {
+        if (pluginID !== null) {
+            setActivatedPlugins((prevActivatedPlugins) => ({
+                ...prevActivatedPlugins,
+                [pluginID]: !prevActivatedPlugins[pluginID],
+            }));
+        }
+
+        setIsModalOpen(false);
+    }
+
 
     if (is_restarting) {
         return <RestartingMessage/>;
     } else if (plugins) {
-        return <PluginsList
-            plugins={plugins}
-            selectedPlugins={selectedPlugins}
-            handleStatus={handlePluginStatusChange}
-            handleSave={handleSaveAndRestart}
-            toggle={toggleActivation}
-            activatedPlugins={activatedPlugins}
-            firstActivatedState={firstActivatedState}
-        />
+        return <div>
+            <PluginsList
+                plugins={plugins}
+                selectedPlugins={selectedPlugins}
+                handleStatus={handlePluginStatusChange}
+                handleSave={handleSaveAndRestart}
+                toggle={toggleActivation}
+                activatedPlugins={activatedPlugins}
+                firstActivatedState={firstActivatedState}
+            />
+
+            <PluginActivationModal
+                isOpen={isModalOpen}
+                plugins={selectedPlugins}
+                activatedPlugins={activatedPlugins}
+                onCancel={closeModal}
+                onClose={() => setIsModalOpen(false)}
+                handleSaveAndRestart={handleSaveAndRestart}
+            />
+        </div>
+
     } else {
         return (
             <p className="nodata">Aucun plugin</p>
