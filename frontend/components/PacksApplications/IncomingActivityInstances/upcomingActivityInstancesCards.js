@@ -24,11 +24,11 @@ export default function upcomingActivityInstancesCards(props) {
     }
 
     return (
-        <div className="row">
-            <div className={`${minimalDisplay ? "col-md-11 ml-4" : "col-sm-5"}`}>
-                <div className={`ibox animated fadeInRight`}>
+        <div className="row mx-5 my-3 m-lg-0">
+            <div className={`${minimalDisplay ? "col-md-11 ml-lg-4" : "col-sm-5"}`}>
+                <div className={`ibox animated fadeInRight mb-0 mb-lg-3`}>
                     <div className="ibox-content text-align-center-sm">
-                        <div className="row">
+                        <div className="row d-flex align-items-center">
                             <div className={`${minimalDisplay ? "col-sm-4" : "col-sm-2"} project-status p-xs`} >
                                 {date !== undefined ? getDate(date.start) : "" }
                             </div>

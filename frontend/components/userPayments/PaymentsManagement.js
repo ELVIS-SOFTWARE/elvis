@@ -75,7 +75,9 @@ function generateDataForPaymentSummaryTable({
                                                 seasons,
                                                 adhesions,
                                                 adhesionPrices,
-                                                adhesionEnabled
+                                                adhesionEnabled,
+                                                packs,
+                                                user
                                             }) {
     let data = [];
 
@@ -210,6 +212,30 @@ function generateDataForPaymentSummaryTable({
                     studentId: adhesion.user.id,
                     adhesionPriceId: adhesion_price.id,
                     adhesionId: adhesion.id,
+                });
+            }
+        }
+    }
+
+    if (packs.length > 0) {
+        const userPacks = packs.filter(p => p.user_id === user.id)
+        if (userPacks.length > 0) {
+            for (const pack of userPacks) {
+                const pack_price = pack.activity_ref_pricing.price;
+                const coupon = 0;
+                data.push({
+                    id: 0,
+                    activity: `Pack de ${user.first_name} ${user.last_name}`,
+                    frequency: 1,
+                    initial_total: 1,
+                    due_total: pack_price || 0,
+                    coupon: coupon,
+                    discountedTotal: pack_price || 0,
+                    unitPrice: pack_price || 0,
+                    user: user,
+                    studentId: user.id,
+                    packPriceId: pack.activity_ref_pricing.id,
+                    packId: pack.id,
                 });
             }
         }
@@ -1235,7 +1261,9 @@ class PaymentsManagement extends React.Component {
             seasons: this.props.seasons,
             adhesionPrices: this.props.adhesionPrices,
             adhesionEnabled: this.props.adhesionEnabled,
-            adhesions: this.state.adhesions
+            adhesions: this.state.adhesions,
+            packs: this.props.packs,
+            user: this.props.user,
         });
 
         const {
@@ -1319,7 +1347,9 @@ class PaymentsManagement extends React.Component {
                     seasons: this.props.seasons,
                     adhesionPrices: this.props.adhesionPrices,
                     adhesionEnabled: this.props.adhesionEnabled,
-                    adhesions: previousSeasonState.adhesions
+                    adhesions: previousSeasonState.adhesions,
+                    packs: this.props.packs,
+                    user: this.props.user,
                 })
             );
 

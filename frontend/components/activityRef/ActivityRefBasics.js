@@ -123,7 +123,7 @@ export default class ActivityRefBasics extends React.Component {
     }
 
     render() {
-        if (this.state.seasons.length === 0 || this.state.pricingCategories.length === 0) {
+        if (this.state.seasons.length === 0) {
             return <div className="spinner-border text-primary" role="status">
                 <span className="sr-only">Loading...</span>
             </div>

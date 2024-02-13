@@ -59,10 +59,12 @@ class ActivityRefPricingController < ApplicationController
       end
     end
 
-    activity_ref.activity_ref_pricing.where(pricing_category_id: params[:name][:value]).each do |activity_ref_pricing|
-      if activity_ref_pricing.overlaps?(@activity_ref_pricing)
-        render json: { errors: ["Les périodes se chevauchent"] }, status: :unprocessable_entity
-        return
+    if @activity_ref_pricing.from_season_id != params[:fromSeason][:value].to_i
+      activity_ref.activity_ref_pricing.where(pricing_category_id: params[:name][:value]).each do |activity_ref_pricing|
+        if activity_ref_pricing.overlaps?(@activity_ref_pricing)
+          render json: { errors: ["Les périodes se chevauchent"] }, status: :unprocessable_entity
+          return
+        end
       end
     end
 

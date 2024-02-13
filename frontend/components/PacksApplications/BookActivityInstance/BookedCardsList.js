@@ -1,17 +1,20 @@
-import React, {Fragment, useState} from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import BookingCard from "./bookingCards";
 import BookedCard from "./bookedCards";
 
 export default function BookedCardsList(props) {
 
     const myActivities = props.myActivities;
+    useEffect(() => {
+        props.setSecondTab();
+    }, []);
 
     if (Object.keys(myActivities).length === 0) {
         return <div className="col-md-12">
             <div className="ibox">
                 <div className="ibox-content text-center">
                     <h3 className="font-bold">Vous n'avez pas encore réservé de séances</h3>
-                    <p>Les séances que vous réservez se verront affichées ici</p>
+                    <p>Les séances réservées s'afficheront ici.</p>
                     <i className="fa fa-pause" aria-hidden="true"></i>
                 </div>
             </div>

@@ -84,13 +84,13 @@ export default function upcomingActivityInstancesList(props) {
                         <div key={index}>
                             {minimalDisplay ? "" : <h2 className="animated fadeInRight">{month}</h2>}
                             {activities[month].map((item, itemIndex) => (
-                                <div key={itemIndex}>
+
                                     <UpcomingActivityInstancesCards
-                                        key={index}
+                                        key={itemIndex}
                                         activity={item}
                                         minimalDisplay={minimalDisplay}
                                     />
-                                </div>
+
                             ))}
                         </div>
                     )

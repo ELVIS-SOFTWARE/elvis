@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import moment from "moment";
 import 'moment/locale/fr';
+import packImgDefault from "../../../images/default_activity.png";
 moment.locale('fr');
 
 export default function regularActivityCards(props) {
@@ -11,10 +12,10 @@ export default function regularActivityCards(props) {
     const activity_ref = desired_activity.activity_ref;
 
     return (
-        <div className="col-md-4 mt-3 activity-card">
+        <div className="col-md-4 mt-lg-3 px-lg-4 p-0  activity-card">
             <div className="card" style={{ height: '100%' }}>
                 <div className="card-img-wrapper">
-                    <img className="card-img-packs" src={activity_ref.picture_path} alt="Card image cap" />
+                    <img className="card-img-packs" src={activity_ref.picture_path ? activity_ref.picture_path : packImgDefault} alt="Card image cap" />
                     <div className={`card-banner-title background-green`}>
                         <p className="font-bold no-margin">Annuel</p>
                     </div>

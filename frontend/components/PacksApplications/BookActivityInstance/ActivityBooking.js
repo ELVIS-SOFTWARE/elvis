@@ -16,26 +16,32 @@ export default function ActivityBooking() {
     const [hoursBeforeCancelling, setHoursBeforeCancelling] = useState(0);
     const [activityRefPricing, setActivityRefPricing] = useState(null);
     const [pack, setPack] = useState(null);
+    const [secondTabActive, setSecondTabActive] = useState(false);
 
     const fetchData = async () => {
-        await api.set()
-            .useLoading()
-            .success(res =>
-            {
-                setUser(res.user);
-                setActivities(sortActivitiesByMonth(res.availabilities));
-                setMyActivities(sortActivitiesByMonth(res.my_activities));
-                setActivityRef(res.activity_ref);
-                setHoursBeforeCancelling(res.hours_before_cancelling)
-                setActivityRefPricing(res.activity_ref_pricing);
-                setPack(res.pack);
-                setLoading(false);
-            })
-            .error(res =>
-            {
-                swal("Une erreur est survenue lors de la récupération des données", res.error, "error");
-            })
-            .get(`/get_bookings_and_availabilities` + window.location.pathname, {});
+        try {
+            await api.set()
+                .useLoading()
+                .success(res =>
+                {
+                    setUser(res.user);
+                    setActivities(sortActivitiesByMonth(res.availabilities));
+                    setMyActivities(sortActivitiesByMonth(res.my_activities));
+                    setActivityRef(res.activity_ref);
+                    setHoursBeforeCancelling(res.hours_before_cancelling)
+                    setActivityRefPricing(res.activity_ref_pricing);
+                    setPack(res.pack);
+                })
+                .error(res =>
+                {
+                    swal("Une erreur est survenue lors de la récupération des données", res.error, "error");
+                })
+                .get(`/get_bookings_and_availabilities` + window.location.pathname, {});
+        } catch (error) {
+            swal("Une erreur est survenue lors de la récupération des données", error, "error");
+        } finally {
+            setLoading(false);
+        }
     }
 
     useEffect(() => {
@@ -88,32 +94,20 @@ export default function ActivityBooking() {
             return;
         }
 
-        swal({
-            title: "Êtes-vous sûr?",
-            text: "Voulez-vous vraiment réserver ces activités?",
-            type: "info",
-            buttons: true,
-            dangerMode: true,
-            showCancelButton: true,
-            confirmButtonText: "Je confirme",
-            cancelButtonText: "Annuler",
-        }).then((willPost) => {
-            if (willPost.value) {
-                api.set()
-                    .useLoading()
-                    .success(res => {
-                        swal("Vos souhaits ont bien été enregistrés", "", "success");
-                    })
-                    .error(res => {
-                        swal(res.message, res.error, "error");
-                    })
-                    .post(`/submit_user_wish_list`, {
-                        user_id: user.id,
-                        wish_list: wishList,
-                        pack_id: pack.id,
-                    });
-            }
-        }).then(() => {
+        api.set()
+            .useLoading()
+            .success(res => {
+                swal("Vos souhaits ont bien été enregistrés", "", "success");
+            })
+            .error(res => {
+                swal(res.message, res.error, "error");
+            })
+            .post(`/submit_user_wish_list`, {
+                user_id: user.id,
+                wish_list: wishList,
+                pack_id: pack.id,
+            })
+        .then(() => {
             fetchData();
         });
     }
@@ -148,6 +142,10 @@ export default function ActivityBooking() {
         });
     }
 
+    function setSecondTab() {
+        secondTabActive ? setSecondTabActive(false) : setSecondTabActive(true);
+    }
+
     if(loading)
         return "Loading..."
 
@@ -177,6 +175,7 @@ export default function ActivityBooking() {
                                 pack={pack}
                                 addToWishList={addToWishList}
                                 removeFromWishList={removeFromWishList}
+                                setSecondTab={setSecondTab}
                             />
                         },
                         {
@@ -189,6 +188,7 @@ export default function ActivityBooking() {
                                 activity_ref={activity_ref}
                                 removeAttendance={removeAttendance}
                                 hoursBeforeCancelling={hoursBeforeCancelling}
+                                setSecondTab={setSecondTab}
                             />
                         },
                     ]}
@@ -196,9 +196,11 @@ export default function ActivityBooking() {
                 />
             </div>
 
-            <div className="app-footer" style={{zIndex: "1", position: "fixed"}}>
-                <button className="btn btn-primary pull-right" onClick={submitWishList}>Réserver</button>
-            </div>
+            { secondTabActive &&
+                <div className="app-footer" style={{zIndex: "1", position: "fixed"}}>
+                    <button className="btn btn-primary pull-right" onClick={submitWishList}>Réserver</button>
+                </div>
+            }
         </Fragment>
     );
 }

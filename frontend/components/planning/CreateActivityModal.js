@@ -14,8 +14,8 @@ class CreateIntervalModal extends React.Component {
         const detectedSeason = getSeasonFromDate(this.props.newInterval.start.toDate(), this.props.seasons);
 
         this.state = {
-            kind: this.props.kind || "p"
- //           season: detectedSeason && detectedSeason.id || "",
+            kind: this.props.kind || "p",
+            season: detectedSeason && detectedSeason.id || "",
         };
 
     }
@@ -60,12 +60,12 @@ class CreateIntervalModal extends React.Component {
                         }
                     </select>
                     <p style={{margin:'10px'}}> <i className="fas fa-info-circle m-r-sm"></i>
-                    {(this.state.season=="") ? 
-                     'La disponibilité sera ajoutée au créneau sélectionné.' 
-                     :
-                     'La disponibilité sera ajoutée à la 1ère semaine de la saison.'}
+                        {this.state.season === "" ?
+                            'La disponibilité sera ajoutée au créneau sélectionné.'
+                            :
+                            'La disponibilité sera ajoutée à la 1ère semaine de la saison.'}
                     </p>
-                   
+
 
                     <label className="label-control">Type</label>
                     <span className="radio radio-primary">
