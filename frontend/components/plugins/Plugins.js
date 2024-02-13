@@ -109,9 +109,11 @@ export default function Plugins(props) {
             .success(res => {
                 if(res.restart)
                     setIsRestarting(true);
+                closeModal();
                 swal(`Les plugins ont été enregistrés avec succès`, res.message, "success");
             })
             .error(res => {
+                closeModal();
                 swal("Une erreur est survenue lors de l'enregistrement des plugins", res.error, "error");
             })
             .post('/plugins', {
