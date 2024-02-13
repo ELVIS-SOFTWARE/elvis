@@ -86,7 +86,7 @@ export default function upcomingActivityInstancesList(props) {
                             {activities[month].map((item, itemIndex) => (
 
                                     <UpcomingActivityInstancesCards
-                                        key={index}
+                                        key={itemIndex}
                                         activity={item}
                                         minimalDisplay={minimalDisplay}
                                     />
