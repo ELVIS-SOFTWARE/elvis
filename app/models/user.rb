@@ -348,6 +348,13 @@ class User < ApplicationRecord
     parents.uniq
   end
 
+  def payment_terms_summary(season_id)
+    season_payment_terms = payer_payment_terms.where(season_id: season_id).first
+    return "" if season_payment_terms.nil?
+
+    season_payment_terms.summary
+  end
+
   def update_addresses(addresses)
     # atomic update operation
     User.transaction do

@@ -30,6 +30,16 @@ class PayerPaymentTerms < ApplicationRecord
     return :F
   end
 
+  def summary
+    res = "paiement #{payment_terms.label}"
+    if day_for_collection.present?
+      payments_months = payment_terms.collect_on_months.map { |m| DateHelper::month_name(m + 1) }.join(", ")
+      res += " le #{payment_terms.days_allowed_for_collection[day_for_collection]} du mois (#{payments_months})"
+    end
+    res += " par #{payment_method.label}" if payment_method.present?
+    res.downcase
+  end
+
   private
 
   def uniqueness

@@ -60,7 +60,7 @@ Lancer la commande `rake elvis:plugins:assets` qui va copier les fichiers assets
 
 Ces commandes sont à lancer à chaque mise à jour des composants du plugin.
 
-## Exécuter les migration
+## Exécuter les migrations
 Chaque plugin peut définir des migrations. Pour les exécuter, il faut lancer la commande:  
 `rake elvis:plugins:migrate`  
 

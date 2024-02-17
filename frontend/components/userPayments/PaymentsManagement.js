@@ -14,6 +14,7 @@ import {indexById, csrfToken, findAndGet} from "../utils/";
 import SwitchPayerModal from "./SwitchPayerModal";
 import {set} from "../../tools/api";
 import * as api from "../../tools/api";
+import { Editor } from "draft-js";
 
 const SEASON_STORED_KEY = "PaymentsSummarySelectedSeason";
 
@@ -1713,6 +1714,16 @@ class PaymentsManagement extends React.Component {
                                                 </button>
                                             }
                                         </div>
+
+                                        {payer.payment_terms_summary &&
+                                            <Fragment>
+                                                <div className="col-lg-12 col-md-6 d-flex justify-content-between m-b-sm">
+                                                    <div className="alert alert-info w-100">
+                                                        Modalités de paiement souhaitées : {payer.payment_terms_summary}
+                                                    </div>
+                                                </div>
+                                            </Fragment>
+                                        }
 
 
                                         {this.state.payments[payer.id] && this.state.payments[payer.id].length > 0 &&

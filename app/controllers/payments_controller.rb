@@ -105,18 +105,24 @@ class PaymentsController < ApplicationController
     end.as_json
 
     include_payer_json = {
-      methods: %i[class_name address phone_number], include: {
-        payer_payment_terms: {
-          include: {
-            payment_terms: {},
-          },
-        }
-      }
+      methods: %i[class_name address phone_number]
     }
 
-    @payer = user.as_json(include_payer_json)
-    @payer[:type] = user.class.to_s
-    @payers = payers_by_season.map { |h| h.merge({ payers: h[:payers].as_json(include_payer_json) }) }
+    @payers = payers_by_season.map do |season_payer_info|
+      season_id = season_payer_info[:season_id]
+      season_payers = season_payer_info[:payers]
+      payers_json = season_payers.as_json(include_payer_json)
+
+      payers_json.each do |payer|
+        payer_id = payer["id"]
+        payer["payment_terms_summary"] = User.find(payer_id).payment_terms_summary(season_id)
+      end
+
+      # Intégrer au hash existant les infos supplémentaires
+      updated_season_payer_info = season_payer_info.merge({ payers: payers_json })
+
+      updated_season_payer_info
+    end
 
     @activities = activities
     @options = user.get_list_of_options.as_json({
@@ -217,23 +223,23 @@ class PaymentsController < ApplicationController
 
     # récupérer les adhésions de tous ces utilisateurs
     @adhesions = Adhesion.where(user_id: desired_activities_users.pluck('id'))
-                        .includes(user:{}, discount: { coupon: {} })
-                        .uniq
-                        .as_json({
-                                   include: {
-                                     user: {
-                                       only: %i[id first_name last_name]
-                                     },
-                                     discount: {
-                                       only: :coupon,
-                                       include: {
-                                         coupon: {
-                                           only: %i[id percent_off label]
-                                         }
-                                       }
-                                     }
-                                   }
-                                 })
+                         .includes(user: {}, discount: { coupon: {} })
+                         .uniq
+                         .as_json({
+                                    include: {
+                                      user: {
+                                        only: %i[id first_name last_name]
+                                      },
+                                      discount: {
+                                        only: :coupon,
+                                        include: {
+                                          coupon: {
+                                            only: %i[id percent_off label]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  })
 
     @adhesion_enabled = Adhesion.enabled
     @adhesion_prices = AdhesionPrice.all.as_json
@@ -1012,7 +1018,7 @@ class PaymentsController < ApplicationController
                               .reduce(0.0) { |acc, p| acc + p.adjusted_amount }
                               .round(2)
 
-    r={
+    r = {
       total_due: total_due,
       previsionnal_total: previsionnal_total,
       total_payments: total_payments,
@@ -1103,13 +1109,13 @@ class PaymentsController < ApplicationController
     end
 
     if Adhesion.enabled
-      #users = season_activities.map { |a| a["user"] }
-      #adhesion_objects = users.map { |u| u["adhesions"] }.flatten.filter { |a| a["season_id"] == season_id }.uniq { |a| a["id"] }
+      # users = season_activities.map { |a| a["user"] }
+      # adhesion_objects = users.map { |u| u["adhesions"] }.flatten.filter { |a| a["season_id"] == season_id }.uniq { |a| a["id"] }
 
       @adhesions.each do |adhesion|
         user = User.find(adhesion["user_id"])
-        #user = users.find { |u| u["id"] == adhesion["user_id"] }
-        #next if user.nil?
+        # user = users.find { |u| u["id"] == adhesion["user_id"] }
+        # next if user.nil?
 
         adhesion_price = AdhesionPrice.find_by(id: adhesion["adhesion_price_id"])
 
