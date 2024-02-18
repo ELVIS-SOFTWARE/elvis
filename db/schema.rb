@@ -113,13 +113,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.bigint "to_activity_ref_id"
   end
 
-  create_table "activity_ref_dolibarr_links", primary_key: ["activity_id", "pricing_id", "season_id"], force: :cascade do |t|
-    t.bigint "activity_id", null: false
-    t.bigint "pricing_id", null: false
-    t.bigint "season_id", null: false
-    t.bigint "dolibarr_id"
-  end
-
   create_table "activity_ref_kinds", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
@@ -147,7 +140,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.bigint "season_id", null: false
     t.bigint "pricing_id"
     t.float "price", default: 0.0
-    t.string "stripe_price_id"
     t.index ["activity_ref_id", "season_id", "pricing_id"], name: "activity_ref_season_pricing_index_on_associations"
   end
 
@@ -175,7 +167,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.integer "activity_type"
     t.boolean "allows_timeslot_selection", default: false
     t.integer "nb_lessons"
-    t.string "stripe_product_id"
     t.index ["activity_ref_kind_id"], name: "index_activity_refs_on_activity_ref_kind_id"
     t.index ["is_lesson"], name: "index_activity_refs_on_is_lesson"
   end
@@ -255,7 +246,7 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
 
   create_table "application_urls", force: :cascade do |t|
     t.string "url"
-    t.boolean "is_main", default: false, null: false
+    t.boolean "is_main"
     t.datetime "last_used_at"
   end
 
@@ -290,21 +281,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.index ["band_id"], name: "index_bands_users_on_band_id"
     t.index ["instrument_id"], name: "index_bands_users_on_instrument_id"
     t.index ["user_id"], name: "index_bands_users_on_user_id"
-  end
-
-  create_table "billing_logs", force: :cascade do |t|
-    t.bigint "payer_id", null: false
-    t.bigint "pricing_id"
-    t.string "product_id", null: false
-    t.string "product_type", null: false
-    t.datetime "issue_date", null: false
-    t.float "unit_price", null: false
-    t.float "quantity", null: false
-    t.float "prorata", null: false
-    t.string "billing_object_id"
-    t.string "billing_object_item_id"
-    t.index ["payer_id"], name: "index_billing_logs_on_payer_id"
-    t.index ["pricing_id"], name: "index_billing_logs_on_pricing_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -354,7 +330,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "deleted_at"
-    t.string "stripe_coupon_id"
     t.index ["deleted_at"], name: "index_coupons_on_deleted_at"
   end
 
@@ -412,16 +387,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.index ["coupon_id"], name: "index_discounts_on_coupon_id"
     t.index ["discountable_type", "discountable_id"], name: "index_discounts_on_discountable"
     t.index ["discountable_type", "discountable_id"], name: "index_discounts_on_discountable_type_and_discountable_id", unique: true
-  end
-
-  create_table "dolibarr_proposals", primary_key: "dolibarr_proposal_id", id: :bigint, default: nil, force: :cascade do |t|
-    t.bigint "payer_id", null: false
-    t.bigint "season_id", null: false
-  end
-
-  create_table "dolibarr_users", primary_key: ["user_id", "dolibarr_user_id"], force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.bigint "dolibarr_user_id", null: false
   end
 
   create_table "due_payment_statuses", force: :cascade do |t|
@@ -627,24 +592,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.index ["evaluation_level_ref_id"], name: "index_levels_on_evaluation_level_ref_id"
     t.index ["season_id"], name: "index_levels_on_season_id"
     t.index ["user_id"], name: "index_levels_on_user_id"
-  end
-
-  create_table "licenses", force: :cascade do |t|
-    t.string "issuer"
-    t.string "user"
-    t.string "description"
-    t.string "instanceName"
-    t.string "object"
-    t.datetime "issueDate"
-    t.string "featuresString"
-    t.interval "validityPeriod"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.string "signature"
-    t.datetime "dateOfEffect"
-    t.string "subscription_id"
-    t.boolean "isDev", default: false
-    t.datetime "revokedAt"
   end
 
   create_table "locations", force: :cascade do |t|
@@ -937,10 +884,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.bigint "location_id"
     t.string "operation", limit: 1, default: "+"
     t.boolean "check_status", default: false
-    t.string "checkout_session_id"
-    t.string "payment_intent_id"
-    t.string "stripe_payment_status"
-    t.string "invoice_id"
     t.index ["due_payment_id"], name: "index_payments_on_due_payment_id"
     t.index ["payable_id"], name: "index_payments_on_payable_id"
     t.index ["payment_method_id"], name: "index_payments_on_payment_method_id"
@@ -1130,21 +1073,10 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.string "zone"
     t.string "siret_rna"
     t.string "legal_entity"
-    t.string "billing_contact_id"
-    t.string "instance_size"
-    t.string "stripe_price_id"
-    t.string "dev_billing_contact_id"
-    t.string "dev_stripe_price_id"
-    t.string "stripe_current_subscription_id"
-    t.string "stripe_current_subscription_status"
-    t.string "dev_stripe_current_subscription_id"
-    t.string "dev_stripe_current_subscription_status"
     t.bigint "planning_id"
     t.boolean "entity_subject_to_vat", default: false
     t.boolean "activities_not_subject_to_vat", default: false
     t.string "rcs"
-    t.string "dev_stripe_account_id"
-    t.string "stripe_account_id"
     t.index ["address_id"], name: "index_schools_on_address_id"
     t.index ["planning_id"], name: "index_schools_on_planning_id"
   end
@@ -1169,165 +1101,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
   create_table "settings", id: :serial, force: :cascade do |t|
     t.string "name", limit: 100, default: "", null: false
     t.text "value"
-  end
-
-  create_table "stripe_coupons", id: false, force: :cascade do |t|
-    t.string "stripe_coupon_id", null: false
-    t.string "name"
-    t.float "percent_off"
-    t.boolean "enabled", default: true
-  end
-
-  create_table "stripe_credit_note_line_items", primary_key: "stripe_credit_note_line_item_id", id: :string, force: :cascade do |t|
-    t.string "stripe_credit_note_id"
-    t.string "stripe_invoice_li"
-    t.integer "quantity"
-    t.string "description"
-    t.decimal "unit_amount_excluding_tax"
-    t.decimal "tax_amount"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.jsonb "tax_rates"
-    t.jsonb "tax_amounts"
-    t.jsonb "discounts"
-    t.jsonb "discount_amounts"
-    t.decimal "amount"
-    t.decimal "amount_excluding_tax"
-  end
-
-  create_table "stripe_credit_notes", id: false, force: :cascade do |t|
-    t.string "stripe_credit_note_id", null: false
-    t.string "stripe_invoice_id"
-    t.string "memo"
-    t.string "reason"
-    t.string "status"
-    t.decimal "amount"
-    t.string "number"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.decimal "subtotal"
-    t.decimal "total"
-    t.decimal "total_excluding_tax"
-    t.jsonb "discount_amounts"
-    t.jsonb "tax_amounts"
-    t.string "pdf"
-    t.string "customer"
-    t.string "credit_note_type"
-    t.datetime "created"
-    t.datetime "voided_at"
-  end
-
-  create_table "stripe_discounts", id: false, force: :cascade do |t|
-    t.string "stripe_discount_id"
-    t.string "stripe_coupon_id"
-    t.string "customer_id"
-    t.string "invoice_id"
-  end
-
-  create_table "stripe_invoice_line_items", force: :cascade do |t|
-    t.string "stripe_li"
-    t.string "stripe_ii"
-    t.string "stripe_invoice_id"
-    t.string "stripe_price_id"
-    t.decimal "amount"
-    t.string "quantity"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.decimal "unit_amount_excluding_tax"
-    t.jsonb "discount_amounts"
-    t.jsonb "discounts"
-    t.jsonb "tax_amounts"
-    t.jsonb "tax_rates"
-  end
-
-  create_table "stripe_invoices", id: false, force: :cascade do |t|
-    t.string "stripe_invoice_id", null: false
-    t.string "status", null: false
-    t.datetime "due_date"
-    t.string "number"
-    t.decimal "amount_due", null: false
-    t.string "customer", null: false
-    t.string "description"
-    t.string "footer"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.decimal "subtotal"
-    t.decimal "total"
-    t.decimal "total_excluding_tax"
-    t.jsonb "total_discount_amounts"
-    t.jsonb "total_tax_amounts"
-    t.jsonb "discounts"
-    t.jsonb "payment_intent"
-    t.string "invoice_pdf"
-  end
-
-  create_table "stripe_prices", id: false, force: :cascade do |t|
-    t.string "stripe_price_id", null: false
-    t.boolean "active", null: false
-    t.string "tax_behavior", null: false
-    t.string "currency", null: false
-    t.string "stripe_product_id"
-    t.decimal "unit_amount_decimal", null: false
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.datetime "deleted_at"
-    t.index ["deleted_at"], name: "index_stripe_prices_on_deleted_at"
-  end
-
-  create_table "stripe_products", id: false, force: :cascade do |t|
-    t.string "stripe_product_id", null: false
-    t.string "code_product", null: false
-    t.boolean "active", null: false
-    t.string "name", null: false
-    t.string "unit_label"
-    t.string "description", null: false
-    t.string "default_price_id"
-    t.string "tax_rate", null: false
-    t.datetime "deleted_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-  end
-
-  create_table "stripe_quote_line_items", force: :cascade do |t|
-    t.string "stripe_li"
-    t.string "stripe_quote_id"
-    t.string "stripe_price_id"
-    t.integer "quantity"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.jsonb "discounts", default: {}
-    t.jsonb "tax_rates", default: {}
-  end
-
-  create_table "stripe_quotes", id: false, force: :cascade do |t|
-    t.string "stripe_quote_id", null: false
-    t.string "customer", null: false
-    t.string "header"
-    t.string "footer"
-    t.string "description"
-    t.string "number"
-    t.string "status", null: false
-    t.decimal "amount_total", null: false
-    t.datetime "expires_at"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.jsonb "total_details"
-    t.decimal "amount_subtotal"
-  end
-
-  create_table "stripe_tax_rates", id: false, force: :cascade do |t|
-    t.string "stripe_tax_rate_id", null: false
-    t.boolean "active"
-    t.string "country"
-    t.string "display_name", null: false
-    t.string "description"
-    t.string "jurisdiction"
-    t.string "percentage", null: false
-    t.string "effective_percentage", null: false
-    t.boolean "inclusive"
-    t.string "tax_type"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "student_attendances", force: :cascade do |t|
@@ -1465,7 +1238,7 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.boolean "solfege"
     t.boolean "handicap", default: false
     t.string "handicap_description"
-    t.integer "adherent_number", default: -> { "nextval('adherent_number_seq'::regclass)" }
+    t.serial "adherent_number", null: false
     t.bigint "evaluation_level_ref_id"
     t.boolean "is_paying"
     t.boolean "is_accompanying"
@@ -1478,9 +1251,8 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.boolean "checked_gdpr", default: false
     t.boolean "checked_image_right"
     t.boolean "checked_newsletter"
-    t.boolean "is_creator", default: false
     t.bigint "organization_id"
-    t.string "stripe_customer_id"
+    t.boolean "is_creator", default: false
     t.string "identification_number"
     t.index ["address_id"], name: "index_users_on_address_id"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
@@ -1504,9 +1276,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
   add_foreign_key "activity_instances", "locations"
   add_foreign_key "activity_instances", "rooms"
   add_foreign_key "activity_instances", "time_intervals"
-  add_foreign_key "activity_ref_dolibarr_links", "activity_refs", column: "activity_id"
-  add_foreign_key "activity_ref_dolibarr_links", "pricings"
-  add_foreign_key "activity_ref_dolibarr_links", "seasons"
   add_foreign_key "activity_ref_pricings", "activity_refs"
   add_foreign_key "activity_ref_pricings", "pricing_categories"
   add_foreign_key "activity_ref_pricings", "seasons", column: "from_season_id"
@@ -1516,15 +1285,10 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
   add_foreign_key "adhesions", "adhesion_prices"
   add_foreign_key "bands", "band_types"
   add_foreign_key "bands", "music_genres"
-  add_foreign_key "billing_logs", "pricings"
-  add_foreign_key "billing_logs", "users", column: "payer_id"
   add_foreign_key "consent_document_users", "consent_documents"
   add_foreign_key "consent_document_users", "users"
   add_foreign_key "desired_activities", "pricing_categories", on_delete: :restrict
   add_foreign_key "discounts", "coupons"
-  add_foreign_key "dolibarr_proposals", "seasons"
-  add_foreign_key "dolibarr_proposals", "users", column: "payer_id"
-  add_foreign_key "dolibarr_users", "users"
   add_foreign_key "due_payments", "payment_schedules"
   add_foreign_key "error_histories", "error_codes"
   add_foreign_key "evaluation_appointments", "activity_applications"
