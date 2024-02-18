@@ -2,7 +2,6 @@ import React from "react";
 import { csrfToken } from "../utils";
 import swal from "sweetalert2";
 import ActivityRefBasics from "./ActivityRefBasics";
-import ActivityRefPricings from "./ActivityRefPricings";
 import ActivityRefApplication from "./ActivityRefApplication";
 import TabbedComponent from "../utils/ui/tabs";
 import WorkGroupTemplateEditor from "./WorkGroupTemplateEditor";
@@ -25,7 +24,6 @@ export default class ActivityRefContainer extends React.Component {
             .mapValues(_.size)
             .value();
 
-        this.pricings = this.props.activityRefSeasonPricings;
         this.teachers = this.props.teachers;
         this.imageChanged = false
         this.route =
@@ -34,21 +32,21 @@ export default class ActivityRefContainer extends React.Component {
                 : `/activity_ref`;
 
         this.state = {
-            PricingCategoriesToSave: []
+            pricingCategoriesToSave: []
         }
     }
 
     addPricingCategoriesToSave(pricing) {
         // on ajoute le pricing à la liste des pricings à sauvegarder
         this.setState({
-            PricingCategoriesToSave: [...this.state.PricingCategoriesToSave, pricing]
+            pricingCategoriesToSave: [...this.state.pricingCategoriesToSave, pricing]
         })
     }
 
     updatePricingCategoriesToSave(updatedPricing) {
         // on met à jour le pricing dans la liste des pricings à sauvegarder
         this.setState({
-            PricingCategoriesToSave: this.state.PricingCategoriesToSave.map(pricing => {
+            pricingCategoriesToSave: this.state.pricingCategoriesToSave.map(pricing => {
                 if (pricing.id === updatedPricing.id) {
                     return updatedPricing;
                 }
@@ -60,7 +58,7 @@ export default class ActivityRefContainer extends React.Component {
     deletePricingCategoriesToSave(pricing) {
         // on supprime le pricing de la liste des pricings à sauvegarder
         this.setState({
-            PricingCategoriesToSave: this.state.PricingCategoriesToSave.filter(p => p.id !== pricing.id)
+            pricingCategoriesToSave: this.state.pricingCategoriesToSave.filter(p => p.id !== pricing.id)
         })
     }
 
@@ -68,10 +66,6 @@ export default class ActivityRefContainer extends React.Component {
         this.instruments = values
     }
 
-    onPricingsChange({ dataBySeason }) {
-        // on applatit notre tableau 
-        this.pricings = [].concat.apply([], Object.values(dataBySeason))
-    }
 
     /**
      * @param {[]} teachers
@@ -132,9 +126,8 @@ export default class ActivityRefContainer extends React.Component {
             allows_timeslot_selection: values.applicationOptions.includes("allows_timeslot_selection"),
             is_work_group: values.activityRef.is_work_group,
             instruments: this.instruments,
-            season_pricings: this.pricings,
             users: (this.teachers || []).map(t => t.id),
-            pricings: this.state.PricingCategoriesToSave
+            pricings: this.state.pricingCategoriesToSave
         }
 
         api
@@ -209,7 +202,6 @@ export default class ActivityRefContainer extends React.Component {
                                         activityRefImage={this.props.activityRefImage}
                                         activityRefKinds={this.props.activityRefKinds}
                                         onImageChange={this.onImageChange.bind(this)}
-                                        PricingCategories={this.props.PricingCategories}
                                         seasons={this.props.seasons}
                                         addPricingCategoriesToSave={this.addPricingCategoriesToSave.bind(this)}
                                         updatePricingCategoriesToSave={this.updatePricingCategoriesToSave.bind(this)}
@@ -228,20 +220,6 @@ export default class ActivityRefContainer extends React.Component {
                                         nextCycles={this.props.nextCycles}
                                     />,
                                 },
-
-                                // les tarifs de l'activité
-                                // {
-                                //     id: "activity_ref_pricings",
-                                //     header: "Tarifs",
-                                //     body: <ActivityRefPricings
-                                //         activityRefId={this.props.activityRef.id}
-                                //         seasons={this.props.seasons}
-                                //         currentSeasonId={this.props.currentSeasonId}
-                                //         pricings={this.props.pricings}
-                                //         activityRefSeasonPricings={this.props.activityRefSeasonPricings}
-                                //         onChange={this.onPricingsChange.bind(this)}
-                                //     />,
-                                // },
 
                                 // les instruments éventuellement liés à l'atelier
                                 {

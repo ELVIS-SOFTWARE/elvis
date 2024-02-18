@@ -46,7 +46,7 @@ export default class ActivityRefDataService extends DataService
         };
 
         // update the pricing in the activityRefPricings array
-        let index = this.activityRefPricings.findIndex(pricing => pricing.id === data.id);
+        let index = this.activityRefPricings.findIndex(arp => arp.id === data.id);
         this.activityRefPricings[index] = updatedPricing;
 
         // update the state of the parent component
@@ -95,7 +95,7 @@ export default class ActivityRefDataService extends DataService
 
     deleteData(data) {
         // remove the pricing from the activityRefPricings array
-        let index = this.activityRefPricings.findIndex(pricing => pricing.id === data.id);
+        let index = this.activityRefPricings.findIndex(arp => arp.id === data.id);
         this.activityRefPricings.splice(index, 1);
 
         // update the state of the parent component

@@ -44,6 +44,21 @@ export const WEEKDAYS = [
     "Samedi",
 ];
 
+export const MONTHS = [
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre",
+];
+
 export const INTERVAL_KINDS = {
     AVAILABILITY: "p",
     LESSON: "c",

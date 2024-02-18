@@ -1,20 +1,6 @@
 import React, { Component } from "react";
-import { WEEKDAYS } from "../../tools/constants";
+import { WEEKDAYS, MONTHS } from "../../tools/constants";
 
-export const MONTHS = [
-    "Janvier",
-    "Février",
-    "Mars",
-    "Avril",
-    "Mai",
-    "Juin",
-    "Juillet",
-    "Août",
-    "Septembre",
-    "Octobre",
-    "Novembre",
-    "Décembre",
-];
 
 export default class AddCourseSummary extends Component {
     constructor(props) {

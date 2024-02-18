@@ -57,13 +57,13 @@ class UserPaymentsController < ApplicationController
 
     # methode de paiement
 
-    payment_payer_terms = user.payer_payment_terms.where(season_id: season.id).first&.as_json(include: [:payment_terms, :payment_method])
-    payment_term = payment_payer_terms&.dig("payment_terms")
+    payer_payment_terms = user.payer_payment_terms.where(season_id: season.id).first&.as_json(include: [:payment_schedule_options, :payment_method])
+    payment_schedule_option = payer_payment_terms&.dig("payment_schedule_options")
 
-    payment_term_data = {
-      term_name: payment_payer_terms&.dig("payment_terms", "label"),
-      payment_method: payment_payer_terms&.dig("payment_method", "label"),
-      day_for_collection: payment_term.nil? || payment_payer_terms.nil? ? 0 : payment_term["days_allowed_for_collection"][payment_payer_terms["day_for_collection"]]
+    payment_terms_data = {
+      term_name: payer_payment_terms&.dig("payment_schedule_options", "label"),
+      payment_method: payer_payment_terms&.dig("payment_method", "label"),
+      day_for_collection: payment_schedule_option.nil? || payer_payment_terms.nil? ? 0 : payment_schedule_option["available_payments_days"][payer_payment_terms["day_for_collection"]]
     }
 
     # fin de la methode de paiement
@@ -72,7 +72,7 @@ class UserPaymentsController < ApplicationController
       format.json { render json: {
         general_infos: data,
         due_payments: due_payments_data.sort_by { |e| e[:due_date] }.reverse,
-        payment_payer_terms: payment_term_data
+        payer_payment_terms: payment_terms_data
       }}
     end
   end
@@ -85,7 +85,7 @@ class UserPaymentsController < ApplicationController
     payment = user.payer_payment_terms.where(season_id: params[:season_id]).first
 
     respond_to do |format|
-      format.json { render json: payment.as_json(only: [:payment_method_id, :payment_terms_id, :day_for_collection]) }
+      format.json { render json: payment.as_json(only: [:payment_method_id, :payment_schedule_options_id, :day_for_collection]) }
     end
   end
 
@@ -111,13 +111,13 @@ class UserPaymentsController < ApplicationController
       user_payment_term = user.payer_payment_terms.create(
         season_id: season.id,
         payment_method_id: params[:payment_method_id],
-        payment_terms_id: params[:payment_terms_id],
+        payment_schedule_options_id: params[:payment_schedule_options_id],
         day_for_collection: params[:day_for_collection]
       )
 
       creation = true
     else
-      # do not permitupdate of payment_terms_id
+      # do not permit update of payment_schedule_options_id
       user_payment_term.update(
         payment_method_id: params[:payment_method_id],
         day_for_collection: params[:day_for_collection]
@@ -127,7 +127,7 @@ class UserPaymentsController < ApplicationController
     SyncDuePaymentWithPayerTermsJob.perform_now(id: user_payment_term.id, creation: creation)
 
     respond_to do |format|
-      format.json { render json: user_payment_term.as_json(only: [:payment_method_id, :payment_terms_id, :day_for_collection]) }
+      format.json { render json: user_payment_term.as_json(only: [:payment_method_id, :payment_schedule_options_id, :day_for_collection]) }
     end
   end
 

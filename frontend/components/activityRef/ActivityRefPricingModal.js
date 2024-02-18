@@ -20,7 +20,9 @@ export default class ActivityRefPricingModal extends React.Component {
     componentDidMount() {
         const { seasons, pricingCategories, isUpdate, item } = this.props;
 
-        const mappedSeasons = seasons.map(season => ({ value: season.id, label: season.label }));
+        const mappedSeasons = seasons
+            .map(season => ({ value: season.id, label: season.label }))
+            .sort((a, b) => a.label.localeCompare(b.label));
         const mappedPricingCategories = pricingCategories.map(pricingCategory => ({
             value: pricingCategory.id,
             label: pricingCategory.name

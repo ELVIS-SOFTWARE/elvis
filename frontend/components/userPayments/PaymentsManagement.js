@@ -128,7 +128,7 @@ function generateDataForPaymentSummaryTable({
                 coupon: {...coupon},
                 studentId: act.id,
                 user: act.user,
-                pricingId: des.pricing_category_id,
+                pricingCategoryId: des.pricing_category_id,
                 activityId: a.id,
                 paymentLocation: act.payment_location,
                 due_total: amount || 0,
@@ -181,7 +181,7 @@ function generateDataForPaymentSummaryTable({
                 coupon: coupon,
                 studentId: option.id,
                 user: option.desired_activity.activity_application.user,
-                pricingId: des.pricing_category_id,
+                pricingCategoryId: des.pricing_category_id,
                 paymentLocation: option.payment_location,
                 due_total: amount || 0,
                 discountedTotal: (amount || 0) * (1 - percent_off / 100),
@@ -194,24 +194,24 @@ function generateDataForPaymentSummaryTable({
 
     if (adhesionEnabled) {
         for (const adhesion of adhesions) {
-            const adhesion_price = adhesionPrices.find(p => p.id === adhesion.adhesion_price_id) || {};
+            const adhesionPrice = adhesionPrices.find(p => p.id === adhesion.adhesion_price_id) || {};
 
-            if (adhesion_price) {
+            if (adhesionPrice) {
                 const coupon = _.get(adhesion, "discount.coupon", 0);
-                const percent_off = _.get(adhesion, "discount.coupon.percent_off", 0);
+                const percentOff = _.get(adhesion, "discount.coupon.percent_off", 0);
 
                 data.push({
                     id: 0,
                     activity: `Adhésion de ${adhesion.user.first_name} ${adhesion.user.last_name}`,
                     frequency: 1,
                     initial_total: 1,
-                    due_total: adhesion_price.price || 0,
+                    due_total: adhesionPrice.price || 0,
                     coupon: coupon,
-                    discountedTotal: (adhesion_price.price || 0) * (1 - percent_off / 100),
-                    unitPrice: adhesion_price.price || 0,
+                    discountedTotal: (adhesionPrice.price || 0) * (1 - percentOff / 100),
+                    unitPrice: adhesionPrice.price || 0,
                     user: adhesion.user,
                     studentId: adhesion.user.id,
-                    adhesionPriceId: adhesion_price.id,
+                    adhesionPriceId: adhesionPrice.id,
                     adhesionId: adhesion.id,
                 });
             }
@@ -467,7 +467,7 @@ class PaymentsManagement extends React.Component {
     }
 
     handleChangePricingChoice(desId, userId, evt) {
-        const pricing = this.props.pricings.find(p => p.id == evt.target.value);
+        const pricing = this.props.pricingCategories.find(p => p.id == evt.target.value);
 
         let dess = {...this.state.desiredActivities};
         let des = _.find(
@@ -490,7 +490,7 @@ class PaymentsManagement extends React.Component {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    pricing_id: pricing.id,
+                    pricing_category_id: pricing.id,
                 }),
             }).then(() => {
                 this.setState({desiredActivities: dess});
@@ -1589,7 +1589,7 @@ class PaymentsManagement extends React.Component {
                                     locations={this.props.locations}
                                     season={this.state.season}
                                     seasons={this.props.seasons}
-                                    pricings={this.props.pricings}
+                                    pricingCategories={this.props.pricingCategories}
                                     data={itemsForPayment}
                                     coupons={this.props.coupons}
                                     totalDue={isNaN(totalDue) ? null : totalDue}

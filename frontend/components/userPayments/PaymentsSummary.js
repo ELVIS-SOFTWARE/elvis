@@ -163,11 +163,11 @@ class PaymentsSummary extends React.Component {
 
                     // Sinon, c'est une activité
                     if (this.props.isStudentView) {
-                        const pricing = this.props.pricings.find(
-                            p => p.id === props.original.pricingId
+                        const pricingCategory = this.props.pricingCategories.find(
+                            p => p.id === props.original.pricingCategoryId
                         );
 
-                        return <p>{pricing ? pricing.label : "aucun tarif défini"}</p>;
+                        return <p>{pricingCategory ? pricingCategory.label : "aucun tarif défini"}</p>;
                     } else {
                         let activity_ref_pricings = props.original.ref.activity_ref_pricing
                         let season = this.props.seasons.find(s => s.id === this.props.season)
@@ -182,7 +182,7 @@ class PaymentsSummary extends React.Component {
                         return (
                             <select
                                 className="form-control"
-                                value={props.original.pricingId || 0}
+                                value={props.original.pricingCategoryId || 0}
                                 onChange={evt =>
                                     this.props.handleChangePricingChoice(
                                         props.original.id,
@@ -195,14 +195,14 @@ class PaymentsSummary extends React.Component {
                                     Sélectionner un tarif
                                 </option>
                                 {pricings.map(assoc => {
-                                    const pricing = this.props.pricings.find(
+                                    const pricingCategory = this.props.pricingCategories.find(
                                         p => p.id === assoc.pricing_category_id
                                     );
 
-                                    if (pricing) {
+                                    if (pricingCategory) {
                                         return (
-                                            <option key={pricing.id} value={pricing.id}>
-                                                {pricing.name}
+                                            <option key={pricingCategory.id} value={pricingCategory.id}>
+                                                {pricingCategory.name}
                                             </option>
                                         );
                                     }
@@ -211,8 +211,8 @@ class PaymentsSummary extends React.Component {
                         );
                     }
                 },
-                accessor: d => (this.props.pricings.find(
-                    p => p.id === d.pricingId
+                accessor: d => (this.props.pricingCategories.find(
+                    p => p.id === d.pricingCategoryId
                 ) || {}).label
             },
             {

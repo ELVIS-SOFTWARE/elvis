@@ -70,7 +70,7 @@ class Wizard extends React.Component {
             selectedEvaluationIntervals: {},
             dayForCollection: {day: null},
             paymentTermsId: {id: null},
-            availPaymentTerms: this.props.availPaymentTerms,
+            availPaymentScheduleOptions: this.props.availPaymentScheduleOptions,
             availPaymentMethods: this.props.availPaymentMethods,
         };
 
@@ -597,8 +597,8 @@ class Wizard extends React.Component {
         });
     }
 
-    handleChangePaymentTerms(paymentTermsId) {
-        this.handleChangePaymentInfo('payment_terms_id', paymentTermsId);
+    handleChangePaymentTerms(paymentScheduleOptionsId) {
+        this.handleChangePaymentInfo('payment_schedule_options_id', paymentScheduleOptionsId);
     }
 
     handleChangePaymentMethod(paymentMethodId) {
@@ -845,14 +845,14 @@ class Wizard extends React.Component {
                 ),
             },
 
-            (this.props.availPaymentTerms && this.props.availPaymentTerms.length > 0 || this.props.paymentStepDisplayText) && {
+            (this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 || this.props.paymentStepDisplayText) && {
                 name: "Modalités de paiement",
                 component: (
                     <WrappedPayerPaymentTerms
                         informationalStepOnly={false}
                         paymentTerms={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         collection={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
-                        availPaymentTerms={this.state.availPaymentTerms}
+                        availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
                         availPaymentMethods={this.state.availPaymentMethods}
                         paymentStepDisplayText={this.props.paymentStepDisplayText}
                         onChangePaymentTerms={this.handleChangePaymentTerms.bind(this)}

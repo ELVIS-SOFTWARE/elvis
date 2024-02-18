@@ -45,14 +45,10 @@ class ActivityRefController < ApplicationController
     @activity_ref_application_options = []
 
     @activity_kinds = ActivityRefKind.all.map { |ar| [ar.name, ar.id] }
-    @pricings = Pricing.all
-    @activity_pricings = []
 
     @seasons = Season.order(:start)
-    @pricings = Pricing.all
     @activity_refs = ActivityRef.all.group_by(&:kind).transform_values { |arr| arr.map { |a| { label: a.label, id: a.id } } }.to_a
     @next_cycles = []
-    @activity_ref_season_pricings = []
 
     @activity_ref_application_options = []
     @activity_ref_application_options.push("") if @activity_ref.has_additional_student
@@ -61,16 +57,23 @@ class ActivityRefController < ApplicationController
     @activity_ref_application_options.push("is_unpopular") if @activity_ref.is_unpopular
     @activity_ref_application_options.push("is_evaluable") if @activity_ref.is_evaluable
     @activity_ref_application_options.push("allows_timeslot_selection") if @activity_ref.allows_timeslot_selection
+
+    @teachers = @activity_ref.users.map { |u| { first_name: u.first_name, last_name: u.last_name, id: u.id } }
+
   end
 
   def create
     ref_param = ref_params
-    @activity_ref = ActivityRef.create(ref_param)
-    # ref.save
+    @activity_ref = ActivityRef.create!(ref_param)
 
     pricings = params[:activity_ref][:pricings]
     pricings.each do |pricing|
-      p = ActivityRefPricing.create(activity_ref_id: @activity_ref.id, price: "#{pricing[:price]}".gsub(',', '.').to_f, from_season_id: pricing[:from_season_id], to_season_id: pricing[:to_season_id], pricing_category_id: pricing[:pricing_category][:id])
+      p = ActivityRefPricing.create(
+        activity_ref_id: @activity_ref.id,
+        price: "#{pricing[:price]}".gsub(',', '.').to_f,
+        from_season_id: pricing[:from_season_id],
+        to_season_id: pricing[:to_season_id],
+        pricing_category_id: pricing[:pricing_category][:id])
       p.save!
 
       unless p
@@ -102,11 +105,8 @@ class ActivityRefController < ApplicationController
 
     @activity_kinds = ActivityRefKind.all.map { |ar| [ar.name, ar.id] }
     @seasons = Season.order(:start)
-    @pricings = Pricing.all
     @activity_refs = ActivityRef.all.group_by(&:activity_ref_kind).transform_values { |arr| arr.map { |a| { label: a.label, id: a.id } } }.to_a
     @next_cycles = @activity_ref.next_cycles.pluck(:to_activity_ref_id)
-
-    @activity_ref_season_pricings = @activity_ref.activity_ref_pricing
 
     @teachers = @activity_ref.users.map { |u| { first_name: u.first_name, last_name: u.last_name, id: u.id } }
   end
@@ -134,8 +134,6 @@ class ActivityRefController < ApplicationController
 
     @activity_ref.activity_ref_kind = ActivityRefKind.find ref_param[:activity_ref_kind_id]
 
-    ##########
-    # on enregistre d'abord les changements sur l'ActivityRef elle-même
     res = @activity_ref.update(ref_param)
 
     unless res
@@ -249,18 +247,6 @@ class ActivityRefController < ApplicationController
     end
 
     redirect_to activity_ref_index_path
-  end
-
-  def set_season_pricings
-    @activity_ref = ActivityRef.find(params[:id])
-
-    ActivityRef.transaction do
-      @activity_ref.activity_ref_pricing.destroy_all
-
-      params[:season_pricings].each do |pricing|
-        @activity_ref.activity_ref_pricing.create(activity_ref_id: @activity_ref.id, pricing_id: pricing[:pricing_id], season_id: pricing[:season_id], price: pricing[:price])
-      end
-    end
   end
 
   def set_instruments

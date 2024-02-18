@@ -173,7 +173,7 @@ class User < ApplicationRecord
   has_many :instruments, through: :users_instruments
 
   has_many :payer_payment_terms, class_name: "PayerPaymentTerms", foreign_key: :payer_id, dependent: :destroy
-  has_many :payment_terms, through: :payer_payment_terms
+  has_many :payment_schedule_options, through: :payer_payment_terms
 
   has_many :consent_document_users, dependent: :destroy
 

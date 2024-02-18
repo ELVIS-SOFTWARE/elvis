@@ -11,7 +11,7 @@ class WrappedPayerPaymentTerms extends React.Component {
         super(props);
         this.state = {
             paymentTerms: {
-                payment_terms_id: props.paymentTerms.payment_terms_id,
+                payment_schedule_options_id: props.paymentTerms.payment_schedule_options_id,
                 day_for_collection: props.paymentTerms.day_for_collection,
                 payment_method_id: props.paymentTerms.payment_method_id,
             },
@@ -24,7 +24,7 @@ class WrappedPayerPaymentTerms extends React.Component {
             return true;
 
         if (this.state.paymentTerms.day_for_collection != null &&
-            !!this.state.paymentTerms.payment_terms_id &&
+            !!this.state.paymentTerms.payment_schedule_options_id &&
             !!this.state.paymentTerms.payment_method_id)
             return true;
         else {
@@ -33,16 +33,16 @@ class WrappedPayerPaymentTerms extends React.Component {
         }
     }
 
-    handleChangePaymentTerms(paymentTermsId) {
+    handleChangePaymentTerms(paymentScheduleOptionsId) {
         this.setState(prevState => {
             return {
                 paymentTerms: {
                     ...prevState.paymentTerms,
-                    payment_terms_id: paymentTermsId,
+                    payment_schedule_options_id: paymentScheduleOptionsId,
                 },
             };
         });
-        this.props.onChangePaymentTerms && this.props.onChangePaymentTerms(paymentTermsId);
+        this.props.onChangePaymentTerms && this.props.onChangePaymentTerms(paymentScheduleOptionsId);
     }
 
     handleChangeDayForCollection(dayIndex) {
@@ -88,13 +88,13 @@ class WrappedPayerPaymentTerms extends React.Component {
         return <Fragment>
 
             {this.props.informationalStepOnly ? (
-                this.props.availPaymentTerms && this.props.availPaymentTerms.length > 0 && <PayerPaymentTermsInfo
-                    availPaymentTerms={this.props.availPaymentTerms}
+                this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 && <PayerPaymentTermsInfo
+                    availPaymentScheduleOptions={this.props.availPaymentScheduleOptions}
                 />
             ) : (
                 <PayerPaymentTerms
                     paymentTerms={this.props.paymentTerms}
-                    availPaymentTerms={this.props.availPaymentTerms}
+                    availPaymentScheduleOptions={this.props.availPaymentScheduleOptions}
                     availPaymentMethods={this.props.availPaymentMethods}
                     onChangePaymentTerms={this.handleChangePaymentTerms.bind(this)}
                     onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
@@ -113,17 +113,17 @@ class WrappedPayerPaymentTerms extends React.Component {
 
 WrappedPayerPaymentTerms.propTypes = {
     paymentTerms: PropTypes.shape({
-        payment_terms_id: PropTypes.number,
+        payment_schedule_options_id: PropTypes.number,
         day_for_collection: PropTypes.number,
         payment_method_id: PropTypes.number,
     }),
-    availPaymentTerms: PropTypes.arrayOf(
+    availPaymentScheduleOptions: PropTypes.arrayOf(
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             label: PropTypes.string.isRequired,
-            terms_number: PropTypes.number.isRequired,
-            collect_on_months: PropTypes.arrayOf(PropTypes.number).isRequired,
-            days_allowed_for_collection: PropTypes.arrayOf(PropTypes.number).isRequired,
+            payments_number: PropTypes.number.isRequired,
+            payments_months: PropTypes.arrayOf(PropTypes.number).isRequired,
+            available_payments_days: PropTypes.arrayOf(PropTypes.number).isRequired,
         }),
     ),
     availPaymentMethods: PropTypes.arrayOf(
