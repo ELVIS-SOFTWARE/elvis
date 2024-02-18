@@ -68,6 +68,15 @@ function calculateTotals(duePayments, payments, itemsForPayment) {
     };
 }
 
+function roundCurrency(value, digits = 2) {
+    return Number(value.toFixed(digits));
+}
+
+function getDiscountedAmount(amount, percentOff) {
+    const res = (amount || 0) * (1 - percentOff / 100);
+    return roundCurrency(res);
+}
+
 function generateDataForPaymentSummaryTable({
                                                 activities,
                                                 desired,
@@ -115,7 +124,7 @@ function generateDataForPaymentSummaryTable({
             }
 
             const coupon = _.get(des, "discount.coupon", 0);
-            const percent_off = _.get(des, "discount.coupon.percent_off", 0);
+            const percentOff = _.get(des, "discount.coupon.percent_off", 0);
 
             data.push({
                 id: des.id,
@@ -132,7 +141,7 @@ function generateDataForPaymentSummaryTable({
                 activityId: a.id,
                 paymentLocation: act.payment_location,
                 due_total: amount || 0,
-                discountedTotal: (amount || 0) * (1 - percent_off / 100),
+                discountedTotal: getDiscountedAmount(amount, percentOff),
                 unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
             });
         }
@@ -169,7 +178,7 @@ function generateDataForPaymentSummaryTable({
             }
 
             const coupon = _.get(des, "discount.coupon", 0);
-            const percent_off = _.get(des, "discount.coupon.percent_off", 0);
+            const percentOff = _.get(des, "discount.coupon.percent_off", 0);
 
             const formattedOption = {
                 id: des.id,
@@ -184,7 +193,7 @@ function generateDataForPaymentSummaryTable({
                 pricingCategoryId: des.pricing_category_id,
                 paymentLocation: option.payment_location,
                 due_total: amount || 0,
-                discountedTotal: (amount || 0) * (1 - percent_off / 100),
+                discountedTotal: getDiscountedAmount(amount, percentOff),
                 isOption: true,
                 unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
             };
@@ -207,7 +216,7 @@ function generateDataForPaymentSummaryTable({
                     initial_total: 1,
                     due_total: adhesionPrice.price || 0,
                     coupon: coupon,
-                    discountedTotal: (adhesionPrice.price || 0) * (1 - percentOff / 100),
+                    discountedTotal: getDiscountedAmount(adhesionPrice.price, percentOff),
                     unitPrice: adhesionPrice.price || 0,
                     user: adhesion.user,
                     studentId: adhesion.user.id,
