@@ -27,10 +27,10 @@ class ActivityRefKind < ApplicationRecord
   end
 
   def display_price(season = Season.current_apps_season || Season.current)
-    activity_refs.reduce(0) do |max_price, activity_ref|
-      ar_display_price = activity_ref.max_price_for_activity_ref(season)
-      ar_display_price > max_price ? ar_display_price : max_price
-    end
+    ActivityRefPricing
+      .for_season(season)
+      .for_activity_ref_id(activity_refs.pluck(:id))
+      .maximum(:price) || 0
   end
 
 end

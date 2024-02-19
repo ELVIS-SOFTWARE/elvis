@@ -157,7 +157,7 @@ class ActivityRef < ApplicationRecord
   end
 
   def max_price_for_activity_ref(season = Season.current_apps_season || Season.current)
-    ActivityRefPricing.for_activity_ref(self).for_season(season).max_by(&:price)&.price || 0
+    ActivityRefPricing.for_activity_ref(self).for_season(season).maximum(:price) || 0
   end
 
   def display_prices_by_season
