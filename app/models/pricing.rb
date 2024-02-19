@@ -7,7 +7,11 @@
 #
 
 
-# DEPRECATED # Remplacé par PricingCategories
+# DEPRECATED
+# Remplacé par PricingCategories
+# ne supprimer définitivement que lorsque toutes les migrations auront été faites
+# (utilisé par la migration '20231204141214_migrate_all_season_pricings_to_categories.rb')
+
 class Pricing < ApplicationRecord
     has_many :activity_ref_season_pricings
     has_many :activity_refs, through: :activity_ref_season_pricings

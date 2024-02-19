@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_01_23_141007) do
+ActiveRecord::Schema.define(version: 2024_02_18_171600) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -809,12 +809,12 @@ ActiveRecord::Schema.define(version: 2024_01_23_141007) do
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "deleted_at"
     t.bigint "payer_id", null: false
-    t.bigint "payment_terms_id", null: false
+    t.bigint "payment_schedule_options_id", null: false
     t.bigint "season_id", null: false
     t.bigint "payment_method_id"
     t.index ["payer_id"], name: "index_payer_payment_terms_on_payer_id"
     t.index ["payment_method_id"], name: "index_payer_payment_terms_on_payment_method_id"
-    t.index ["payment_terms_id"], name: "index_payer_payment_terms_on_payment_terms_id"
+    t.index ["payment_schedule_options_id"], name: "index_payer_payment_terms_on_payment_schedule_options_id"
     t.index ["season_id"], name: "index_payer_payment_terms_on_season_id"
   end
 
@@ -826,6 +826,19 @@ ActiveRecord::Schema.define(version: 2024_01_23_141007) do
     t.boolean "is_credit_note", default: false
     t.boolean "built_in", default: false
     t.boolean "show_payment_method_to_user", default: false
+  end
+
+  create_table "payment_schedule_options", force: :cascade do |t|
+    t.string "label"
+    t.integer "payments_number"
+    t.jsonb "payments_months"
+    t.jsonb "available_payments_days"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
+    t.bigint "pricing_category_id"
+    t.integer "index"
+    t.index ["pricing_category_id"], name: "index_payment_schedule_options_on_pricing_category_id"
   end
 
   create_table "payment_schedule_statuses", force: :cascade do |t|
@@ -852,19 +865,6 @@ ActiveRecord::Schema.define(version: 2024_01_23_141007) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "built_in", default: false
-  end
-
-  create_table "payment_terms", force: :cascade do |t|
-    t.string "label"
-    t.integer "terms_number"
-    t.jsonb "collect_on_months"
-    t.jsonb "days_allowed_for_collection"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.datetime "deleted_at"
-    t.bigint "pricing_id"
-    t.integer "index"
-    t.index ["pricing_id"], name: "index_payment_terms_on_pricing_id"
   end
 
   create_table "payments", force: :cascade do |t|
@@ -1299,10 +1299,10 @@ ActiveRecord::Schema.define(version: 2024_01_23_141007) do
   add_foreign_key "packs", "seasons"
   add_foreign_key "packs", "users"
   add_foreign_key "payer_payment_terms", "payment_methods"
-  add_foreign_key "payer_payment_terms", "payment_terms", column: "payment_terms_id"
+  add_foreign_key "payer_payment_terms", "payment_schedule_options", column: "payment_schedule_options_id"
   add_foreign_key "payer_payment_terms", "seasons"
   add_foreign_key "payer_payment_terms", "users", column: "payer_id"
-  add_foreign_key "payment_terms", "pricings"
+  add_foreign_key "payment_schedule_options", "pricing_categories"
   add_foreign_key "planning_conflicts", "conflicts"
   add_foreign_key "planning_conflicts", "plannings"
   add_foreign_key "room_room_features", "room_features", column: "room_features_id"

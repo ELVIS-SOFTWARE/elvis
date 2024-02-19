@@ -23,7 +23,7 @@ export default function UserPaymentsV2({seasons, user, is_current_user, onPayCli
             {
                 setData(data.general_infos);
                 setDuePaymentsData(data.due_payments);
-                setPaymentTerms(data.payment_payer_terms);
+                setPaymentTerms(data.payer_payment_terms);
             })
             .error(data =>
             {

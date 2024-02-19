@@ -29,7 +29,6 @@ Rails.application.routes.draw do
     get "payment_parameters", to: "payments_parameters#index"
     post "payment_parameters/list_status", to: "payments_parameters#list_payments_status"
     post "payment_parameters/list_methods", to: "payments_parameters#list_payments_methods"
-    post "payment_parameters/list_pricings", to: "payments_parameters#list_pricings"
     post "payment_parameters/show_adhesion", to: "payments_parameters#show_adhesion"
     post "payment_parameters/update_adhesion", to: "payments_parameters#update_adhesion"
 
@@ -140,12 +139,6 @@ Rails.application.routes.draw do
   delete "/season/:id/holidays", to: "seasons#delete_holidays"
   post "/season/:id/fetch_holidays", to: "seasons#fetch_holidays"
   post "/season/:id/make_active", to: "seasons#make_active", as: "make_active_season"
-
-  #  =====================
-  # ACTIVITY REF SEASON PRICINGS
-  #  =====================
-  get "activity_ref_season_pricings/migrate", to: "activity_ref_season_pricings#migrate_old_pricings"
-  resources "activity_ref_season_pricings"
 
   #  =====================
   # SEARCH
@@ -412,7 +405,6 @@ Rails.application.routes.draw do
   get "/autosuggest/cities", to: "autosuggest#cities"
 
   patch "/activity_refs/:id/instruments", to: "activity_ref#set_instruments"
-  post "/activity_refs/:id/season_pricings", to: "activity_ref#set_season_pricings"
 
   #  Resources Referentials
   resources :evaluation_level_ref
@@ -453,16 +445,6 @@ Rails.application.routes.draw do
   resources :activity_ref
   post "/activity_ref/:id/update", to: "activity_ref#update"
   post "/activity_ref/:id/picture", to: "activity_ref#save_picture"
-
-  # ==================
-  # PRICING
-  # ==================
-  resources :pricings, except: :create
-
-  post "/pricings", to: "pricing_api#create"
-
-  get "/pricings/migrate_old_pricings", to: "pricing_api#migrate_old_pricings"
-  get "/pricings/migrate_old_pricing_choices", to: "pricing_api#migrate_old_pricing_choices"
 
   # ==================
   # EVALUATION APPOINTMENTS
@@ -568,14 +550,14 @@ Rails.application.routes.draw do
   get "/references/:classname/:id", to: "remove#get_references"
 
   # ==================
-  # PaymentTerms
+  # PaymentScheduleOptions
   # ==================
 
-  resources :payment_terms, path: "payment-terms"
-  post "/payment-terms/activated", to: "payment_terms#change_activated_param"
-  post "/payment-terms/display_text", to: "payment_terms#change_term_display_text_param"
-  post "/payment-terms/move_up", to: "payment_terms#move_up"
-  post "/payment-terms/move_down", to: "payment_terms#move_down"
+  resources :payment_schedule_options, path: "payment_schedule_options"
+  post "/payment_schedule_options/activated", to: "payment_schedule_options#change_activated_param"
+  post "/payment_schedule_options/display_text", to: "payment_schedule_options#change_term_display_text_param"
+  post "/payment_schedule_options/move_up", to: "payment_schedule_options#move_up"
+  post "/payment_schedule_options/move_down", to: "payment_schedule_options#move_down"
 
   resources :organizations
    post "/organizations/update_from_user", to: "organizations#update_from_user"

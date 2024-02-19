@@ -315,11 +315,12 @@ class ActivitiesApplicationsController < ApplicationController
     @instruments = Instrument.all
     @consent_docs = ConsentDocument.jsonize_consent_document_query(ConsentDocument.all.order(:index))
 
-    show_payment_terms_param = Parameter.find_or_create_by(label: "payment_terms.activated", value_type: "boolean")
-    show_payment_terms = show_payment_terms_param.parse
+    show_payment_schedule_options_param = Parameter.find_or_create_by(label: "payment_terms.activated", value_type: "boolean")
+    show_payment_schedule_options = show_payment_schedule_options_param.parse
 
-    @avail_payment_terms = show_payment_terms ? PaymentTerms.all.as_json : []
-    @payment_step_display_text = show_payment_terms ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
+    @avail_payment_schedule_options = show_payment_schedule_options ? PaymentScheduleOptions.all.as_json : []
+    @avail_payment_methods = show_payment_schedule_options ? PaymentMethod.displayable.as_json(only: [:id, :label]) : []
+    @payment_step_display_text = show_payment_schedule_options ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
 
     @adhesion_prices = AdhesionPrice.all.as_json
 
@@ -475,11 +476,11 @@ class ActivitiesApplicationsController < ApplicationController
 
     @actionType = params[:action_type].nil? ? 0 : params[:action_type].to_i
 
-    show_payment_terms_param = Parameter.find_or_create_by(label: "payment_terms.activated", value_type: "boolean")
-    show_payment_terms = show_payment_terms_param.parse
+    show_payment_schedule_options_param = Parameter.find_or_create_by(label: "payment_terms.activated", value_type: "boolean")
+    show_payment_schedule_options = show_payment_schedule_options_param.parse
 
-    @avail_payment_terms = show_payment_terms ? PaymentTerms.all.as_json : []
-    @payment_step_display_text = show_payment_terms ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
+    @avail_payment_schedule_options = show_payment_schedule_options ? PaymentScheduleOptions.all.as_json : []
+    @payment_step_display_text = show_payment_schedule_options ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
     @adhesion_prices = Adhesion.all.as_json
   end
 
@@ -578,19 +579,21 @@ class ActivitiesApplicationsController < ApplicationController
         if params[:application][:infos][:payer_payment_terms].present?
           existing_payment_terms = @user.payer_payment_terms.where(season_id: season.id)
 
-          sended_payment_terms = params[:application][:infos][:payer_payment_terms]&.find {|p| p[:season_id] == season.id}
+          received_payment_terms = params[:application][:infos][:payer_payment_terms]&.find {|p| p[:season_id] == season.id}
 
-          if sended_payment_terms.present?
+          if received_payment_terms.present?
             if existing_payment_terms.empty?
               @user.payer_payment_terms.create!(
-                payment_terms_id: sended_payment_terms.fetch(:payment_terms_id, nil),
+                payment_schedule_options_id: received_payment_terms.fetch(:payment_schedule_options_id, nil),
                 season_id: season.id,
-                day_for_collection: sended_payment_terms[:day_for_collection],
+                day_for_collection: received_payment_terms[:day_for_collection],
+                payment_method_id: received_payment_terms[:payment_method_id],
                 )
             else
               existing_payment_terms.first&.update!(
-                day_for_collection: sended_payment_terms[:day_for_collection],
-                payment_terms_id: sended_payment_terms[:id],
+                day_for_collection: received_payment_terms[:day_for_collection],
+                payment_schedule_options_id: received_payment_terms[:payment_schedule_options_id],
+                payment_method_id: received_payment_terms[:payment_method_id],
                 )
             end
           end

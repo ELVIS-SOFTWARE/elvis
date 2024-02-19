@@ -14,6 +14,7 @@ import {indexById, csrfToken, findAndGet} from "../utils/";
 import SwitchPayerModal from "./SwitchPayerModal";
 import {set} from "../../tools/api";
 import * as api from "../../tools/api";
+import { Editor } from "draft-js";
 
 const SEASON_STORED_KEY = "PaymentsSummarySelectedSeason";
 
@@ -67,6 +68,15 @@ function calculateTotals(duePayments, payments, itemsForPayment) {
     };
 }
 
+function roundCurrency(value, digits = 2) {
+    return Number(value.toFixed(digits));
+}
+
+function getDiscountedAmount(amount, percentOff) {
+    const res = (amount || 0) * (1 - percentOff / 100);
+    return roundCurrency(res);
+}
+
 function generateDataForPaymentSummaryTable({
                                                 activities,
                                                 desired,
@@ -114,7 +124,7 @@ function generateDataForPaymentSummaryTable({
             }
 
             const coupon = _.get(des, "discount.coupon", 0);
-            const percent_off = _.get(des, "discount.coupon.percent_off", 0);
+            const percentOff = _.get(des, "discount.coupon.percent_off", 0);
 
             data.push({
                 id: des.id,
@@ -127,11 +137,11 @@ function generateDataForPaymentSummaryTable({
                 coupon: {...coupon},
                 studentId: act.id,
                 user: act.user,
-                pricingId: des.pricing_category_id,
+                pricingCategoryId: des.pricing_category_id,
                 activityId: a.id,
                 paymentLocation: act.payment_location,
                 due_total: amount || 0,
-                discountedTotal: (amount || 0) * (1 - percent_off / 100),
+                discountedTotal: getDiscountedAmount(amount, percentOff),
                 unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
             });
         }
@@ -168,7 +178,7 @@ function generateDataForPaymentSummaryTable({
             }
 
             const coupon = _.get(des, "discount.coupon", 0);
-            const percent_off = _.get(des, "discount.coupon.percent_off", 0);
+            const percentOff = _.get(des, "discount.coupon.percent_off", 0);
 
             const formattedOption = {
                 id: des.id,
@@ -180,10 +190,10 @@ function generateDataForPaymentSummaryTable({
                 coupon: coupon,
                 studentId: option.id,
                 user: option.desired_activity.activity_application.user,
-                pricingId: des.pricing_category_id,
+                pricingCategoryId: des.pricing_category_id,
                 paymentLocation: option.payment_location,
                 due_total: amount || 0,
-                discountedTotal: (amount || 0) * (1 - percent_off / 100),
+                discountedTotal: getDiscountedAmount(amount, percentOff),
                 isOption: true,
                 unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
             };
@@ -193,24 +203,24 @@ function generateDataForPaymentSummaryTable({
 
     if (adhesionEnabled) {
         for (const adhesion of adhesions) {
-            const adhesion_price = adhesionPrices.find(p => p.id === adhesion.adhesion_price_id) || {};
+            const adhesionPrice = adhesionPrices.find(p => p.id === adhesion.adhesion_price_id) || {};
 
-            if (adhesion_price) {
+            if (adhesionPrice) {
                 const coupon = _.get(adhesion, "discount.coupon", 0);
-                const percent_off = _.get(adhesion, "discount.coupon.percent_off", 0);
+                const percentOff = _.get(adhesion, "discount.coupon.percent_off", 0);
 
                 data.push({
                     id: 0,
                     activity: `Adhésion de ${adhesion.user.first_name} ${adhesion.user.last_name}`,
                     frequency: 1,
                     initial_total: 1,
-                    due_total: adhesion_price.price || 0,
+                    due_total: adhesionPrice.price || 0,
                     coupon: coupon,
-                    discountedTotal: (adhesion_price.price || 0) * (1 - percent_off / 100),
-                    unitPrice: adhesion_price.price || 0,
+                    discountedTotal: getDiscountedAmount(adhesionPrice.price, percentOff),
+                    unitPrice: adhesionPrice.price || 0,
                     user: adhesion.user,
                     studentId: adhesion.user.id,
-                    adhesionPriceId: adhesion_price.id,
+                    adhesionPriceId: adhesionPrice.id,
                     adhesionId: adhesion.id,
                 });
             }
@@ -466,7 +476,7 @@ class PaymentsManagement extends React.Component {
     }
 
     handleChangePricingChoice(desId, userId, evt) {
-        const pricing = this.props.pricings.find(p => p.id == evt.target.value);
+        const pricing = this.props.pricingCategories.find(p => p.id == evt.target.value);
 
         let dess = {...this.state.desiredActivities};
         let des = _.find(
@@ -489,7 +499,7 @@ class PaymentsManagement extends React.Component {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    pricing_id: pricing.id,
+                    pricing_category_id: pricing.id,
                 }),
             }).then(() => {
                 this.setState({desiredActivities: dess});
@@ -1588,7 +1598,7 @@ class PaymentsManagement extends React.Component {
                                     locations={this.props.locations}
                                     season={this.state.season}
                                     seasons={this.props.seasons}
-                                    pricings={this.props.pricings}
+                                    pricingCategories={this.props.pricingCategories}
                                     data={itemsForPayment}
                                     coupons={this.props.coupons}
                                     totalDue={isNaN(totalDue) ? null : totalDue}
@@ -1713,6 +1723,16 @@ class PaymentsManagement extends React.Component {
                                                 </button>
                                             }
                                         </div>
+
+                                        {payer.payment_terms_summary &&
+                                            <Fragment>
+                                                <div className="col-lg-12 col-md-6 d-flex justify-content-between m-b-sm">
+                                                    <div className="alert alert-info w-100">
+                                                        Modalités de paiement souhaitées : {payer.payment_terms_summary}
+                                                    </div>
+                                                </div>
+                                            </Fragment>
+                                        }
 
 
                                         {this.state.payments[payer.id] && this.state.payments[payer.id].length > 0 &&

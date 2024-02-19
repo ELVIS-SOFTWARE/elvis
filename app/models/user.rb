@@ -173,7 +173,7 @@ class User < ApplicationRecord
   has_many :instruments, through: :users_instruments
 
   has_many :payer_payment_terms, class_name: "PayerPaymentTerms", foreign_key: :payer_id, dependent: :destroy
-  has_many :payment_terms, through: :payer_payment_terms
+  has_many :payment_schedule_options, through: :payer_payment_terms
 
   has_many :consent_document_users, dependent: :destroy
 
@@ -346,6 +346,13 @@ class User < ApplicationRecord
       parents << fl.user if fl.link == "enfant"
     end
     parents.uniq
+  end
+
+  def payment_terms_summary(season_id)
+    season_payment_terms = payer_payment_terms.where(season_id: season_id).first
+    return "" if season_payment_terms.nil?
+
+    season_payment_terms.summary
   end
 
   def update_addresses(addresses)

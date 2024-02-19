@@ -5,11 +5,11 @@ import {toast} from "react-toastify";
 import { EditorState, convertToRaw, convertFromRaw, ContentState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 
-export default function EditPaymentTerms()
+export default function EditPaymentScheduleOptions()
 {
-    const [paymentTerms, setPaymentTerms] = useState([]);
+    const [paymentScheduleOptions, setPaymentScheduleOptions] = useState([]);
     const [indexValues, setIndexValues] = useState([]);
-    const [paymentTermsActivated, setPaymentTermsActivated] = useState(false);
+    const [paymentScheduleOptionsActivated, setPaymentScheduleOptionsActivated] = useState(false);
     const [init, setInit] = useState(true);
     const [editorState, setEditorState] = useState(
         () => EditorState.createEmpty(),
@@ -20,8 +20,8 @@ export default function EditPaymentTerms()
        api.set()
            .success(res =>
            {
-                setPaymentTerms(res.data);
-                setPaymentTermsActivated(res.activated);
+                setPaymentScheduleOptions(res.data);
+                setPaymentScheduleOptionsActivated(res.activated);
                 setInit(false);
                 setIndexValues(res.index)
 
@@ -40,9 +40,9 @@ export default function EditPaymentTerms()
            })
            .error(res =>
            {
-               swal("Une erreur est survenue lors de la récupération des conditions de paiement", res.error, "error");
+               swal("Une erreur est survenue lors de la récupération des options d'échéancier de paiement", res.error, "error");
            })
-           .get("/payment-terms", {});
+           .get("/payment_schedule_options", {});
     }, []);
 
     useEffect(() =>
@@ -54,16 +54,16 @@ export default function EditPaymentTerms()
                 {
                     swal("Une erreur est survenue lors de la mise à jour des conditions de paiement", res.error, "error");
                 })
-                .post("/payment-terms/activated", {activated: paymentTermsActivated});
+                .post("/payment_schedule_options/activated", {activated: paymentScheduleOptionsActivated});
         }
 
-    }, [paymentTermsActivated]);
+    }, [paymentScheduleOptionsActivated]);
 
-    const onItemDelete = (paymentTerm) =>
+    const onItemDelete = (paymentScheduleOption) =>
     {
         swal({
             title: "Êtes-vous sûr ?",
-            text: "La suppression de cette modalité de paiement est définitive.",
+            text: "La suppression de cette option d'échéancier de paiement est définitive.",
             type: "warning",
             showCancelButton: true,
             confirmButtonText: "Oui, supprimer",
@@ -75,13 +75,13 @@ export default function EditPaymentTerms()
                 api.set()
                     .success(res =>
                     {
-                        setPaymentTerms(paymentTerms.filter(p => p.id !== paymentTerm.id));
+                        setPaymentScheduleOptions(paymentScheduleOptions.filter(p => p.id !== paymentScheduleOption.id));
                     })
                     .error(res =>
                     {
-                        swal("Une erreur est survenue lors de la suppression de la modalité de paiement", res.error, "error");
+                        swal("Une erreur est survenue lors de la suppression de l'option d'échéancier de paiement", res.error, "error");
                     })
-                    .del(`/payment-terms/${paymentTerm.id}`, {});
+                    .del(`/payment_schedule_options/${paymentScheduleOption.id}`, {});
             }
         });
     };
@@ -94,13 +94,13 @@ export default function EditPaymentTerms()
             }).error(res => {
                 swal("Une erreur est survenue lors de la mise à jour des informations complémentaires", res.error, "error");
             })
-            .post("/payment-terms/display_text", {display_text: JSON.stringify(convertToRaw(editorState.getCurrentContent()))});
+            .post("/payment_schedule_options/display_text", {display_text: JSON.stringify(convertToRaw(editorState.getCurrentContent()))});
     };
 
     function handleMoveUp(paymentId) {
         api.set()
             .success(payment => {
-                setPaymentTerms(payment);
+                setPaymentScheduleOptions(payment);
             })
             .error(() => {
                 swal({
@@ -108,7 +108,7 @@ export default function EditPaymentTerms()
                     type: "error",
                 });
             })
-            .post(`/payment-terms/move_up`,
+            .post(`/payment_schedule_options/move_up`,
                 {id: paymentId}
             );
     }
@@ -116,7 +116,7 @@ export default function EditPaymentTerms()
     function handleMoveDown(paymentId) {
         api.set()
             .success(payment => {
-                setPaymentTerms(payment);
+                setPaymentScheduleOptions(payment);
             })
             .error(() => {
                 swal({
@@ -124,7 +124,7 @@ export default function EditPaymentTerms()
                     type: "error",
                 });
             })
-            .post(`/payment-terms/move_down`,
+            .post(`/payment_schedule_options/move_down`,
                 {id: paymentId}
             );
     }
@@ -150,12 +150,12 @@ export default function EditPaymentTerms()
                 <div className="checkbox checkbox-primary">
                     <input
                         type="checkbox"
-                        id={"paymentTermsActivated"}
+                        id={"paymentScheduleOptionsActivated"}
                         className=""
-                        checked={paymentTermsActivated}
-                        onChange={e => setPaymentTermsActivated(e.target.checked)}
+                        checked={paymentScheduleOptionsActivated}
+                        onChange={e => setPaymentScheduleOptionsActivated(e.target.checked)}
                     />
-                    <label htmlFor={"paymentTermsActivated"}>Afficher les modalités de paiement dans le parcours d'inscription</label>
+                    <label htmlFor={"paymentScheduleOptionsActivated"}>Afficher les modalités de paiement dans le parcours d'inscription</label>
                 </div>
             </div>
         </div>
@@ -166,26 +166,26 @@ export default function EditPaymentTerms()
             </div>
 
             <div className="col-sm-12 text-right">
-                <a className={"btn btn-primary"} href={`/payment-terms/new?returnUrl=${encodeURIComponent(window.location)}`}>
-                    <i className="fas fa-plus"></i> Ajouter une modalité de paiement
+                <a className={"btn btn-primary"} href={`/payment_schedule_options/new?returnUrl=${encodeURIComponent(window.location)}`}>
+                    <i className="fas fa-plus"></i> Ajouter une option d'échéancier de paiement
                 </a>
             </div>
         </div>
 
         <div className="row">
             <div className="col-sm-12">
-                {paymentTerms
+                {paymentScheduleOptions
                     .sort(compareIndices)
-                    .map((paymentTerm, index) =>
+                    .map((paymentScheduleOption, index) =>
                 {
-                    return <EditPaymentTermItem
-                                key={paymentTerm.id}
-                                paymentTerm={paymentTerm}
+                    return <EditPaymentScheduleOptionItem
+                                key={paymentScheduleOption.id}
+                                paymentScheduleOption={paymentScheduleOption}
                                 index={index} onDelete={onItemDelete}
                                 onMoveUp={handleMoveUp}
                                 onMoveDown={handleMoveDown}
-                                isFirst={paymentTerm.index === Math.min(...indexValues)}
-                                isLast={paymentTerm.index === Math.max(...indexValues)}
+                                isFirst={paymentScheduleOption.index === Math.min(...indexValues)}
+                                isLast={paymentScheduleOption.index === Math.max(...indexValues)}
                     />
                 })}
             </div>
@@ -228,7 +228,7 @@ export default function EditPaymentTerms()
     </Fragment>
 }
 
-const EditPaymentTermItem = ({paymentTerm, index, isFirst, isLast, onDelete, onMoveUp, onMoveDown}) =>
+const EditPaymentScheduleOptionItem = ({paymentScheduleOption, index, isFirst, isLast, onDelete, onMoveUp, onMoveDown}) =>
 {
     return <div className="row mx-0 my-3 border-hover" style={{
         backgroundColor: "rgb(226,237,243)",
@@ -241,21 +241,21 @@ const EditPaymentTermItem = ({paymentTerm, index, isFirst, isLast, onDelete, onM
 
         <div className="col-sm-1">
             <div className="btn btn-md"
-                 onClick={() => isFirst ? "" : onMoveUp(paymentTerm.id)}>
+                 onClick={() => isFirst ? "" : onMoveUp(paymentScheduleOption.id)}>
                 {isFirst || <i className="fas fa-chevron-up"></i>}&nbsp;
             </div>
             <div
                 className="btn btn-md"
-                onClick={() => isLast ? "" : onMoveDown(paymentTerm.id)}>
+                onClick={() => isLast ? "" : onMoveDown(paymentScheduleOption.id)}>
                 {isLast || <i className="fas fa-chevron-down"></i>}&nbsp;
             </div>
         </div>
 
-        <a className="col-sm-10 btn btn-lg text-dark text-decoration-none" href={`/payment-terms/${paymentTerm.id}/edit?returnUrl=${encodeURIComponent(window.location)}`}>
-            {paymentTerm.label}
+        <a className="col-sm-10 btn btn-lg text-dark text-decoration-none" href={`/payment_schedule_options/${paymentScheduleOption.id}/edit?returnUrl=${encodeURIComponent(window.location)}`}>
+            {paymentScheduleOption.label}
         </a>
 
-        <div className="col-sm-1 text-right btn btn-lg" onClick={() => onDelete(paymentTerm)}>
+        <div className="col-sm-1 text-right btn btn-lg" onClick={() => onDelete(paymentScheduleOption)}>
             <i className="fas fa-times" />
         </div>
     </div>

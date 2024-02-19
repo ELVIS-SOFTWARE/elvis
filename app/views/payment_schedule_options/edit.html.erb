@@ -1,0 +1,7 @@
+<%= react_component("paymentsTerms/PaymentScheduleOptionForm", {
+  paymentScheduleOption: @payment_schedule_option,
+  action: @submit_url,
+  method: @http_method,
+  return_url: params[:returnUrl],
+  pricingCategories: @pricing_categories,
+}) %>

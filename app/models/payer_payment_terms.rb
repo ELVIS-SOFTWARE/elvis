@@ -8,7 +8,7 @@
 #  updated_at         :datetime         not null
 #  deleted_at         :datetime
 #  payer_id           :bigint           not null
-#  payment_terms_id   :bigint           not null
+#  payment_schedule_options_id   :bigint           not null
 #  season_id          :bigint           not null
 #  payment_method_id  :bigint
 #
@@ -16,7 +16,7 @@ class PayerPaymentTerms < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :payer, class_name: "User"
-  belongs_to :payment_terms
+  belongs_to :payment_schedule_options
   belongs_to :season
   belongs_to :payment_method, optional: true
 
@@ -28,6 +28,16 @@ class PayerPaymentTerms < ApplicationRecord
 
   def self.class_name_gender
     return :F
+  end
+
+  def summary
+    res = "paiement #{payment_schedule_options.label}"
+    if day_for_collection.present?
+      payments_months = payment_schedule_options.payments_months.map { |m| DateHelper::month_name(m + 1) }.join(", ")
+      res += " le #{payment_schedule_options.available_payments_days[day_for_collection]} du mois (#{payments_months})"
+    end
+    res += " par #{payment_method.label}" if payment_method.present?
+    res.downcase
   end
 
   private

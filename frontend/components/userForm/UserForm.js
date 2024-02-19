@@ -264,7 +264,7 @@ class UserForm extends React.PureComponent {
         });
 
         this.setState({
-            requireIdentificationNumber:  values.is_paying || userIsMinor(values.birthday)
+            requireIdentificationNumber: this.props.displayIdentificationNumber && (values.is_paying || userIsMinor(values.birthday))
         })
     }
 

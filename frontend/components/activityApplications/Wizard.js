@@ -70,7 +70,8 @@ class Wizard extends React.Component {
             selectedEvaluationIntervals: {},
             dayForCollection: {day: null},
             paymentTermsId: {id: null},
-            availPaymentTerms: this.props.availPaymentTerms,
+            availPaymentScheduleOptions: this.props.availPaymentScheduleOptions,
+            availPaymentMethods: this.props.availPaymentMethods,
         };
 
         _.map(
@@ -574,21 +575,18 @@ class Wizard extends React.Component {
 
     }
 
-    handleChangePaymentTerms(paymentTermsId)
-    {
+    handleChangePaymentInfo(key, value) {
         const paymentTerms = [...(this.state.infos.payer_payment_terms || [])];
-        const paymentTerm = paymentTerms.find(term => term.season_id == this.state.season_id);
+        let paymentTerm = paymentTerms.find(term => term.season_id == this.state.season_id);
 
-        if (paymentTerm)
-        {
-            paymentTerm.payment_terms_id = paymentTermsId;
-        }
-        else
-        {
-            paymentTerms.push({
+        if (paymentTerm) {
+            paymentTerm[key] = value;
+        } else {
+            paymentTerm = {
                 season_id: this.state.season_id,
-                payment_terms_id: paymentTermsId
-            });
+                [key]: value
+            };
+            paymentTerms.push(paymentTerm);
         }
 
         this.setState({
@@ -597,6 +595,14 @@ class Wizard extends React.Component {
                 payer_payment_terms: paymentTerms
             }
         });
+    }
+
+    handleChangePaymentTerms(paymentScheduleOptionsId) {
+        this.handleChangePaymentInfo('payment_schedule_options_id', paymentScheduleOptionsId);
+    }
+
+    handleChangePaymentMethod(paymentMethodId) {
+        this.handleChangePaymentInfo('payment_method_id', paymentMethodId);
     }
 
     handleChangeDayForCollection(dayForCollection)
@@ -839,16 +845,19 @@ class Wizard extends React.Component {
                 ),
             },
 
-            (this.props.availPaymentTerms && this.props.availPaymentTerms.length > 0 || this.props.paymentStepDisplayText) && {
+            (this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 || this.props.paymentStepDisplayText) && {
                 name: "Modalités de paiement",
                 component: (
                     <WrappedPayerPaymentTerms
+                        informationalStepOnly={false}
                         paymentTerms={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         collection={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
-                        availPaymentTerms={this.state.availPaymentTerms}
+                        availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
+                        availPaymentMethods={this.state.availPaymentMethods}
                         paymentStepDisplayText={this.props.paymentStepDisplayText}
                         onChangePaymentTerms={this.handleChangePaymentTerms.bind(this)}
                         onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
+                        onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
                     />
                 )
             },

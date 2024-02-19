@@ -44,6 +44,21 @@ export const WEEKDAYS = [
     "Samedi",
 ];
 
+export const MONTHS = [
+    "Janvier",
+    "Février",
+    "Mars",
+    "Avril",
+    "Mai",
+    "Juin",
+    "Juillet",
+    "Août",
+    "Septembre",
+    "Octobre",
+    "Novembre",
+    "Décembre",
+];
+
 export const INTERVAL_KINDS = {
     AVAILABILITY: "p",
     LESSON: "c",
@@ -117,4 +132,5 @@ export const MESSAGES = {
     err_must_respond: "Vous devez répondre pour continuer.",
     err_must_select_price: "Sélectionnez un tarif ou supprimez la ligne.",
     err_cannot_duplicate_price: "Impossible d'ajouter deux fois le même produit avec le même tarif.",
+    err_must_select_payment_terms: "veuillez sélectionnez les modalités de paiement.",
 };

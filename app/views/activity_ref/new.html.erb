@@ -6,7 +6,8 @@
  <br />
 
     <div class="row m-t">
-        <%= react_component "activityRef/ActivityRefContainer", {
+        <%=
+            react_component "activityRef/ActivityRefContainer", {
             postTo: "create",
             seasons: @seasons,
             activityRef: @activity_ref,
@@ -16,14 +17,10 @@
             activityRefApplicationOptions: { applicationOptions: @activity_ref_application_options},
             nextCycles: @next_cycles,
             activityRefs: @activity_refs,
-            pricings: @pricings,
-            activityRefSeasonPricings: @activity_ref_season_pricings,
             activityInstruments: @activity_ref.instruments,
             instruments: Instrument.all,
             currentSeasonId: Season.current.id,
-            PricingCategories: PricingCategory
-              .all
-              .as_json(include: { activity_ref_pricing: {} })
+            teachers: @teachers
             } %>
     </div>
 

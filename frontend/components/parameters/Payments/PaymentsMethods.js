@@ -66,7 +66,7 @@ export default class PaymentsMethods extends BaseDataTable {
 
     deleteStatus(status) {
         swal({
-            title: "Voulez-vous vraiment supprimer la méthode de paiment '" + status.label + "' ?",
+            title: "Voulez-vous vraiment supprimer la méthode de paiement '" + status.label + "' ?",
             type: "warning",
             showCancelButton: true,
             cancelButtonText: "non",

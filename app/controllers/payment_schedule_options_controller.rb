@@ -1,21 +1,21 @@
 # frozen_string_literal: true
 
-class PaymentTermsController < ApplicationController
+class PaymentScheduleOptionsController < ApplicationController
   before_action :set_current_user
-  before_action :get_all_paymentTermsIndexes
-  before_action -> { @pricings = Pricing.all }, only: [:new, :edit]
+  before_action :get_all_payment_schedule_option_indexes
+  before_action -> { @pricing_categories = PricingCategory.all }, only: [:new, :edit]
 
   def index
-    @payment_terms = PaymentTerms.all
+    @payment_schedule_options = PaymentScheduleOptions.all
     @activated = Parameter.get_value('payment_terms.activated')
     @display_text = Parameter.get_value('payment_step.display_text')
 
     respond_to do |format|
       format.json { render json: {
-        data: @payment_terms,
+        data: @payment_schedule_options,
         activated: @activated.present?, # present? return true if object is true and false if null or false
         display_text: @display_text,
-        index: @payment_terms.pluck(:index)
+        index: @payment_schedule_options.pluck(:index)
       }, status: :ok }
     end
 
@@ -24,13 +24,13 @@ class PaymentTermsController < ApplicationController
   end
 
   def destroy
-    @payment_term = PaymentTerms.find(params[:id])
-    @payment_term.index = nil
-    @payment_term.save!
-    @payment_term.destroy!
+    @payment_schedule_option = PaymentScheduleOptions.find(params[:id])
+    @payment_schedule_option.index = nil
+    @payment_schedule_option.save!
+    @payment_schedule_option.destroy!
 
     respond_to do |format|
-      format.json { render json: { message: "Payment term deleted" }, status: :ok }
+      format.json { render json: { message: "Payment schedule option deleted" }, status: :ok }
     end
 
   rescue StandardError => e
@@ -38,17 +38,17 @@ class PaymentTermsController < ApplicationController
   end
 
   def new
-    @submit_url = payment_terms_path
+    @submit_url = payment_schedule_options_path
     @http_method = :post
   end
 
   def create
-    @payment_term = PaymentTerms.new(payment_term_params)
-    @payment_term[:index] = (PaymentTerms.maximum(:index) || 0) + 1
-    @payment_term.save!
+    @payment_schedule_option = PaymentScheduleOptions.new(payment_schedule_option_params)
+    @payment_schedule_option[:index] = (PaymentScheduleOptions.maximum(:index) || 0) + 1
+    @payment_schedule_option.save!
 
     respond_to do |format|
-      format.json { render json: { message: "Payment term created" }, status: :ok }
+      format.json { render json: { message: "Payment schedule option created" }, status: :ok }
     end
 
   rescue StandardError => e
@@ -56,19 +56,19 @@ class PaymentTermsController < ApplicationController
   end
 
   def edit
-    @payment_term = PaymentTerms.find(params[:id])
+    @payment_schedule_option = PaymentScheduleOptions.find(params[:id])
 
-    @submit_url = payment_term_path(@payment_term)
+    @submit_url = payment_schedule_option_path(@payment_schedule_option)
     @http_method = :patch
   end
 
   def update
-    @payment_term = PaymentTerms.find(params[:id])
+    @payment_schedule_option = PaymentScheduleOptions.find(params[:id])
 
-    @payment_term.update!(payment_term_params)
+    @payment_schedule_option.update!(payment_schedule_option_params)
 
     respond_to do |format|
-      format.json { render json: { message: "Payment term updated" }, status: :ok }
+      format.json { render json: { message: "Payment schedule option updated" }, status: :ok }
     end
 
   rescue StandardError => e
@@ -104,11 +104,11 @@ class PaymentTermsController < ApplicationController
 
   # Enhanced version of @author: Xavier Maquignon #
   def move_up
-    doc_to_move_up = PaymentTerms.find(params[:id])
-    return if doc_to_move_up.index==PaymentTerms.minimum(:index)
+    doc_to_move_up = PaymentScheduleOptions.find(params[:id])
+    return if doc_to_move_up.index==PaymentScheduleOptions.minimum(:index)
 
-    move_up_index = find_nearest_smaller_number(get_all_paymentTermsIndexes, doc_to_move_up.index)
-    doc_to_move_down = PaymentTerms.find_by(index: move_up_index)
+    move_up_index = find_nearest_smaller_number(get_all_payment_schedule_option_indexes, doc_to_move_up.index)
+    doc_to_move_down = PaymentScheduleOptions.find_by(index: move_up_index)
 
     doc_to_move_down.index = doc_to_move_up.index
     doc_to_move_up.index = move_up_index
@@ -116,15 +116,15 @@ class PaymentTermsController < ApplicationController
     doc_to_move_down.save!
     doc_to_move_up.save!
 
-    render json: jsonize_payment_terms_query(PaymentTerms.all.order(:index))
+    render json: jsonize_payment_schedule_options_query(PaymentScheduleOptions.all.order(:index))
   end
 
   def move_down
-    doc_to_move_down = PaymentTerms.find(params[:id])
-    return if doc_to_move_down.index==PaymentTerms.maximum(:index)
+    doc_to_move_down = PaymentScheduleOptions.find(params[:id])
+    return if doc_to_move_down.index==PaymentScheduleOptions.maximum(:index)
 
-    move_down_index = find_nearest_greater_number(get_all_paymentTermsIndexes, doc_to_move_down.index)
-    doc_to_move_up = PaymentTerms.find_by(index: move_down_index)
+    move_down_index = find_nearest_greater_number(get_all_payment_schedule_option_indexes, doc_to_move_down.index)
+    doc_to_move_up = PaymentScheduleOptions.find_by(index: move_down_index)
 
     doc_to_move_up.index = doc_to_move_down.index
     doc_to_move_down.index = move_down_index
@@ -132,23 +132,31 @@ class PaymentTermsController < ApplicationController
     doc_to_move_down.save!
     doc_to_move_up.save!
 
-    render json: jsonize_payment_terms_query(PaymentTerms.all.order(:index))
+    render json: jsonize_payment_schedule_options_query(PaymentScheduleOptions.all.order(:index))
   end
 
   private
 
-  def get_all_paymentTermsIndexes
-    PaymentTerms.all.pluck(:index)
+  def get_all_payment_schedule_option_indexes
+    PaymentScheduleOptions.all.pluck(:index)
   end
 
   private
 
-  def payment_term_params
-    params.require(:payment_term).permit(:pricing_id, :label, :terms_number, collect_on_months: [], days_allowed_for_collection: [])
+  def payment_schedule_option_params
+    params.require(:payment_schedule_option)
+          .permit(
+            :pricing_category_id,
+            :label,
+            :payments_number,
+            payments_months: [],
+            available_payments_days: []
+          )
+
   end
 
-  def jsonize_payment_terms_query(query)
-    PaymentTerms.jsonize_payment_terms_query(query)
+  def jsonize_payment_schedule_options_query(query)
+    PaymentScheduleOptions.jsonize_payment_schedule_options_query(query)
   end
 
   def find_nearest_smaller_number(arr, target)

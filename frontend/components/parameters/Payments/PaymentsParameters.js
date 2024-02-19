@@ -2,7 +2,7 @@ import React from "react";
 import PaymentsMethods from "./PaymentsMethods";
 import BaseParameters from "../BaseParameters";
 import AdhesionSettings from './AdhesionSettings';
-import EditPaymentTerms from "./EditPaymentTerms";
+import EditPaymentScheduleOptions from "./EditPaymentScheduleOptions";
 import Coupons from "./Coupons";
 import PricingCategoriesEdit from "../Activities/PricingCategoriesEdit";
 
@@ -31,7 +31,7 @@ export default class PaymentsParameters extends BaseParameters {
                 urlNew="/payment_method/new"
             />,
             <PricingCategoriesEdit />,
-            <EditPaymentTerms />,
+            <EditPaymentScheduleOptions />,
             <Coupons />
         ];
     }
