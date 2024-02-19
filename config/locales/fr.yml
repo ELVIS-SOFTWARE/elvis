@@ -3,9 +3,12 @@ fr:
         formats:
             date_month_concise: '%d %B %Y'
             long_date: '%e %B %Y'
+            day: '%A'
+            short_time: '%Hh%M'
     date:
         formats:
             date_month_concise: '%d %B %Y'
+
     activerecord:
         attributes:
             activity_ref:

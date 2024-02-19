@@ -42,6 +42,7 @@ gem "annotate"
 gem "responders"
 gem "wicked_pdf"
 gem "wkhtmltopdf-binary"
+gem 'rubyzip'
 
 gem "kaminari", '~> 1.2.1'
 

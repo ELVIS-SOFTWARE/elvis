@@ -461,6 +461,12 @@ Rails.application.routes.draw do
   post "/student_attendances/:id", to: "student_attendances#update"
 
   # ==================
+  # STUDENTS
+  # ==================
+  get "/students.pdf", to: "students#index"
+
+
+  # ==================
   # STUDENT EVALUATIONS
   # ==================
   scope "/student_evaluations" do
