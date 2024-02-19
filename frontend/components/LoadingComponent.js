@@ -5,12 +5,21 @@ export default function LoadingComponent()
     const [loading, setLoading] = React.useState(false);
 
     React.useEffect(() => {
-        window.addEventListener("loadingStart", () => {
+        const loadingStartFunc = () => {
             setLoading(true);
-        });
-        window.addEventListener("loadingEnd", () => {
+        };
+
+        const loadingEndFunc = () => {
             setLoading(false);
-        });
+        };
+
+        window.addEventListener("loadingStart", loadingStartFunc);
+        window.addEventListener("loadingEnd", loadingEndFunc);
+
+        return () => {
+            window.removeEventListener("loadingStart", loadingStartFunc);
+            window.removeEventListener("loadingEnd", loadingEndFunc);
+        }
     }, []);
 
     return loading && <div
