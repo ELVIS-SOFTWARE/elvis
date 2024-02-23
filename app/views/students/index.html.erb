@@ -1,0 +1,70 @@
+<div style="text-align: right;">
+  <%
+    logo_url = ""
+    if school
+      logo_url = school.logo.attached? ? rails_blob_url(school.logo) : nil
+    end
+  %>
+  <img src="<%= logo_url %>" height="150px" class="logo" alt="logo">
+</div>
+
+<h1>
+  Liste des cours de <%= teacher.first_name %> <%= teacher.last_name %>
+</h1>
+
+
+<%
+
+  activities_and_students.each do |activity_id, details|
+    activity_ref = details[0]["activity_ref"]
+    start = details[0]["start"]
+
+    start_day = l(start, format: :day)
+    start_hour = l(start, format: :short_time)
+    end_hour = l(details[0]["end"], format: :short_time)
+
+    room = details[0]["room"]
+
+    activity_applications = ActivityApplication.for_activity_id(activity_id)
+    student_details = activity_applications.each_with_object({}) do |aa, hash|
+      hash[aa.user_id] = {
+        begin_at: aa.begin_at ? l(aa.begin_at, format: :long_date) : nil,
+        stopped_at: aa.stopped_at ? l(aa.stopped_at, format: :long_date) : nil
+      }
+    end
+%>
+
+  <h2>
+    <%= start_day %> de <%= start_hour %> à <%= end_hour %> : cours de <%= activity_ref %>  (salle <%= room %>)
+  </h2>
+
+  <table>
+
+    <%
+      details.each do |student|
+        details = student_details[student["id"]]
+        begin_at = details[:begin_at]
+        stopped_at = details[:stopped_at]
+    %>
+      <tr>
+        <td>
+          <%= student["first_name"] %>
+        </td>
+        <td>
+          <%= student["last_name"].upcase %>
+        <td>
+          &nbsp;
+        <td>
+          à partir du <%= begin_at %>
+          <%= stopped_at ? "jusqu'au #{stopped_at}" : "" %>
+        </td>
+      </tr>
+    <%
+      end
+    %>
+
+  </table>
+
+<%
+  end
+%>
