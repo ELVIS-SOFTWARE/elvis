@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require 'Zip'
+require 'zip'
 
 class StudentsController < ApplicationController
   def index
