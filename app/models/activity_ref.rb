@@ -148,102 +148,15 @@ class ActivityRef < ApplicationRecord
     end
   end
 
-  # Calcule les tarifs max pour toutes les activités et les familles d'activités et les stocke en cache (durée 5 minutes)
-  #  Cette méthode est créée dans un objectif de performance : elle évite de faire des requêtes SQL à chaque fois que l'on veut afficher un tarif
-  # @param [Season] season la saison pour laquelle calculer les tarifs ou omis pour toutes les saisons
-  def self.compute_all_display_prices(season = nil)
-
-    pricings = ActivityRefPricing
-                 .select("
-    activity_ref_pricings.activity_ref_id,
-    activity_refs.id,
-    activity_refs.activity_ref_kind_id,
-    activity_ref_pricings.price,
-    activity_ref_pricings.pricing_category_id,
-    activity_ref_pricings.from_season_id,
-    from_seasons.start as from_season_start,
-    activity_ref_pricings.to_season_id,
-    to_seasons.end as to_season_end
-    ")
-                 .joins(:activity_ref)
-                 .includes(:activity_ref)
-                 .joins("inner join seasons from_seasons on activity_ref_pricings.from_season_id = from_seasons.id")
-                 .joins("left join seasons to_seasons on activity_ref_pricings.to_season_id = to_seasons.id or activity_ref_pricings.to_season_id is null")
-                 .where("activity_ref_pricings.deleted_at is null")
-
-    if season.is_a?(Season)
-      pricings = pricings.where("from_seasons.start <= ? AND (to_seasons.end IS NULL OR to_seasons.end >= ?)", season.start, season.start)
-    end
-
-    # group pricings by activity_ref_id
-    # pricings_by_ar = pricings.group_by(&:activity_ref_id)
-
-    seasons = Season.all_seasons_cached
-    pricings_by_ar = {}
-
-    # first pass : iterate over  pricings
-    # and store them in a hash by activity_ref_id
-    pricings.each do |pricing|
-      # if the activity_ref_id is not in the hash, create a new array
-      # and store the pricing in it
-      if pricings_by_ar[pricing.activity_ref_id].nil?
-        pricings_by_ar[pricing.activity_ref_id] = [pricing]
-      else
-        # if the activity_ref_id is already in the hash, just add the pricing to the array
-        pricings_by_ar[pricing.activity_ref_id] << pricing
-      end
-    end
-
-    # iterate over the hash pricings_by_ar
-    # for each activity_ref, iterate over each season
-    # for each season, compute the max price
-    # and store it in cache as "activity_ref_id:season_id:price"
-    max_pricings_by_season = {}
-    max_ar_kind_pricings_by_season = {}
-
-    pricings_by_ar.each do |activity_ref_id, pricings|
-      max_pricings_by_season[activity_ref_id] = {}
-      ar_kind_id = pricings.first.activity_ref.activity_ref_kind_id
-      max_ar_kind_pricings_by_season[ar_kind_id] ||= {}
-
-      seasons.each do |season|
-        max_price = pricings
-                      .select { |p|
-                        p.from_season_start <= season.start &&
-                          (p.to_season_id.nil? || p.to_season_end >= season.start) }
-                      .map(&:price)
-                      .max || 0
-
-        max_pricings_by_season[activity_ref_id][season.id] = max_price
-
-        if max_price > max_ar_kind_pricings_by_season[ar_kind_id][season.id].to_i
-          max_ar_kind_pricings_by_season[ar_kind_id][season.id] = max_price
-        end
-
-        Rails.cache.write(
-          "activity_ref_id:#{activity_ref_id}:#{season.id}:price", max_price,
-          expires_in: 5.minute)
-      end
-
-      max_ar_kind_pricings_by_season.each do |ar_kind_id, hash|
-        hash.each do |season_id, max_price|
-          Rails.cache.write(
-            "activity_ref_kind_id:#{ar_kind_id}:#{season_id}:price", max_price,
-            expires_in: 5.minute)
-        end
-      end
-
-    end
-
-  end
-
   def display_price(season = Season.current_apps_season || Season.current)
-    ActivityRef.compute_all_display_prices unless Rails.cache.exist?("activity_ref_id:#{id}:#{season.id}:price")
+    unless Rails.cache.exist?("activity_ref_id:#{id}:#{season.id}:price")
+      ActivityRefs::MaxPricesCalculator.new.call
+    end
 
     if substitutable?
       Rails.cache.read("activity_ref_kind_id:#{activity_ref_kind_id}:#{season.id}:price")
     else
-       Rails.cache.read("activity_ref_id:#{id}:#{season.id}:price")
+      Rails.cache.read("activity_ref_id:#{id}:#{season.id}:price")
     end
   end
 
@@ -252,27 +165,6 @@ class ActivityRef < ApplicationRecord
       hash[season.id] = display_price(season)
     end
   end
-
-  # def display_price(season = Season.current_apps_season || Season.current)
-  #   if substitutable?
-  #     activity_ref_kind&.display_price(season)
-  #   else
-  #     max_price_for_activity_ref(season)
-  #   end
-  # end
-  #
-  # def max_price_for_activity_ref(season = Season.current_apps_season || Season.current)
-  #   puts "================ max_price_for_activity_ref for ActivityRef ##{id} season #{season.label}"
-  #   ActivityRefPricing.for_activity_ref(self).for_season(season).maximum(:price) || 0
-  # end
-  #
-  # def display_prices_by_season
-  #   puts "================ display_prices_by_season for ActivityRef ##{id}"
-  #
-  #   Season.all.each_with_object({}) do |season, hash|
-  #     hash[season.id] = display_price(season)
-  #   end
-  # end
 
   def kind
     activity_ref_kind&.name
