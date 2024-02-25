@@ -13,7 +13,7 @@ export default class PaymentsParameters extends BaseParameters {
         this.state.tabsNames = [
             'Adhésion',
             /*'Statuts de paiements',*/
-            'Méthodes de paiements',
+            'Moyens de paiements',
             'Catégories de prix',
             'Modalités de paiement',
             'Taux de remise'

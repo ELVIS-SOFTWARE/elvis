@@ -85,7 +85,7 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
 
                     swal({
                         title: "Erreur",
-                        text: "Une erreur est survenue lors de la récupération des méthodes de paiement",
+                        text: "Une erreur est survenue lors de la récupération des moyens de paiement",
                         type: "error",
                     });
                 })

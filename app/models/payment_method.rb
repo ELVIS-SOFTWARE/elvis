@@ -50,7 +50,7 @@ class PaymentMethod < ApplicationRecord
     #reset_pk_sequence
 
     def self.display_class_name(singular = true)
-        singular ? "méthode de paiement" : "méthodes de paiement"
+        singular ? "moyen de paiement" : "moyens de paiement"
     end
 
     def self.class_name_gender
