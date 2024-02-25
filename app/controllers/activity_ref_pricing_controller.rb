@@ -120,7 +120,7 @@ class ActivityRefPricingController < ApplicationController
     respond_to do |format|
       format.json {
         render json: {
-          seasons: Season.all.as_json(only: [:id, :label]),
+          seasons: Season.all_seasons_cached.as_json(only: [:id, :label]),
           pricing_categories: PricingCategory.all.as_json,
           activity_ref_pricings: ActivityRefPricing.all.as_json(include: { pricing_category: {} }),
           packs: Pack.all.as_json(only: [:id, :user_id, :activity_ref_pricing_id])

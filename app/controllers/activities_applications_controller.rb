@@ -7,7 +7,7 @@ class ActivitiesApplicationsController < ApplicationController
   def index
     activities_applications = ActivityApplication.includes(:activity_refs).all
     authorize! :read, activities_applications
-    @seasons = Season.all
+    @seasons = Season.all_seasons_cached
 
     season = Season.current_apps_season
 
@@ -169,7 +169,7 @@ class ActivitiesApplicationsController < ApplicationController
     @activity_refs = ActivityRef.all.as_json(methods: [:display_name])
     @statuses = ActivityApplicationStatus.all
     @levels = EvaluationLevelRef.all
-    @seasons = Season.all
+    @seasons = Season.all_seasons_cached
     @student_evaluation_questions = Question.student_evaluation_questions.all
     @application_change_questions = Question.application_change_questionnaire
     @new_student_level_questions = Question.new_student_level_questionnaire
@@ -261,7 +261,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     @season = Season.current_apps_season.as_json({ include: :holidays })
 
-    @seasons = Season.all.as_json({ include: :holidays })
+    @seasons = Season.all_seasons_cached.as_json({ include: :holidays })
     if current_user.nil?
       @current_user = nil
     else
@@ -278,6 +278,7 @@ class ActivitiesApplicationsController < ApplicationController
     # etant donnée que l'on récupère toutes les activity_refs pour le front
     # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
     # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
+
     @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
 
     activity_refs = if current_user&.is_admin
@@ -288,7 +289,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
-                              .select { |ar| ar["activity_type"] != "child"  and ar["activity_type"] != "cham" and !ar["allows_timeslot_selection"] }
+                              .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and !ar["allows_timeslot_selection"] }
                               .group_by { |ar| ar["kind"] }
                               .transform_values { |values| values.max_by { |ar| ar["display_price"] } }
                               .values
@@ -325,11 +326,11 @@ class ActivitiesApplicationsController < ApplicationController
     @adhesion_prices = AdhesionPrice.all.as_json
 
     @packs = ActivityRefPricing
-             .where('("activity_ref_pricings"."from_season_id" <= ? AND ("activity_ref_pricings"."to_season_id" IS NULL OR "activity_ref_pricings"."to_season_id" >= ?))', Season.current.id, Season.current.id)
-             .as_json(include: {
-               pricing_category: {},
-               activity_ref: {},
-             })
+               .where('("activity_ref_pricings"."from_season_id" <= ? AND ("activity_ref_pricings"."to_season_id" IS NULL OR "activity_ref_pricings"."to_season_id" >= ?))', Season.current.id, Season.current.id)
+               .as_json(include: {
+                 pricing_category: {},
+                 activity_ref: {},
+               })
 
     # on regroupe les activity_ref_pricings par label
     @packs = @packs.group_by { |arp| arp["activity_ref"]["label"] }
@@ -435,7 +436,7 @@ class ActivitiesApplicationsController < ApplicationController
     @all_activity_ref_kinds = ActivityRefKind.all.as_json
     @activity_refs_cham = []
     @season = season.as_json({ include: :holidays })
-    @seasons = Season.all.as_json({ include: :holidays })
+    @seasons = Season.all_seasons_cached.as_json({ include: :holidays })
     @application_change_questions = Question.application_change_questionnaire
     @instruments = Instrument.all
     @locations = Location.all
@@ -579,7 +580,7 @@ class ActivitiesApplicationsController < ApplicationController
         if params[:application][:infos][:payer_payment_terms].present?
           existing_payment_terms = @user.payer_payment_terms.where(season_id: season.id)
 
-          received_payment_terms = params[:application][:infos][:payer_payment_terms]&.find {|p| p[:season_id] == season.id}
+          received_payment_terms = params[:application][:infos][:payer_payment_terms]&.find { |p| p[:season_id] == season.id }
 
           if received_payment_terms.present?
             if existing_payment_terms.empty?
@@ -588,13 +589,13 @@ class ActivitiesApplicationsController < ApplicationController
                 season_id: season.id,
                 day_for_collection: received_payment_terms[:day_for_collection],
                 payment_method_id: received_payment_terms[:payment_method_id],
-                )
+              )
             else
               existing_payment_terms.first&.update!(
                 day_for_collection: received_payment_terms[:day_for_collection],
                 payment_schedule_options_id: received_payment_terms[:payment_schedule_options_id],
                 payment_method_id: received_payment_terms[:payment_method_id],
-                )
+              )
             end
           end
         end
@@ -695,7 +696,6 @@ class ActivitiesApplicationsController < ApplicationController
           new_applications << @activity_application
         end
 
-
         # This means that the user should have
         if params[:application][:practicedInstruments].any? && params[:application][:selectedEvaluationIntervals]
           params[:application][:selectedEvaluationIntervals].each do |ref_id, interval|
@@ -726,7 +726,7 @@ class ActivitiesApplicationsController < ApplicationController
             pc = PricingCategory.find(value).first
             activity_ref_pricing = nil
             pc.activity_ref_pricing.each do |arp|
-                activity_ref_pricing = arp if arp.activity_ref.label == key
+              activity_ref_pricing = arp if arp.activity_ref.label == key
             end
 
             Pack.create!(user_id: @user.id, activity_ref_pricing_id: activity_ref_pricing.id, season_id: season.id, lessons_remaining: pc.number_lessons)

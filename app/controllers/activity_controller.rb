@@ -8,7 +8,7 @@ class ActivityController < ApplicationController
   def index
     @current_user = current_user
     @activity_refs = ActivityRef.all.includes({ activities: [], activity_ref_kind: {} })
-    @seasons = Season.all
+    @seasons = Season.all_seasons_cached
     @rooms = Room.all
     @teachers = User.teachers.all
     @evaluation_level_refs = EvaluationLevelRef.all

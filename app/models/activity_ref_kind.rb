@@ -26,11 +26,4 @@ class ActivityRefKind < ApplicationRecord
     return :F
   end
 
-  def display_price(season = Season.current_apps_season || Season.current)
-    ActivityRefPricing
-      .for_season(season)
-      .for_activity_ref_id(activity_refs.pluck(:id))
-      .maximum(:price) || 0
-  end
-
 end

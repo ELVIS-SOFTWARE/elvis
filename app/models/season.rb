@@ -86,6 +86,12 @@ class Season < ApplicationRecord
       the_time < season.closing_date_for_applications
   end
 
+  def self.all_seasons_cached
+    Rails.cache.fetch("seasons:all", expires_in: 5.minutes) do
+      Season.all
+    end
+  end
+
   # renvoie la date du lundi de la semaine qui contient le jour de début de la saison
   # ex : si la saison commence le jeudi 1er septembre 2022, on renvoie le lundi 29 août 2022
   def first_week_date
