@@ -594,8 +594,8 @@ Rails.application.routes.draw do
   get "/my_activities/:id/bookActivity/:activity_ref_id", to: "my_activities#show_bookings_and_availabilities"
   get "/get_bookings_and_availabilities/my_activities/:user_id/bookActivity/:pack_id", to: "my_activities#get_bookings_and_availabilities"
 
-  get "/my_activities/:id/incoming", to: "my_activities#show_incoming_activities"
-  get "/get_incoming_activities/my_activities/:user_id/incoming", to: "my_activities#get_upcoming_activities_for_user"
+  get "/my_activities/:id/upcoming", to: "my_activities#show_upcoming_activities"
+  get "/get_upcoming_activities/my_activities/:user_id/upcoming", to: "my_activities#get_upcoming_activities_for_user"
 
   post "/submit_user_wish_list", to: "my_activities#submit_user_wish_list"
   post "/remove_wished_attendance", to: "my_activities#remove_wished_attendance"

@@ -2,7 +2,7 @@
 
 class MyActivitiesController < ApplicationController
   before_action -> { @current_user = current_user }
-  before_action :authorize_user, only: [:show, :show_bookings_and_availabilities, :show_incoming_activities]
+  before_action :authorize_user, only: [:show, :show_bookings_and_availabilities, :show_upcoming_activities]
 
   def authorize_user
     if current_user.id != params[:id].to_i && !current_user.admin?
@@ -34,7 +34,7 @@ class MyActivitiesController < ApplicationController
   end
 
   ###### Page des prochains cours ######
-  def show_incoming_activities
+  def show_upcoming_activities
 
   end
 
@@ -270,6 +270,9 @@ class MyActivitiesController < ApplicationController
 
     if user_pack.lessons_remaining > 0
       params[:wish_list].each do |activityInstance|
+        # inscrire l'élève au cours sélectionné, si ce n'est pas encore le cas
+        Student.find_or_create_by!(user_id: params[:user_id], activity_id: activityInstance["activity_id"])
+
         attendance = StudentAttendance.create(user_id: params[:user_id], activity_instance_id: activityInstance["id"], is_pack: true)
         attendance.save!
 

@@ -3,7 +3,7 @@ import * as api from "../../../tools/api";
 import swal from "sweetalert2";
 import ActivityCard from "./activityCards";
 import RegularActivityCard from "./regularActivityCards";
-import IncomingActivityInstancesList from "../IncomingActivityInstances/upcomingActivityInstancesList";
+import UpcomingActivityInstancesList from "../UpcomingActivityInstances/upcomingActivityInstancesList";
 import PlaceholderCard from "./placeholderCard";
 
 export default function myActivities() {
@@ -131,10 +131,10 @@ export default function myActivities() {
                     <div className="d-flex flex-column">
                         <div className="mx-4 d-flex align-items-baseline justify-content-between mb-4">
                             <h4 className="title font-bold">MES PROCHAINS COURS</h4>
-                            <a href={window.location.href + "/incoming"} className="color-black font-bold mr-4">Voir mon
+                            <a href={window.location.href + "/upcoming"} className="color-black font-bold mr-4">Voir mon
                                 planning &nbsp; &gt;</a>
                         </div>
-                        <IncomingActivityInstancesList/>
+                        <UpcomingActivityInstancesList/>
                     </div>
 
                 </div>

@@ -8,10 +8,10 @@ export default function upcomingActivityInstancesList(props) {
     const [loading, setLoading] = useState(true);
     const [activities, setActivities] = useState(null);
     let minimalDisplay = false;
-    let url = `/get_incoming_activities` + window.location.pathname;
+    let url = `/get_upcoming_activities` + window.location.pathname;
 
-    if (!url.includes("/incoming")){
-        url += "/incoming";
+    if (!url.includes("/upcoming")){
+        url += "/upcoming";
         minimalDisplay = true;
     }
 
