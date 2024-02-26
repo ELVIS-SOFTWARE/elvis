@@ -50,7 +50,8 @@ module ActivityRefs
     end
 
     def update_max_price_for_activity_ref_kind(ar_kind_id, max_ar_kind_pricings_by_season, max_price, season)
-      if max_price > max_ar_kind_pricings_by_season[ar_kind_id][season.id].to_i
+      max_ar_kind_pricings_by_season[ar_kind_id][season.id] ||= 0
+      if max_price > max_ar_kind_pricings_by_season[ar_kind_id][season.id]
         max_ar_kind_pricings_by_season[ar_kind_id][season.id] = max_price
       end
     end
