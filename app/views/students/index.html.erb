@@ -15,18 +15,19 @@
 
 <%
 
-  activities_and_students.each do |activity_id, details|
-    activity_ref = details[0]["activity_ref"]
-    start = details[0]["start"]
+  activities_and_students.each do |activity_id, students|
+    activity_ref = students[0]["activity_ref_label"]
+    start = students[0]["start"]
 
-    start_day = l(start, format: :day)
-    start_hour = l(start, format: :short_time)
-    end_hour = l(details[0]["end"], format: :short_time)
+    start_day = l(Time.parse(start), format: :day)
+    start_hour = l(Time.parse(start).in_time_zone, format: :short_time)
+    end_hour = l(Time.parse(students[0]["end"]).in_time_zone, format: :short_time)
 
-    room = details[0]["room"]
+    group_name = students[0]["group_name"]
+    room = students[0]["room_label"]
 
     activity_applications = ActivityApplication.for_activity_id(activity_id)
-    student_details = activity_applications.each_with_object({}) do |aa, hash|
+    application_dates = activity_applications.each_with_object({}) do |aa, hash|
       hash[aa.user_id] = {
         begin_at: aa.begin_at ? l(aa.begin_at, format: :long_date) : nil,
         stopped_at: aa.stopped_at ? l(aa.stopped_at, format: :long_date) : nil
@@ -35,16 +36,29 @@
 %>
 
   <h2>
-    <%= start_day %> de <%= start_hour %> à <%= end_hour %> : cours de <%= activity_ref %>  (salle <%= room %>)
+    <%= start_day %> de <%= start_hour %> à <%= end_hour %> : cours de <%= activity_ref %>
+
+    <% if group_name.present? || room.present? %>
+      (
+      <% if group_name.present? %>
+        groupe <%= group_name %>,
+      <% end %>
+      <% if room.present? %>
+        salle <%= room %>
+      <% end %>
+      )
+    <% end %>
+
   </h2>
 
   <table>
 
     <%
-      details.each do |student|
-        details = student_details[student["id"]]
-        begin_at = details[:begin_at]
-        stopped_at = details[:stopped_at]
+      students.each do |student|
+        next if student["user_id"].nil?
+        dates = application_dates[student["user_id"]]
+        begin_at = dates.try(:[], :begin_at)
+        stopped_at = dates.try(:[], :stopped_at)
     %>
       <tr>
         <td>
@@ -55,7 +69,7 @@
         <td>
           &nbsp;
         <td>
-          à partir du <%= begin_at %>
+          <%= begin_at ? "à partir du #{begin_at}" : "" %>
           <%= stopped_at ? "jusqu'au #{stopped_at}" : "" %>
         </td>
       </tr>

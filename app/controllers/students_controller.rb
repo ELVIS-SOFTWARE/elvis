@@ -46,25 +46,27 @@ class StudentsController < ApplicationController
     activity_ids = teacher_activities.pluck(:activity_id)
 
     activities_and_students =
-      User.joins(
-        students: {
-          activity: [
-            :activity_ref,
-            :time_interval,
-            :room
-          ] })
-          .where('students.activity_id IN (?)', activity_ids)
-          .select('
-            users.id,
+      Activity
+        .joins(
+          :activity_ref,
+          :time_interval,
+          :room)
+        .left_joins(students: :user)
+        .where('activities.id IN (?)', activity_ids)
+        .select('
+            users.id as user_id,
             users.first_name,
             users.last_name,
-            students.activity_id,
-            activity_refs.label as activity_ref,
+            activities.id as activity_id,
+            activities.group_name,
+            activity_refs.label as activity_ref_label,
             time_intervals.start,
             time_intervals.end,
-            rooms.label as room')
-          .order('time_intervals.start')
-          .group_by { |o| o.activity_id }
+            rooms.label as room_label
+            ')
+        .order('time_intervals.start')
+        .as_json
+        .group_by { |a| a['activity_id'] }
 
     render_to_string(wicked_pdf: {}, pdf: "list_#{teacher.last_name}",
                      encoding: 'utf8',
