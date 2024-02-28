@@ -14,7 +14,6 @@ import {indexById, csrfToken, findAndGet} from "../utils/";
 import SwitchPayerModal from "./SwitchPayerModal";
 import {set} from "../../tools/api";
 import * as api from "../../tools/api";
-import { Editor } from "draft-js";
 
 const SEASON_STORED_KEY = "PaymentsSummarySelectedSeason";
 
