@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_02_18_171600) do
+ActiveRecord::Schema.define(version: 2024_02_28_184350) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -133,14 +133,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.index ["activity_ref_id"], name: "index_activity_ref_pricings_on_activity_ref_id"
     t.index ["deleted_at"], name: "index_activity_ref_pricings_on_deleted_at"
     t.index ["pricing_category_id"], name: "index_activity_ref_pricings_on_pricing_category_id"
-  end
-
-  create_table "activity_ref_season_pricings", force: :cascade do |t|
-    t.bigint "activity_ref_id", null: false
-    t.bigint "season_id", null: false
-    t.bigint "pricing_id"
-    t.float "price", default: 0.0
-    t.index ["activity_ref_id", "season_id", "pricing_id"], name: "activity_ref_season_pricing_index_on_associations"
   end
 
   create_table "activity_refs", force: :cascade do |t|
@@ -1002,10 +994,6 @@ ActiveRecord::Schema.define(version: 2024_02_18_171600) do
     t.boolean "is_a_pack", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-  end
-
-  create_table "pricings", force: :cascade do |t|
-    t.string "label", null: false
   end
 
   create_table "questions", force: :cascade do |t|
