@@ -82,7 +82,7 @@ export default function myActivities() {
                                 <h4 className="title font-bold">MES ACTIVITÉS</h4>
                             </div>
 
-                            <div className="px-lg-4">
+                            <div className="px-lg-4 mr-3">
                                 {season_list.length > 1 &&
                                     <select className="custom-select" value={selectedSeason.id}
                                             onChange={handleSeasonChange}>
