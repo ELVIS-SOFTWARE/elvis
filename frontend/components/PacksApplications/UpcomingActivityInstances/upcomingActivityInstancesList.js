@@ -20,7 +20,8 @@ export default function upcomingActivityInstancesList(props) {
             .useLoading()
             .success(res =>
             {
-                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 3) : res));
+                console.log(res);
+                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 4) : res));
                 setLoading(false);
             })
             .error(res =>
@@ -66,8 +67,6 @@ export default function upcomingActivityInstancesList(props) {
 
         return sortedActivities;
     }
-
-
 
     if (loading) return (
         <Fragment>Chargement...</Fragment>
