@@ -2,14 +2,14 @@ class ActivityRefKindController < ApplicationController
   before_action -> { @current_user = current_user }
 
   def index
-    @activity_ref_kinds = ActivityRefKind.all
+    @activity_ref_kinds = ActivityRefKind.order(:label)
 
     respond_to do |format|
       format.html 
 
       format.json do
           render json: @activity_ref_kinds.as_json(
-              except: [:created_at, :updated_at, :deleted_at] )
+              except: [:created_at, :updated_at, :deleted_at])
       end
     end
   end
