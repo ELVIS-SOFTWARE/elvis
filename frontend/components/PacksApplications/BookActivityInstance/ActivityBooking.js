@@ -99,6 +99,7 @@ export default function ActivityBooking() {
             .useLoading()
             .success(res => {
                 swal("Vos souhaits ont bien été enregistrés", "", "success");
+                setActiveTab(1);
             })
             .error(res => {
                 swal(res.message, res.error, "error");
@@ -162,8 +163,6 @@ export default function ActivityBooking() {
                 <div className="row mt-2 ml-1">
                     <p>Sélectionner les créneaux de cours que vous souhaitez</p>
                 </div>
-
-                <button onClick={() => setActiveTab(1 - activeTab)}>change</button>
 
                 <TabbedComponent
                     tabs={[
