@@ -20,7 +20,6 @@ export default function upcomingActivityInstancesList(props) {
             .useLoading()
             .success(res =>
             {
-                console.log(res);
                 setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 4) : res));
                 setLoading(false);
             })
