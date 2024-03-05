@@ -17,6 +17,7 @@ export default function ActivityBooking() {
     const [activityRefPricing, setActivityRefPricing] = useState(null);
     const [pack, setPack] = useState(null);
     const [secondTabActive, setSecondTabActive] = useState(false);
+    const [activeTab, setActiveTab] = useState(0);
 
     const fetchData = async () => {
         try {
@@ -162,12 +163,14 @@ export default function ActivityBooking() {
                     <p>Sélectionner les créneaux de cours que vous souhaitez</p>
                 </div>
 
+                <button onClick={() => setActiveTab(1 - activeTab)}>change</button>
+
                 <TabbedComponent
                     tabs={[
                         {
                             id: "tab1",
                             header: "À venir",
-                            active: true,
+                            active: activeTab === 0,
                             headerStyle:{color: "inherit", textDecoration: "none"},
                             body: <BookingCardsList
                                 activities={activities}
@@ -181,7 +184,7 @@ export default function ActivityBooking() {
                         {
                             id: "tab2",
                             header: "Mes séances",
-                            active: false,
+                            active: activeTab === 1,
                             headerStyle:{color: "inherit", textDecoration: "none"},
                             body: <BookedCardsList
                                 myActivities={myActivities}
