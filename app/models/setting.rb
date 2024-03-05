@@ -121,19 +121,39 @@ class Setting < ActiveRecord::Base
   @cached_settings = {}
   @cached_cleared_on = Time.now
 
+  YAML_PERMITTED_CLASSES = [Symbol, ActiveSupport::HashWithIndifferentAccess, TrueClass, FalseClass, NilClass, Numeric, String, Array, Hash].freeze
+
   def value
     v = read_attribute(:value)
     # Unserialize serialized settings
     # if available_settings[name]['serialized'] && v.is_a?(String)
     if v.is_a?(String)
-      v = YAML.safe_load(v, permitted_classes: [Symbol, ActiveSupport::HashWithIndifferentAccess])
-      v = force_utf8_strings(v)
+      begin
+        v = YAML.safe_load(v, permitted_classes: YAML_PERMITTED_CLASSES)
+        v = force_utf8_strings(v)
+      rescue Psych::DisallowedClass => e
+        logger&.error "Error unserializing setting #{name}: #{e.message}"
+      end
     end
     v
   end
 
   def value=(v)
     v = v.to_yaml if v
+
+    # try to load yml
+    begin
+      YAML.safe_load(v, permitted_classes: YAML_PERMITTED_CLASSES)
+    rescue StandardError => e
+      logger&.error "Error serializing setting #{name}: #{e.message}"
+
+      if e.class == Psych::DisallowedClass
+        raise StandardError.new("Error while saving settings, class of one or more values are not allowed. Allowed classes are: #{YAML_PERMITTED_CLASSES}.")
+      end
+
+      raise StandardError.new("Error while saving settings. please check the logs for more information.")
+    end
+
     write_attribute(:value, v.to_s)
   end
 
