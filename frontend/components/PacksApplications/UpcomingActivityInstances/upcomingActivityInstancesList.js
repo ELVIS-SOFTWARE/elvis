@@ -7,6 +7,7 @@ import moment from "moment";
 export default function upcomingActivityInstancesList(props) {
     const [loading, setLoading] = useState(true);
     const [activities, setActivities] = useState(null);
+    const [prevActivities, setPrevActivities] = useState(null);
     let minimalDisplay = false;
     let url = `/get_upcoming_activities` + window.location.pathname;
 
@@ -20,7 +21,7 @@ export default function upcomingActivityInstancesList(props) {
             .useLoading()
             .success(res =>
             {
-                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 3) : res));
+                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 4) : res));
                 setLoading(false);
             })
             .error(res =>
@@ -39,33 +40,61 @@ export default function upcomingActivityInstancesList(props) {
      * @param data
      */
     function sortActivitiesByMonth(data) {
+        const currentDate = moment();
         let sortedActivities = {};
+        let pastActivities = {};
 
         data.forEach(activity => {
-            const month = moment(activity.time_interval.start).format('MMMM');
-            if (sortedActivities[month] === undefined) {
-                sortedActivities[month] = [];
+            const activityStartDate = moment(activity.time_interval.start);
+
+            // Vérifiez si l'activité est à venir ou du jour même
+            if (activityStartDate.isBefore(currentDate, 'day')) {
+                const month = activityStartDate.format('MMMM');
+                if (pastActivities[month] === undefined) {
+                    pastActivities[month] = [];
+                }
+                pastActivities[month].push(activity);
+            } else {
+                const month = activityStartDate.format('MMMM');
+                if (sortedActivities[month] === undefined) {
+                    sortedActivities[month] = [];
+                }
+                sortedActivities[month].push(activity);
             }
-            sortedActivities[month].push(activity);
+
         });
 
-        // retirer les doublons par date
+        // Retirer les doublons par date
         Object.keys(sortedActivities).forEach(month => {
             sortedActivities[month] = sortedActivities[month].filter((thing, index, self) =>
                     index === self.findIndex((t) => (
                         t.time_interval.start === thing.time_interval.start
                     ))
-            )
+            );
         });
 
-        return sortedActivities;
+        Object.keys(pastActivities).forEach(month => {
+            pastActivities[month] = pastActivities[month].filter((thing, index, self) =>
+                index === self.findIndex((t) => (
+                    t.time_interval.start === thing.time_interval.start
+                ))
+            );
+        });
+
+        return {...sortedActivities, ...pastActivities};
     }
 
     if (loading) return (
         <Fragment>Chargement...</Fragment>
     );
 
-    if (Object.keys(activities).length === 0) {
+    const allActivities = { ...activities };
+
+    if (prevActivities && prevActivities.length > 0) {
+        allActivities["Passé"] = prevActivities;
+    }
+
+    if (Object.keys(allActivities).length === 0) {
         return (
             <div className="col-md-12">
                 <div className="ibox">
@@ -79,18 +108,16 @@ export default function upcomingActivityInstancesList(props) {
     } else {
         return <Fragment>
             <div>
-                {Object.keys(activities).map((month, index) => (
-                    activities[month].length > 0 && (
+                {Object.keys(allActivities).map((month, index) => (
+                    allActivities[month].length > 0 && (
                         <div key={index}>
                             {minimalDisplay ? "" : <h2 className="animated fadeInRight">{month}</h2>}
-                            {activities[month].map((item, itemIndex) => (
-
-                                    <UpcomingActivityInstancesCards
-                                        key={itemIndex}
-                                        activity={item}
-                                        minimalDisplay={minimalDisplay}
-                                    />
-
+                            {allActivities[month].map((item, itemIndex) => (
+                                <UpcomingActivityInstancesCards
+                                    key={itemIndex}
+                                    activity={item}
+                                    minimalDisplay={minimalDisplay}
+                                />
                             ))}
                         </div>
                     )
