@@ -7,7 +7,7 @@ import moment from "moment";
 export default function upcomingActivityInstancesList(props) {
     const [loading, setLoading] = useState(true);
     const [activities, setActivities] = useState(null);
-    const [prevActivities, setPrevActivities] = useState(null);
+    // const [pastActivities, setPastActivities] = useState(null);
     let minimalDisplay = false;
     let url = `/get_upcoming_activities` + window.location.pathname;
 
@@ -21,7 +21,11 @@ export default function upcomingActivityInstancesList(props) {
             .useLoading()
             .success(res =>
             {
-                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 4) : res));
+                // let pastActivity = res.filter(activity => moment(activity.time_interval.start).isBefore(moment(), 'minute'));
+                let futureActivity = res.filter(activity => moment(activity.time_interval.start).isAfter(moment(), 'minute'));
+
+                setActivities(sortActivitiesByMonth(minimalDisplay ? futureActivity.slice(0, 3) : res));
+                // setPastActivities(sortActivitiesByMonth(pastActivity));
                 setLoading(false);
             })
             .error(res =>
@@ -33,68 +37,53 @@ export default function upcomingActivityInstancesList(props) {
 
     useEffect(() => {
         fetchData()
+
     }, [])
 
     /**
      * trier les activités par mois
      * @param data
      */
+
+    function sortActivitiesByDate(activities) {
+        return activities.sort((a, b) => moment(a.time_interval.start) - moment(b.time_interval.start));
+    }
+
     function sortActivitiesByMonth(data) {
-        const currentDate = moment();
         let sortedActivities = {};
-        let pastActivities = {};
 
         data.forEach(activity => {
-            const activityStartDate = moment(activity.time_interval.start);
+            const startMoment = moment(activity.time_interval.start);
+            const currentMonth = startMoment.format('MMMM');
 
-            // Vérifiez si l'activité est à venir ou du jour même
-            if (activityStartDate.isBefore(currentDate, 'day')) {
-                const month = activityStartDate.format('MMMM');
-                if (pastActivities[month] === undefined) {
-                    pastActivities[month] = [];
+            if (startMoment.isSameOrAfter(moment(), 'month')) {
+                if (sortedActivities[currentMonth] === undefined) {
+                    sortedActivities[currentMonth] = [];
                 }
-                pastActivities[month].push(activity);
-            } else {
-                const month = activityStartDate.format('MMMM');
-                if (sortedActivities[month] === undefined) {
-                    sortedActivities[month] = [];
-                }
-                sortedActivities[month].push(activity);
+                sortedActivities[currentMonth].push(activity);
             }
-
         });
 
-        // Retirer les doublons par date
+        Object.keys(sortedActivities).forEach(month => {
+            sortedActivities[month] = sortActivitiesByDate(sortedActivities[month]);
+        });
+
         Object.keys(sortedActivities).forEach(month => {
             sortedActivities[month] = sortedActivities[month].filter((thing, index, self) =>
                     index === self.findIndex((t) => (
                         t.time_interval.start === thing.time_interval.start
                     ))
-            );
+            )
         });
 
-        Object.keys(pastActivities).forEach(month => {
-            pastActivities[month] = pastActivities[month].filter((thing, index, self) =>
-                index === self.findIndex((t) => (
-                    t.time_interval.start === thing.time_interval.start
-                ))
-            );
-        });
-
-        return {...sortedActivities, ...pastActivities};
+        return sortedActivities;
     }
 
     if (loading) return (
         <Fragment>Chargement...</Fragment>
     );
 
-    const allActivities = { ...activities };
-
-    if (prevActivities && prevActivities.length > 0) {
-        allActivities["Passé"] = prevActivities;
-    }
-
-    if (Object.keys(allActivities).length === 0) {
+    if (Object.keys(activities).length === 0) {
         return (
             <div className="col-md-12">
                 <div className="ibox">
@@ -108,16 +97,18 @@ export default function upcomingActivityInstancesList(props) {
     } else {
         return <Fragment>
             <div>
-                {Object.keys(allActivities).map((month, index) => (
-                    allActivities[month].length > 0 && (
+                {Object.keys(activities).map((month, index) => (
+                    activities[month].length > 0 && (
                         <div key={index}>
                             {minimalDisplay ? "" : <h2 className="animated fadeInRight">{month}</h2>}
-                            {allActivities[month].map((item, itemIndex) => (
+                            {activities[month].map((item, itemIndex) => (
+
                                 <UpcomingActivityInstancesCards
                                     key={itemIndex}
                                     activity={item}
                                     minimalDisplay={minimalDisplay}
                                 />
+
                             ))}
                         </div>
                     )
