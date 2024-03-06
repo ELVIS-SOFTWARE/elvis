@@ -2,7 +2,6 @@ class ActivityRefKindController < ApplicationController
   before_action -> { @current_user = current_user }
 
   def index
-    @activity_ref_kinds = ActivityRefKind.order(:label)
 
     respond_to do |format|
       format.html 
@@ -15,7 +14,7 @@ class ActivityRefKindController < ApplicationController
   end
 
   def list
-    query = ActivityRefKind.all
+    query = ActivityRefKind.all.order(:name)
 
     respond_to do |format|
       format.json { render json: { status:query.as_json, pages:1, total:1} }

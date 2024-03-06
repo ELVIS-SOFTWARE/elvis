@@ -29,7 +29,7 @@ export default class ActivityRefBasics extends React.Component {
         super(props);
         this.state = {
             tabs: [],
-            activityRefKinds: this.props.activityRefKinds.map(ark => { return { value: ark[1], label: ark[0] } }),
+            activityRefKinds: this.props.activityRefKinds.map(ark => { return { value: ark[1], label: ark[0] } }).sort( (a, b) => a.label.localeCompare(b.label)),
             seasons: [],
             pricingCategories: [],
             activityRefPricings: [],
