@@ -1033,7 +1033,7 @@ class MergeAllMigrations < ActiveRecord::Migration[6.1]
     add_foreign_key :activity_refs, :activity_ref_kinds unless foreign_key_exists? :activity_refs, :activity_ref_kinds
     add_foreign_key :bands, :band_types unless foreign_key_exists? :bands, :band_types
     add_foreign_key :bands, :music_genres unless foreign_key_exists? :bands, :music_genres
-    add_foreign_key :desired_activities, :pricings unless foreign_key_exists? :desired_activities, :pricings
+    add_foreign_key :desired_activities, :pricings unless foreign_key_exists? :desired_activities, :pricings if Object.const_defined?(:Pricing)
     add_foreign_key :due_payments, :payment_schedules unless foreign_key_exists? :due_payments, :payment_schedules
     add_foreign_key :evaluation_appointments, :activity_applications unless foreign_key_exists? :evaluation_appointments, :activity_applications
     add_foreign_key :holidays, :seasons unless foreign_key_exists? :holidays, :seasons

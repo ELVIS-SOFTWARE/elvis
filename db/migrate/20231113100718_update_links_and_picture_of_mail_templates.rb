@@ -143,8 +143,9 @@ class UpdateLinksAndPictureOfMailTemplates < ActiveRecord::Migration[6.1]
                                             }
     )
 
-    #pp notification_template
+    template = notification_template.as_json
+    template.delete("id")
 
-    notification_template.save!
+    NotificationTemplate.upsert(template, unique_by: :path)
   end
 end
