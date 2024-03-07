@@ -274,6 +274,16 @@ class UserList extends React.Component {
                                 Adhérent
                             </a>
                         );
+                    } else if (d.attached_to_id) {
+                        return (
+                            <a
+                                href={`/users/${d.id}`}
+                                className="badge"
+                                style={{ backgroundColor: "#009f9a", color: "white" }}
+                            >
+                                Compte rattaché
+                            </a>
+                        );
                     } else {
                         return (
                             <a
@@ -299,6 +309,7 @@ class UserList extends React.Component {
                         <option value="user">Autres</option>
                         <option value="student">Élèves</option>
                         <option value="teacher">Professeurs</option>
+                        <option value="attached">Compte rattachés</option>
                     </select>
                 ),
             },

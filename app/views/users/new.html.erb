@@ -30,7 +30,12 @@
 
       <div class="form-group">
         <div><%= f.label :email %><span class="text-danger">*</span></div>
-        <%= f.email_field :email, autofocus: true, required: true, autocomplete: "email", class: "form-control" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+      </div>
+
+      <div class="form-group">
+        <div><%= f.label :compte_rattaché_à %></div>
+        <%= f.collection_select :attached_to_id, @users_to_attach, :id, :full_name, { include_blank: true }, { class: "form-control" } %>
       </div>
 
       <div class="form-group">

@@ -48,7 +48,10 @@
                     <div class="col-sm" style="flex:1">
                         <div class="contact-info">
                             <h3><%= m.first_name %> <b><%= m.last_name %></b></h3>
-                            <span class="relation"><%= "#{m.display_family_link(@user, @season)} #{@user.genitive_first_name}" %></span>
+                            <span class="relation"><%= "#{m.display_family_link(@user, @season)} #{@user.genitive_first_name}" %></span><br/>
+                            <% if @user.attached_accounts.where(id: m.id).any? %>
+                              <span class="relation">Compte rattaché</span>
+                            <% end %>
                             <% m.telephones.each do |t| %>
                                 <p><%= t.label.nil? ? "" : t.label.capitalize %>: <%= t.number %></p>
                             <% end %>
@@ -93,9 +96,9 @@
                             <h4 class="mt-3 mb-2"> Profil </h4>
                             <% if !(m.id == @current_user.id) || @current_user.is_admin %>
                                 <%= link_to(user_path(m), class: "btn btn-primary btn-outline") do %>
-                                    
+
                                     <i class="fas fa-eye"></i> Voir
-                                    
+
                                 <% end %>
                                 <%= link_to edit_user_path(m.id), class: "btn btn-outline btn-primary m-2" do %>
                                     <i class="fas fa-edit"></i> Éditer
@@ -135,5 +138,49 @@
                 <% end %>
             </div>
         </div>
+    <% end %>
+
+    <% if @attached_account_to_show.any? %>
+      <hr /><br/>
+      <h2 class="title-profile">Comptes rattachés :</h2>
+
+      <% @attached_account_to_show.each do |attached_user| %>
+        <div class="contact-thumb">
+          <div class="col-sm" style="flex:1">
+            <div class="contact-info">
+              <h3><%= attached_user.first_name %> <b><%= attached_user.last_name %></b></h3>
+              <span class="relation">compte rattaché</span>
+              <% attached_user.telephones.each do |t| %>
+                <p><%= t.label.nil? ? "" : t.label.capitalize %>: <%= t.number %></p>
+              <% end %>
+            </div>
+          </div>
+          <% if @current_user.is_admin or (@user.id == @current_user.id) %>
+            <div class="col-sm profil border-left <%= @season.closing_date_for_applications >= DateTime.now ? "border-right" : "" %>" style="flex:1"->
+              <h4 class="mt-3 mb-2"> Profil </h4>
+              <% if !(@user.id == @current_user.id) || @current_user.is_admin %>
+                <%= link_to(user_path(attached_user), class: "btn btn-primary btn-outline") do %>
+
+                  <i class="fas fa-eye"></i> Voir
+
+                <% end %>
+                <%= link_to edit_user_path(attached_user.id), class: "btn btn-outline btn-primary m-2" do %>
+                  <i class="fas fa-edit"></i> Éditer
+                <% end %>
+              <% end %>
+            </div>
+            <% if Season.registration_opened %>
+              <div class="col-sm border-dark" style="flex: 1;">
+                <h4> Activités </h4>
+                <% if !(@user.id == @current_user.id) || @current_user.is_admin %>
+                  <%= link_to new_application_path(attached_user), class: "btn btn-primary" do %>
+                    <i class="fas fa-graduation-cap"></i> Pré-inscrire
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
     <% end %>
 </div>

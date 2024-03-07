@@ -27,7 +27,7 @@ class UsersController < ApplicationController
 
   def update_email
     user = current_user
-    user.email = params[:user][:email]
+    user.email = params[:user][:email] if user.attached_to.nil? || user.attached_to.email != params[:user][:email]
     return unless user.save
 
     token = user.set_reset_password_token
@@ -64,7 +64,7 @@ class UsersController < ApplicationController
 
   def save_new_account
     user = User.find params[:id]
-    user.email = params[:user][:email]
+    user.email = params[:user][:email] if user.attached_to.nil? || user.attached_to.email != params[:user][:email]
     user.reset_password(params[:user][:password], params[:user][:password_confirmation])
     user.first_connection = false
 
@@ -152,6 +152,8 @@ class UsersController < ApplicationController
           query = query.members.not_students
         when "teacher", "admin"
           query = query.where("is_#{filter[:value]} = true")
+        when "attached"
+          query = query.where.not(attached_to_id: nil)
         else
           # type code here
         end
@@ -280,6 +282,11 @@ class UsersController < ApplicationController
                                  methods: :family_links_with_user
                                })
     authorize! :read, @user
+
+    fml = @user.family_links(@season)
+
+    @user_to_exclude_from_attached = fml.map(&:member_id) + fml.map(&:user_id)
+    @attached_account_to_show = @user.attached_accounts.where.not(id: @user_to_exclude_from_attached)
 
     @adhesion = @user.get_last_adhesion
     @distance_to_end_date = nil
@@ -572,6 +579,8 @@ class UsersController < ApplicationController
     # Utilisation des erreurs via get = façon plus rapide de faire. => Mieux = appel de la creation via react & message dynamique
     @errors = nil if !@errors.is_a?(Array) || @errors.length.zero? || !@errors[0].is_a?(String)
 
+    @users_to_attach = User.where(attached_to_id: nil)
+
     authorize! :manage, User
     @activity_refs = ActivityRef.all
   end
@@ -579,8 +588,11 @@ class UsersController < ApplicationController
   def create
     user = User.new(user_params)
 
+    # ne pas mettre dans "user_params" pour n'authorizer que cette fois l'attribut.
+    user.attached_to_id = params[:user][:attached_to_id] if params[:user][:attached_to_id].present?
     user.last_name = user.last_name.strip
     user.first_name = user.first_name.strip
+    user.email = nil if user.attached? && user.attached_to.email == user.email
 
     if user.teacher? && params[:user][:activity_refs]
       user.activity_refs = ActivityRef.find(params[:user][:activity_refs])
@@ -723,6 +735,7 @@ class UsersController < ApplicationController
         # par sécurité on force la valeur à false si l'utilisateur actuel n'est pas un admin && qu'il modifie sa page
         up[:is_admin] = false if !@user.is_admin && !current_user.is_admin && current_user.id == @user.id
         up[:identification_number] = nil if "#{up[:identification_number]}".empty?
+        up[:email] = nil if @user.attached? && @user.attached_to.email == up[:email]
 
         @user.update!(up)
 
@@ -749,6 +762,7 @@ class UsersController < ApplicationController
     student.last_name = student.last_name.strip
     student.is_teacher = false
     student.is_admin = false
+    student.email = nil if student.attached? && student.attached_to.email == student.email
 
     begin
       student.save!
@@ -769,6 +783,7 @@ class UsersController < ApplicationController
       @season,
       send_confirmation: true
     )
+
     render status: :created, json: is_created
   end
 

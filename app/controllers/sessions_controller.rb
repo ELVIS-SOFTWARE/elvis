@@ -1,8 +1,14 @@
 class SessionsController < Devise::SessionsController
   
   def create
-    matching_user = User.where(email: params[:user][:login])
-      .or(User.where(adherent_number: params[:user][:login]))
+    matching_user = User
+                      .where(email: params[:user][:login])
+                      .or(User.where(adherent_number: params[:user][:login]))
+
+    # verify if there are any admin users
+    unless matching_user.where(is_admin: true).any?
+      matching_user = matching_user.where(attached_to: nil)
+    end
 
     if matching_user.many?
       matching_user.each do |user|
@@ -18,7 +24,7 @@ class SessionsController < Devise::SessionsController
 
   def create_with_token
     resource = User.find_by_authentication_token(params[:auth_token])
-    if resource
+    if resource.attached_at.nil? && resource
       sign_in :user, resource
       redirect_to after_sign_in_path_for(resource) and return
     else
