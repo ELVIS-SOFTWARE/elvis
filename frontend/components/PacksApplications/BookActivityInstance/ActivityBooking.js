@@ -163,8 +163,6 @@ export default function ActivityBooking() {
                     <p>Sélectionner les créneaux de cours que vous souhaitez</p>
                 </div>
 
-                <button onClick={() => setActiveTab(1 - activeTab)}>change</button>
-
                 <TabbedComponent
                     tabs={[
                         {
