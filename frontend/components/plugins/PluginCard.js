@@ -91,7 +91,7 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                 <div className="card-text d-flex justify-content-between align-items-center w-100">
                     <div>PAYANT</div>
                     <div className="d-flex align-items-center">
-                        {pluginActivated && initialyActivated ? (
+                        {pluginActivated && initialyActivated && plugin.name === "elvis_plugin_student_payments"? (
                             <a
                                 href={setting_path}
                                 className="btn btn-sm mr-2"
