@@ -949,7 +949,7 @@ class User < ApplicationRecord
 
   def ensure_attached_account_has_no_password
     if attached_to.present?
-      self.encrypted_password = nil
+      self.encrypted_password = ""
       self.password = nil
       self.password_confirmation = nil
     end

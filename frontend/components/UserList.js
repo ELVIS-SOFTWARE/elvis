@@ -10,6 +10,8 @@ import ReactTableFullScreen from "./ReactTableFullScreen";
 import * as api from "../tools/api";
 import swal from "sweetalert2";
 import {post} from "../tools/api";
+import Modal from "react-modal";
+import AttachAccount from "./AttachAccount";
 
 const requestData = (pageSize, page, sorted, filtered, format) => {
     return fetch(`/users/list${format ? "." + format : ""}`, {
@@ -428,6 +430,11 @@ class UserList extends React.Component {
                         Fusionner des doublons
                     </a>
 
+                    <button className="btn btn-primary m-r" href="/users/new" onClick={() => this.setState({showAttachAccountModal: true})}>
+                        <i className="fas fa-bezier-curve"></i>&nbsp;
+                        Rattacher des utilisateurs
+                    </button>
+
 
                     <button
                         data-tippy-content="Envoyer le mail de confirmation"
@@ -469,6 +476,17 @@ class UserList extends React.Component {
                 <div className="flex flex-center-justified m-t-xs">
                     <h3>{`${this.state.total} utilisateurs au total`}</h3>
                 </div>
+
+                <Modal
+                    isOpen={this.state.showAttachAccountModal}
+                    ariaHideApp={false}
+                    onRequestClose={() => this.setState({showAttachAccountModal: false})}
+                    className="modal-lg">
+                    <AttachAccount onSucess={() => {
+                        this.setState({showAttachAccountModal: false});
+                        this.fetchData(this.state.filter)
+                    }} />
+                </Modal>
             </div>
         );
     }

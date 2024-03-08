@@ -1034,7 +1034,7 @@ class UsersController < ApplicationController
       methods: :family_links_with_user
     }
     render json: Users::SearchUser.new(params[:last_name], params[:first_name], nil, params[:season_id], nil, includes,
-                                       false).execute
+                                       false, params[:hideAttachedAccounts]).execute
   end
 
   def set_level
@@ -1602,6 +1602,21 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
 
     render json: { all_doc_consented: @user.consent_document_users }
+  end
+
+  def attach_users
+    @user = User.find(params[:id])
+
+    render json: {message: "compte de rattachement not found"}, status: :not_found and return if @user.nil?
+
+    (params[:users] || []).each do |u|
+      user = User.find(u[:id])
+      next if user.nil? || user.attached? || user.id == @user.id
+
+      user.attached_to = @user
+      user.email = u[:email]
+      user.save
+    end
   end
 
   private

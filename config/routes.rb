@@ -201,6 +201,7 @@ Rails.application.routes.draw do
   get "/users/:id/presence_sheet/:date", to: "users#presence_sheet", as: "presence_sheet"
   get "/users/:id/applications", to: "users#applications"
   get "/users/payments", to: "user_payments#show_for_current", as: :user_payments_for_current
+  put "/users/:id/attach", to: "users#attach_users"
   resources :users
   put "/users/:id/update_family", to: "users#update_family"
 
