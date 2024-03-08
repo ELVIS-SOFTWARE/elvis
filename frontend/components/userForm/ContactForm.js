@@ -2,7 +2,7 @@ import React from "react";
 import { Form, Field, FormSpy } from "react-final-form";
 import arrayMutators from "final-form-arrays";
 import Switch from "react-switch";
-import _ from "lodash";
+import _, { values } from "lodash";
 import moment from "moment";
 
 import GeneralInfos from "./GeneralInfos";
@@ -14,6 +14,7 @@ import { required } from "../../tools/validators";
 import { fullname, toLocaleDate, toDate } from "../../tools/format";
 import { changeUser, selectPhoneType, changeRelationshipDirection } from "../../tools/mutators";
 import InlineYesNoRadio from "../common/InlineYesNoRadio";
+import Checkbox from "../common/Checkbox";
 
 const familyLinks = [
     "père",
@@ -55,6 +56,7 @@ class ContactForm extends React.PureComponent {
             last_name: props.initialValues.last_name,
             birthday: props.initialValues.birthday,
             is_inverse: props.initialValues.is_inverse,
+            is_attached: props.initialValues.is_attached,
         };
     }
 
@@ -115,13 +117,17 @@ class ContactForm extends React.PureComponent {
     }
 
     validateUserMatch() {
+        const selectedUser = this.state.suggestedUsers[this.state.selectedUserMatch];
+
         this.mutators.changeUser({
-            ...this.state.suggestedUsers[this.state.selectedUserMatch],
+            ...selectedUser,
             is_inverse: this.state.is_inverse,
+            is_attached: false
         });
         this.setState({
             isUserSearchOver: true,
             suggestedUsers: null,
+            is_attached: false,
         });
     }
 
@@ -218,6 +224,9 @@ class ContactForm extends React.PureComponent {
                     {({ handleSubmit, form }) => {
                         this.mutators = form.mutators
 
+                        console.log("form.getState().values", form.getState().values)
+                        console.log("mutators", form.mutators)
+
                         return <form onSubmit={handleSubmit} className="user-form">
                             <FormSpy
                                 subscription={{ values: true }}
@@ -227,6 +236,27 @@ class ContactForm extends React.PureComponent {
                                 ignoreValidate={false}
                                 // displayGender
                                 displayBirthday />
+
+                            { user_linked && !form.getState().values.id && <div>
+                                <Checkbox
+                                    name="is_attached"
+                                    id="is_attached"
+                                    label={`"Est rattaché à ${user_linked.first_name} ${user_linked.last_name}`}
+                                    input={{
+                                        value: this.state.is_attached,
+                                        onChange: (e) => {
+                                            this.setState({ is_attached: e.target.checked});
+                                            this.mutators.changeUser({
+                                                ...this.props.initialValues,
+                                                first_name: this.state.first_name,
+                                                last_name: this.state.last_name,
+                                                birthday: this.state.birthday,
+                                                is_attached: e.target.checked,
+                                            });
+                                        }
+                                    }} />
+                            </div>}
+
                             <hr />
 
                             {

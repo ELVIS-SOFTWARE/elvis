@@ -281,7 +281,7 @@ class UserList extends React.Component {
                                 className="badge"
                                 style={{ backgroundColor: "#009f9a", color: "white" }}
                             >
-                                Compte rattaché
+                                Utilisateur rattaché
                             </a>
                         );
                     } else {
@@ -309,7 +309,7 @@ class UserList extends React.Component {
                         <option value="user">Autres</option>
                         <option value="student">Élèves</option>
                         <option value="teacher">Professeurs</option>
-                        <option value="attached">Compte rattachés</option>
+                        <option value="attached">Utilisateur rattachés</option>
                     </select>
                 ),
             },

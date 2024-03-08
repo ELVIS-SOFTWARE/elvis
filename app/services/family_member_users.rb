@@ -45,7 +45,7 @@ module FamilyMemberUsers
 
       #is_created ||= member[:id].nil?
 
-      fmu.email = if fmu.attached? && fmu.attached_to.email == user.email
+      fmu.email = if fmu.attached? && fmu.email == user.email
                     nil
                   else
                     member[:email]

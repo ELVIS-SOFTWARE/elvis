@@ -50,7 +50,7 @@
                             <h3><%= m.first_name %> <b><%= m.last_name %></b></h3>
                             <span class="relation"><%= "#{m.display_family_link(@user, @season)} #{@user.genitive_first_name}" %></span><br/>
                             <% if @user.attached_accounts.where(id: m.id).any? %>
-                              <span class="relation">Compte rattaché</span>
+                              <span class="relation">Utilisateur rattaché</span>
                             <% end %>
                             <% m.telephones.each do |t| %>
                                 <p><%= t.label.nil? ? "" : t.label.capitalize %>: <%= t.number %></p>
@@ -149,7 +149,7 @@
           <div class="col-sm" style="flex:1">
             <div class="contact-info">
               <h3><%= attached_user.first_name %> <b><%= attached_user.last_name %></b></h3>
-              <span class="relation">compte rattaché</span>
+              <span class="relation">Utilisateur rattaché</span>
               <% attached_user.telephones.each do |t| %>
                 <p><%= t.label.nil? ? "" : t.label.capitalize %>: <%= t.number %></p>
               <% end %>

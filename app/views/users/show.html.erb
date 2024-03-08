@@ -30,7 +30,7 @@
           <% end %>
 
           <% if @user.attached? %>
-            <span class="label d-inline-block m-t-xs w-auto" style="background-color: #009f9a; color: white">Compte rattaché</span>
+            <span class="label d-inline-block m-t-xs w-auto" style="background-color: #009f9a; color: white">Utilisateur rattaché</span>
           <% end %>
 
           <% unless @user.activities.empty? %>
@@ -65,7 +65,7 @@
       <div class="ibox-content">
         <% if @user.attached? %>
           <div class="info-group">
-            <p class="info-label">Compte rattaché à</p>
+            <p class="info-label">Utilisateur rattaché à</p>
             <%= link_to user_path(@user.attached_to) do %>
               <%= @user.attached_to.full_name %> (<%= @user.attached_to.adherent_number %>)
             <% end %>
