@@ -79,6 +79,7 @@ class UsersController < ApplicationController
              .includes(
                :telephones,
                :addresses,
+               :attached_to,
                family_member_users: {
                  member: %i[addresses telephones]
                },
@@ -1616,6 +1617,37 @@ class UsersController < ApplicationController
       user.attached_to = @user
       user.email = u[:email]
       user.save
+    end
+  end
+
+  def detach
+    @user_to_detach = User.find(params[:id])
+
+    render json: {message: "user not found"}, status: :not_found and return if @user_to_detach.nil?
+
+    @old_parent_user = @user_to_detach.attached_to
+
+    @user_to_detach.attached_to = nil
+    @user_to_detach.email = params[:email]
+
+    if @user_to_detach.save
+
+      if params[:addFamilyLink]
+        is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
+          [ActiveSupport::HashWithIndifferentAccess.new(@user_to_detach.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
+          @old_parent_user,
+          Season.current,
+          send_confirmation: true
+        )
+
+        if !is_created
+          render json: {message: "Le lien familial n'as pus être créer mais l'utilisateur à bien été détaché"}, status: :unprocessable_entity and return
+        end
+      end
+
+      render json: {message: "success"}, status: :ok
+    else
+      render json: {message: @user_to_detach.errors.full_messages}, status: :unprocessable_entity
     end
   end
 

@@ -16,7 +16,7 @@ import { changeUser, selectPhoneType, changeRelationshipDirection } from "../../
 import InlineYesNoRadio from "../common/InlineYesNoRadio";
 import Checkbox from "../common/Checkbox";
 
-const familyLinks = [
+export const familyLinks = [
     "père",
     "mère",
     "grand-père",

@@ -164,9 +164,11 @@
                   <i class="fas fa-eye"></i> Voir
 
                 <% end %>
-                <%= link_to edit_user_path(attached_user.id), class: "btn btn-outline btn-primary m-2" do %>
+                <%= link_to edit_user_path(attached_user.id), class: "btn btn-outline btn-primary" do %>
                   <i class="fas fa-edit"></i> Éditer
                 <% end %>
+
+                <%= react_component("detachAccount", {user: attached_user.as_json(methods: %i[family_links_with_user attached_to]) }) %>
               <% end %>
             </div>
             <% if Season.registration_opened %>
