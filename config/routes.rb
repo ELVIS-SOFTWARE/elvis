@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   get "/plugins", to: "plugins#index"
   post "/plugins", to: "plugins#changed"
 
-  match 'settings/plugin/:id', :controller => 'settings', :action => 'plugin', :via => [:get, :post], :as => 'plugin_settings'
+  match 'settings/:name', :controller => 'settings', :action => 'plugin', :via => [:get, :post], :as => 'plugin_settings'
 
   # ===================
   # FIN PLUGINS
