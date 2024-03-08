@@ -83,6 +83,7 @@ class User < ApplicationRecord
   before_save :ensure_authentication_token
   before_save :ensure_confirmation_token
   before_save :flip_flags
+  before_save :ensure_attached_account_has_no_password
   before_validation :email_is_null_if_attached
 
   scope :teachers, -> { where(is_teacher: true) }
@@ -234,7 +235,8 @@ class User < ApplicationRecord
   end
 
   def self.find_first_by_auth_conditions(warden_conditions)
-    conditions = warden_conditions.dup
+    conditions = warden_conditions.dup.permit(:attached_to_id, :login, :birthday, :first_name, :last_name)
+
     if login = conditions.delete(:login)
       where(conditions).where(["lower(email) = :value OR adherent_number::varchar(255) = :value",
                                { value: login.downcase }]).first
@@ -808,6 +810,8 @@ class User < ApplicationRecord
   # override devise::model::recoverable
   # -----------------------------------
   def self.send_reset_password_instructions(attributes = {})
+    attributes[:attached_to_id] = nil # add condition to not match attached account
+
     recoverable = find_for_authentication(attributes) || initialize_with_errors(attributes)
     recoverable.send_reset_password_instructions if recoverable.persisted?
     recoverable
@@ -942,6 +946,14 @@ class User < ApplicationRecord
   end
 
   private
+
+  def ensure_attached_account_has_no_password
+    if attached_to.present?
+      self.encrypted_password = nil
+      self.password = nil
+      self.password_confirmation = nil
+    end
+  end
 
   def email_is_null_if_attached
     self.email = nil if attached_to.present? && attached_to.email == email
