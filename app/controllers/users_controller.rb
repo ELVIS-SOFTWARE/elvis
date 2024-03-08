@@ -1632,10 +1632,12 @@ class UsersController < ApplicationController
 
     if @user_to_detach.save
 
+      DeviseMailer.confirmation_instructions(@user_to_detach, @user_to_detach.confirmation_token).deliver_later
+
       if params[:addFamilyLink]
         is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
-          [ActiveSupport::HashWithIndifferentAccess.new(@user_to_detach.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
-          @old_parent_user,
+          [ActiveSupport::HashWithIndifferentAccess.new(@old_parent_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
+          @user_to_detach,
           Season.current,
           send_confirmation: true
         )
