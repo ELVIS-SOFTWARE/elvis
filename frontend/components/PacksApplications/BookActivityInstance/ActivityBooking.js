@@ -18,6 +18,7 @@ export default function ActivityBooking() {
     const [pack, setPack] = useState(null);
     const [secondTabActive, setSecondTabActive] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
+    const [nbStudents, setNbStudents] = useState(0);
 
     const fetchData = async () => {
         try {
@@ -32,6 +33,7 @@ export default function ActivityBooking() {
                     setHoursBeforeCancelling(res.hours_before_cancelling)
                     setActivityRefPricing(res.activity_ref_pricing);
                     setPack(res.pack);
+                    setNbStudents(res.nb_students);
                 })
                 .error(res =>
                 {

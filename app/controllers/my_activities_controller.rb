@@ -105,6 +105,7 @@ class MyActivitiesController < ApplicationController
           activity_ref_pricing: activity_ref_pricing.as_json,
           pack: pack.as_json,
           hours_before_cancelling: Parameter.get_value("planning.hours_before_cancelling_activity") || 0,
+          nb_students: Pack.select(:user_id).distinct.count,
         }
       }
     end
