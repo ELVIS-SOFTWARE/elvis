@@ -1642,8 +1642,9 @@ class UsersController < ApplicationController
           send_confirmation: true
         )
 
-        if !is_created
-          render json: {message: "Le lien familial n'as pus être créer mais l'utilisateur à bien été détaché"}, status: :unprocessable_entity and return
+        unless is_created
+          render json: { message: "Le lien familial n'as pus être créer mais l'utilisateur à bien été détaché" }, status: :unprocessable_entity
+          return
         end
       end
 
