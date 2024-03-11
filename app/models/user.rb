@@ -299,6 +299,7 @@ class User < ApplicationRecord
     payment_schedules.find_by(season_id: Season.current.id)
   end
 
+  # @return [Array<FamilyMemberUser>]
   def family_links(season = Season.current_apps_season)
     return [] if season.nil?
 

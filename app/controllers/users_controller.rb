@@ -1634,17 +1634,27 @@ class UsersController < ApplicationController
 
       DeviseMailer.confirmation_instructions(@user_to_detach, @user_to_detach.confirmation_token).deliver_later
 
-      if params[:addFamilyLink]
-        is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
-          [ActiveSupport::HashWithIndifferentAccess.new(@old_parent_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
-          @user_to_detach,
-          Season.current,
-          send_confirmation: true
-        )
+      if params[:from] == "family_link"
+        unless params[:addFamilyLink]
+          family_links = @user_to_detach.family_links
 
-        unless is_created
-          render json: { message: "Le lien familial n'as pus être créer mais l'utilisateur à bien été détaché" }, status: :unprocessable_entity
-          return
+          links_to_deletes = family_links.select { |fl| fl.user_id == @old_parent_user.id || fl.member_id == @old_parent_user.id }
+
+          FamilyMemberUser.where(id: links_to_deletes.map(&:id)).delete_all
+        end
+      else
+        if params[:addFamilyLink]
+          is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
+            [ActiveSupport::HashWithIndifferentAccess.new(@old_parent_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
+            @user_to_detach,
+            Season.current,
+            send_confirmation: true
+          )
+
+          unless is_created
+            render json: { message: "Le lien familial n'as pus être créer mais l'utilisateur à bien été détaché" }, status: :unprocessable_entity
+            return
+          end
         end
       end
 

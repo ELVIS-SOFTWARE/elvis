@@ -81,7 +81,7 @@
                         <% if @user.attached_accounts.where(id: m.id).any? %>
                         <div class="col-sm-2 lienFamilial border-right py-1" style="flex:1">
                           <h4> Rattachement </h4>
-                          <%= react_component("detachAccount", {user: m.as_json(methods: %i[family_links_with_user attached_to]) }) %>
+                          <%= react_component("detachAccount", {from: "family_link", user: m.as_json(methods: %i[family_links_with_user attached_to]) }) %>
                         </div>
                         <% end %>
                         <div class="col-sm-3 lienFamilial py-1" style="flex:1">
@@ -164,7 +164,7 @@
           <% if @current_user.is_admin or (@user.id == @current_user.id) %>
             <div class="col-sm lienFamilial" style="flex:1">
               <h4> Rattachement </h4>
-              <%= react_component("detachAccount", {user: attached_user.as_json(methods: %i[family_links_with_user attached_to]) }) %>
+              <%= react_component("detachAccount", {from: "attached_account", user: attached_user.as_json(methods: %i[family_links_with_user attached_to]) }) %>
             </div>
             <div class="col-sm profil border-left <%= @season.closing_date_for_applications >= DateTime.now ? "border-right" : "" %>" style="flex:1"->
               <h4 class="mt-3 mb-2"> Profil </h4>

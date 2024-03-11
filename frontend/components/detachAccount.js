@@ -10,7 +10,7 @@ import Input from "./common/Input";
 import { MESSAGES } from "../tools/constants";
 import swal from "sweetalert2";
 
-export default function detachAccount({user, user_id})
+export default function detachAccount({user, user_id, from})
 {
     const [userToDetach, setUserToDetach] = useState(user);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +41,7 @@ export default function detachAccount({user, user_id})
         const sendData = {
             email: values.email,
             addFamilyLink: addFamilyLink,
+            from
         }
 
         if (addFamilyLink)
@@ -103,81 +104,15 @@ export default function detachAccount({user, user_id})
                                     render={Input} />
                             </div>
 
-                            <div className="col-sm">
-                                <input id="addFamilyLink" type="checkbox" onChange={e => setAddFamilyLink(e.target.checked)}/>
-                                <label htmlFor="addFamilyLink">Ajouter un lien familial</label>
-                            </div>
+                            {familyLinkCheckbox({ onClick: checked => setAddFamilyLink(checked), from })}
                         </div>
 
-                        {addFamilyLink && <div className="row">
-                            <h3>
-                                Lien familial
-                            </h3>
-
-                            <div className="col-sm">
-                                <div className="row">
-                                    <div className="col-sm-3">
-                                        <p className="h5"><b>{userToDetach.first_name} {userToDetach.last_name}</b> est
-                                        </p>
-                                    </div>
-                                    <div className="col-sm-3">
-                                        <Field
-                                            name="link"
-                                            type="select"
-                                            render={(props) => <Fragment>
-                                                <select className="form-control" {...props.input}>
-                                                    <option key={-1} />
-                                                    {props.options.map((opt, i) => (
-                                                        <option key={i} value={opt.value}>
-                                                            {opt.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                {props.meta.error && props.meta.touched && <p className="help-block text-danger">{MESSAGES[props.meta.error]}</p>}
-                                            </Fragment>}
-                                            required={true}
-                                            validate={required}
-                                            options={familyLinks.map(link => ({
-                                                value: link,
-                                                label: _.capitalize(link),
-                                            }))} />
-                                    </div>
-                                    <div className="col-sm-3">
-                                        <p className="h5 text-center">de <b>{userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name}</b>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <hr />
-                                <div className="row">
-                                    <h3 className="col-sm-12 m-b-sm">
-                                    Relation
-                                        avec {userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name}
-                                    </h3>
-                                </div>
-
-
-                                <div className="row">
-                                <InlineYesNoRadio
-                                        label={<p>{userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name} est payeur
-                                            pour {userToDetach.first_name} {userToDetach.last_name}</p>}
-                                        name="is_paying_for"
-                                        validate={required} />
-                                </div>
-
-                                <div className="row">
-                                    <InlineYesNoRadio
-                                        label={<p>{userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name} est représentant légal
-                                            de {userToDetach.first_name} {userToDetach.last_name}</p>}
-                                        name="is_legal_referent"
-                                        validate={required} />
-                                </div>
-                            </div>
-                        </div>}
+                        {familyLinkForm({userToDetach, from})}
 
                         <div className="row">
                             <div className="col-sm-6">
-                                <button className="btn btn-secondary" type="button" onClick={() => setIsModalOpen(false)}>
+                                <button className="btn btn-secondary" type="button"
+                                        onClick={() => setIsModalOpen(false)}>
                                     Annuler
                                 </button>
                             </div>
@@ -194,4 +129,89 @@ export default function detachAccount({user, user_id})
 
         </Modal>
     </Fragment>
+}
+
+const familyLinkCheckbox = ({ onClick, from }) => {
+    let labelMessage = "Ajouter un lien familial";
+
+    if (from === "family_link")
+        labelMessage = "Conservé le lien familial";
+
+    return <div className="col-sm">
+        <input id="addFamilyLink" type="checkbox" onChange={e => onClick(e.target.checked)} />
+        <label htmlFor="addFamilyLink">{labelMessage}</label>
+    </div>
+}
+
+const familyLinkForm = ({userToDetach, from}) =>
+{
+    if(from !== "family_link")
+        return <Fragment>
+
+        </Fragment>
+
+    return <div className="row">
+        <h3>
+            Lien familial
+        </h3>
+
+        <div className="col-sm">
+            <div className="row">
+                <div className="col-sm-3">
+                    <p className="h5"><b>{userToDetach.first_name} {userToDetach.last_name}</b> est
+                    </p>
+                </div>
+                <div className="col-sm-3">
+                    <Field
+                        name="link"
+                        type="select"
+                        render={(props) => <Fragment>
+                            <select className="form-control" {...props.input}>
+                                <option key={-1} />
+                                {props.options.map((opt, i) => (
+                                    <option key={i} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                            {props.meta.error && props.meta.touched && <p className="help-block text-danger">{MESSAGES[props.meta.error]}</p>}
+                        </Fragment>}
+                        required={true}
+                        validate={required}
+                        options={familyLinks.map(link => ({
+                            value: link,
+                            label: _.capitalize(link),
+                        }))} />
+                </div>
+                <div className="col-sm-3">
+                    <p className="h5 text-center">de <b>{userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name}</b></p>
+                </div>
+            </div>
+
+            <hr />
+            <div className="row">
+                <h3 className="col-sm-12 m-b-sm">
+                    Relation
+                    avec {userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name}
+                </h3>
+            </div>
+
+
+            <div className="row">
+                <InlineYesNoRadio
+                    label={<p>{userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name} est payeur
+                        pour {userToDetach.first_name} {userToDetach.last_name}</p>}
+                    name="is_paying_for"
+                    validate={required} />
+            </div>
+
+            <div className="row">
+                <InlineYesNoRadio
+                    label={<p>{userToDetach.attached_to.first_name} {userToDetach.attached_to.last_name} est représentant légal
+                        de {userToDetach.first_name} {userToDetach.last_name}</p>}
+                    name="is_legal_referent"
+                    validate={required} />
+            </div>
+        </div>
+    </div>
 }
