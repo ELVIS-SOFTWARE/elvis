@@ -1474,6 +1474,9 @@ class UsersController < ApplicationController
       family_users << current_user
     end
 
+    family_users += user.attached_accounts
+    family_users += [user.attached_to] if user.attached_to&.id == @current_user.id || (user.attached_to && @current_user.is_admin)
+
     @pre_application = jsonize_pre_application.call(pre_application_id)
 
     @family_users = []

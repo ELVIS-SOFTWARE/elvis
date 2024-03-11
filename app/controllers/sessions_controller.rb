@@ -24,7 +24,7 @@ class SessionsController < Devise::SessionsController
 
   def create_with_token
     resource = User.find_by_authentication_token(params[:auth_token])
-    if resource.attached_at.nil? && resource
+    if resource && resource.attached_to.nil?
       sign_in :user, resource
       redirect_to after_sign_in_path_for(resource) and return
     else

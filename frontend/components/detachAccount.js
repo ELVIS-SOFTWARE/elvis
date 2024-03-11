@@ -107,7 +107,7 @@ export default function detachAccount({user, user_id, from})
                             {familyLinkCheckbox({ onClick: checked => setAddFamilyLink(checked), from })}
                         </div>
 
-                        {familyLinkForm({userToDetach, from})}
+                        {familyLinkForm({userToDetach, from, addFamilyLink})}
 
                         <div className="row">
                             <div className="col-sm-6">
@@ -143,9 +143,9 @@ const familyLinkCheckbox = ({ onClick, from }) => {
     </div>
 }
 
-const familyLinkForm = ({userToDetach, from}) =>
+const familyLinkForm = ({userToDetach, from, addFamilyLink}) =>
 {
-    if(from !== "family_link")
+    if(from === "family_link" || !addFamilyLink)
         return <Fragment>
 
         </Fragment>

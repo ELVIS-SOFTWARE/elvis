@@ -131,13 +131,14 @@ class ContactForm extends React.PureComponent {
         });
     }
 
-    disabledUserSearch() {
-        this.props.initialValues.first_name = this.state.first_name;
-        this.props.initialValues.last_name = this.state.last_name;
-        this.props.initialValues.birthday = this.state.birthday;
-
+    disabledUserSearch()
+    {
         this.mutators.changeUser({
             ...this.props.initialValues,
+            first_name: this.state.first_name,
+            last_name: this.state.last_name,
+            birthday: this.state.birthday,
+            is_attached: this.state.is_attached,
         })
         this.setState({ isUserSearchOver: true });
     }
@@ -225,7 +226,6 @@ class ContactForm extends React.PureComponent {
                         this.mutators = form.mutators
 
                         console.log("form.getState().values", form.getState().values)
-                        console.log("mutators", form.mutators)
 
                         return <form onSubmit={handleSubmit} className="user-form">
                             <FormSpy

@@ -168,7 +168,7 @@
             </div>
             <div class="col-sm profil border-left <%= @season.closing_date_for_applications >= DateTime.now ? "border-right" : "" %>" style="flex:1"->
               <h4 class="mt-3 mb-2"> Profil </h4>
-              <% if !(@user.id == @current_user.id) || @current_user.is_admin %>
+              <% if @user.id == @current_user.id || @current_user.is_admin || attached_user.id == @current_user %>
                 <%= link_to(user_path(attached_user), class: "btn btn-primary btn-outline") do %>
 
                   <i class="fas fa-eye"></i> Voir
@@ -182,7 +182,7 @@
             <% if Season.registration_opened %>
               <div class="col-sm border-dark" style="flex: 1;">
                 <h4> Activités </h4>
-                <% if !(@user.id == @current_user.id) || @current_user.is_admin %>
+                <% if !(attached_user.id == @current_user.id) || @current_user.is_admin %>
                   <%= link_to new_application_path(attached_user), class: "btn btn-primary" do %>
                     <i class="fas fa-graduation-cap"></i> Pré-inscrire
                   <% end %>
