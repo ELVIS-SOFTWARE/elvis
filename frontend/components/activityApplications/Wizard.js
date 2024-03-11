@@ -391,6 +391,8 @@ class Wizard extends React.Component {
                 let htmltext = '';
                 let confirmtext = 'Redirection';
 
+                console.log(data);
+
                 if (data.activity_application !== null) {
                     htmltext += '<p>'
                         + '<b>' + 'Votre demande d\'inscription a bien été prise en compte' + '</b>' + '<br/>'
@@ -418,11 +420,7 @@ class Wizard extends React.Component {
                 {
                     if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
                         let get_params = '';
-                        let redirect_url = `/new_application/${this.state.user.id}${get_params}`;
-
-                        if (data.pack_created && data.activity_application !== null) {
-                            redirect_url = `/my_activities/${this.state.user.id}`;
-                        }
+                        let redirect_url = `/my_activities/${this.state.user.id}`;
 
                         window.location.href = redirect_url;
                     } else {
