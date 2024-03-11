@@ -101,7 +101,7 @@ class MyActivitiesController < ApplicationController
                                                    time_interval: {}
                                                  }
                                                }),
-          activity_ref: activity_ref.as_json({ only: [:id, :label, :kind] }),
+          activity_ref: activity_ref.as_json({ only: [:id, :label, :kind, :occupation_limit] }),
           activity_ref_pricing: activity_ref_pricing.as_json,
           pack: pack.as_json,
           hours_before_cancelling: Parameter.get_value("planning.hours_before_cancelling_activity") || 0,
