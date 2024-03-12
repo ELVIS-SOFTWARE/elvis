@@ -3,6 +3,11 @@
 class ActivityRefPricingController < ApplicationController
 
   def index
+    respond_to do |format|
+      format.json do
+        render json: ActivityRefPricing.all
+      end
+    end
   end
 
   def create
