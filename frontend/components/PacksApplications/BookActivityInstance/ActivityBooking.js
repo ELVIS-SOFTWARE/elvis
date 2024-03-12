@@ -99,6 +99,7 @@ export default function ActivityBooking() {
             .useLoading()
             .success(res => {
                 swal("Vos souhaits ont bien été enregistrés", "", "success");
+                setActiveTab(1);
             })
             .error(res => {
                 swal(res.message, res.error, "error");
