@@ -138,9 +138,9 @@ class ContactForm extends React.PureComponent {
             first_name: this.state.first_name,
             last_name: this.state.last_name,
             birthday: this.state.birthday,
-            is_attached: this.state.is_attached,
+            is_attached: true, //this.state.is_attached, // 12/03/24 ==> attached by default if no user match
         })
-        this.setState({ isUserSearchOver: true });
+        this.setState({ isUserSearchOver: true, is_attached: true });
     }
 
     render() {
@@ -237,7 +237,7 @@ class ContactForm extends React.PureComponent {
                                 // displayGender
                                 displayBirthday />
 
-                            { user_linked && !form.getState().values.id && <div>
+                            {/* user_linked && !form.getState().values.id && <div>
                                 <Checkbox
                                     name="is_attached"
                                     id="is_attached"
@@ -255,7 +255,7 @@ class ContactForm extends React.PureComponent {
                                             });
                                         }
                                     }} />
-                            </div>}
+                            </div>*/}
 
                             <hr />
 
