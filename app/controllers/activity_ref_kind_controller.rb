@@ -2,6 +2,7 @@ class ActivityRefKindController < ApplicationController
   before_action -> { @current_user = current_user }
 
   def index
+    @activity_ref_kinds = ActivityRefKind.all
 
     respond_to do |format|
       format.html 
