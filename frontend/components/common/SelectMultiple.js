@@ -5,6 +5,9 @@ import _ from "lodash";
 import CreatableSelect from "react-select/lib/Creatable";
 
 import swal from "sweetalert2";
+import { Field } from "react-final-form";
+import AlertCheckbox from "./AlertCheckbox";
+import Input from "./Input";
 
 /**
  * Il y as quelques restrictions pour utiliser ce SelectMultiple.
@@ -44,25 +47,34 @@ export default class SelectMultiple extends React.Component
         {
             this.state.selectedFeatures = this.state.features.filter(f => this.props.features.includes(f.value));
             _.remove(this.state.features, this.state.selectedFeatures);
+
+            if(this.props.mutators && this.props.name)
+            {
+                this.state.selectedFeatures.forEach((f, i) => this.props.mutators.update(this.props.name, i, f.value));
+            }
         }
     }
 
     handleChange(values, actionMeta)
     {
-        console.log(values, actionMeta);
         if(actionMeta.action === 'select-option')
         {
             const newFeature = this.props.isMulti ? _.last(values) : values;
 
-            console.log(newFeature);
-
             if(this.props.isMulti)
                 _.remove(this.state.features, newFeature);
 
-            return this.setState({selectedFeatures: [
-                    ...(this.props.isMulti ? this.state.selectedFeatures : []),
-                    newFeature
-                ]});
+            const selectedFeatures = [
+                ...(this.props.isMulti ? this.state.selectedFeatures : []),
+                newFeature
+            ];
+
+            if(this.props.mutators && this.props.name)
+            {
+                selectedFeatures.forEach((f, i) => this.props.mutators.update(this.props.name, i, f.value));
+            }
+
+            return this.setState({selectedFeatures});
         }
         else if(actionMeta.action === 'remove-value')
         {
@@ -71,6 +83,11 @@ export default class SelectMultiple extends React.Component
 
             if(!this.state.features.includes(actionMeta.removedValue))
                 this.state.features.push(actionMeta.removedValue);
+
+            if(this.props.mutators && this.props.name)
+            {
+                this.props.mutators.remove(this.props.name, this.state.selectedFeatures.indexOf(actionMeta.removedValue));
+            }
 
             return this.setState({
                 selectedFeatures: newFeatures,
@@ -90,6 +107,11 @@ export default class SelectMultiple extends React.Component
                 {
                     this.state.features.push(...this.state.selectedFeatures.filter(f => !this.state.features.includes(f)));
 
+                    if(this.props.mutators && this.props.name)
+                    {
+                        while(this.props.mutators.pop(this.props.name) !== undefined);
+                    }
+
                     this.setState({
                         selectedFeatures: [],
                     });
@@ -101,11 +123,18 @@ export default class SelectMultiple extends React.Component
     render()
     {
         return <div>
-            <input type="hidden"
-                   className="d-none none"
-                   value={this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : this.state.selectedFeatures[0].value}
-                   name={this.props.name}
-                   style={{display: "none"}} />
+            <Field
+                name={this.props.name}
+                type="hidden"
+                render={Input}
+                input={{
+                    value: this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : this.state.selectedFeatures[0].value,
+                    className: "d-none none",
+                    style: {display: "none"},
+                    name: this.props.name,
+                    type: "hidden",
+                }}
+            />
             <label>{this.props.title}</label>
 
             <CreatableSelect
@@ -122,5 +151,6 @@ SelectMultiple.propTypes = {
     name: PropTypes.string,
     all_features: PropTypes.array.isRequired,
     features: PropTypes.array,
+    mutators: PropTypes.object,
     isMulti: PropTypes.bool,
 }

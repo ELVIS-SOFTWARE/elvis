@@ -8,6 +8,7 @@ import AlertCheckbox from "../common/AlertCheckbox";
 import FamilyMembers from "./FamilyMembers";
 import SelectSameAs from "./SelectSameAs";
 import { toRawPhoneNumber } from "../../tools/format";
+import SelectMultiple from "../common/SelectMultiple";
 
 class ContactInfos extends React.PureComponent {
     constructor(props) {
@@ -51,6 +52,17 @@ class ContactInfos extends React.PureComponent {
 
         const { push, update } = this.props.mutators;
 
+        const family_links_with_user = [...values.family_links_with_user];
+
+        // Add the current user to the list of family members users to define is_paying column
+        family_links_with_user.push({
+            id: currentUser.id,
+            first_name: currentUser.first_name,
+            last_name: currentUser.last_name,
+            is_paying_for: currentUser.is_paying
+
+        })
+
         return (
             <div>
                 <FormSpy
@@ -71,12 +83,13 @@ class ContactInfos extends React.PureComponent {
 
                 {canAddContacts ? (
                     <div className="m-b-md">
-                        <Field
-                            name="is_paying"
-                            type="checkbox"
-                            alertType="warning"
-                            render={AlertCheckbox}
-                            text={"L'élève est aussi le payeur."}
+                        <SelectMultiple
+                            title="Payeurs"
+                            name="payers"
+                            isMulti
+                            mutators={this.props.mutators}
+                            all_features={family_links_with_user.map(flwu => [`${flwu.first_name} ${flwu.last_name}`, flwu.id])}
+                            features={family_links_with_user.filter(flwu => flwu.is_paying_for).map(f => f.id)}
                         />
 
                         <FamilyMembers

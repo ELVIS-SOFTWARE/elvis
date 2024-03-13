@@ -649,9 +649,10 @@ class UsersController < ApplicationController
                                  addresses: { only: %i[id street_address country department postcode city] },
                                  levels: { include: %i[evaluation_level_ref activity_ref] },
                                  consent_document_users: {}
-                               },
-                               methods: :family_links_with_user
+                               }
                              })
+
+    @userjson["family_links_with_user"] = user.family_links_with_user(Season.current).as_json
 
     @addresses = user.addresses
     @school_name = School.first&.name
@@ -724,7 +725,24 @@ class UsersController < ApplicationController
         up[:is_admin] = false if !@user.is_admin && !current_user.is_admin && current_user.id == @user.id
         up[:identification_number] = nil if "#{up[:identification_number]}".empty?
 
+        payers = params.dig(:user, :payers)
+
+        up[:is_paying] = payers&.include?(@user.id) || false
+
         @user.update!(up)
+
+        # use season.current because it's same as edit page
+        @user.family_links_with_user(Season.current).each do |fmu|
+
+          fmu[:is_paying_for] = payers&.include?(fmu[:id]) || false
+
+          FamilyMemberUsers.addFamilyMemberWithConfirmation(
+            [ActiveSupport::HashWithIndifferentAccess.new(fmu)],
+            @user,
+            Season.current,
+            send_confirmation: false
+          )
+        end
 
         params.dig(:user, :consent_docs)&.each do |doc|
           next if doc.nil? || (doc.class == Array && doc.length < 2)
