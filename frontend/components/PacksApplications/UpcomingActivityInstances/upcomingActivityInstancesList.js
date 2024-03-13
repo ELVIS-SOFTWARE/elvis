@@ -7,7 +7,6 @@ import moment from "moment";
 export default function upcomingActivityInstancesList(props) {
     const [loading, setLoading] = useState(true);
     const [activities, setActivities] = useState(null);
-    // const [pastActivities, setPastActivities] = useState(null);
     let minimalDisplay = false;
     let url = `/get_upcoming_activities` + window.location.pathname;
 
@@ -21,11 +20,8 @@ export default function upcomingActivityInstancesList(props) {
             .useLoading()
             .success(res =>
             {
-                // let pastActivity = res.filter(activity => moment(activity.time_interval.start).isBefore(moment(), 'minute'));
                 let futureActivity = res.filter(activity => moment(activity.time_interval.start).isAfter(moment(), 'minute'));
-
                 setActivities(sortActivitiesByMonth(minimalDisplay ? futureActivity.slice(0, 3) : res));
-                // setPastActivities(sortActivitiesByMonth(pastActivity));
                 setLoading(false);
             })
             .error(res =>
