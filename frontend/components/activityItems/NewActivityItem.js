@@ -163,8 +163,6 @@ class NewActivityItem extends React.Component {
             </React.Fragment>;
         }
 
-        console.log(actionLabel)
-
         return (
             <div className="row">
                 <div className="col-sm-9">
