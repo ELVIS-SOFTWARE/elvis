@@ -7,7 +7,7 @@ import {csrfToken} from "../utils";
 import swal from "sweetalert2";
 import Modal from "react-modal";
 import AnswerProposal from "./AnswerProposal";
-import CancelApplicationItem from "./CancelApplicationItem";
+import CancelApplication from "./CancelApplication";
 
 class NewActivityItem extends React.Component {
     constructor(props) {
@@ -203,7 +203,7 @@ class NewActivityItem extends React.Component {
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
                                     {activity_application_status_id === 1 ?
-                                        <CancelApplicationItem
+                                        <CancelApplication
                                             activity_application_status_id={activity_application_status_id}
                                         />
                                         : ""

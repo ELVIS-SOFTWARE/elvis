@@ -3,7 +3,7 @@ import {useState} from "react";
 import swal from "sweetalert2";
 import Modal from "react-modal";
 
-export default function CancelApplicationItem(props) {
+export default function CancelApplication(props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     function handleModal() {
