@@ -51,7 +51,7 @@ class ElvisPluginGenerator < Rails::Generators::NamedBase
 
     template "README.rdoc", "#{plugin_path}/README.rdoc"
     template "init.rb.erb", "#{plugin_path}/init.rb"
-    template "routes.rb", "#{plugin_path}/config/routes.rb"
+    template "routes.rb.erb", "#{plugin_path}/config/routes.rb"
     template "en_rails_i18n.yml", "#{plugin_path}/config/locales/en.yml"
     template "test_helper.rb.erb", "#{plugin_path}/test/test_helper.rb"
 

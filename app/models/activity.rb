@@ -67,6 +67,7 @@ class Activity < ApplicationRecord
   end
 
   # crée les instances (ActivityInstance) de l'Activity
+  # autrement dit les séances du cours
   # **Paramètres**
   # - intervals :
   # Les TimeIntervals qui spécifient les séances de cours à créer sur la saison ;

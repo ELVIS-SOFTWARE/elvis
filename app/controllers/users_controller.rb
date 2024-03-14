@@ -317,6 +317,30 @@ class UsersController < ApplicationController
                     .reverse
                     .to_h
 
+    # on doit ajouter ici les activités liées à des packs
+    # qui ne font pas l'objet d'une inscription (activity_application)
+    activity_refs = ActivityRef
+                      .includes(activity_ref_pricing: :pricing_category)
+                      .includes(activities: :students)
+                      .joins(activities: :students)
+                      .where("pricing_categories.is_a_pack = true")
+                      .where("students.user_id=?", @user.id)
+
+    activities = activity_refs
+                   .map(&:activities)
+                   .flatten
+    #.uniq { |act| act.id}
+
+    # group activities by season
+    activities = activities.group_by{|act| act.season.id}
+    # add these activities to the &activities hash
+    activities.each do |season_id, acts|
+      season = Season.find(season_id)
+      @activities[season] = [] if @activities[season].nil?
+      @activities[season] += acts
+      @activities[season].uniq! { |act| act.id}
+    end
+
     @applications = @user
                       .activity_applications
                       .includes({

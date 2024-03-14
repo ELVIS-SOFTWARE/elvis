@@ -7,21 +7,17 @@ import _ from "lodash";
  * @param {*} param0 tabs, an array containing four key-values: id, header, active (bool), mode ("buttons" / "classic") and body
  */
 export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, defaultActiveTab = 0 }) {
-    const [tabs, setTabs] = useState([]);
+    const [active, setActive] = useState(defaultActiveTab);
+
+    const propsActivated = tabsProps.findIndex(t => t.active);
 
     useEffect(() => {
-        const activeTabs = _.compact(tabsProps).map((t, i) => {
-            return {
-                ...t,
-                active: (tabs && tabs[i] ? tabs[i].active || false : t.active === undefined ? i === defaultActiveTab : t.active)
-            }
-        });
-        setTabs(activeTabs);
-    }, [tabsProps]);
+        if (propsActivated !== -1)
+            setActive(propsActivated)
+    }, [propsActivated]);
 
     const handleTabClick = (idx) => {
-        const newTabs = tabs.map((t, i) => ({ ...t, active: i === idx }));
-        setTabs(newTabs);
+        setActive(idx);
     };
 
     const mode = modeProps || "classic";
@@ -33,15 +29,15 @@ export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, def
                     className={`flex ${mode === "classic" ? "nav nav-tabs" : "bg-light-blue flex no-padding"}`}
                     role="tablist"
                 >
-                    {tabs.map((t, i) => (
+                    {tabsProps.map((t, i) => (
                         <li
                             key={i}
                             style={{ height: "auto" }}
-                            className={`${mode === "classic" ? "" : "btn btn-primary btn_slider"} ${t.active ? "active" : ""}`}
+                            className={`${mode === "classic" ? "" : "btn btn-primary btn_slider"} ${active === i ? "active" : ""}`}
                             onClick={t.headerHandler || (() => {})}
                         >
                             <a
-                                className={`${mode === "classic" ? "nav-link " : "text-"} ${t.active ? "active" : ""}`}
+                                className={`${mode === "classic" ? "nav-link " : "text-"} ${active === i ? "active" : ""}`}
                                 data-toggle={!t.headerHandler && "tab"}
                                 onClick={() => handleTabClick(i)}
                                 style={t.headerStyle || {}}
@@ -54,13 +50,13 @@ export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, def
                 </ul>
                 <div className="tab-content">
                     {
-                        tabs.map((t, i) => <div
+                        tabsProps.map((t, i) => <div
                             key={i}
                             id={t.id}
-                            className={`tab-pane ${t.active ? "active" : ""}`}
+                            className={`tab-pane ${active === i ? "active" : ""}`}
                             role="tabpanel">
                             <div className={`panel-body ${mode === "classic" ? "" : "no-padding"}`}>
-                                {t.active && t.body}
+                                {active === i && t.body}
                             </div>
                         </div>)
                     }

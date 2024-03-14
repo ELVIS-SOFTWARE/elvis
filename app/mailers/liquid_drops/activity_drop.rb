@@ -75,11 +75,7 @@ module LiquidDrops
     end
 
     def startDate
-      months_hash = {"Monday" => 'Lundi', "Tuesday" => 'Mardi', "Wednesday" => 'Mercredi', "Thursday" => 'Jeudi',
-                "Friday" => 'Vendredi', "Saturday" => 'Samedi', "Sunday" => "Dimanche"}
-      month = DateTime.parse(@activity["time_interval"]["end"]).strftime("%A")
-
-      months_hash[month]
+      I18n.l(DateTime.parse(@activity["time_interval"]["end"]), format: "%A %d")
     end
 
   end

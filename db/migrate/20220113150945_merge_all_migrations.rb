@@ -104,12 +104,14 @@ class MergeAllMigrations < ActiveRecord::Migration[6.1]
       t.datetime "updated_at", precision: 6, null: false
     end
 
-    create_table "activity_ref_season_pricings", if_not_exists: true do |t|
-      t.bigint "activity_ref_id", null: false
-      t.bigint "season_id", null: false
-      t.bigint "pricing_id"
-      t.float "price", default: 0.0
-      t.index ["activity_ref_id", "season_id", "pricing_id"], name: "activity_ref_season_pricing_index_on_associations"
+    if Object.const_defined?(:ActivityRefSeasonPricing)
+      create_table "activity_ref_season_pricings", if_not_exists: true do |t|
+        t.bigint "activity_ref_id", null: false
+        t.bigint "season_id", null: false
+        t.bigint "pricing_id"
+        t.float "price", default: 0.0
+        t.index ["activity_ref_id", "season_id", "pricing_id"], name: "activity_ref_season_pricing_index_on_associations"
+      end
     end
 
     create_table "activity_refs", if_not_exists: true do |t|
@@ -787,8 +789,10 @@ class MergeAllMigrations < ActiveRecord::Migration[6.1]
       t.index ["user_id"], name: "index_pre_applications_on_user_id"
     end
 
-    create_table "pricings", if_not_exists: true do |t|
-      t.string "label", null: false
+    if Object.const_defined?(:Pricing)
+      create_table "pricings", if_not_exists: true do |t|
+        t.string "label", null: false
+      end
     end
 
     create_table "questions", if_not_exists: true do |t|
@@ -1029,7 +1033,7 @@ class MergeAllMigrations < ActiveRecord::Migration[6.1]
     add_foreign_key :activity_refs, :activity_ref_kinds unless foreign_key_exists? :activity_refs, :activity_ref_kinds
     add_foreign_key :bands, :band_types unless foreign_key_exists? :bands, :band_types
     add_foreign_key :bands, :music_genres unless foreign_key_exists? :bands, :music_genres
-    add_foreign_key :desired_activities, :pricings unless foreign_key_exists? :desired_activities, :pricings
+    add_foreign_key :desired_activities, :pricings unless foreign_key_exists? :desired_activities, :pricings if Object.const_defined?(:Pricing)
     add_foreign_key :due_payments, :payment_schedules unless foreign_key_exists? :due_payments, :payment_schedules
     add_foreign_key :evaluation_appointments, :activity_applications unless foreign_key_exists? :evaluation_appointments, :activity_applications
     add_foreign_key :holidays, :seasons unless foreign_key_exists? :holidays, :seasons

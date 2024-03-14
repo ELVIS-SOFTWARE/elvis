@@ -1,31 +1,40 @@
-import React, {Fragment, useEffect, useState} from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 
 export default function PayerPaymentTerms({
                                               paymentTerms,
-                                              availPaymentTerms,
+                                              availPaymentScheduleOptions,
+                                              availPaymentMethods,
                                               onChangePaymentTerms,
-                                              onChangeDayForCollection
+                                              onChangeDayForCollection,
+                                              onChangePaymentMethod,
                                           }) {
 
-    const [selectionChanged, setSelectionChanged] = useState(paymentTerms.day_for_collection === undefined);
-    const [selectedPaymentTermsId, setSelectedPaymentTermsId] = useState(paymentTerms.payment_terms_id || 0);
+    const [scheduleOptionChanged, setScheduleOptionChanged] = useState(paymentTerms.day_for_collection === undefined);
+    const [selectedPaymentTermsId, setSelectedPaymentTermsId] = useState(paymentTerms.payment_schedule_options_id || 0);
+    const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(paymentTerms.payment_method_id || 0);
     const [selectedDaysForCollection, setSelectedDaysForCollection] = useState(paymentTerms.day_for_collection !== undefined ? [paymentTerms.day_for_collection] : []);
     const selectedPaymentTerms = getSelectedPaymentTerms();
-    const availableChoices = selectedPaymentTerms ? selectedPaymentTerms.days_allowed_for_collection.length : 0;
+    const availableChoices = selectedPaymentTerms ? selectedPaymentTerms.available_payments_days.length : 0;
 
     function getSelectedPaymentTerms(id = selectedPaymentTermsId) {
-        return availPaymentTerms.find(
-            item => item.id === id
+        return availPaymentScheduleOptions.find(
+            item => item.id === id,
         );
     }
 
-    function handleSelectChange(e) {
-        setSelectionChanged(true);
-        paymentTerms.payment_terms_id = parseInt(e.target.value) ;
-        setSelectedPaymentTermsId(paymentTerms.payment_terms_id);
-        onChangePaymentTerms && onChangePaymentTerms(paymentTerms.payment_terms_id);
+    function handleScheduleOptionChange(e) {
+        setScheduleOptionChanged(true);
+        paymentTerms.payment_schedule_options_id = parseInt(e.target.value);
+        setSelectedPaymentTermsId(paymentTerms.payment_schedule_options_id);
+        onChangePaymentTerms && onChangePaymentTerms(paymentTerms.payment_schedule_options_id);
+    }
+
+    function handleSelectMethodChange(e) {
+        paymentTerms.payment_method_id = parseInt(e.target.value);
+        setSelectedPaymentMethodId(paymentTerms.payment_method_id);
+        onChangePaymentMethod && onChangePaymentMethod(paymentTerms.payment_method_id);
     }
 
     function handleDayChange(selectedDaysList) {
@@ -33,9 +42,8 @@ export default function PayerPaymentTerms({
         onChangeDayForCollection && onChangeDayForCollection(paymentTerms.day_for_collection);
     }
 
-
     useEffect(() => {
-            if (!selectionChanged)
+            if (!scheduleOptionChanged)
                 return;
 
             if (selectedPaymentTerms) {
@@ -47,9 +55,9 @@ export default function PayerPaymentTerms({
                     handleDayChange([]);
                 }
             }
-            setSelectionChanged(false);
+            setScheduleOptionChanged(false);
         },
-        [selectedPaymentTermsId, availableChoices]
+        [selectedPaymentTermsId, availableChoices],
     );
 
     return (
@@ -60,45 +68,65 @@ export default function PayerPaymentTerms({
             <div className="ibox-content">
 
                 {//////////////////////////////////////////////////////////////////////////////////
+                    // échéancier
                 }
-                <div className="form-group">
-                    <label htmlFor="payment_terms_id">Sélectionner la modalité de paiement</label>
-                </div>
+                <div className="form-group m-t-md">
+                    <label htmlFor="payment_schedule_options_id">Sélectionner votre échéancier</label>
                 <select
                     className="form-control"
-                    name="payment_terms_id"
-                    onChange={handleSelectChange}
+                    name="payment_schedule_options_id"
+                    onChange={handleScheduleOptionChange}
                     value={selectedPaymentTermsId}
                 >
                     <option key={-1} value="0">(choisissez une option)</option>
-                    {availPaymentTerms.map(apt =>
-                        <option key={apt.id} value={apt.id}>{apt.label}</option>
+                    {availPaymentScheduleOptions.map(apt =>
+                        <option key={apt.id} value={apt.id}>{apt.label}</option>,
                     )}
                 </select>
+                </div>
 
                 {//////////////////////////////////////////////////////////////////////////////////
+                    // date de paiement
                 }
 
                 {selectedPaymentTerms &&
                     <Fragment>
 
                         <div className="form-group m-t-lg">
-                            <label htmlFor="payment_terms_id">Prélèvement</label>
-                            <p>Sélectionner la date de prélèvement mensuel</p>
+                            <label htmlFor="payment_schedule_options_id">Règlement</label>
+                            <p>Sélectionner la date de règlement mensuel</p>
                         </div>
 
                         <ToggleButtonGroup
                             multiSelect={false}
                             selected={selectedDaysForCollection}
                             childrenContent={
-                                selectedPaymentTerms.days_allowed_for_collection.map((day, i) => {
-                                    return <span> {day} </span>
+                                selectedPaymentTerms.available_payments_days.map((day, i) => {
+                                    return <span> {day} </span>;
                                 })
                             }
                             onChange={handleDayChange}
                         />
                     </Fragment>
                 }
+
+                {//////////////////////////////////////////////////////////////////////////////////
+                    // moyen de paiement
+                }
+                <div className="form-group m-t-md">
+                    <label htmlFor="payment_method_id">Sélectionner votre moyen de paiement</label>
+                    <select
+                        className="form-control"
+                        name="payment_method_id"
+                        onChange={handleSelectMethodChange}
+                        value={selectedPaymentMethodId}
+                    >
+                        <option key={-1} value="0">(choisissez une option)</option>
+                        {availPaymentMethods.map(apm =>
+                            <option key={apm.id} value={apm.id}>{apm.label}</option>,
+                        )}
+                    </select>
+                </div>
 
             </div>
         </div>
@@ -109,18 +137,19 @@ export default function PayerPaymentTerms({
 
 PayerPaymentTerms.propTypes = {
     paymentTerms: PropTypes.shape({
-        payment_terms_id: PropTypes.number,
-        day_for_collection: PropTypes.number
+        payment_schedule_options_id: PropTypes.number,
+        day_for_collection: PropTypes.number,
+        payment_method_id: PropTypes.number
     }),
-    availPaymentTerms: PropTypes.arrayOf(
+    availPaymentScheduleOptions: PropTypes.arrayOf(
         PropTypes.shape({
             id: PropTypes.number.isRequired,
             label: PropTypes.string.isRequired,
-            terms_number: PropTypes.number.isRequired,
-            collect_on_months: PropTypes.arrayOf(PropTypes.number).isRequired,
-            days_allowed_for_collection: PropTypes.arrayOf(PropTypes.number).isRequired
-        })
+            payments_number: PropTypes.number.isRequired,
+            payments_months: PropTypes.arrayOf(PropTypes.number).isRequired,
+            available_payments_days: PropTypes.arrayOf(PropTypes.number).isRequired,
+        }),
     ),
     onChangePaymentTerms: PropTypes.func,
-    onChangeDayForCollection: PropTypes.func
-}
+    onChangeDayForCollection: PropTypes.func,
+};

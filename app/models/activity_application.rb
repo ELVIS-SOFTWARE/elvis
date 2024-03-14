@@ -63,6 +63,9 @@ class ActivityApplication < ApplicationRecord
 
   has_many :time_interval_preferences, dependent: :destroy
 
+  scope :for_activity_id, ->(activity_id) { joins(:desired_activities).where(desired_activities: { activity_id: activity_id }) }
+
+
   def self.display_class_name(singular = true)
     singular ? "demande d'inscription" : "demandes d'inscription"
   end

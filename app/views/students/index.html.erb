@@ -1,0 +1,84 @@
+<div style="text-align: right;">
+  <%
+    logo_url = ""
+    if school
+      logo_url = school.logo.attached? ? rails_blob_url(school.logo) : nil
+    end
+  %>
+  <img src="<%= logo_url %>" height="150px" class="logo" alt="logo">
+</div>
+
+<h1>
+  Liste des cours de <%= teacher.first_name %> <%= teacher.last_name %>
+</h1>
+
+
+<%
+
+  activities_and_students.each do |activity_id, students|
+    activity_ref = students[0]["activity_ref_label"]
+    start = students[0]["start"]
+
+    start_day = l(Time.parse(start), format: :day)
+    start_hour = l(Time.parse(start).in_time_zone, format: :short_time)
+    end_hour = l(Time.parse(students[0]["end"]).in_time_zone, format: :short_time)
+
+    group_name = students[0]["group_name"]
+    room = students[0]["room_label"]
+
+    activity_applications = ActivityApplication.for_activity_id(activity_id)
+    application_dates = activity_applications.each_with_object({}) do |aa, hash|
+      hash[aa.user_id] = {
+        begin_at: aa.begin_at ? l(aa.begin_at, format: :long_date) : nil,
+        stopped_at: aa.stopped_at ? l(aa.stopped_at, format: :long_date) : nil
+      }
+    end
+%>
+
+  <h2>
+    <%= start_day %> de <%= start_hour %> à <%= end_hour %> : cours de <%= activity_ref %>
+
+    <% if group_name.present? || room.present? %>
+      (
+      <% if group_name.present? %>
+        groupe <%= group_name %>,
+      <% end %>
+      <% if room.present? %>
+        salle <%= room %>
+      <% end %>
+      )
+    <% end %>
+
+  </h2>
+
+  <table>
+
+    <%
+      students.each do |student|
+        next if student["user_id"].nil?
+        dates = application_dates[student["user_id"]]
+        begin_at = dates.try(:[], :begin_at)
+        stopped_at = dates.try(:[], :stopped_at)
+    %>
+      <tr>
+        <td>
+          <%= student["first_name"] %>
+        </td>
+        <td>
+          <%= student["last_name"].upcase %>
+        <td>
+          &nbsp;
+        <td>
+          <%= begin_at ? "à partir du #{begin_at}" : "" %>
+          <%= stopped_at ? "jusqu'au #{stopped_at}" : "" %>
+        </td>
+      </tr>
+    <%
+      end
+    %>
+
+  </table>
+
+<%
+  end
+%>

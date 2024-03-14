@@ -10,7 +10,7 @@
 #  is_validated            :boolean          default(FALSE)
 #  activity_id             :integer
 #  payment_frequency       :integer
-#  pricing_id              :bigint
+#  pricing_category_id              :bigint
 #  prorata                 :integer
 #  prorata_amount          :decimal(, )
 #  deleted_at              :datetime

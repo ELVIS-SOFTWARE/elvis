@@ -10,9 +10,14 @@ class ActivityRefPricing < ApplicationRecord
 
   has_many :packs
 
-  scope :for_season, ->(season) { where("from_season_id <= ? AND (to_season_id IS NULL OR to_season_id >= ?)", season.id, season.id) }
-  scope :for_activity_ref, ->(activity_ref) { where(activity_ref_id: activity_ref.id) }
-  scope :for_pricing_category, ->(pricing_category) { where(pricing_category_id: pricing_category.id) }
+  scope :for_season, ->(season) { where("from_season_id <= ? AND (to_season_id IS NULL OR to_season_id >= ?)", season&.id, season&.id) }
+  scope :for_season_id, ->(season_id) { where("from_season_id <= ? AND (to_season_id IS NULL OR to_season_id >= ?)", season_id, season_id) }
+
+  scope :for_activity_ref, ->(activity_ref) { where(activity_ref: activity_ref) }
+  scope :for_activity_ref_id, ->(activity_ref_id) { where(activity_ref_id: activity_ref_id) }
+
+  scope :for_pricing_category, ->(pricing_category) { where(pricing_category: pricing_category) }
+  scope :for_pricing_category_id, ->(pricing_category_id) { where(pricing_category_id: pricing_category_id) }
 
 
   def self.display_class_name(singular= true)

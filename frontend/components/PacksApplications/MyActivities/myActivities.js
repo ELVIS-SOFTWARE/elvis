@@ -3,7 +3,7 @@ import * as api from "../../../tools/api";
 import swal from "sweetalert2";
 import ActivityCard from "./activityCards";
 import RegularActivityCard from "./regularActivityCards";
-import IncomingActivityInstancesList from "../IncomingActivityInstances/upcomingActivityInstancesList";
+import UpcomingActivityInstancesList from "../UpcomingActivityInstances/upcomingActivityInstancesList";
 import PlaceholderCard from "./placeholderCard";
 
 export default function myActivities() {
@@ -76,15 +76,16 @@ export default function myActivities() {
 
                 <div className="row mt-lg-3">
 
-                    <div className="col-md-8 no-padding h-100">
-                        <div className="row d-flex align-items-baseline mt-3 mx-4 mx-lg-0">
-                            <div className="col-md-6">
+                    <div className="col-xl-8 col-lg-12 no-padding h-100">
+                        <div className="d-flex align-items-baseline justify-content-between mt-3 mx-4 mx-lg-0">
+                            <div className="px-lg-4">
                                 <h4 className="title font-bold">MES ACTIVITÉS</h4>
                             </div>
 
-                            <div className="col-md-2 text-right px-2">
+                            <div className="px-lg-4 mr-3">
                                 {season_list.length > 1 &&
-                                    <select className="custom-select" value={selectedSeason.id} onChange={handleSeasonChange}>
+                                    <select className="custom-select" value={selectedSeason.id}
+                                            onChange={handleSeasonChange}>
                                         <option value="">Selectionner une saison</option>
                                         {season_list.map((season) => (
                                             <option key={season.id} value={season.id}>
@@ -96,45 +97,46 @@ export default function myActivities() {
                             </div>
 
                         </div>
-                        <PlaceholderCard
-                            user={user}
-                        />
+                        <div className="d-inline-flex flex-wrap activity-cards">
+                            <PlaceholderCard
+                                user={user}
+                            />
 
-                        {regularActivities.length > 0 &&
-                            regularActivities.map((activity, index) => (
-                                isDesiredActivitySet(activity.desired_activities) &&
-                                <RegularActivityCard
-                                    key={index}
-                                    activityApplication={regularActivities[index]}
-                                />
-                            ))
-                        }
+                            {regularActivities.length > 0 &&
+                                regularActivities.map((activity, index) => (
+                                    isDesiredActivitySet(activity.desired_activities) &&
+                                    <RegularActivityCard
+                                        key={index}
+                                        activityApplication={regularActivities[index]}
+                                    />
+                                ))
+                            }
 
-                        {userActivities.length > 0 &&
-                            userActivities.map((pack, index) => (
-                                <ActivityCard
-                                    key={index}
-                                    pack={userActivities[index]}
-                                />
-                            ))
-                        }
+                            {userActivities.length > 0 &&
+                                userActivities.map((pack, index) => (
+                                    <ActivityCard
+                                        key={index}
+                                        pack={userActivities[index]}
+                                    />
+                                ))
+                            }
 
-                        {userActivities.length === 0 &&
-                            regularActivities.length === 0 &&
-                            <div className="w-100 text-center">
-                                <i className="fa fa-info-circle" aria-hidden="true"/>
-                                <h3>Vous n'avez pas de cours pour la saison selectionnée</h3>
-                            </div>
-                        }
+                            {userActivities.length === 0 &&
+                                regularActivities.length === 0 &&
+                                <div className="w-100 text-center">
+                                    <i className="fa fa-info-circle" aria-hidden="true"/>
+                                    <h3>Vous n'avez pas de cours pour la saison selectionnée</h3>
+                                </div>
+                            }
+                        </div>
                     </div>
-
-                    <div className="d-flex flex-column">
+                    <div className="col-xl-4 col-lg-12 d-flex flex-column">
                         <div className="mx-4 d-flex align-items-baseline justify-content-between mb-4">
                             <h4 className="title font-bold">MES PROCHAINS COURS</h4>
-                            <a href={window.location.href + "/incoming"} className="color-black font-bold mr-4">Voir mon
+                            <a href={window.location.href + "/upcoming"} className="color-black font-bold mr-4">Voir mon
                                 planning &nbsp; &gt;</a>
                         </div>
-                        <IncomingActivityInstancesList/>
+                        <UpcomingActivityInstancesList/>
                     </div>
 
                 </div>

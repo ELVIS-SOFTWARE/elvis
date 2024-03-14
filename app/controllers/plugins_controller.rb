@@ -2,46 +2,39 @@ class PluginsController < ApplicationController
   before_action :set_current_user
 
   def index
-    @is_restarted = flash[:restart] == 1
-
-    @plugins = Plugin.where(hidden: false).to_a unless @is_restarted
-
     respond_to do |format|
       format.html
       format.json { render json: {
-        plugins: @plugins,
+        plugins: Plugin.where(hidden: false),
       } }
     end
   end
 
   def changed
-    if params[:data].present?
-      plugin_changed = []
+    plugin_changed = []
 
-      params[:data].each do |plugin_id, updated_status|
+    plugins = Plugin.where(id: params[:data].keys).to_a
 
-        plugin = Plugin.find_by(id: plugin_id, hidden: false)
+    plugins.each do |plugin|
+      if params[:data][plugin.id.to_s]
+        plugin.activated_at = DateTime.now if plugin.activated_at.nil?
+      else
+        plugin.activated_at = nil
 
-        if updated_status
-          plugin.activated_at = DateTime.now if plugin.activated_at.nil?
-        else
-          plugin.activated_at = nil
-
-          if params[:rollback] == "on"
-            plugin.migrations.reverse.each do |m|
-              plugin.rollback m
-            end
+        if params[:rollback] == "on"
+          plugin.migrations.reverse.each do |m|
+            plugin.rollback m
           end
         end
-
-        plugin_changed << plugin if plugin.changed?
-
-        # save plugin ; ignore potential error to process further
-        plugin.save
-
-
       end
 
+      plugin_changed << plugin if plugin.changed?
+
+      # save plugin ; ignore potential error to process further
+      plugin.save
+    end
+
+    if plugin_changed.any?
       EventHandler.plugins_state.changed.trigger(
         sender: self.class.name,
         args: {
@@ -54,15 +47,11 @@ class PluginsController < ApplicationController
       restart = File.open(File.join(Rails.root, "tmp", "restart.txt"), "w")
       restart.write "restart"
       restart.close
-
-      flash[:restart] = 1
-      redirect_to action: :index
     end
-  end
 
-  private
-
-  def plugins_params
-    params[:activated]
+    respond_to do |format|
+      format.html { redirect_to action: :index }
+      format.json { render json: { restart: plugin_changed.any? } }
+    end
   end
 end

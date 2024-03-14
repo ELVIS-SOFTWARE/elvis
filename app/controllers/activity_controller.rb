@@ -8,7 +8,7 @@ class ActivityController < ApplicationController
   def index
     @current_user = current_user
     @activity_refs = ActivityRef.all.includes({ activities: [], activity_ref_kind: {} })
-    @seasons = Season.all
+    @seasons = Season.all_seasons_cached
     @rooms = Room.all
     @teachers = User.teachers.all
     @evaluation_level_refs = EvaluationLevelRef.all
@@ -199,7 +199,6 @@ class ActivityController < ApplicationController
         break
       end
 
-
       DesiredActivity.find(desired_activity_id).options.map(&:activity).compact.each do |a|
         a.remove_student(desired_activity_id, true)
       end
@@ -207,7 +206,6 @@ class ActivityController < ApplicationController
       Activities::AddStudent
         .new(activity_id, desired_activity_id)
         .execute
-
 
       # Ici, on calcule le nombre de séances dues par l'utilisateur (parce qu'il n'a pas commencé en début de saison)
       # Le nombre de séances "manquées" est déduit du nombre de séances dues (calcul du prorata)
@@ -284,7 +282,6 @@ class ActivityController < ApplicationController
     desired_activity = DesiredActivity.find(desired_activity_id)
 
     activity.remove_student(desired_activity_id)
-
 
     render json: Utils.format_for_suggestion(
       desired_activity.activity_application.user,
@@ -524,7 +521,7 @@ class ActivityController < ApplicationController
     time_intervals = []
 
     unless activityId.nil?
-      time_intervals = ActivityInstance.where(activity_id: activityId).select(:id, :time_interval_id).as_json({include: {student_attendances: {}}})
+      time_intervals = ActivityInstance.where(activity_id: activityId).select(:id, :time_interval_id).as_json({ include: { student_attendances: {} } })
       time_intervals = time_intervals.map { |ti| { activity_instance_id: ti['id'], time_interval: TimeInterval.find(ti['time_interval_id']), student_count: ti["student_attendances"].count } }
     end
 
@@ -661,10 +658,10 @@ class ActivityController < ApplicationController
     }
 
     query = Activity
-            .all
-            .includes(includes_h)
+              .all
+              .includes(includes_h)
 
-    query = query.joins(:time_interval).where(time_intervals: {is_validated: true})
+    query = query.joins(:time_interval).where(time_intervals: { is_validated: true })
 
     json_query[:filtered]&.each do |filter|
       prop = filter[:id]
@@ -855,11 +852,13 @@ class ActivityController < ApplicationController
   def activities_list_json(query, filter = params)
     total = query.count
 
-    query = query
-              .page(filter[:page] + 1)
-              .per(filter[:page_size])
+    if filter[:page] && filter[:page_size]
+      query = query
+                .page(filter[:page] + 1)
+                .per(filter[:page_size])
 
-    total_pages = query.total_pages
+      total_pages = query.total_pages
+    end
 
     # Map users applications by activity
     apps_dates = {}

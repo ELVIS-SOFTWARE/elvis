@@ -55,19 +55,25 @@ class Season < ApplicationRecord
   # renvoie la saison pour laquelle les inscriptions devraient être ouvertes
   # @return [Season] la saison en cours ou bien la saison suivante
   def self.current_apps_season
-    return nil unless Season.any?
+    Rails.cache.fetch("current_apps_season", expires_in: 12.hours) do
 
-    s = Season.current
+      return nil unless Season.any?
 
-    if DateTime.now > s&.closing_date_for_applications
-      s = Season.next
+      s = Season.current
+
+      if DateTime.now > s&.closing_date_for_applications
+        s = Season.next
+      end
+
+      s
     end
-
-    s
   end
 
   def self.is_pre_application_period
     season = current_apps_season || current
+
+    return false if season.nil?
+
     the_time = DateTime.now
 
     the_time < season.closing_date_for_applications &&
@@ -77,10 +83,20 @@ class Season < ApplicationRecord
 
   def self.registration_opened
     season = current_apps_season || current
+
+    # si on n'a pas de saison en cours, on considère que les inscriptions sont ouvertes (bdd vide)
+    return true if season.nil?
+
     the_time = DateTime.now
 
     the_time >= season.opening_date_for_new_applications &&
       the_time < season.closing_date_for_applications
+  end
+
+  def self.all_seasons_cached
+    Rails.cache.fetch("seasons:all", expires_in: 5.minutes) do
+      Season.all
+    end
   end
 
   # renvoie la date du lundi de la semaine qui contient le jour de début de la saison
@@ -110,7 +126,9 @@ class Season < ApplicationRecord
   end
 
   def self.current
-    includes(:holidays).where(is_current: true).first
+    Rails.cache.fetch("current_season", expires_in: 12.hours) do
+      includes(:holidays).where(is_current: true).first
+    end
   end
 
   def is_next

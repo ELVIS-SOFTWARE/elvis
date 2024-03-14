@@ -17,14 +17,16 @@ module PaymentHelper
       next unless desired
 
       activity_nb_lesson = activity.intended_nb_lessons
-      price_association  = activity.activity_ref.activity_ref_pricing.find do |act_s_p|
-        act_s_p.pricing_id == desired.pricing_id && act_s_p.season_id == season.id
-      end
+      activity_ref_pricing  = ActivityRefPricing
+                             .for_season(season)
+                             .for_activity_ref(activity.activity_ref)
+                             .for_pricing_category(desired.pricing_category)
+                             .first
 
       amount = 0
 
-      if price_association&.price
-        amount = ((price_association.price / activity_nb_lesson) * (desired.prorata || activity_nb_lesson)).round(2)
+      if activity_ref_pricing&.price
+        amount = ((activity_ref_pricing.price / activity_nb_lesson) * (desired.prorata || activity_nb_lesson)).round(2)
       end
 
       data << {

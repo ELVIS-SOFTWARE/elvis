@@ -136,8 +136,10 @@ class UpdateButtonLinkOnTemplates < ActiveRecord::Migration[6.1]
                                             }
     )
 
-    pp notification_template
+    template = notification_template.as_json
 
-    notification_template.save!
+    template.delete("id")
+
+    NotificationTemplate.upsert(template, unique_by: :path)
   end
 end

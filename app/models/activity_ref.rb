@@ -149,19 +149,19 @@ class ActivityRef < ApplicationRecord
   end
 
   def display_price(season = Season.current_apps_season || Season.current)
+    unless Rails.cache.exist?("activity_ref_id:#{id}:#{season.id}:price")
+      ActivityRefs::MaxPricesCalculator.new.call
+    end
+
     if substitutable?
-      activity_ref_kind&.display_price(season)
+      Rails.cache.read("activity_ref_kind_id:#{activity_ref_kind_id}:#{season.id}:price")
     else
-      max_price_for_activity_ref(season)
+      Rails.cache.read("activity_ref_id:#{id}:#{season.id}:price")
     end
   end
 
-  def max_price_for_activity_ref(season = Season.current_apps_season || Season.current)
-    ActivityRefPricing.for_activity_ref(self).for_season(season).max_by(&:price)&.price || 0
-  end
-
   def display_prices_by_season
-    Season.all.each_with_object({}) do |season, hash|
+    Season.all_seasons_cached.each_with_object({}) do |season, hash|
       hash[season.id] = display_price(season)
     end
   end

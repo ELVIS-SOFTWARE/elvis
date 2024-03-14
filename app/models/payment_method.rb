@@ -15,6 +15,8 @@
 class PaymentMethod < ApplicationRecord
     #extend Elvis::ConstantLike
 
+    scope :displayable, -> { where(show_payment_method_to_user: true, is_credit_note: false) }
+
     def self.mark_as_built_in
         BUILTINS.map do |c|
             c.update! built_in: true
@@ -48,7 +50,7 @@ class PaymentMethod < ApplicationRecord
     #reset_pk_sequence
 
     def self.display_class_name(singular = true)
-        singular ? "méthode de paiement" : "méthodes de paiement"
+        singular ? "moyen de paiement" : "moyens de paiement"
     end
 
     def self.class_name_gender

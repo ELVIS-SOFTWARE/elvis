@@ -8,10 +8,10 @@ export default function upcomingActivityInstancesList(props) {
     const [loading, setLoading] = useState(true);
     const [activities, setActivities] = useState(null);
     let minimalDisplay = false;
-    let url = `/get_incoming_activities` + window.location.pathname;
+    let url = `/get_upcoming_activities` + window.location.pathname;
 
-    if (!url.includes("/incoming")){
-        url += "/incoming";
+    if (!url.includes("/upcoming")){
+        url += "/upcoming";
         minimalDisplay = true;
     }
 
@@ -20,7 +20,7 @@ export default function upcomingActivityInstancesList(props) {
             .useLoading()
             .success(res =>
             {
-                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 3) : res));
+                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 4) : res));
                 setLoading(false);
             })
             .error(res =>
@@ -39,23 +39,29 @@ export default function upcomingActivityInstancesList(props) {
      * @param data
      */
     function sortActivitiesByMonth(data) {
+        const currentDate = moment();
         let sortedActivities = {};
 
         data.forEach(activity => {
-            const month = moment(activity.time_interval.start).format('MMMM');
-            if (sortedActivities[month] === undefined) {
-                sortedActivities[month] = [];
+            const activityStartDate = moment(activity.time_interval.start);
+
+            // Vérifiez si l'activité est à venir ou du jour même
+            if (activityStartDate.isSameOrAfter(currentDate, 'day')) {
+                const month = activityStartDate.format('MMMM');
+                if (sortedActivities[month] === undefined) {
+                    sortedActivities[month] = [];
+                }
+                sortedActivities[month].push(activity);
             }
-            sortedActivities[month].push(activity);
         });
 
-        // retirer les doublons par date
+        // Retirer les doublons par date
         Object.keys(sortedActivities).forEach(month => {
             sortedActivities[month] = sortedActivities[month].filter((thing, index, self) =>
                     index === self.findIndex((t) => (
                         t.time_interval.start === thing.time_interval.start
                     ))
-            )
+            );
         });
 
         return sortedActivities;
@@ -86,7 +92,7 @@ export default function upcomingActivityInstancesList(props) {
                             {activities[month].map((item, itemIndex) => (
 
                                     <UpcomingActivityInstancesCards
-                                        key={index}
+                                        key={itemIndex}
                                         activity={item}
                                         minimalDisplay={minimalDisplay}
                                     />

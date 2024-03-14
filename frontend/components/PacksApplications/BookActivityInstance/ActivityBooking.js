@@ -17,6 +17,7 @@ export default function ActivityBooking() {
     const [activityRefPricing, setActivityRefPricing] = useState(null);
     const [pack, setPack] = useState(null);
     const [secondTabActive, setSecondTabActive] = useState(false);
+    const [activeTab, setActiveTab] = useState(0);
 
     const fetchData = async () => {
         try {
@@ -98,6 +99,7 @@ export default function ActivityBooking() {
             .useLoading()
             .success(res => {
                 swal("Vos souhaits ont bien été enregistrés", "", "success");
+                setActiveTab(1);
             })
             .error(res => {
                 swal(res.message, res.error, "error");
@@ -167,7 +169,7 @@ export default function ActivityBooking() {
                         {
                             id: "tab1",
                             header: "À venir",
-                            active: true,
+                            active: activeTab === 0,
                             headerStyle:{color: "inherit", textDecoration: "none"},
                             body: <BookingCardsList
                                 activities={activities}
@@ -181,7 +183,7 @@ export default function ActivityBooking() {
                         {
                             id: "tab2",
                             header: "Mes séances",
-                            active: false,
+                            active: activeTab === 1,
                             headerStyle:{color: "inherit", textDecoration: "none"},
                             body: <BookedCardsList
                                 myActivities={myActivities}

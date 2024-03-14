@@ -2,13 +2,13 @@ import React, {Fragment, useEffect, useState} from "react";
 import Modal from "react-modal";
 import * as api from "../../../tools/api";
 import swal from "sweetalert2";
-import {MONTHS} from "../../courses/AddCourseSummary";
+import { MONTHS } from "../../../tools/constants";
 import ToggleButtonGroup from "../../ToggleButtonGroup";
 
 export default function PaymentTermsSettingModal({season, user, children, onSaved, isForNew = false})
 {
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [paymentTerm, setPaymentTerm] = useState({paymentTermId: null, on_day: null, methodId: null});
+    const [paymentTerm, setPaymentTerm] = useState({paymentScheduleOptionId: null, onDay: null, paymentMethodIndex: null});
 
     const [allPaymentTerms, setAllPaymentTerms] = useState([]);
     const [paymentMethods, setPaymentMethods] = useState([]);
@@ -22,14 +22,14 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
                 if(data)
                 {
                     setPaymentTerm({
-                        paymentTermId: data.payment_terms_id,
-                        on_day: data.day_for_collection,
-                        methodId: (payment_methods ? payment_methods : paymentMethods).findIndex(p => p.id === data.payment_method_id),
+                        paymentScheduleOptionId: data.payment_schedule_options_id,
+                        onDay: data.day_for_collection,
+                        paymentMethodIndex: (payment_methods ? payment_methods : paymentMethods).findIndex(p => p.id === data.payment_method_id),
                     });
                 }
                 else
                 {
-                    setPaymentTerm({paymentTermId: null, on_day: null, methodId: null});
+                    setPaymentTerm({paymentScheduleOptionId: null, onDay: null, paymentMethodIndex: null});
                 }
             })
             .error(data =>
@@ -47,7 +47,7 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
 
     useEffect(() =>
     {
-        if(!paymentTerm.paymentTermId)
+        if(!paymentTerm.paymentScheduleOptionId)
         {
             const promises = [];
 
@@ -69,7 +69,7 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
                         type: "error",
                     });
                 })
-                .get(`/payment-terms`, {season_id: season.id}));
+                .get(`/payment_schedule_options`, {season_id: season.id}));
 
             // get payments methods
             promises.push(api.set()
@@ -85,7 +85,7 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
 
                     swal({
                         title: "Erreur",
-                        text: "Une erreur est survenue lors de la récupération des méthodes de paiement",
+                        text: "Une erreur est survenue lors de la récupération des moyens de paiement",
                         type: "error",
                     });
                 })
@@ -115,8 +115,8 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
 
                 if(onSaved && typeof onSaved === "function")
                     onSaved({
-                        term_name: allPaymentTerms.find(p => p.id === paymentTerm.paymentTermId).label,
-                        payment_method: paymentMethods[paymentTerm.methodId].label,
+                        term_name: allPaymentTerms.find(p => p.id === paymentTerm.paymentScheduleOptionId).label,
+                        payment_method: paymentMethods[paymentTerm.paymentMethodIndex].label,
                     });
             })
             .error(data =>
@@ -131,13 +131,13 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
             })
             .post(`/users/${user.id}/paymentTerms`, {
                 season_id: season.id,
-                payment_terms_id: paymentTerm.paymentTermId,
-                day_for_collection: paymentTerm.on_day,
-                payment_method_id: paymentMethods[paymentTerm.methodId].id,
+                payment_schedule_options_id: paymentTerm.paymentScheduleOptionId,
+                day_for_collection: paymentTerm.onDay,
+                payment_method_id: paymentMethods[paymentTerm.paymentMethodIndex].id,
             });
     }
 
-    const payTermObject = allPaymentTerms.find(p => p.id === paymentTerm.paymentTermId);
+    const payTermObject = allPaymentTerms.find(p => p.id === paymentTerm.paymentScheduleOptionId);
 
     return <Fragment>
         <button className="btn btn-primary px-sm-5" onClick={() => setModalIsOpen(true)}>
@@ -160,31 +160,31 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
 
             <div className="row">
                 <div className="col-sm-6">
-                    <p>Sélectionnez la modalité de paiement </p>
+                    <p>Sélectionnez l'option d'échéancier de paiement </p>
                     <select className="form-control"
                             disabled={!isForNew}
-                            value={paymentTerm.paymentTermId || ""}
-                            onChange={(e) => setPaymentTerm({...paymentTerm, paymentTermId: parseInt(e.target.value)})}>
+                            value={paymentTerm.paymentScheduleOptionId || ""}
+                            onChange={(e) => setPaymentTerm({...paymentTerm, paymentScheduleOptionId: parseInt(e.target.value)})}>
                         <option value={""}></option>
                         {allPaymentTerms.map(pt => <option key={pt.id} value={pt.id}>{pt.label}</option>)}
                     </select>
                 </div>
                 <div className="col-sm-12">
-                    {paymentTerm.paymentTermId && <div className="m-t-md alert alert-info px-sm-3 py-sm-4">
-                        Le prélèvement sera fait au mois suivant: {payTermObject.collect_on_months.map(m => MONTHS[m]).join(", ")}
+                    {paymentTerm.paymentScheduleOptionId && <div className="m-t-md alert alert-info px-sm-3 py-sm-4">
+                        Le règlement sera fait au(x) mois de {payTermObject.payments_months.map(m => MONTHS[m]).join(", ")}
                     </div>}
                 </div>
             </div>
 
             <div className="m-t-md row">
                 <div className="col-sm-12">
-                    <p>Sélectionnez le jour de prélèvement</p>
+                    <p>Sélectionnez le jour de règlement</p>
 
                     <div className="row">
                         {payTermObject && <ToggleButtonGroup
-                            selected={[paymentTerm.on_day]}
-                            childrenContent={payTermObject.days_allowed_for_collection.map(d => <span>{d}</span>)}
-                            onChange={(selected) => setPaymentTerm({...paymentTerm, on_day: selected[0]})}
+                            selected={[paymentTerm.onDay]}
+                            childrenContent={payTermObject.available_payments_days.map(d => <span>{d}</span>)}
+                            onChange={(selected) => setPaymentTerm({...paymentTerm, onDay: selected[0]})}
                         />}
                     </div>
                 </div>
@@ -196,8 +196,8 @@ export default function PaymentTermsSettingModal({season, user, children, onSave
                 </div>
 
                 <ToggleButtonGroup
-                    selected={[paymentTerm.methodId]}
-                    onChange={(selected) => setPaymentTerm({...paymentTerm, methodId: selected[0]})}
+                    selected={[paymentTerm.paymentMethodIndex]}
+                    onChange={(selected) => setPaymentTerm({...paymentTerm, paymentMethodIndex: selected[0]})}
                     childrenContent={paymentMethods.map(m => <div>
                         {getIconForPaymentMethod(m)}
                         <p>{m.label}</p>

@@ -76,7 +76,6 @@ Question.create!([
                  ])
 # =============================================================================
 
-
 # =============================================================================
 EvaluationLevelRef.create!([
                              { value: 0, label: "DEBUTANT", can_continue: false },
@@ -99,21 +98,21 @@ PaymentScheduleStatus.create!([
 
 # =============================================================================
 
-Pricing.create!([
-                  { label: "Annuel" },
-                  { label: "Mensuel" }
-                ])
+PricingCategory.create!([
+                          { name: "Annuel", is_a_pack: false },
+                          { name: "Trimestriel", is_a_pack: false },
+                          { name: "Mensuel", is_a_pack: false }
+                        ])
 
 # =============================================================================
 
 ConsentDocument.create!([
-                          { title: "RGPD", expected_answer: true, index: 1, content: "Je consens à ce que mes données personnelles soient utilisées à des fins de traitements associés au fonctionnement de la plateforme comme décrits dans la politique de confidentialité et traitement des données personnelles par {schoolName}"},
+                          { title: "RGPD", expected_answer: true, index: 1, content: "Je consens à ce que mes données personnelles soient utilisées à des fins de traitements associés au fonctionnement de la plateforme comme décrits dans la politique de confidentialité et traitement des données personnelles par {schoolName}" },
                           { title: "Droit à l'image", expected_answer: false, index: 2, content: "J'autorise {schoolName} à utiliser mon image sur ses différents supports de communication (site Internet, formulaires divers, réseaux sociaux, communiqués de presse, newsletters et ce, uniquement dans l'idée de valoriser la pratique musicale." },
                           { title: " Inscription newsletter", expected_answer: false, index: 3, content: "J'autorise {schoolName} à me tenir à jour de son activité par newsletter." }
                         ])
 
 # =============================================================================
-
 
 #  SEASONS CREATION
 year = if DateTime.now.month >= 9
@@ -142,7 +141,6 @@ current_season.save!
 
 # =============================================================================
 
-
 # =============================================================================
 # Create default coupons
 percent_off_values = [10, 15, 20, 25, 50]
@@ -155,7 +153,6 @@ percent_off_values.each do |percent|
   )
 end
 # =============================================================================
-
 
 Chewy.strategy(:bypass)
 

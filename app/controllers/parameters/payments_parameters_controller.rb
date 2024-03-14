@@ -42,23 +42,6 @@ class Parameters::PaymentsParametersController < ApplicationController
     end
   end
 
-  def list_pricings
-    query = Pricing.all
-
-    params[:filtered].each do |filter|
-      query = case filter[:id]
-              when "id"
-                query.where(id: filter[:value])
-              else
-                query.where("#{filter[:id]} ILIKE ?", "#{filter[:value]}%")
-              end
-    end
-
-    respond_to do |format|
-      format.json { render json: list_json(query, params) }
-    end
-  end
-
   def show_adhesion
     adhesion_enabled = Adhesion.enabled
 

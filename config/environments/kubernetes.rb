@@ -45,7 +45,7 @@ Rails.application.configure do
   # config.force_ssl = true
 
   # Use a different cache store in production.
-  # config.cache_store = :mem_cache_store
+  config.cache_store = :memory_store
 
   # config.active_job.queue_name_prefix = "rails-starter_#{Rails.env}"
   config.action_mailer.perform_caching = false

@@ -1,4 +1,3 @@
-
 <%= react_component("activityApplications/Wizard", {
   countryCode: @country_code,
   documentUrl: @document_url,
@@ -29,7 +28,8 @@
   actionType: @actionType,
   inscription_path: new_application_path(@pre_selected_user),
   user_path: user_path(@pre_selected_user),
-  availPaymentTerms: @avail_payment_terms,
+  availPaymentScheduleOptions: @avail_payment_schedule_options,
+  availPaymentMethods: @avail_payment_methods,
   paymentStepDisplayText: @payment_step_display_text,
   packs: @packs,
 }) %>

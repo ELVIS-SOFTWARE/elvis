@@ -16,7 +16,7 @@ class DesiredActivityController < ApplicationController
 
     def set_pricing
         desired_activity = DesiredActivity.find(params[:id])
-        pricing = PricingCategory.find(params[:pricing_id])
+        pricing = PricingCategory.find(params[:pricing_category_id])
 
         if desired_activity.nil? || pricing.nil?
             return head :not_found

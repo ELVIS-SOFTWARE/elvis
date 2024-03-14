@@ -367,7 +367,8 @@
                                           | <%= a.time_interval.start.in_time_zone("Europe/Paris").strftime("%H:%M") %>
                                           - <%= a.time_interval.end.in_time_zone("Europe/Paris").strftime("%H:%M") %></p>
                                       <% end %>
-                                      <% unless @applications[@applications.keys.find { |acts| acts.include?(a.id) }].stopped_at.nil? %>
+                                      <% activity_application = @applications[@applications.keys.find { |acts| acts.include?(a.id) }]
+                                         unless activity_application&.stopped_at.nil? %>
                                         <p class="text-danger">
                                           <span>Arrêt le</span>
                                           <%= @applications[@applications.keys.find { |acts| acts.include?(a.id) }].stopped_at.in_time_zone("Europe/Paris").strftime(" %d/%m/%Y") %>

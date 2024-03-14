@@ -1,7 +1,4 @@
 import React, {Fragment, useEffect, useState} from "react";
-import * as api from "../../../tools/api";
-import swal from "sweetalert2";
-import moment from "moment/moment";
 import UpcomingActivityInstancesList from "./upcomingActivityInstancesList";
 
 export default function upcomingActivityInstances() {

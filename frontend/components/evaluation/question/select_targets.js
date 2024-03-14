@@ -53,7 +53,7 @@ const ROOMS_TARGET = targetFactory({
 });
 
 const PAYMENT_METHODS = targetFactory({
-    label: "Méthodes de paiement",
+    label: "Moyens de paiement",
     setName: "payment_methods",
 });
 

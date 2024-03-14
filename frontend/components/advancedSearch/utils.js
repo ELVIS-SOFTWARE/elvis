@@ -391,7 +391,7 @@ export const initializeLang = () => {
     QueryBuilder.defaults({ lang_code: "fr" });
 };
 
-export const PAYMENT_TERMS_TERM_NUMBERS = [
+export const PAYMENT_SCHEDULE_OPTIONS_PAYMENTS_NUMBERS = [
     {
         nb: 1,
         label: "Annuel (1)"
@@ -405,7 +405,7 @@ export const PAYMENT_TERMS_TERM_NUMBERS = [
         label: "Trimestriel (3)"
     },
     {
-        nb: 4,
-        label: "Mensuel (4)"
+        nb: 9,
+        label: "Mensuel (9)"
     }
 ];

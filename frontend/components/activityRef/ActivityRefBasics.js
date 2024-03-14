@@ -101,16 +101,16 @@ export default class ActivityRefBasics extends React.Component {
             .get("/activity_ref_pricings/get_seasons_and_pricing_categories", {});
     }
 
-    handleSaveForNewActivity(pricing) {
-        this.props.addPricingCategoriesToSave(pricing);
+    handleSaveForNewActivity(pricingCategory) {
+        this.props.addPricingCategoriesToSave(pricingCategory);
     }
 
-    handleUpdateForNewActivity(pricing) {
-        this.props.updatePricingCategoriesToSave(pricing);
+    handleUpdateForNewActivity(pricingCategory) {
+        this.props.updatePricingCategoriesToSave(pricingCategory);
     }
 
-    handleDeleteForNewActivity(pricing) {
-        this.props.deletePricingCategoriesToSave(pricing);
+    handleDeleteForNewActivity(pricingCategory) {
+        this.props.deletePricingCategoriesToSave(pricingCategory);
     }
 
     CreateButton({onCreate}) {
@@ -159,8 +159,10 @@ export default class ActivityRefBasics extends React.Component {
             let dataService = null;
 
             if (activityRef.id !== null)
+                // si l'activité existe déjà, on utilise le dataService classique
                 dataService = new ActivityRefDataService(activityRef.id, this.state.packs);
             else
+                // sinon, on utilise le dataService pour les nouvelles activités
                 dataService = new NewActivityRefDataService(this.handleSaveForNewActivity, this.handleUpdateForNewActivity, this.handleDeleteForNewActivity, this.state.activityRefPricings, this.state.pricingCategories);
 
             return (
@@ -298,7 +300,7 @@ export default class ActivityRefBasics extends React.Component {
                                 showFullScreenButton={false}
                                 oneResourceTypeName="un tarif"
                                 thisResourceTypeName="ce tarif"
-                                defaultSorted={[{id: "id", asc: true}]}
+                                defaultSorted={[{id: "to_season_id", desc: true}, {id: "pricing_category_id", asc: true}]}
                             />
                         </div>
 
