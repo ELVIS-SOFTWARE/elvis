@@ -125,13 +125,7 @@ class NewActivityItem extends React.Component {
         const activity_application_status_id = _.get(this.props, "new_activity_application.activity_application_status_id");
 
         let actionLabel = "";
-        if (this.props.new_activity_application &&
-            this.props.new_activity_application.activity_application_status  &&
-            _.includes(
-                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé"],
-                this.props.new_activity_application.activity_application_status.label
-            )
-        ) {
+        if (this.props.new_activity_application && this.props.new_activity_application.activity_application_status ) {
             actionLabel = "Traitée";
             if (this.props.new_activity_application.activity_application_status.label === "Proposition acceptée")
                 actionLabel = "Proposition acceptée";
@@ -141,6 +135,9 @@ class NewActivityItem extends React.Component {
 
             if (this.props.new_activity_application.activity_application_status.label === "Cours proposé")
                 actionLabel = "Cours proposé";
+
+            if (this.props.new_activity_application.activity_application_status.label === "Soumis")
+                actionLabel = "Soumis";
         } else {
             actionLabel = "En attente";
         }
@@ -165,6 +162,8 @@ class NewActivityItem extends React.Component {
                 </p>
             </React.Fragment>;
         }
+
+        console.log(actionLabel)
 
         return (
             <div className="row">

@@ -99,6 +99,8 @@ Rails.application.routes.draw do
   # mount Sidekiq::Web => "/sidekiq"
 
   resources :activities_applications, path: "inscriptions"
+  get "/get_default_and_list_activity_application_statuses", to: "activities_applications#get_default_and_list_activity_application_statuses"
+  post "/set_default_activity_application_status", to: "activities_applications#set_default_activity_application_status"
 
   # ==================
   # COUPONS
