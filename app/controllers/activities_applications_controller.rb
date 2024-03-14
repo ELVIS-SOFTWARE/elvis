@@ -1045,10 +1045,10 @@ class ActivitiesApplicationsController < ApplicationController
     )
 
     status.value = params[:status_id][:id]
-    status.save
+    res = status.save
 
     respond_to do |format|
-      format.json { render json: { success: true } }
+      format.json { render json: { success: res } }
     end
   end
 
