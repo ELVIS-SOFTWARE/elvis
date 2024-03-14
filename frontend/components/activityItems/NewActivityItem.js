@@ -27,23 +27,23 @@ class NewActivityItem extends React.Component {
     }
 
     openAssignationRefusedModal() {
-        this.setState({ isAssignationRefusedModalOpen: true });
+        this.setState({isAssignationRefusedModalOpen: true});
     }
 
     closeAssignationRefusedModal() {
-        this.setState({ isAssignationRefusedModalOpen: false });
+        this.setState({isAssignationRefusedModalOpen: false});
     }
 
     openAssignationAcceptedModal() {
-        this.setState({ isAssignationAcceptedModalOpen: true });
+        this.setState({isAssignationAcceptedModalOpen: true});
     }
 
     closeAssignationAcceptedModal() {
-        this.setState({ isAssignationAcceptedModalOpen: false });
+        this.setState({isAssignationAcceptedModalOpen: false});
     }
 
     updateReasonRefused(event) {
-        this.setState({ reasonOfRefusal: event.target.value });
+        this.setState({reasonOfRefusal: event.target.value});
     }
 
     handleProcessRefusedAssignationActivity() {
@@ -77,7 +77,7 @@ class NewActivityItem extends React.Component {
 
             return response.json()
         }).then(json => {
-            this.setState({ proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_REFUSED_ID });
+            this.setState({proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_REFUSED_ID});
             swal("Proposition refusée", "Les raisons ont été communiquées", "info")
         });
     }
@@ -112,7 +112,7 @@ class NewActivityItem extends React.Component {
 
             return response.json()
         }).then(json => {
-            this.setState({ proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID });
+            this.setState({proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID});
             swal("Réussite", "Proposition acceptée", "success");
         });
     }
@@ -126,7 +126,7 @@ class NewActivityItem extends React.Component {
 
         let actionLabel = "";
         if (this.props.new_activity_application &&
-            this.props.new_activity_application.activity_application_status  &&
+            this.props.new_activity_application.activity_application_status &&
             _.includes(
                 ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé"],
                 this.props.new_activity_application.activity_application_status.label
@@ -144,6 +144,7 @@ class NewActivityItem extends React.Component {
         } else {
             actionLabel = "En attente";
         }
+
 
         /**
          *  Affichage du jour, créneau, professeur, et salle
@@ -178,7 +179,7 @@ class NewActivityItem extends React.Component {
                             </h4>
                         </div>
                         <div className="ibox-content text-align-center-sm">
-                            <div className="row">
+                            <div className="row d-flex align-items-center">
                                 <div className="col-sm-2 project-status p-xs">
                                     {renderActivityAction(actionLabel)}
                                 </div>
@@ -194,13 +195,23 @@ class NewActivityItem extends React.Component {
                                     <p className="pb-0"> {desiredActivity.activity_id === null ? desiredActivity.activity_ref.kind : desiredActivity.activity_ref.label} </p>
                                     <p className="pb-0"> {activityDetails} </p>
                                 </div>
-                                <div className="col-sm-6 p-xs">
+                                <div className="col-sm-6 p-xs d-flex justify-content-end">
                                     <AnswerProposal
                                         activity_application_status_id={activity_application_status_id}
                                         proposalAnswered={this.state.proposalAnswered}
                                         openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
+                                    {activity_application_status_id === 1 ?
+                                        <button className="btn text-white mr-4"
+                                            style={{
+                                                backgroundColor: "#00334A",
+                                                borderRadius: "8px",
+                                                fontWeight: "bold"
+                                            }}
+                                            >Modifier</button>
+                                        : ""
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -253,7 +264,7 @@ class NewActivityItem extends React.Component {
                     </h2>
                     <div className="content">
                         <div className="form-group">
-                            { this.props.confirm_activity_text ?
+                            {this.props.confirm_activity_text ?
                                 <p className="mt-5 text-justify">{this.props.confirm_activity_text}</p> : ""
                             }
                         </div>
