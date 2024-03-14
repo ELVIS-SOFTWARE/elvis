@@ -30,7 +30,7 @@ export default function EditApplication(props) {
             <Modal
                 isOpen={isEditModalOpen}
                 onRequestClose={() => handleEditModal()}
-                className="modal-xl fade"
+                className="modal-sm"
                 ariaHideApp={false}
                 contentLabel="Modifier votre inscription"
                 style={{
@@ -70,7 +70,7 @@ export default function EditApplication(props) {
             <Modal
                 isOpen={isConfirmationModalOpen}
                 onRequestClose={() => handleConfirmationModal()}
-                className="modal-xl fade"
+                className="modal-sm"
                 ariaHideApp={false}
                 contentLabel="Modification réussie"
                 style={{
