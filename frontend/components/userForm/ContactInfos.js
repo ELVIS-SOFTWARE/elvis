@@ -61,7 +61,18 @@ class ContactInfos extends React.PureComponent {
             last_name: currentUser.last_name,
             is_paying_for: currentUser.is_paying
 
-        })
+        });
+
+        if(values.payers && values.payers.length > 0)
+        {
+            values.payers.forEach(payer => {
+                const payerUser = family_links_with_user.find(flu => flu.id === payer);
+                if(payerUser)
+                {
+                    payerUser.is_paying_for = true;
+                }
+            });
+        }
 
         return (
             <div>
