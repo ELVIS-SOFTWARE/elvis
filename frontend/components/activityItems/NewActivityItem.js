@@ -125,7 +125,13 @@ class NewActivityItem extends React.Component {
         const activity_application_status_id = _.get(this.props, "new_activity_application.activity_application_status_id");
 
         let actionLabel = "";
-        if (this.props.new_activity_application && this.props.new_activity_application.activity_application_status ) {
+        if (this.props.new_activity_application &&
+            this.props.new_activity_application.activity_application_status  &&
+            _.includes(
+                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé"],
+                this.props.new_activity_application.activity_application_status.label
+            )
+        ) {
             actionLabel = "Traitée";
             if (this.props.new_activity_application.activity_application_status.label === "Proposition acceptée")
                 actionLabel = "Proposition acceptée";
