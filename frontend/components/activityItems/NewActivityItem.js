@@ -7,6 +7,7 @@ import {csrfToken} from "../utils";
 import swal from "sweetalert2";
 import Modal from "react-modal";
 import AnswerProposal from "./AnswerProposal";
+import EditApplication from "./EditApplication";
 
 class NewActivityItem extends React.Component {
     constructor(props) {
@@ -203,13 +204,9 @@ class NewActivityItem extends React.Component {
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
                                     {activity_application_status_id === 1 ?
-                                        <button className="btn text-white mr-4"
-                                            style={{
-                                                backgroundColor: "#00334A",
-                                                borderRadius: "8px",
-                                                fontWeight: "bold"
-                                            }}
-                                            >Modifier</button>
+                                        <EditApplication
+                                        activity_application_status_id={activity_application_status_id}
+                                        />
                                         : ""
                                     }
                                 </div>
@@ -284,6 +281,7 @@ class NewActivityItem extends React.Component {
                         Je confirme
                     </button>
                 </Modal>
+
             </div>
         );
     }
