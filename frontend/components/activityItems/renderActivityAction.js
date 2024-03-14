@@ -64,7 +64,7 @@ function renderActivityAction(actionLabel) {
                 <React.Fragment>
                     <i className="fas mt-4 fa-hourglass fa-sm bg-warning img-circle"
                        style={{ padding: "1px 6px 1px 6px" }} />
-                    <span className="label label-warning">En attente de traitement</span>
+                    <span className="label label-warning">Soumis</span>
                 </React.Fragment>
             );
     }
