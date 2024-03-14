@@ -28,7 +28,7 @@ module Users
 
         # filter family links by given season
         if @includes.dig("methods", "family_links_with_user")
-          u[:family_links_with_user] = u.family_links_with_user(@season)
+          u["family_links_with_user"] = u.family_links_with_user(@season)
         end
 
         unless @season.nil? || u.planning.nil?

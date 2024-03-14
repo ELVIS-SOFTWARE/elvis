@@ -565,17 +565,27 @@ class ActivitiesApplicationsController < ApplicationController
           consentement.save!
         end
 
+        payers = params.dig(:application, :infos, :payers)
+
+        if payers
+          @user.is_paying = payers.any? { |p| p == @user.id }
+        end
+
         # @user.skip_confirmation_notification!
         @user.save!
 
-        # unless params[:application][:infos][:family].nil?
-        #   FamilyMemberUsers.addFamilyMemberWithConfirmation(
-        #     params[:application][:infos][:family],
-        #     @user,
-        #     Season.current_apps_season,
-        #     send_confirmation: false,
-        #   )
-        # end
+        # il faut que le user soit sauvegardé pour pouvoir lui associer des membres de la famille
+        @user.family_links_with_user(season).each do |fmu|
+
+          fmu[:is_paying_for] = payers&.include?(fmu[:id]) || false
+
+          FamilyMemberUsers.addFamilyMemberWithConfirmation(
+            [ActiveSupport::HashWithIndifferentAccess.new(fmu)],
+            @user,
+            season,
+            send_confirmation: false
+          )
+        end
 
         if params[:application][:infos][:payer_payment_terms].present?
           existing_payment_terms = @user.payer_payment_terms.where(season_id: season.id)
