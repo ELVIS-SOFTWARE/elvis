@@ -203,6 +203,7 @@ class NewActivityItem extends React.Component {
                                         openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
+
                                     {activity_application_status_id === 1 ?
                                         <EditApplication
                                         activity_application_status_id={activity_application_status_id}

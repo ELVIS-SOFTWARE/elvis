@@ -37,16 +37,10 @@ export default function EditApplication(props) {
                 <h2 className="modal-header mb-5" style={{color: "#00334A"}}>
                     Modifier votre demande d'inscription
                 </h2>
-                <div className="content">
-                    <input type="text" id="editInput" name="editInput"
-                           style={{
-                               width: "100%", // Ajuster la largeur à 100% pour occuper toute la largeur de la modal
-                               height: "200px",
-                               textAlign: "left"
-                           }}
-                           placeholder="Indiquer les modifications à nous communiquer (disponibilité, choix professeur)"
-                           wrap="soft" // Permettre le retour automatique du texte du placeholder
-                    />
+                <div className="content" style={{height: "200px"}}>
+                    <textarea id="editInput" name="editInput" style={{width: "100%", height: "100%"}} wrap="soft">
+                        Indiquer les modifications à nous communiquer (disponibilité, choix professeur)
+                    </textarea>
                 </div>
                 <div className="d-flex justify-content-end mt-5">
                     <button className="btn text-white"
