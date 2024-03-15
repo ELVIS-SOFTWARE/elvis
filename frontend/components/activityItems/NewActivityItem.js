@@ -129,7 +129,7 @@ class NewActivityItem extends React.Component {
         if (this.props.new_activity_application &&
             this.props.new_activity_application.activity_application_status &&
             _.includes(
-                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé"],
+                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé", "Soumis"],
                 this.props.new_activity_application.activity_application_status.label
             )
         ) {
@@ -207,11 +207,10 @@ class NewActivityItem extends React.Component {
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
 
-                                    {activity_application_status_id === 1 ?
+                                    {activity_application_status_id === ActivityApplicationStatus.SUBMITTED_ID &&
                                         <EditApplication
-                                        activity_application_status_id={activity_application_status_id}
+                                            activity_application_status_id={activity_application_status_id}
                                         />
-                                        : ""
                                     }
                                 </div>
                             </div>
