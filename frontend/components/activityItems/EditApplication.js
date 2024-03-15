@@ -57,6 +57,16 @@ export default function EditApplication(props) {
                                     fontWeight: "bold"
                                 }}
                                 onClick={() => {
+                                    if (editInput === "") {
+                                        swal.fire({
+                                            title: "Veuillez renseigner les modifications à apporter",
+                                            icon: "info",
+                                            confirmButtonColor: "#00334A",
+                                            confirmButtonText: "OK"
+                                        });
+                                        return;
+                                    }
+
                                     handleCloseEditModal();
                                     handleCloseConfirmationModal();
                                     props.handleProcessModifyApplication(editInput);
