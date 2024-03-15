@@ -18,8 +18,11 @@ export default function CancelApplication(props) {
                         borderRadius: "8px",
                         fontWeight: "bold"
                     }}
-                    onClick={() => handleModal()}
-            >Annuler
+                    onClick={() => {
+                        handleModal()
+                        props.handleProcessCancelApplication()
+                    }}>
+                Annuler
             </button>
 
             <Modal
@@ -45,7 +48,13 @@ export default function CancelApplication(props) {
                                     backgroundColor: "#00334A",
                                     borderRadius: "8px",
                                     fontWeight: "bold"
-                                }}>
+                                }}
+
+                                onClick={() => {
+                                    handleModal()
+                                    window.location.reload()
+                                }}
+                        >
                             Voir mes demandes
                         </button>
                     </div>

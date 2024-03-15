@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import _ from "lodash";
 import moment from "moment/moment";
 import renderActivityAction from "./renderActivityAction";
@@ -28,6 +28,7 @@ class NewActivityItem extends React.Component {
         }
         this.updateReasonRefused = this.updateReasonRefused.bind(this);
         this.handleProcessModifyApplication = this.handleProcessModifyApplication.bind(this);
+        this.handleProcessCancelApplication = this.handleProcessCancelApplication.bind(this);
     }
 
     openAssignationRefusedModal() {
@@ -137,6 +138,22 @@ class NewActivityItem extends React.Component {
             }, {});
     }
 
+    handleProcessCancelApplication() {
+        api.set()
+            .error(() => {
+                swal({
+                    title: "Erreur lors de l'annulation de l'inscription",
+                    type: "error",
+                });
+            })
+            .del(`/destroy/activity_application/${this.state.activityApplicationId}`, {})
+            .then(() => {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 5000); // 5000 milliseconds = 5 seconds
+            });
+    }
+
     render() {
         const {
             data
@@ -224,18 +241,18 @@ class NewActivityItem extends React.Component {
                                         openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
-                                    {activity_application_status_id === 1 ?
-                                        <CancelApplication
-                                            activity_application_status_id={activity_application_status_id}
-                                        />
-                                        : ""
-                                    }
 
-                                    {activity_application_status_id === ActivityApplicationStatus.SUBMITTED_ID &&
-                                        <EditApplication
-                                            handleProcessModifyApplication={this.handleProcessModifyApplication}
-                                        />
-                                    }
+                                    {activity_application_status_id === ActivityApplicationStatus.SUBMITTED_ID && (
+                                        <Fragment>
+                                            <CancelApplication
+                                                handleProcessCancelApplication={this.handleProcessCancelApplication}
+                                            />
+
+                                            <EditApplication
+                                                handleProcessModifyApplication={this.handleProcessModifyApplication}
+                                            />
+                                        </Fragment>
+                                    )}
                                 </div>
                             </div>
                         </div>
