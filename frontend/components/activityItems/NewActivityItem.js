@@ -142,6 +142,9 @@ class NewActivityItem extends React.Component {
 
             if (this.props.new_activity_application.activity_application_status.label === "Cours proposé")
                 actionLabel = "Cours proposé";
+
+            if (this.props.new_activity_application.activity_application_status.label === "Soumis")
+                actionLabel = "Soumis";
         } else {
             actionLabel = "En attente";
         }
