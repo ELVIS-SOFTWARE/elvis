@@ -8,6 +8,8 @@ import swal from "sweetalert2";
 import Modal from "react-modal";
 import AnswerProposal from "./AnswerProposal";
 import CancelApplication from "./CancelApplication";
+import EditApplication from "./EditApplication";
+import * as api from "../../tools/api";
 
 class NewActivityItem extends React.Component {
     constructor(props) {
@@ -25,26 +27,27 @@ class NewActivityItem extends React.Component {
             activityApplicationId: this.props.new_activity_application.desired_activities[0].activity_application_id
         }
         this.updateReasonRefused = this.updateReasonRefused.bind(this);
+        this.handleProcessModifyApplication = this.handleProcessModifyApplication.bind(this);
     }
 
     openAssignationRefusedModal() {
-        this.setState({ isAssignationRefusedModalOpen: true });
+        this.setState({isAssignationRefusedModalOpen: true});
     }
 
     closeAssignationRefusedModal() {
-        this.setState({ isAssignationRefusedModalOpen: false });
+        this.setState({isAssignationRefusedModalOpen: false});
     }
 
     openAssignationAcceptedModal() {
-        this.setState({ isAssignationAcceptedModalOpen: true });
+        this.setState({isAssignationAcceptedModalOpen: true});
     }
 
     closeAssignationAcceptedModal() {
-        this.setState({ isAssignationAcceptedModalOpen: false });
+        this.setState({isAssignationAcceptedModalOpen: false});
     }
 
     updateReasonRefused(event) {
-        this.setState({ reasonOfRefusal: event.target.value });
+        this.setState({reasonOfRefusal: event.target.value});
     }
 
     handleProcessRefusedAssignationActivity() {
@@ -78,7 +81,7 @@ class NewActivityItem extends React.Component {
 
             return response.json()
         }).then(json => {
-            this.setState({ proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_REFUSED_ID });
+            this.setState({proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_REFUSED_ID});
             swal("Proposition refusée", "Les raisons ont été communiquées", "info")
         });
     }
@@ -113,9 +116,25 @@ class NewActivityItem extends React.Component {
 
             return response.json()
         }).then(json => {
-            this.setState({ proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID });
+            this.setState({proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID});
             swal("Réussite", "Proposition acceptée", "success");
         });
+    }
+
+    handleProcessModifyApplication(content) {
+        api.set()
+            .error(() => {
+                swal({
+                    title: "Erreur lors de l'envoi du commentaire",
+                    type: "error",
+                });
+            })
+            .post("/comments", {
+                commentable_id: this.state.preApplicationActivity.id,
+                commentable_type: "ActivityApplication",
+                user_id: this.props.current_user.id,
+                content: content,
+            }, {});
     }
 
     render() {
@@ -127,9 +146,9 @@ class NewActivityItem extends React.Component {
 
         let actionLabel = "";
         if (this.props.new_activity_application &&
-            this.props.new_activity_application.activity_application_status  &&
+            this.props.new_activity_application.activity_application_status &&
             _.includes(
-                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé"],
+                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé", "Soumis"],
                 this.props.new_activity_application.activity_application_status.label
             )
         ) {
@@ -142,6 +161,9 @@ class NewActivityItem extends React.Component {
 
             if (this.props.new_activity_application.activity_application_status.label === "Cours proposé")
                 actionLabel = "Cours proposé";
+
+            if (this.props.new_activity_application.activity_application_status.label === "Soumis")
+                actionLabel = "Soumis";
         } else {
             actionLabel = "En attente";
         }
@@ -179,7 +201,7 @@ class NewActivityItem extends React.Component {
                             </h4>
                         </div>
                         <div className="ibox-content text-align-center-sm">
-                            <div className="row">
+                            <div className="row d-flex align-items-center">
                                 <div className="col-sm-2 project-status p-xs">
                                     {renderActivityAction(actionLabel)}
                                 </div>
@@ -195,7 +217,7 @@ class NewActivityItem extends React.Component {
                                     <p className="pb-0"> {desiredActivity.activity_id === null ? desiredActivity.activity_ref.kind : desiredActivity.activity_ref.label} </p>
                                     <p className="pb-0"> {activityDetails} </p>
                                 </div>
-                                <div className="col-sm-6 p-xs">
+                                <div className="col-sm-6 p-xs d-flex justify-content-end">
                                     <AnswerProposal
                                         activity_application_status_id={activity_application_status_id}
                                         proposalAnswered={this.state.proposalAnswered}
@@ -207,6 +229,12 @@ class NewActivityItem extends React.Component {
                                             activity_application_status_id={activity_application_status_id}
                                         />
                                         : ""
+                                    }
+
+                                    {activity_application_status_id === ActivityApplicationStatus.SUBMITTED_ID &&
+                                        <EditApplication
+                                            handleProcessModifyApplication={this.handleProcessModifyApplication}
+                                        />
                                     }
                                 </div>
                             </div>
@@ -260,7 +288,7 @@ class NewActivityItem extends React.Component {
                     </h2>
                     <div className="content">
                         <div className="form-group">
-                            { this.props.confirm_activity_text ?
+                            {this.props.confirm_activity_text ?
                                 <p className="mt-5 text-justify">{this.props.confirm_activity_text}</p> : ""
                             }
                         </div>

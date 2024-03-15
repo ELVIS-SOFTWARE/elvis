@@ -5,7 +5,7 @@ function renderActivityAction(actionLabel) {
         case "Proposition acceptée":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg mt-4 fa-check-circle color-green" />
+                    <i className="fas fa-lg fa-check-circle color-green" />
                     <span className="label label-primary bg-green">
                         Proposition acceptée
                     </span>
@@ -14,7 +14,7 @@ function renderActivityAction(actionLabel) {
         case "Cours proposé":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg mt-4 fa-info-circle color-green" />
+                    <i className="fas fa-lg fa-info-circle color-green" />
                     <span className="label label-primary bg-green">
                         Cours proposé
                     </span>
@@ -23,7 +23,7 @@ function renderActivityAction(actionLabel) {
         case "Proposition refusée":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg mt-4 fa-times-circle" style={{color:"#ED5565"}} />
+                    <i className="fas fa-lg fa-times-circle" style={{color:"#ED5565"}} />
                     <span className="label label-danger bg-danger">
                         Proposition refusée
                     </span>
@@ -32,7 +32,7 @@ function renderActivityAction(actionLabel) {
         case "Traitée":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg mt-4 fa-check-circle color-green" />
+                    <i className="fas fa-lg fa-check-circle color-green" />
                     <span className="label label-primary bg-green">
                         Cours attribué
                     </span>
@@ -41,7 +41,7 @@ function renderActivityAction(actionLabel) {
         case "En traitement":
             return (
                 <React.Fragment>
-                    <i className="fas mt-4 fa-check-circle text-info" />
+                    <i className="fas fa-check-circle text-info" />
                     <span className="label label-info">En traitement</span>
                 </React.Fragment>
             );
@@ -55,16 +55,24 @@ function renderActivityAction(actionLabel) {
         case "Current":
             return (
                 <React.Fragment>
-                    <i className="fas mt-4 fa-check-circle text-secondary" />
+                    <i className="fas fa-check-circle text-secondary" />
                     <span className="label label-default">Cours actuel</span>
+                </React.Fragment>
+            );
+        case "Soumis": // "Submitted"
+            return (
+                <React.Fragment>
+                    <i className="fas mt-4 fa-hourglass fa-sm bg-warning img-circle"
+                       style={{ padding: "1px 6px 1px 6px" }} />
+                    <span className="label label-warning mt-1">Soumis</span>
                 </React.Fragment>
             );
         default:
             return (
                 <React.Fragment>
-                    <i className="fas mt-4 fa-hourglass fa-sm bg-warning img-circle"
+                    <i className="fas m-0 fa-hourglass fa-sm bg-warning img-circle"
                        style={{ padding: "1px 6px 1px 6px" }} />
-                    <span className="label label-warning">En attente de traitement</span>
+                    <span className="label label-warning mt-1">En attente de traitement</span>
                 </React.Fragment>
             );
     }

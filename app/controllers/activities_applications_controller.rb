@@ -600,7 +600,9 @@ class ActivitiesApplicationsController < ApplicationController
           end
         end
 
-        status = ActivityApplicationStatus.find(ActivityApplicationStatus::TREATMENT_PENDING_ID)
+        set_status = Parameter.find_by(label: "activityApplication.default_status")
+
+        status = set_status ? set_status.value.to_i : ActivityApplicationStatus::SUBMITTED_ID
 
         if params[:preApplicationActivityId].present? && params[:preApplicationActivityId] != "0" #  == "Change"
           pre_application_activity = PreApplicationActivity.find(params[:preApplicationActivityId])
@@ -1027,6 +1029,27 @@ class ActivitiesApplicationsController < ApplicationController
       activity_application_status: {},
       referent: {},
     })
+  end
+
+  def get_default_and_list_activity_application_statuses
+    render json: {
+      default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::SUBMITTED_ID),
+      list: ActivityApplicationStatus.all,
+    }
+  end
+
+  def set_default_activity_application_status
+    status = Parameter.find_or_create_by(
+      label: "activityApplication.default_status",
+      value_type: "integer"
+    )
+
+    status.value = params[:status_id][:id]
+    res = status.save
+
+    respond_to do |format|
+      format.json { render json: { success: res } }
+    end
   end
 
   private
