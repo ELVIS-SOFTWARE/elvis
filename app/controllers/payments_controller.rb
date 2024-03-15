@@ -44,9 +44,30 @@ class PaymentsController < ApplicationController
 
       users.each { |p| activities += p.get_list_of_activities(s) }
 
+      tmp_fm = user.family_member_users
+                           .for_season(s)
+                           .compact
+
+      # verify if exist a due_payment for the user
+      why_payers_added = {}
+      tmp_payers = tmp_fm
+                     .filter { |fm| fm.is_paying_for || fm.member.payment_schedules.find_by(season_id: s.id)&.due_payments&.any? }
+                     .map do |fm|
+                          # add an atribute to get the payer adding decision (added because is_paying or added because of a payment schedule)
+                          why_payers_added[fm.member_id] = fm.is_paying_for
+
+                          fm.member
+                     end
+                     .compact
+
+      tmp_payers << user if user.is_paying || user.payment_schedules.find_by(season_id: s.id)&.due_payments&.any?
+
+      tmp_payers.uniq!(&:id)
+
       arr << {
         season_id: s.id,
-        payers: user.get_users_paying_for_self(s)
+        payers: tmp_payers,
+        why_payers_added: why_payers_added
       }
 
       # si l'utilisateur paie pour au moins une autre personne, on l'ajoute aux payeurs
@@ -117,10 +138,12 @@ class PaymentsController < ApplicationController
     @payers = payers_by_season.map do |season_payer_info|
       season_id = season_payer_info[:season_id]
       season_payers = season_payer_info[:payers]
+      why_payers_added = season_payer_info[:why_payers_added]
       payers_json = season_payers.as_json(include_payer_json)
 
       payers_json.each do |payer|
         payer_id = payer["id"]
+        payer["payer_paying_for_current_season?"] = why_payers_added[payer_id]
         payer["payment_terms_summary"] = User.find(payer_id).payment_terms_summary(season_id)
       end
 

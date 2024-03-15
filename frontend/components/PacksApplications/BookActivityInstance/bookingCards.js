@@ -38,7 +38,7 @@ export default function bookingCards(props) {
             <div className="col-sm-5">
                 <div
                     className={`ibox animated fadeInRight border-${isClicked ? 'lightblue' : 'transparent'}`}
-                    onClick={() => handleClick()}
+                    onClick={() => handleClick(activity)}
                     style={activity.student_attendances.length >= activity_ref.occupation_limit ? {
                         pointerEvents: "none",
                         cursor: "not-allowed",

@@ -52,7 +52,7 @@ class ContactInfos extends React.PureComponent {
 
         const { push, update } = this.props.mutators;
 
-        const family_links_with_user = [...values.family_links_with_user];
+        const family_links_with_user = [...(values.family_links_with_user || [])];
 
         // Add the current user to the list of family members users to define is_paying column
         family_links_with_user.push({

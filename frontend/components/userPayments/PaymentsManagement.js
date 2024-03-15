@@ -1702,6 +1702,13 @@ class PaymentsManagement extends React.Component {
                                                 >
                                                     {`${payer.first_name} ${payer.last_name} (${payer.class_name})`}
                                                 </a>
+
+                                                {payer["payer_paying_for_current_season?"] ? "" : <span
+                                                    className="badge badge-danger m-l-sm"
+                                                    data-tippy-content="Cet utilisateur n'est plus payeur pour cette saison, mais apparaît parce que des échéances existent pour lui."
+                                                    >
+                                                        N'est plus payeur
+                                                </span>}
                                             </h3>
                                             {this.state.payers.length > 1 &&
                                                 <button
