@@ -490,7 +490,7 @@ class ActivitiesApplicationsController < ApplicationController
     begin
       new_applications = []
 
-      # ActivityApplication.transaction do
+      ActivityApplication.transaction do
         if params[:application][:personSelection] == "myself"
           # @type [User]
           @user = User.find(params[:application][:user][:id])
@@ -568,14 +568,14 @@ class ActivitiesApplicationsController < ApplicationController
         # @user.skip_confirmation_notification!
         @user.save!
 
-        unless params[:application][:infos][:family].nil?
-          FamilyMemberUsers.addFamilyMemberWithConfirmation(
-            params[:application][:infos][:family],
-            @user,
-            Season.current_apps_season,
-            send_confirmation: false,
-          )
-        end
+        # unless params[:application][:infos][:family].nil?
+        #   FamilyMemberUsers.addFamilyMemberWithConfirmation(
+        #     params[:application][:infos][:family],
+        #     @user,
+        #     Season.current_apps_season,
+        #     send_confirmation: false,
+        #   )
+        # end
 
         if params[:application][:infos][:payer_payment_terms].present?
           existing_payment_terms = @user.payer_payment_terms.where(season_id: season.id)
@@ -735,7 +735,7 @@ class ActivitiesApplicationsController < ApplicationController
             @pack_created = true
           end
         end
-      # end
+      end
 
       # notify new users of their new application
       new_applications.each do |app|
