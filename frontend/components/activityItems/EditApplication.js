@@ -110,11 +110,7 @@ export default function EditApplication(props) {
                         </button>
                     </div>
                 </div>
-
-
             </Modal>
-
         </div>
-
     )
 }
