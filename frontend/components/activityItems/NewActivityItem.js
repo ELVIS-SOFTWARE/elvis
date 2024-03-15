@@ -8,6 +8,7 @@ import swal from "sweetalert2";
 import Modal from "react-modal";
 import AnswerProposal from "./AnswerProposal";
 import EditApplication from "./EditApplication";
+import * as api from "../../tools/api";
 
 class NewActivityItem extends React.Component {
     constructor(props) {
@@ -25,6 +26,7 @@ class NewActivityItem extends React.Component {
             activityApplicationId: this.props.new_activity_application.desired_activities[0].activity_application_id
         }
         this.updateReasonRefused = this.updateReasonRefused.bind(this);
+        this.handleProcessModifyApplication = this.handleProcessModifyApplication.bind(this);
     }
 
     openAssignationRefusedModal() {
@@ -118,6 +120,22 @@ class NewActivityItem extends React.Component {
         });
     }
 
+    handleProcessModifyApplication(content) {
+        api.set()
+            .error(() => {
+                swal({
+                    title: "Erreur lors de l'envoi du commentaire",
+                    type: "error",
+                });
+            })
+            .post("/comments", {
+                commentable_id: this.state.preApplicationActivity.id,
+                commentable_type: "ActivityApplication",
+                user_id: this.props.current_user.id,
+                content: content,
+            }, {});
+    }
+
     render() {
         const {
             data
@@ -209,7 +227,7 @@ class NewActivityItem extends React.Component {
 
                                     {activity_application_status_id === ActivityApplicationStatus.SUBMITTED_ID &&
                                         <EditApplication
-                                            activity_application_status_id={activity_application_status_id}
+                                            handleProcessModifyApplication={this.handleProcessModifyApplication}
                                         />
                                     }
                                 </div>

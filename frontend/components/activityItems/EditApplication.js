@@ -1,17 +1,19 @@
 import React from "react";
 import {useState} from "react";
-import swal from "sweetalert2";
 import Modal from "react-modal";
+import * as api from "../../tools/api";
+import swal from "sweetalert2";
 
 export default function EditApplication(props) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+    const [editInput, setEditInput] = useState("");
 
-    function handleEditModal() {
+    function handleCloseEditModal() {
         setIsEditModalOpen(!isEditModalOpen);
     }
 
-    function handleConfirmationModal() {
+    function handleCloseConfirmationModal() {
         setIsConfirmationModalOpen(!isConfirmationModalOpen);
     }
 
@@ -23,13 +25,13 @@ export default function EditApplication(props) {
                         borderRadius: "8px",
                         fontWeight: "bold"
                     }}
-                    onClick={() => handleEditModal()}
+                    onClick={() => handleCloseEditModal()}
             >Modifier
             </button>
 
             <Modal
                 isOpen={isEditModalOpen}
-                onRequestClose={() => handleEditModal()}
+                onRequestClose={() => handleCloseEditModal()}
                 className="modal-sm"
                 ariaHideApp={false}
                 contentLabel="Modifier votre inscription"
@@ -44,8 +46,8 @@ export default function EditApplication(props) {
                         Modifier votre demande d'inscription
                     </h2>
                     <div className="content" style={{height: "200px"}}>
-                        <textarea id="editInput" name="editInput" style={{width: "100%", height: "100%"}} wrap="soft"
-                                  defaultValue="Indiquer les modifications à nous communiquer (disponibilité, choix professeur)"></textarea>
+                        <textarea id="editInput" name="editInput" style={{width: "100%", height: "100%"}} wrap="soft" onChange={(e) => setEditInput(e.target.value)}
+                                  placeholder="Indiquer les modifications à nous communiquer (disponibilité, choix professeur)"></textarea>
                     </div>
                     <div className="d-flex justify-content-end mt-5">
                         <button className="btn text-white"
@@ -55,10 +57,10 @@ export default function EditApplication(props) {
                                     fontWeight: "bold"
                                 }}
                                 onClick={() => {
-                                    handleEditModal();
-                                    handleConfirmationModal();
+                                    handleCloseEditModal();
+                                    handleCloseConfirmationModal();
+                                    props.handleProcessModifyApplication(editInput);
                                 }}
-
                         >
                             Modifier
                         </button>
@@ -69,7 +71,7 @@ export default function EditApplication(props) {
 
             <Modal
                 isOpen={isConfirmationModalOpen}
-                onRequestClose={() => handleConfirmationModal()}
+                onRequestClose={() => handleCloseConfirmationModal()}
                 className="modal-sm"
                 ariaHideApp={false}
                 contentLabel="Modification réussie"
@@ -92,7 +94,7 @@ export default function EditApplication(props) {
                                     borderRadius: "8px",
                                     fontWeight: "bold"
                                 }}
-                        onClick={() => handleConfirmationModal()}
+                        onClick={() => handleCloseConfirmationModal()}
                         >
                             Voir mes demandes
                         </button>
