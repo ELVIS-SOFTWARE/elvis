@@ -289,7 +289,15 @@ class PaymentsController < ApplicationController
             pricing_category: {}
           }
         },
-        user: {}
+        user: {},
+        discount: {
+          only: :coupon,
+          include: {
+            coupon: {
+              only: %i[id percent_off label]
+            }
+          }
+        }
       })
     end
 

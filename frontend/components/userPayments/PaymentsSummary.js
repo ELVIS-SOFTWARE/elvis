@@ -289,8 +289,8 @@ class PaymentsSummary extends React.Component {
                             coupons={this.state.coupons}
                             onChange={value =>
                                 this.props.handleChangePercentOffChoice(
-                                    props.original.id ? props.original.id : props.original.adhesionId,
-                                    props.original.id ? "DesiredActivity" : "Adhesion",
+                                    props.original.adhesionId || props.original.packId || props.original.id,
+                                    props.original.adhesionId ? "Adhesion" : props.original.packId ? "Pack" : "Activity",
                                     value
                                 )
                             }

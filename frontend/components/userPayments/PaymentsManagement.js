@@ -235,7 +235,8 @@ function generateDataForPaymentSummaryTable({
             for (const pack of userPacks)
             {
                 const pack_price = pack.activity_ref_pricing.price;
-                const coupon = 0;
+                const coupon = _.get(pack, "discount.coupon", 0);
+                const percentOff = _.get(pack, "discount.coupon.percent_off", 0);
 
                 data.push({
                     id: 0,
@@ -244,7 +245,7 @@ function generateDataForPaymentSummaryTable({
                     initial_total: 1,
                     due_total: pack_price || 0,
                     coupon: coupon,
-                    discountedTotal: pack_price || 0,
+                    discountedTotal: getDiscountedAmount(pack_price || 0, percentOff),
                     unitPrice: pack_price || 0,
                     user: user,
                     studentId: user.id,
