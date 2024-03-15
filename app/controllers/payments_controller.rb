@@ -277,15 +277,21 @@ class PaymentsController < ApplicationController
       only: %i[id label percent_off enabled]
     )
 
-    @packs = Pack.all.as_json(include: {
-      activity_ref: {},
-      activity_ref_pricing: {
-        include: {
-          pricing_category: {}
-        }
-      },
-      user: {}
-    })
+    @packs = {}
+
+    Pack.where(user_id: activities.map(&:user).map(&:id).uniq).each do |pack|
+      @packs[pack.season_id] = [] if @packs[pack.season_id].nil?
+
+      @packs[pack.season_id] << pack.as_json(include: {
+        activity_ref: {},
+        activity_ref_pricing: {
+          include: {
+            pricing_category: {}
+          }
+        },
+        user: {}
+      })
+    end
 
     respond_to do |format|
       format.html

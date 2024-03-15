@@ -226,15 +226,20 @@ function generateDataForPaymentSummaryTable({
         }
     }
 
-    if (packs.length > 0) {
+    if ((packs || []).length > 0)
+    {
         const userPacks = packs.filter(p => p.user_id === user.id)
-        if (userPacks.length > 0) {
-            for (const pack of userPacks) {
+
+        if (userPacks.length > 0)
+        {
+            for (const pack of userPacks)
+            {
                 const pack_price = pack.activity_ref_pricing.price;
                 const coupon = 0;
+
                 data.push({
                     id: 0,
-                    activity: `Pack de ${user.first_name} ${user.last_name}`,
+                    activity: `Pack de ${user.first_name} ${user.last_name} pour ${pack.activity_ref.label} (${pack.activity_ref.kind})`,
                     frequency: 1,
                     initial_total: 1,
                     due_total: pack_price || 0,
@@ -243,7 +248,7 @@ function generateDataForPaymentSummaryTable({
                     unitPrice: pack_price || 0,
                     user: user,
                     studentId: user.id,
-                    packPriceId: pack.activity_ref_pricing.id,
+                    packPrice: pack.activity_ref_pricing,
                     packId: pack.id,
                 });
             }
@@ -1271,7 +1276,7 @@ class PaymentsManagement extends React.Component {
             adhesionPrices: this.props.adhesionPrices,
             adhesionEnabled: this.props.adhesionEnabled,
             adhesions: this.state.adhesions,
-            packs: this.props.packs,
+            packs: (this.props.packs || {})[this.state.season],
             user: this.props.user,
         });
 
