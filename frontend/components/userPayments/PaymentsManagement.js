@@ -1362,7 +1362,7 @@ class PaymentsManagement extends React.Component {
                     adhesionPrices: this.props.adhesionPrices,
                     adhesionEnabled: this.props.adhesionEnabled,
                     adhesions: previousSeasonState.adhesions,
-                    packs: this.props.packs,
+                    packs: (this.props.packs || {})[this.state.season],
                     user: this.props.user,
                 })
             );

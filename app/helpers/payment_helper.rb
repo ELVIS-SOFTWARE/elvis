@@ -64,6 +64,39 @@ module PaymentHelper
       end
     end
 
+    season_packs = []
+
+    Pack.where(season_id: season_id, user_id: students.map{|a| a.user_id }.uniq).each do |pack|
+      season_packs << pack.as_json(include: {
+        activity_ref: {},
+        activity_ref_pricing: {
+          include: {
+            pricing_category: {}
+          }
+        },
+        user: {}
+      })
+    end
+
+    if season_packs.any?
+      season_packs.each do |pack|
+        data.push({
+                    id: 0,
+                    activity: "Pack de #{pack["user"]["first_name"]} #{pack["user"]["last_name"]} pour #{pack["activity_ref"]["label"]} (#{pack["activity_ref"]["kind"]})",
+                    frequency: 1,
+                    initial_total: 1,
+                    due_total: pack["activity_ref_pricing"]["price"] || 0,
+                    coupon: 0,
+                    discountedTotal: pack["activity_ref_pricing"]["price"] || 0,
+                    unitPrice: pack["activity_ref_pricing"]["price"] || 0,
+                    user: pack["user"],
+                    studentId: pack["user"]["id"],
+                    packPrice: pack["activity_ref_pricing"],
+                    packId: pack["id"],
+                  })
+      end
+    end
+
     data
   end
 
