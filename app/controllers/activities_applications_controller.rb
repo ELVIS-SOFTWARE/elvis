@@ -1033,7 +1033,7 @@ class ActivitiesApplicationsController < ApplicationController
 
   def get_default_and_list_activity_application_statuses
     render json: {
-      default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status")),
+      default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::SUBMITTED_ID),
       list: ActivityApplicationStatus.all,
     }
   end
