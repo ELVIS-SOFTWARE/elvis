@@ -9,13 +9,13 @@ class ActivityRefKindController < ApplicationController
 
       format.json do
           render json: @activity_ref_kinds.as_json(
-              except: [:created_at, :updated_at, :deleted_at] )
+              except: [:created_at, :updated_at, :deleted_at])
       end
     end
   end
 
   def list
-    query = ActivityRefKind.all
+    query = ActivityRefKind.all.order(:name)
 
     respond_to do |format|
       format.json { render json: { status:query.as_json, pages:1, total:1} }
