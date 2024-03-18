@@ -64,7 +64,7 @@ class UsersController < ApplicationController
 
   def save_new_account
     user = User.find params[:id]
-    user.email = params[:user][:email]
+    user.email = params[:user][:email] if user.attached_to.nil? || user.attached_to.email != params[:user][:email]
     user.reset_password(params[:user][:password], params[:user][:password_confirmation])
     user.first_connection = false
 
@@ -79,6 +79,7 @@ class UsersController < ApplicationController
              .includes(
                :telephones,
                :addresses,
+               :attached_to,
                family_member_users: {
                  member: %i[addresses telephones]
                },
@@ -152,6 +153,8 @@ class UsersController < ApplicationController
           query = query.members.not_students
         when "teacher", "admin"
           query = query.where("is_#{filter[:value]} = true")
+        when "attached"
+          query = query.where.not(attached_to_id: nil)
         else
           # type code here
         end
@@ -280,6 +283,11 @@ class UsersController < ApplicationController
                                  methods: :family_links_with_user
                                })
     authorize! :read, @user
+
+    fml = @user.family_links(@season)
+
+    user_to_exclude_from_attached = fml.map(&:member_id) + fml.map(&:user_id)
+    @attached_account_to_show = @user.attached_accounts.where.not(id: user_to_exclude_from_attached)
 
     @adhesion = @user.get_last_adhesion
     @distance_to_end_date = nil
@@ -572,6 +580,8 @@ class UsersController < ApplicationController
     # Utilisation des erreurs via get = façon plus rapide de faire. => Mieux = appel de la creation via react & message dynamique
     @errors = nil if !@errors.is_a?(Array) || @errors.length.zero? || !@errors[0].is_a?(String)
 
+    @users_to_attach = User.where(attached_to_id: nil)
+
     authorize! :manage, User
     @activity_refs = ActivityRef.all
   end
@@ -579,8 +589,11 @@ class UsersController < ApplicationController
   def create
     user = User.new(user_params)
 
+    # ne pas mettre dans "user_params" pour n'authorizer que cette fois l'attribut.
+    user.attached_to_id = params[:user][:attached_to_id] if params[:user][:attached_to_id].present?
     user.last_name = user.last_name.strip
     user.first_name = user.first_name.strip
+    user.email = nil if user.attached? && user.attached_to.email == user.email
 
     if user.teacher? && params[:user][:activity_refs]
       user.activity_refs = ActivityRef.find(params[:user][:activity_refs])
@@ -723,6 +736,7 @@ class UsersController < ApplicationController
         # par sécurité on force la valeur à false si l'utilisateur actuel n'est pas un admin && qu'il modifie sa page
         up[:is_admin] = false if !@user.is_admin && !current_user.is_admin && current_user.id == @user.id
         up[:identification_number] = nil if "#{up[:identification_number]}".empty?
+        up[:email] = nil if @user.attached? && @user.attached_to.email == up[:email]
 
         @user.update!(up)
 
@@ -749,6 +763,7 @@ class UsersController < ApplicationController
     student.last_name = student.last_name.strip
     student.is_teacher = false
     student.is_admin = false
+    student.email = user_params[:email]
 
     begin
       student.save!
@@ -769,6 +784,7 @@ class UsersController < ApplicationController
       @season,
       send_confirmation: true
     )
+
     render status: :created, json: is_created
   end
 
@@ -1019,7 +1035,7 @@ class UsersController < ApplicationController
       methods: :family_links_with_user
     }
     render json: Users::SearchUser.new(params[:last_name], params[:first_name], nil, params[:season_id], nil, includes,
-                                       false).execute
+                                       false, params[:hideAttachedAccounts]).execute
   end
 
   def set_level
@@ -1458,6 +1474,9 @@ class UsersController < ApplicationController
       family_users << current_user
     end
 
+    family_users += user.attached_accounts
+    family_users += [user.attached_to] if user.attached_to&.id == @current_user.id || (user.attached_to && @current_user.is_admin)
+
     @pre_application = jsonize_pre_application.call(pre_application_id)
 
     @family_users = []
@@ -1587,6 +1606,70 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
 
     render json: { all_doc_consented: @user.consent_document_users }
+  end
+
+  def attach_users
+    user = User.find(params[:id])
+
+    render json: {message: "compte de rattachement introuvable"}, status: :not_found and return if user.nil?
+
+    ActiveRecord::Base.transaction do
+      (params[:users] || []).each do |u|
+        user_to_attach = User.find(u[:id])
+        next if user_to_attach.nil? || user_to_attach.attached? || user_to_attach.id == user.id
+
+        user_to_attach.attached_to = user
+        user_to_attach.email = u[:email]
+        user_to_attach.save!
+      end
+    end
+
+  rescue ActiveRecord::RecordInvalid => invalid
+    render json: {message: invalid.message}, status: :unprocessable_entity
+  end
+
+  def detach_user
+    user_to_detach = User.find(params[:id])
+
+    render json: {message: "user not found"}, status: :not_found and return if user_to_detach.nil?
+
+    old_main_user = user_to_detach.attached_to
+
+    user_to_detach.attached_to = nil
+    user_to_detach.email = params[:email]
+
+    if user_to_detach.save
+
+      DeviseMailer.confirmation_instructions(user_to_detach, user_to_detach.confirmation_token).deliver_later
+
+      if params[:from] == "family_link"
+        unless params[:addFamilyLink]
+          family_links = user_to_detach.family_links
+
+          links_to_deletes = family_links.select { |fl| fl.user_id == old_main_user.id || fl.member_id == old_main_user.id }
+
+          FamilyMemberUser.where(id: links_to_deletes.map(&:id)).delete_all
+        end
+      else
+        if params[:addFamilyLink]
+          is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
+            [ActiveSupport::HashWithIndifferentAccess.new(old_main_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
+            user_to_detach,
+            Season.current,
+            send_confirmation: true
+          )
+
+          unless is_created
+            render json: { message: "Le lien familial n'as pus être créer mais l'utilisateur à bien été détaché" }, status: :unprocessable_entity
+            return
+          end
+        end
+      end
+
+      render json: {message: "success"}, status: :ok
+    else
+      render json: {message: user_to_detach.errors.full_messages}, status: :unprocessable_entity
+    end
   end
 
   private

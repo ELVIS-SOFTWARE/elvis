@@ -42,10 +42,15 @@ class Ability
     # for all users :
     family_ids = user.family.uniq.pluck(:id)
     family_ids.append(user.id)
+
+    attached_account_ids = user.attached_accounts.pluck(:id)
+
     can :manage, User, id: user.id
     can :manage, User, id: family_ids
+    can :manage, User, id: attached_account_ids
     can :create, Payment, payable_id: user.id
     can :manage, ActivityApplication, user_id: family_ids
+    can :manage, ActivityApplication, user_id: attached_account_ids
     can :read, Planning, user: user
   end
 end

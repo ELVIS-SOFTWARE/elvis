@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_02_28_184350) do
+ActiveRecord::Schema.define(version: 2024_03_07_132834) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -1242,7 +1242,9 @@ ActiveRecord::Schema.define(version: 2024_02_28_184350) do
     t.bigint "organization_id"
     t.boolean "is_creator", default: false
     t.string "identification_number"
+    t.bigint "attached_to_id"
     t.index ["address_id"], name: "index_users_on_address_id"
+    t.index ["attached_to_id"], name: "index_users_on_attached_to_id"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
@@ -1304,4 +1306,5 @@ ActiveRecord::Schema.define(version: 2024_02_28_184350) do
   add_foreign_key "time_interval_preferences", "time_intervals"
   add_foreign_key "time_interval_preferences", "users"
   add_foreign_key "users", "organizations"
+  add_foreign_key "users", "users", column: "attached_to_id"
 end

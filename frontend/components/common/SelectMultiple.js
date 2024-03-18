@@ -103,7 +103,7 @@ export default class SelectMultiple extends React.Component
         return <div>
             <input type="hidden"
                    className="d-none none"
-                   value={this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : this.state.selectedFeatures[0].value}
+                   value={this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : (this.state.selectedFeatures[0] || {}).value}
                    name={this.props.name}
                    style={{display: "none"}} />
             <label>{this.props.title}</label>
