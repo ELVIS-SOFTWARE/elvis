@@ -52,6 +52,11 @@ require "csv"
 class User < ApplicationRecord
   update_index("users") { self } #  specifying index, type and back-reference for updating
 
+  before_validation -> { @ignore_attached_email = true }
+  before_save -> { @ignore_attached_email = true }
+  before_create -> { @ignore_attached_email = true }
+  before_update -> { @ignore_attached_email = true }
+
   before_save :strip_names
 
   def run_chewy_callbacks
@@ -84,7 +89,7 @@ class User < ApplicationRecord
   before_save :ensure_confirmation_token
   before_save :flip_flags
   before_save :ensure_attached_account_has_no_password
-  before_validation :email_is_null_if_attached
+  before_validation :clear_dupl_email_if_attached
 
   scope :teachers, -> { where(is_teacher: true) }
   scope :admins, -> { where(is_admin: true) }
@@ -677,8 +682,6 @@ class User < ApplicationRecord
     adhesions.uniq
   end
 
-  NOT_USE_EMAIL_ATTACHED_TO = %w[save validate create update].freeze
-
   def email_required?
     attached_to.nil? # required only if not attached to another user
   end
@@ -695,9 +698,17 @@ class User < ApplicationRecord
     tmp = super
 
     # ignore attached user email in case of save, validate, create or update to avoid duplicate email in database
-    return tmp if caller.any? { |c| NOT_USE_EMAIL_ATTACHED_TO.any? { |m| c.include?(m) } }
+    return tmp if @ignore_attached_email
 
     "#{tmp}".blank? ? attached_to&.email : tmp
+  end
+
+  def email=(value)
+    if attached? && value == attached_to.email
+      super(nil)
+    else
+      super(value)
+    end
   end
 
   def phone_number
@@ -956,7 +967,7 @@ class User < ApplicationRecord
     end
   end
 
-  def email_is_null_if_attached
+  def clear_dupl_email_if_attached
     self.email = nil if attached_to.present? && attached_to.email == email
   end
 

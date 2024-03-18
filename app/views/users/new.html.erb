@@ -34,8 +34,12 @@
       </div>
 
       <div class="form-group">
-        <div><%= f.label :compte_rattaché_à %></div>
-        <%= f.collection_select :attached_to_id, @users_to_attach, :id, :full_name, { include_blank: true }, { class: "form-control" } %>
+        <%= react_component("common/SelectMultiple", {
+          isMulti: false,
+          title: "Compte rattaché à",
+          name: "user[attached_to_id]",
+          all_features: @users_to_attach.map { |user| ["#{user.full_name} (#{user.adherent_number})", user.id] }
+        }) %>
       </div>
 
       <div class="form-group">

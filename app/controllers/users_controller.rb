@@ -27,7 +27,7 @@ class UsersController < ApplicationController
 
   def update_email
     user = current_user
-    user.email = params[:user][:email] if user.attached_to.nil? || user.attached_to.email != params[:user][:email]
+    user.email = params[:user][:email]
     return unless user.save
 
     token = user.set_reset_password_token
@@ -286,8 +286,8 @@ class UsersController < ApplicationController
 
     fml = @user.family_links(@season)
 
-    @user_to_exclude_from_attached = fml.map(&:member_id) + fml.map(&:user_id)
-    @attached_account_to_show = @user.attached_accounts.where.not(id: @user_to_exclude_from_attached)
+    user_to_exclude_from_attached = fml.map(&:member_id) + fml.map(&:user_id)
+    @attached_account_to_show = @user.attached_accounts.where.not(id: user_to_exclude_from_attached)
 
     @adhesion = @user.get_last_adhesion
     @distance_to_end_date = nil
@@ -763,7 +763,7 @@ class UsersController < ApplicationController
     student.last_name = student.last_name.strip
     student.is_teacher = false
     student.is_admin = false
-    student.email = nil if student.attached? && student.attached_to.email == student.email
+    student.email = user_params[:email]
 
     begin
       student.save!
@@ -1609,47 +1609,52 @@ class UsersController < ApplicationController
   end
 
   def attach_users
-    @user = User.find(params[:id])
+    user = User.find(params[:id])
 
-    render json: {message: "compte de rattachement not found"}, status: :not_found and return if @user.nil?
+    render json: {message: "compte de rattachement introuvable"}, status: :not_found and return if user.nil?
 
-    (params[:users] || []).each do |u|
-      user = User.find(u[:id])
-      next if user.nil? || user.attached? || user.id == @user.id
+    ActiveRecord::Base.transaction do
+      (params[:users] || []).each do |u|
+        user_to_attach = User.find(u[:id])
+        next if user_to_attach.nil? || user_to_attach.attached? || user_to_attach.id == user.id
 
-      user.attached_to = @user
-      user.email = u[:email]
-      user.save
+        user_to_attach.attached_to = user
+        user_to_attach.email = u[:email]
+        user_to_attach.save!
+      end
     end
+
+  rescue ActiveRecord::RecordInvalid => invalid
+    render json: {message: invalid.message}, status: :unprocessable_entity
   end
 
-  def detach
-    @user_to_detach = User.find(params[:id])
+  def detach_user
+    user_to_detach = User.find(params[:id])
 
-    render json: {message: "user not found"}, status: :not_found and return if @user_to_detach.nil?
+    render json: {message: "user not found"}, status: :not_found and return if user_to_detach.nil?
 
-    @old_parent_user = @user_to_detach.attached_to
+    old_main_user = user_to_detach.attached_to
 
-    @user_to_detach.attached_to = nil
-    @user_to_detach.email = params[:email]
+    user_to_detach.attached_to = nil
+    user_to_detach.email = params[:email]
 
-    if @user_to_detach.save
+    if user_to_detach.save
 
-      DeviseMailer.confirmation_instructions(@user_to_detach, @user_to_detach.confirmation_token).deliver_later
+      DeviseMailer.confirmation_instructions(user_to_detach, user_to_detach.confirmation_token).deliver_later
 
       if params[:from] == "family_link"
         unless params[:addFamilyLink]
-          family_links = @user_to_detach.family_links
+          family_links = user_to_detach.family_links
 
-          links_to_deletes = family_links.select { |fl| fl.user_id == @old_parent_user.id || fl.member_id == @old_parent_user.id }
+          links_to_deletes = family_links.select { |fl| fl.user_id == old_main_user.id || fl.member_id == old_main_user.id }
 
           FamilyMemberUser.where(id: links_to_deletes.map(&:id)).delete_all
         end
       else
         if params[:addFamilyLink]
           is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
-            [ActiveSupport::HashWithIndifferentAccess.new(@old_parent_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
-            @user_to_detach,
+            [ActiveSupport::HashWithIndifferentAccess.new(old_main_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
+            user_to_detach,
             Season.current,
             send_confirmation: true
           )
@@ -1663,7 +1668,7 @@ class UsersController < ApplicationController
 
       render json: {message: "success"}, status: :ok
     else
-      render json: {message: @user_to_detach.errors.full_messages}, status: :unprocessable_entity
+      render json: {message: user_to_detach.errors.full_messages}, status: :unprocessable_entity
     end
   end
 

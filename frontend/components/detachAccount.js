@@ -78,13 +78,13 @@ export default function detachAccount({user, user_id, from})
         >
             <h4>Voulez-vous détacher l'utilisateur {user.first_name} {user.last_name} ?</h4>
             <p>
-                Ce dernier deviendras indépendant, c'est à dire qu'il pourras se connecter et géré son compte.
-                Il vous est cependant toujours possible de géré son compte si vous créez un lient familial avec lui.
+                Ce dernier deviendra indépendant, c'est à dire qu'il pourra se connecter et gérer son compte.
+                Il vous est cependant toujours possible de gérer son compte si vous créez un lien familial avec lui.
             </p>
 
             <p>
-                Pour détacher un compte, vous devez lui ajouter une adresse email (si il n'en a pas déjà une). C'est à cet adresse que le lien lui permettant de se connecter sera envoyé. <br/>
-                P.S: ce nouvel email ne doit pas être déjà utilisé par un autre utilisateur.
+                Pour détacher un compte, vous devez lui ajouter une adresse email (si il n'en a pas déjà une). C'est à cette adresse que sera envoyé le lien lui permettant de se connecter.
+                NB : ce nouvel email ne doit pas être déjà affecté à un autre utilisateur.
             </p>
 
             <Form
@@ -135,7 +135,7 @@ const familyLinkCheckbox = ({ onClick, from }) => {
     let labelMessage = "Ajouter un lien familial";
 
     if (from === "family_link")
-        labelMessage = "Conservé le lien familial";
+        labelMessage = "Conserver le lien familial";
 
     return <div className="col-sm">
         <input id="addFamilyLink" type="checkbox" onChange={e => onClick(e.target.checked)} />

@@ -225,8 +225,6 @@ class ContactForm extends React.PureComponent {
                     {({ handleSubmit, form }) => {
                         this.mutators = form.mutators
 
-                        console.log("form.getState().values", form.getState().values)
-
                         return <form onSubmit={handleSubmit} className="user-form">
                             <FormSpy
                                 subscription={{ values: true }}
