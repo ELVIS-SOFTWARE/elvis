@@ -20,7 +20,9 @@ export default function upcomingActivityInstancesList(props) {
             .useLoading()
             .success(res =>
             {
-                setActivities(sortActivitiesByMonth(minimalDisplay ? res.slice(0, 4) : res));
+                let futureActivity = res.filter(activity => moment(activity.time_interval.start).isAfter(moment(), 'minute'));
+                setActivities(sortActivitiesByMonth(minimalDisplay ? futureActivity.slice(0, 4) : res));
+
                 setLoading(false);
             })
             .error(res =>
@@ -32,30 +34,38 @@ export default function upcomingActivityInstancesList(props) {
 
     useEffect(() => {
         fetchData()
+
     }, [])
 
     /**
      * trier les activités par mois
      * @param data
      */
+
+    function sortActivitiesByDate(activities) {
+        return activities.sort((a, b) => moment(a.time_interval.start) - moment(b.time_interval.start));
+    }
+
     function sortActivitiesByMonth(data) {
         const currentDate = moment();
         let sortedActivities = {};
 
         data.forEach(activity => {
-            const activityStartDate = moment(activity.time_interval.start);
+            const startMoment = moment(activity.time_interval.start);
+            const currentMonth = startMoment.format('MMMM');
 
-            // Vérifiez si l'activité est à venir ou du jour même
-            if (activityStartDate.isSameOrAfter(currentDate, 'day')) {
-                const month = activityStartDate.format('MMMM');
-                if (sortedActivities[month] === undefined) {
-                    sortedActivities[month] = [];
+            if (startMoment.isSameOrAfter(moment(), 'month')) {
+                if (sortedActivities[currentMonth] === undefined) {
+                    sortedActivities[currentMonth] = [];
                 }
-                sortedActivities[month].push(activity);
+                sortedActivities[currentMonth].push(activity);
             }
         });
 
-        // Retirer les doublons par date
+        Object.keys(sortedActivities).forEach(month => {
+            sortedActivities[month] = sortActivitiesByDate(sortedActivities[month]);
+        });
+
         Object.keys(sortedActivities).forEach(month => {
             sortedActivities[month] = sortedActivities[month].filter((thing, index, self) =>
                     index === self.findIndex((t) => (
@@ -91,11 +101,11 @@ export default function upcomingActivityInstancesList(props) {
                             {minimalDisplay ? "" : <h2 className="animated fadeInRight">{month}</h2>}
                             {activities[month].map((item, itemIndex) => (
 
-                                    <UpcomingActivityInstancesCards
-                                        key={itemIndex}
-                                        activity={item}
-                                        minimalDisplay={minimalDisplay}
-                                    />
+                                <UpcomingActivityInstancesCards
+                                    key={itemIndex}
+                                    activity={item}
+                                    minimalDisplay={minimalDisplay}
+                                />
 
                             ))}
                         </div>
