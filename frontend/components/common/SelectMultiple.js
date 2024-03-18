@@ -128,13 +128,14 @@ export default class SelectMultiple extends React.Component
                 type="hidden"
                 render={Input}
                 input={{
-                    value: this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : this.state.selectedFeatures[0].value,
+                    value: this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : (this.state.selectedFeatures[0] || {}).value,
                     className: "d-none none",
                     style: {display: "none"},
                     name: this.props.name,
                     type: "hidden",
                 }}
             />
+
             <label>{this.props.title}</label>
 
             <CreatableSelect

@@ -30,7 +30,16 @@
 
       <div class="form-group">
         <div><%= f.label :email %><span class="text-danger">*</span></div>
-        <%= f.email_field :email, autofocus: true, required: true, autocomplete: "email", class: "form-control" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+      </div>
+
+      <div class="form-group">
+        <%= react_component("common/SelectMultiple", {
+          isMulti: false,
+          title: "Compte rattaché à",
+          name: "user[attached_to_id]",
+          all_features: @users_to_attach.map { |user| ["#{user.full_name} (#{user.adherent_number})", user.id] }
+        }) %>
       </div>
 
       <div class="form-group">

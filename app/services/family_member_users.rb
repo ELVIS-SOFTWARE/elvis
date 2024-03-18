@@ -36,13 +36,20 @@ module FamilyMemberUsers
     family&.each do |member|
       fmu = if member[:id]
              User.find(member[:id])
-           else
-             User.new
+            else
+              # on ne change pas le lien d'attachement ici...
+             User.new(
+               attached_to_id: member[:attach_to_user] ? user.id : nil,
+             )
            end
 
       #is_created ||= member[:id].nil?
 
-      fmu.email = member[:email]
+      fmu.email = if fmu.attached? && fmu.email == user.email
+                    nil
+                  else
+                    member[:email]
+                  end
       fmu.first_name = member[:first_name]
       fmu.last_name = member[:last_name]
       fmu.birthday = member[:birthday]

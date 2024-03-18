@@ -52,6 +52,11 @@ require "csv"
 class User < ApplicationRecord
   update_index("users") { self } #  specifying index, type and back-reference for updating
 
+  before_validation -> { @ignore_attached_email = true }
+  before_save -> { @ignore_attached_email = true }
+  before_create -> { @ignore_attached_email = true }
+  before_update -> { @ignore_attached_email = true }
+
   before_save :strip_names
 
   def run_chewy_callbacks
@@ -83,6 +88,8 @@ class User < ApplicationRecord
   before_save :ensure_authentication_token
   before_save :ensure_confirmation_token
   before_save :flip_flags
+  before_save :ensure_attached_account_has_no_password
+  before_validation :clear_dupl_email_if_attached
 
   scope :teachers, -> { where(is_teacher: true) }
   scope :admins, -> { where(is_admin: true) }
@@ -103,6 +110,7 @@ class User < ApplicationRecord
   has_many :teachers_activity_refs, dependent: :restrict_with_exception
   has_many :activity_refs, through: :teachers_activity_refs
 
+  belongs_to :attached_to, class_name: "User", optional: true
   has_one :planning, dependent: :destroy
   has_one :planning_csv, -> { select(:id, :user_id) }, class_name: "Planning", dependent: :destroy, required: false
 
@@ -204,9 +212,16 @@ class User < ApplicationRecord
     matched_user = User.where(
       birthday: birthday
     ).ci_find(:first_name, first_name).ci_find(:last_name, last_name).first
+
     if matched_user && (matched_user.id != id)
       errors.add(:base,
                  "un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance.")
+    end
+
+    # pour le moment, seulement pour les new records => compatibilité avec instances existantes
+    # todo: remove new_record? condition
+    if attached_to.nil? && new_record? && (User.where(email: email).any?)
+      errors.add(:base, "un compte existe déjà avec cet email.")
     end
   end
 
@@ -225,7 +240,8 @@ class User < ApplicationRecord
   end
 
   def self.find_first_by_auth_conditions(warden_conditions)
-    conditions = warden_conditions.dup
+    conditions = warden_conditions.dup.permit(:attached_to_id, :login, :birthday, :first_name, :last_name)
+
     if login = conditions.delete(:login)
       where(conditions).where(["lower(email) = :value OR adherent_number::varchar(255) = :value",
                                { value: login.downcase }]).first
@@ -288,6 +304,7 @@ class User < ApplicationRecord
     payment_schedules.find_by(season_id: Season.current.id)
   end
 
+  # @return [Array<FamilyMemberUser>]
   def family_links(season = Season.current_apps_season)
     return [] if season.nil?
 
@@ -680,6 +697,35 @@ class User < ApplicationRecord
     adhesions.uniq
   end
 
+  def email_required?
+    attached_to.nil? # required only if not attached to another user
+  end
+
+  def attached?
+    attached_to.present?
+  end
+
+  def attached_accounts
+    User.where(attached_to: self)
+  end
+
+  def email
+    tmp = super
+
+    # ignore attached user email in case of save, validate, create or update to avoid duplicate email in database
+    return tmp if @ignore_attached_email
+
+    "#{tmp}".blank? ? attached_to&.email : tmp
+  end
+
+  def email=(value)
+    if attached? && value == attached_to.email
+      super(nil)
+    else
+      super(value)
+    end
+  end
+
   def phone_number
     tel = telephones.first&.number&.strip
 
@@ -791,6 +837,8 @@ class User < ApplicationRecord
   # override devise::model::recoverable
   # -----------------------------------
   def self.send_reset_password_instructions(attributes = {})
+    attributes[:attached_to_id] = nil # add condition to not match attached account
+
     recoverable = find_for_authentication(attributes) || initialize_with_errors(attributes)
     recoverable.send_reset_password_instructions if recoverable.persisted?
     recoverable
@@ -926,10 +974,22 @@ class User < ApplicationRecord
 
   private
 
+  def ensure_attached_account_has_no_password
+    if attached_to.present?
+      self.encrypted_password = ""
+      self.password = nil
+      self.password_confirmation = nil
+    end
+  end
+
+  def clear_dupl_email_if_attached
+    self.email = nil if attached_to.present? && attached_to.email == email
+  end
+
   def strip_names
     last_name.strip!
     first_name.strip!
-    email.strip!
+    email&.strip!
   end
 
   def create_planning

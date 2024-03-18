@@ -151,7 +151,7 @@ class ContactInfos extends React.PureComponent {
                         type="email"
                         render={Input}
                         validate={!ignoreValidate && required}
-                        required={!ignoreValidate}
+                        required={!currentUser.is_attached && !ignoreValidate}
                     />
                 </div>
 

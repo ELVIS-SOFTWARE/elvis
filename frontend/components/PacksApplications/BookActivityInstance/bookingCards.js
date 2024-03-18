@@ -25,7 +25,7 @@ export default function bookingCards(props) {
     }
 
 
-    function handleClick(activity) {
+    function handleClick() {
         setIsClicked(!isClicked)
         if (activity.student_attendances.length >= activity_ref.occupation_limit) {
             return;

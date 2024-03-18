@@ -1,6 +1,6 @@
 module Users
   class SearchUser
-    def initialize(last_name, first_name, birthday, season_id, adherent_number, includes, exact_search = true)
+    def initialize(last_name, first_name, birthday, season_id, adherent_number, includes, exact_search = true, hide_attached_accounts = false)
       @last_name = last_name.strip.capitalize
       @first_name = first_name.strip.capitalize
       @birthday = birthday
@@ -8,6 +8,7 @@ module Users
       @season = season_id.nil? ? nil : Season.find(season_id)
       @includes = includes
       @exact_search = exact_search
+      @hide_attached_accounts = hide_attached_accounts
     end
 
     def execute
@@ -21,6 +22,7 @@ module Users
 
       users = users.where(birthday: @birthday) unless @birthday.nil?
       users = users.where(adherent_number: @adherent_number) unless @adherent_number.nil?
+      users = users.where(attached_to_id: nil) if @hide_attached_accounts
 
 
       users.map do |u|

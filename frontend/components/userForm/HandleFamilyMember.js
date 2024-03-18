@@ -23,10 +23,13 @@ class HandleFamilyMember extends React.Component {
         let url = "/users/"+this.props.user.id+"/update_family"
         let user = this.props.user;
         let {familyMember} = this.props
+
         user.family = [{
             ...values,
             initial_is_inverse: familyMember && familyMember.is_inverse,
+            attach_to_user: values.is_attached
         }];
+
         api.put(url,{
             user: user,
             has_mdp : true,
@@ -117,12 +120,13 @@ class HandleFamilyMember extends React.Component {
             toggle_edit_buton,
             toggle_delete_button,
         } = this.props
-        const formattedInitialValues = familyMember ? {...familyMember}
+        const formattedInitialValues = familyMember ? {...familyMember, is_attached: !!familyMember.attached_to_id}
             : {
                 addresses: user.addresses,
                 telephones: user.telephones,
                 email: user.email,
                 is_inverse: true,
+                is_attached: !!user.attached_to_id
             }
         
         let user_fname, user_lname, member_fname, member_lname;
