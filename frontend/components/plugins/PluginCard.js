@@ -50,7 +50,7 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                     >
                         {plugin.display_name}
                     </p>
-                    <img src={plugin.logo} className="m-0 pr-0"></img>
+                    <img src={plugin.logo} className="m-0 pr-0" style={{width: "60px"}}></img>
                 </div>
                 <div
                     className="card-text pt-3 w-100 mb-3"
@@ -89,11 +89,11 @@ export default function PluginCard({plugin, setting_path, handleToggleActivation
                 </div>
 
                 <div className="card-text d-flex justify-content-between align-items-center w-100">
-                    <div>PAYANT</div>
+                        {plugin.price ? (<div>PAYANT</div>) : (<div>GRATUIT</div>)}
                     <div className="d-flex align-items-center">
                         {pluginActivated && initialyActivated ? (
                             <a
-                                href={setting_path}
+                                href={`/settings/${plugin.name}`}
                                 className="btn btn-sm mr-2"
                                 style={{
                                     color: "#006fb0",
