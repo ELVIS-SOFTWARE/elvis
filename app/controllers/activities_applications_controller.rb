@@ -575,17 +575,7 @@ class ActivitiesApplicationsController < ApplicationController
         @user.save!
 
         # il faut que le user soit sauvegardé pour pouvoir lui associer des membres de la famille
-        @user.family_links_with_user(season).each do |fmu|
-
-          fmu[:is_paying_for] = payers&.include?(fmu[:id]) || false
-
-          FamilyMemberUsers.addFamilyMemberWithConfirmation(
-            [ActiveSupport::HashWithIndifferentAccess.new(fmu)],
-            @user,
-            season,
-            send_confirmation: false
-          )
-        end
+        @user.update_is_paying_of_family_links(payers, season, false)
 
         if params[:application][:infos][:payer_payment_terms].present?
           existing_payment_terms = @user.payer_payment_terms.where(season_id: season.id)

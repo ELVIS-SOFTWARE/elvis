@@ -34,55 +34,14 @@ class PaymentsController < ApplicationController
 
     @user = user
 
-    desired_activities = {}
-    activities = []
+    @desired_activities = {}
+    @activities = []
 
-    payers_by_season = Season.all.reduce([]) do |arr, s|
-      users = (user.whole_family(s.id) << user).uniq
+    payers_by_season = get_payers_by_seasons_and_fill_desired_and_activities(user)
 
-      desired_activities[s.id] = users.first&.get_desired_activities_for_family(s)
+    @activities.uniq!
 
-      users.each { |p| activities += p.get_list_of_activities(s) }
-
-      tmp_fm = user.family_member_users
-                           .for_season(s)
-                           .compact
-
-      # verify if exist a due_payment for the user
-      why_payers_added = {}
-      tmp_payers = tmp_fm
-                     .filter { |fm| fm.is_paying_for || fm.member.payment_schedules.find_by(season_id: s.id)&.due_payments&.any? }
-                     .map do |fm|
-                          # add an atribute to get the payer adding decision (added because is_paying or added because of a payment schedule)
-                          why_payers_added[fm.member_id] = fm.is_paying_for
-
-                          fm.member
-                     end
-                     .compact
-
-      tmp_payers << user if user.is_paying || user.payment_schedules.find_by(season_id: s.id)&.due_payments&.any?
-
-      tmp_payers.uniq!(&:id)
-
-      arr << {
-        season_id: s.id,
-        payers: tmp_payers,
-        why_payers_added: why_payers_added
-      }
-
-      # si l'utilisateur paie pour au moins une autre personne, on l'ajoute aux payeurs
-      if user.id == @user.id && !arr.last[:payers].any? { |u| u.id == user.id } && (@user.is_paying || user.any_users_self_is_paying_for?(s))
-        arr.last[:payers] << user
-      end
-
-      arr.last[:payers].uniq!
-
-      arr
-    end
-
-    activities.uniq!
-
-    @desired_activities = desired_activities.transform_values do |des|
+    @desired_activities = @desired_activities.transform_values do |des|
       des.as_json({
                     include: {
                       pricing_category: {},
@@ -153,7 +112,7 @@ class PaymentsController < ApplicationController
       updated_season_payer_info
     end
 
-    @activities = activities
+    @activities = @activities
     @options = user.get_list_of_options.as_json({
                                                   include: {
                                                     activity: {
@@ -279,7 +238,7 @@ class PaymentsController < ApplicationController
 
     @packs = {}
 
-    Pack.where(user_id: activities.map(&:user).map(&:id).uniq).each do |pack|
+    Pack.where(user_id: @activities.map(&:user).map(&:id).uniq).each do |pack|
       @packs[pack.season_id] = [] if @packs[pack.season_id].nil?
 
       @packs[pack.season_id] << pack.as_json(include: {
@@ -1017,6 +976,54 @@ class PaymentsController < ApplicationController
   end
 
   private
+
+  # get all payers of family by seasons and add old payers who have due_payments
+  # @param [User] user
+  # @return [Array<Hash>]
+  def get_payers_by_seasons_and_fill_desired_and_activities(user)
+    return Season.all.reduce([]) do |arr, s|
+      users = (user.whole_family(s.id) << user).uniq
+
+      @desired_activities[s.id] = users.first&.get_desired_activities_for_family(s)
+
+      users.each { |p| @activities += p.get_list_of_activities(s) }
+
+      tmp_fm = user.family_member_users
+                   .for_season(s)
+                   .compact
+
+      # verify if exist a due_payment for the user
+      why_payers_added = {}
+      tmp_payers = tmp_fm
+                     .filter { |fm| fm.is_paying_for || fm.member.payment_schedules.find_by(season_id: s.id)&.due_payments&.any? }
+                     .map do |fm|
+        # add an atribute to get the payer adding decision (added because is_paying or added because of a payment schedule)
+        why_payers_added[fm.member_id] = fm.is_paying_for
+
+        fm.member
+      end
+                     .compact
+
+      tmp_payers << user if user.is_paying || user.payment_schedules.find_by(season_id: s.id)&.due_payments&.any?
+
+      tmp_payers.uniq!(&:id)
+
+      arr << {
+        season_id: s.id,
+        payers: tmp_payers,
+        why_payers_added: why_payers_added
+      }
+
+      # si l'utilisateur paie pour au moins une autre personne, on l'ajoute aux payeurs
+      if user.id == @user.id && !arr.last[:payers].any? { |u| u.id == user.id } && (@user.is_paying || user.any_users_self_is_paying_for?(s))
+        arr.last[:payers] << user
+      end
+
+      arr.last[:payers].uniq!
+
+      arr
+    end
+  end
 
   def payment_params
     params.require(:payment).permit(

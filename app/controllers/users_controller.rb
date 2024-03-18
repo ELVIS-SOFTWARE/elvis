@@ -731,18 +731,7 @@ class UsersController < ApplicationController
 
         @user.update!(up)
 
-        # use season.current because it's same as edit page
-        @user.family_links_with_user(Season.current).each do |fmu|
-
-          fmu[:is_paying_for] = payers&.include?(fmu[:id]) || false
-
-          FamilyMemberUsers.addFamilyMemberWithConfirmation(
-            [ActiveSupport::HashWithIndifferentAccess.new(fmu)],
-            @user,
-            Season.current,
-            send_confirmation: false
-          )
-        end
+        @user.update_is_paying_of_family_links(payers, Season.current, false)
 
         params.dig(:user, :consent_docs)&.each do |doc|
           next if doc.nil? || (doc.class == Array && doc.length < 2)

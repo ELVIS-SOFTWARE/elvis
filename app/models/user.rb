@@ -467,6 +467,21 @@ class User < ApplicationRecord
     activities.flatten.uniq
   end
 
+  def update_is_paying_of_family_links(payer_ids, season = Season.current_apps_season, send_confirmation_mail = false)
+    # use season.current because it's same as edit page
+    family_links_with_user(season).each do |fmu|
+
+      fmu[:is_paying_for] = payer_ids&.include?(fmu[:id]) || false
+
+      FamilyMemberUsers.addFamilyMemberWithConfirmation(
+        [ActiveSupport::HashWithIndifferentAccess.new(fmu)],
+        self,
+        season,
+        send_confirmation: send_confirmation_mail
+      )
+    end
+  end
+
   def get_options
     activity_applications
       .map(&:desired_activities)
