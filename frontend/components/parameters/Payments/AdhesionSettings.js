@@ -92,11 +92,10 @@ export default function AdhesionSettings()
     function deleteStatus(adh)
     {
         swal({
-            title: `Êtes-vous sûr de vouloir supprimer le prix d\\'adhésion ${adh.label} ?`,
-            text: "Vous ne pourrez pas revenir en arrière !",
+            title: `Souhaitez-vous supprimer le prix d'adhésion "${adh.label}" ?`,
             type: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Oui, supprimer !',
+            confirmButtonText: 'Supprimer',
             cancelButtonText: 'Annuler'
         }).then((result) =>
         {
@@ -112,8 +111,8 @@ export default function AdhesionSettings()
                         console.error(data.errors);
 
                         swal({
-                            title: 'Erreur',
-                            text: 'Une erreur est survenue. Contactez un administrateur',
+                            title: 'Suppression impossible',
+                            text: `le prix d'adhésion "${adh.label}" ne peux être supprimé car déjà utilisé dans un réglement.`,
                             type: 'error'
                         });
                     })

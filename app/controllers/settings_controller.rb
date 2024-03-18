@@ -63,7 +63,7 @@ class SettingsController < ApplicationController
 
   def plugin
     @current_user = current_user
-    @plugin = Plugin.find(params[:id])
+    @plugin = Plugin.find_by(name: params[:name])
 
     unless @plugin&.configurable?
       render status: 404

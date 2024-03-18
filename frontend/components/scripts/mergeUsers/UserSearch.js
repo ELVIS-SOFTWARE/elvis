@@ -65,6 +65,7 @@ class UserSearch extends React.PureComponent {
                             first_name: this.state.first_name,
                             last_name: this.state.last_name,
                             season_id: this.props.season.id,
+                            hideAttachedAccounts: this.props.hideAttachedAccounts
                         }
                     );
 

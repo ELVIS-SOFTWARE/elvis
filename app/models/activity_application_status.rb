@@ -19,6 +19,7 @@ class ActivityApplicationStatus < ApplicationRecord
     # /!\ conserver ces identifiants                      /!\
     #########################################################
     TREATMENT_PENDING_ID = 1
+    SUBMITTED_ID = 2
     ACTIVITY_PENDING_ID = 7
     ACTIVITY_ATTRIBUTED_ID = 5
     STOPPED_ID = 9
@@ -29,9 +30,10 @@ class ActivityApplicationStatus < ApplicationRecord
     ASSESSMENT_PENDING_ID = 10
     ACTIVITY_PROPOSED_ID = 19
 
-    BUILTIN_IDS = [TREATMENT_PENDING_ID, ACTIVITY_PENDING_ID, ACTIVITY_ATTRIBUTED_ID, STOPPED_ID, CANCELED_ID, TREATMENT_IMPOSSIBLE_ID, PROPOSAL_REFUSED_ID, PROPOSAL_ACCEPTED_ID, ASSESSMENT_PENDING_ID, ACTIVITY_PROPOSED_ID].freeze
+    BUILTIN_IDS = [TREATMENT_PENDING_ID, ACTIVITY_PENDING_ID, ACTIVITY_ATTRIBUTED_ID, STOPPED_ID, CANCELED_ID, TREATMENT_IMPOSSIBLE_ID, PROPOSAL_REFUSED_ID, PROPOSAL_ACCEPTED_ID, ASSESSMENT_PENDING_ID, ACTIVITY_PROPOSED_ID, SUBMITTED_ID].freeze
 
     TREATMENT_PENDING = find_or_create_by!(id: TREATMENT_PENDING_ID, label: 'En attente de traitement', is_stopping: false, is_active: true)
+    SUBMITTED = find_or_create_by!(id: SUBMITTED_ID, label: 'Soumis', is_stopping: false, is_active: true)
     ACTIVITY_PENDING = find_or_create_by!(id: ACTIVITY_PENDING_ID, label: 'Cours en attente', is_stopping: false, is_active: true)
     ACTIVITY_ATTRIBUTED = find_or_create_by!(id: ACTIVITY_ATTRIBUTED_ID, label: 'Cours attribué', is_stopping: false, is_active: true)
     STOPPED = find_or_create_by!(id: STOPPED_ID, label: 'Arrêtée', is_stopping: true, is_active: true)
@@ -42,7 +44,7 @@ class ActivityApplicationStatus < ApplicationRecord
     ASSESSMENT_PENDING = find_or_create_by!(id: ASSESSMENT_PENDING_ID, label: 'Attente résultat évaluation', is_stopping: false, is_active: true)
     ACTIVITY_PROPOSED = find_or_create_by!(id: ACTIVITY_PROPOSED_ID, label: 'Cours proposé', is_stopping: false, is_active: true)
 
-    BUILTINS = [TREATMENT_PENDING, ACTIVITY_PENDING, ACTIVITY_ATTRIBUTED, STOPPED, CANCELED, TREATMENT_IMPOSSIBLE, PROPOSAL_REFUSED, PROPOSAL_ACCEPTED, ASSESSMENT_PENDING, ACTIVITY_PROPOSED].freeze
+    BUILTINS = [TREATMENT_PENDING, ACTIVITY_PENDING, ACTIVITY_ATTRIBUTED, STOPPED, CANCELED, TREATMENT_IMPOSSIBLE, PROPOSAL_REFUSED, PROPOSAL_ACCEPTED, ASSESSMENT_PENDING, ACTIVITY_PROPOSED, SUBMITTED].freeze
 
     # réinitialise la séquence de l'ID pour permettre de créer des prochains objets en base
     reset_pk_sequence

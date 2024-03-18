@@ -59,12 +59,20 @@ function renderActivityAction(actionLabel) {
                     <span className="label label-default">Cours actuel</span>
                 </React.Fragment>
             );
+        case "Soumis": // "Submitted"
+            return (
+                <React.Fragment>
+                    <i className="fas mt-4 fa-hourglass fa-sm bg-warning img-circle"
+                       style={{ padding: "1px 6px 1px 6px" }} />
+                    <span className="label label-warning mt-1">Soumis</span>
+                </React.Fragment>
+            );
         default:
             return (
                 <React.Fragment>
                     <i className="fas mt-4 fa-hourglass fa-sm bg-warning img-circle"
                        style={{ padding: "1px 6px 1px 6px" }} />
-                    <span className="label label-warning">En attente de traitement</span>
+                    <span className="label label-warning mt-1">En attente de traitement</span>
                 </React.Fragment>
             );
     }

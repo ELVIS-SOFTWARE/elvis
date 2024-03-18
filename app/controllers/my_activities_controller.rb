@@ -60,6 +60,7 @@ class MyActivitiesController < ApplicationController
         next if instance.nil?
         availabilities.push(instance) if DateTime.now < instance.time_interval.start
 
+
         # on vérifie si l'activité a été réservée par l'utilisateur
         instance.student_attendances.each do |attendance|
           if attendance.user_id == params[:user_id].to_i
@@ -91,8 +92,10 @@ class MyActivitiesController < ApplicationController
                                                    include: {
                                                      teacher: {},
                                                      room: {},
-                                                     time_interval: {}
-                                                   }
+                                                     time_interval: {},
+                                                     student_attendances: {},
+                                                   },
+
                                                  }),
           my_activities: my_activities.as_json({
                                                  include: {
@@ -101,10 +104,11 @@ class MyActivitiesController < ApplicationController
                                                    time_interval: {}
                                                  }
                                                }),
-          activity_ref: activity_ref.as_json({ only: [:id, :label, :kind] }),
+          activity_ref: activity_ref.as_json({ only: [:id, :label, :kind, :occupation_limit] }),
           activity_ref_pricing: activity_ref_pricing.as_json,
           pack: pack.as_json,
           hours_before_cancelling: Parameter.get_value("planning.hours_before_cancelling_activity") || 0,
+
         }
       }
     end

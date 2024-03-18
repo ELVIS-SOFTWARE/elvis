@@ -39,6 +39,9 @@ class UpdateTemplateOnUserPack < ActiveRecord::Migration[6.1]
                                             }
     )
 
-    notification_template.save!
+    template = notification_template.as_json
+    template.delete("id")
+
+    NotificationTemplate.upsert(template, unique_by: :path)
   end
 end

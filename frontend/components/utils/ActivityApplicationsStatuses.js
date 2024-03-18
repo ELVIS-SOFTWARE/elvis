@@ -1,4 +1,5 @@
 export const TREATMENT_PENDING_ID = 1;
+export const SUBMITTED_ID = 2;
 export const ACTIVITY_ATTRIBUTED_ID = 5;
 export const ACTIVITY_PENDING_ID = 7;
 export const STOPPED_ID = 9;

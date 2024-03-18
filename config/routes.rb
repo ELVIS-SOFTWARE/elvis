@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   get "/plugins", to: "plugins#index"
   post "/plugins", to: "plugins#changed"
 
-  match 'settings/plugin/:id', :controller => 'settings', :action => 'plugin', :via => [:get, :post], :as => 'plugin_settings'
+  match 'settings/:name', :controller => 'settings', :action => 'plugin', :via => [:get, :post], :as => 'plugin_settings'
 
   # ===================
   # FIN PLUGINS
@@ -98,6 +98,8 @@ Rails.application.routes.draw do
   # mount Sidekiq::Web => "/sidekiq"
 
   resources :activities_applications, path: "inscriptions"
+  get "/get_default_and_list_activity_application_statuses", to: "activities_applications#get_default_and_list_activity_application_statuses"
+  post "/set_default_activity_application_status", to: "activities_applications#set_default_activity_application_status"
 
   # ==================
   # COUPONS
@@ -201,6 +203,8 @@ Rails.application.routes.draw do
   get "/users/:id/presence_sheet/:date", to: "users#presence_sheet", as: "presence_sheet"
   get "/users/:id/applications", to: "users#applications"
   get "/users/payments", to: "user_payments#show_for_current", as: :user_payments_for_current
+  put "/users/:id/attach", to: "users#attach_users"
+  delete "/users/:id/detach", to: "users#detach_user"
   resources :users
   put "/users/:id/update_family", to: "users#update_family"
 

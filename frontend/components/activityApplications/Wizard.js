@@ -391,6 +391,7 @@ class Wizard extends React.Component {
                 let htmltext = '';
                 let confirmtext = 'Redirection';
 
+
                 if (data.activity_application !== null) {
                     htmltext += '<p>'
                         + '<b>' + 'Votre demande d\'inscription a bien été prise en compte' + '</b>' + '<br/>'
@@ -420,7 +421,7 @@ class Wizard extends React.Component {
                         let get_params = '';
                         let redirect_url = `/new_application/${this.state.user.id}${get_params}`;
 
-                        if (data.pack_created && data.activity_application !== null) {
+                        if (data.pack_created) {
                             redirect_url = `/my_activities/${this.state.user.id}`;
                         }
 

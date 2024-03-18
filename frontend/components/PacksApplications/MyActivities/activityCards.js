@@ -37,12 +37,7 @@ export default function activityCards(props) {
     }
 
     return (
-        <div
-            className="col-md-4 mt-lg-3 px-lg-4 p-0  activity-card"
-            // onMouseEnter={() => setIsHovered(true)}
-            // onMouseLeave={() => setIsHovered(false)}
-        >
-            <div className="card" style={{ height: '100%' }}>
+            <div className="card activity-card my-3 mx-3">
                 <div className="card-img-wrapper">
                     <img
                         className="card-img-packs img-fluid"
@@ -89,6 +84,5 @@ export default function activityCards(props) {
                     {/*)}*/}
                 </div>
             </div>
-        </div>
     );
 }

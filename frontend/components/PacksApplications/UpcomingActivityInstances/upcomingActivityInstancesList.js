@@ -21,7 +21,8 @@ export default function upcomingActivityInstancesList(props) {
             .success(res =>
             {
                 let futureActivity = res.filter(activity => moment(activity.time_interval.start).isAfter(moment(), 'minute'));
-                setActivities(sortActivitiesByMonth(minimalDisplay ? futureActivity.slice(0, 3) : res));
+                setActivities(sortActivitiesByMonth(minimalDisplay ? futureActivity.slice(0, 4) : res));
+
                 setLoading(false);
             })
             .error(res =>
@@ -46,6 +47,7 @@ export default function upcomingActivityInstancesList(props) {
     }
 
     function sortActivitiesByMonth(data) {
+        const currentDate = moment();
         let sortedActivities = {};
 
         data.forEach(activity => {
@@ -69,7 +71,7 @@ export default function upcomingActivityInstancesList(props) {
                     index === self.findIndex((t) => (
                         t.time_interval.start === thing.time_interval.start
                     ))
-            )
+            );
         });
 
         return sortedActivities;

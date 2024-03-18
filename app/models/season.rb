@@ -71,6 +71,9 @@ class Season < ApplicationRecord
 
   def self.is_pre_application_period
     season = current_apps_season || current
+
+    return false if season.nil?
+
     the_time = DateTime.now
 
     the_time < season.closing_date_for_applications &&
@@ -80,6 +83,10 @@ class Season < ApplicationRecord
 
   def self.registration_opened
     season = current_apps_season || current
+
+    # si on n'a pas de saison en cours, on considère que les inscriptions sont ouvertes (bdd vide)
+    return true if season.nil?
+
     the_time = DateTime.now
 
     the_time >= season.opening_date_for_new_applications &&
