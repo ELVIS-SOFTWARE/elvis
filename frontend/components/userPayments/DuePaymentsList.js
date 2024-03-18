@@ -66,7 +66,7 @@ class DuePaymentsList extends React.Component {
         const newDuePayment = { ...this.state.newDuePayment };
         newDuePayment.isAdhesionDue = !newDuePayment.isAdhesionDue;
 
-        newDuePayment.amount = _.round(this.props.adhesionEnabled ? this.props.itemsForPayment.filter(item => item.id == 0).reduce((acc, i) => acc + i.discountedTotal, 0) : 0, 2);
+        newDuePayment.amount = _.round(this.props.adhesionEnabled ? this.props.itemsForPayment.filter(item => item.adhesionPriceId).reduce((acc, i) => acc + i.discountedTotal, 0) : 0, 2);
         this.setState({
             newDuePayment,
         });
@@ -224,11 +224,11 @@ class DuePaymentsList extends React.Component {
                 : 0;
 
         let results = [];
-        let adhesionPrice = this.props.adhesionEnabled ? this.props.itemsForPayment.filter(item => item.id == 0).reduce((acc, i) => acc + i.discountedTotal, 0) : 0;
+        let adhesionPrice = this.props.adhesionEnabled ? this.props.itemsForPayment.filter(item => item.adhesionPriceId).reduce((acc, i) => acc + i.discountedTotal, 0) : 0;
 
         adhesionPrice = _.round(adhesionPrice, 2);
 
-        if (adhesionNewDuePayment && dates.length) {
+        if (adhesionNewDuePayment && dates.length && adhesionPrice > 0) {
             const date = _.head(dates);
             results.push({
                 id: 0,
@@ -241,7 +241,7 @@ class DuePaymentsList extends React.Component {
         const totalLeft = this.props.itemsForPayment
             // On ne garde l'adhésion que dans le cas où
             // l'on veut créer une adh isolée
-            .filter(item => adhesionNewDuePayment && isolateAdhesion || item.id !== 0)
+            .filter(item => adhesionNewDuePayment && isolateAdhesion || item.adhesionPriceId == null)
             .reduce((acc, i) => acc + i.discountedTotal, 0) - _.reduce(specialDues, (acc, due) => acc + due.count * due.amount, 0);
 
         const duePayments = _.map(dates, (date, i) => {

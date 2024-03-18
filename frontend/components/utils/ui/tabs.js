@@ -7,6 +7,8 @@ import _ from "lodash";
  * @param {*} param0 tabs, an array containing four key-values: id, header, active (bool), mode ("buttons" / "classic") and body
  */
 export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, defaultActiveTab = 0 }) {
+    tabsProps = tabsProps.filter(t => t != undefined);
+
     const [active, setActive] = useState(defaultActiveTab);
 
     const propsActivated = tabsProps.findIndex(t => t.active);

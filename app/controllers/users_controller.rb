@@ -662,9 +662,10 @@ class UsersController < ApplicationController
                                  addresses: { only: %i[id street_address country department postcode city] },
                                  levels: { include: %i[evaluation_level_ref activity_ref] },
                                  consent_document_users: {}
-                               },
-                               methods: :family_links_with_user
+                               }
                              })
+
+    @userjson["family_links_with_user"] = user.family_links_with_user(Season.current).as_json
 
     @addresses = user.addresses
     @school_name = School.first&.name
@@ -738,7 +739,13 @@ class UsersController < ApplicationController
         up[:identification_number] = nil if "#{up[:identification_number]}".empty?
         up[:email] = nil if @user.attached? && @user.attached_to.email == up[:email]
 
+        payers = params.dig(:user, :payers)
+
+        up[:is_paying] = payers&.include?(@user.id) || false
+
         @user.update!(up)
+
+        @user.update_is_paying_of_family_links(payers, Season.current, false)
 
         params.dig(:user, :consent_docs)&.each do |doc|
           next if doc.nil? || (doc.class == Array && doc.length < 2)

@@ -138,7 +138,15 @@ class PaymentsSummary extends React.Component {
                 id: "tarif",
                 maxWidth: 100,
                 Cell: props => {
-                    // Si la ligne n'a pas d'id, c'est que c'est une adhésion
+                    // Si il y as un packId
+                    if (props.original.packId)
+                    {
+                        // 15/03/24 on ne permet pas la modification du pack (pour l'instant)
+                        return <p>{_.get(props, ["original", "packPrice", "pricing_category", "name"]) || "Inconnue"}</p>;
+                    }
+
+
+                    // Sinon, si la ligne n'a pas d'id, c'est que c'est une adhésion
                     if (props.original.id === 0) {
                         if (this.props.isStudentView) {
                             return <p>{(this.props.adhesionPrices.find(a => props.original.adhesionPriceId) || {}).label}</p>;
@@ -281,8 +289,8 @@ class PaymentsSummary extends React.Component {
                             coupons={this.state.coupons}
                             onChange={value =>
                                 this.props.handleChangePercentOffChoice(
-                                    props.original.id ? props.original.id : props.original.adhesionId,
-                                    props.original.id ? "DesiredActivity" : "Adhesion",
+                                    props.original.adhesionId || props.original.packId || props.original.id,
+                                    props.original.adhesionId ? "Adhesion" : props.original.packId ? "Pack" : "Activity",
                                     value
                                 )
                             }

@@ -206,11 +206,9 @@ class UserForm extends React.PureComponent {
 
         // Check payer
         if (
-            !values.is_paying &&
-            (isEmpty(values.family) ||
-                !values.family.find(member => isRadioTrue(member.is_paying_for)))
+            (values.payers || []).length === 0
         ) {
-            this.errors.is_paying = "err_must_have_payer";
+            this.errors.payers = "err_must_have_payer";
         }
 
         // check if rules of procedures checkbox is checked

@@ -226,24 +226,30 @@ function generateDataForPaymentSummaryTable({
         }
     }
 
-    if (packs.length > 0) {
+    if ((packs || []).length > 0)
+    {
         const userPacks = packs.filter(p => p.user_id === user.id)
-        if (userPacks.length > 0) {
-            for (const pack of userPacks) {
+
+        if (userPacks.length > 0)
+        {
+            for (const pack of userPacks)
+            {
                 const pack_price = pack.activity_ref_pricing.price;
-                const coupon = 0;
+                const coupon = _.get(pack, "discount.coupon", 0);
+                const percentOff = _.get(pack, "discount.coupon.percent_off", 0);
+
                 data.push({
                     id: 0,
-                    activity: `Pack de ${user.first_name} ${user.last_name}`,
+                    activity: `Pack de ${user.first_name} ${user.last_name} pour ${pack.activity_ref.label} (${pack.activity_ref.kind})`,
                     frequency: 1,
                     initial_total: 1,
                     due_total: pack_price || 0,
                     coupon: coupon,
-                    discountedTotal: pack_price || 0,
+                    discountedTotal: getDiscountedAmount(pack_price || 0, percentOff),
                     unitPrice: pack_price || 0,
                     user: user,
                     studentId: user.id,
-                    packPriceId: pack.activity_ref_pricing.id,
+                    packPrice: pack.activity_ref_pricing,
                     packId: pack.id,
                 });
             }
@@ -1271,7 +1277,7 @@ class PaymentsManagement extends React.Component {
             adhesionPrices: this.props.adhesionPrices,
             adhesionEnabled: this.props.adhesionEnabled,
             adhesions: this.state.adhesions,
-            packs: this.props.packs,
+            packs: (this.props.packs || {})[this.state.season],
             user: this.props.user,
         });
 
@@ -1357,7 +1363,7 @@ class PaymentsManagement extends React.Component {
                     adhesionPrices: this.props.adhesionPrices,
                     adhesionEnabled: this.props.adhesionEnabled,
                     adhesions: previousSeasonState.adhesions,
-                    packs: this.props.packs,
+                    packs: (this.props.packs || {})[this.state.season],
                     user: this.props.user,
                 })
             );
@@ -1702,6 +1708,13 @@ class PaymentsManagement extends React.Component {
                                                 >
                                                     {`${payer.first_name} ${payer.last_name} (${payer.class_name})`}
                                                 </a>
+
+                                                {payer["payer_paying_for_current_season?"] ? "" : <span
+                                                    className="badge badge-danger m-l-sm"
+                                                    data-tippy-content="Cet utilisateur n'est plus payeur pour cette saison, mais apparaît parce que des échéances existent pour lui."
+                                                    >
+                                                        N'est plus payeur
+                                                </span>}
                                             </h3>
                                             {this.state.payers.length > 1 &&
                                                 <button
