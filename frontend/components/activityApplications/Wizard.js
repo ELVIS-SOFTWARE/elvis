@@ -523,7 +523,7 @@ class Wizard extends React.Component {
         }
 
         this.setState({
-            skipActivityChoice: (this.state.selectedActivities.length === 1 && Object.keys(this.props.packs).length === 0 )|| this.state.isApplicationChange
+            skipActivityChoice: (this.state.selectedActivities.length === 1 && Object.keys(this.props.packs || {}).length === 0 )|| this.state.isApplicationChange
         })
     }
 
