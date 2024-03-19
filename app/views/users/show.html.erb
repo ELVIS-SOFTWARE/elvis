@@ -248,7 +248,7 @@
         <% end %>
       <% end %>
 
-      <% if current_user.is_admin || @current_user.is_paying_for?(@user) %>
+      <% if !@user.attached? && (current_user.is_admin || @current_user.is_paying_for?(@user)) %>
         <div class="ibox-content">
           <% if @user.has_no_password? %>
             <%= react_component("userForm/BtnResendEmail", {
