@@ -363,7 +363,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     redirect_to "/401" and return unless can? :create, ActivityApplication.new(user_id: pre_selected_user.id)
 
-    @user = pre_selected_user.as_json(include: { planning: { include: [:time_intervals] }, consent_document_users: {} })
+    @user = pre_selected_user.as_json(include: { planning: { include: [:time_intervals] }, consent_document_users: {} }, methods: :family_links_with_user)
     @current_user = current_user
 
     display_activity_refs = []
