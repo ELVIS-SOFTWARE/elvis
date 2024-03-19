@@ -78,7 +78,7 @@
                     </div>
                     <%# if @current_user.is_admin or @current_user.is_teacher or (@user.id == @current_user.id) or (m.id == @current_user.id) %>
                     <% if @current_user.is_admin or (@user.id == @current_user.id) or (m.id == @current_user.id) %>
-                        <% if @current_user.is_admin #or @user.attached_accounts.where(id: m.id).any? %>
+                        <% if @current_user.is_admin && m.attached_to.id == @user.id #or @user.attached_accounts.where(id: m.id).any? %>
                         <div class="col-sm-2 lienFamilial border-right py-1" style="flex:1">
                           <h4> Rattachement </h4>
                           <%= react_component("detachAccount", {from: "family_link", user: m.as_json(methods: %i[family_links_with_user attached_to]) }) %>
