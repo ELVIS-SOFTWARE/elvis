@@ -13,6 +13,6 @@ class RenamePricingIdToPricingCategoryIdInPaymentScheduleOptions < ActiveRecord:
   def down
     remove_foreign_key :payment_schedule_options, column: :pricing_category_id
     rename_column :payment_schedule_options, :pricing_category_id, :pricing_id
-    add_foreign_key :payment_schedule_options, :pricings, column: :pricing_id if Object.const_defined?(:Pricing)
+    add_foreign_key :payment_schedule_options, :pricings, column: :pricing_id if foreign_key_exists?(:payment_schedule_options, :pricing_categories)
   end
 end
