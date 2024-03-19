@@ -602,7 +602,7 @@ class ActivitiesApplicationsController < ApplicationController
 
         set_status = Parameter.find_by(label: "activityApplication.default_status")
 
-        status = set_status ? set_status.value.to_i : ActivityApplicationStatus::SUBMITTED_ID
+        status = ActivityApplicationStatus.find(set_status ? set_status.value.to_i : ActivityApplicationStatus::SUBMITTED_ID)
 
         if params[:preApplicationActivityId].present? && params[:preApplicationActivityId] != "0" #  == "Change"
           pre_application_activity = PreApplicationActivity.find(params[:preApplicationActivityId])
@@ -757,7 +757,7 @@ class ActivitiesApplicationsController < ApplicationController
     rescue IntervalTakenError => e
       render status: 400, json: { errors: [e.message] }
     rescue StandardError => e
-      Rails.logger.error e.message
+      Rails.logger.error "#{e.message}\n#{e.backtrace&.join("\n")} "
 
       render status: 500, json: {
         errors: ["Une erreur est survenue lors de la création de votre demande d'inscription, veuillez-contactez l'administration."],
