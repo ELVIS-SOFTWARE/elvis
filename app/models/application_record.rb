@@ -108,6 +108,29 @@ class ApplicationRecord < ActiveRecord::Base
     end
   end
 
+
+  def self.use_cache_for_methods(*methods_to_cache)
+    methods_to_cache.flatten!
+
+    (methods_to_cache || []).each do |method_to_cache|
+      next unless self.method(method_to_cache)
+
+      m = self.method(method_to_cache).to_proc
+
+      define_singleton_method method_to_cache do |*args|
+        Rails.cache.fetch("#{self.name}:#{method_to_cache}", expires_in: 12.hours) do
+          m.call(*args)
+        end
+      end
+    end
+  end
+
+  def self.clear_method_cache(*methods)
+    methods.each do |method|
+      Rails.cache.delete("#{self.name}:#{method}")
+    end
+  end
+
   private
 
   # enregistre les changements avant la sauvegarde (update/create)

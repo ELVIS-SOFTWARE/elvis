@@ -44,19 +44,18 @@ class Season < ApplicationRecord
   validate :check_start_end
   validate :check_applications_dates
 
-  def self.display_class_name(singular = true)
-    singular ? "saison" : "saisons"
-  end
+  class << self
+    def display_class_name(singular = true)
+      singular ? "saison" : "saisons"
+    end
 
-  def self.class_name_gender
-    return :F
-  end
+    def class_name_gender
+      return :F
+    end
 
-  # renvoie la saison pour laquelle les inscriptions devraient être ouvertes
-  # @return [Season] la saison en cours ou bien la saison suivante
-  def self.current_apps_season
-    Rails.cache.fetch("current_apps_season", expires_in: 12.hours) do
-
+    # renvoie la saison pour laquelle les inscriptions devraient être ouvertes
+    # @return [Season] la saison en cours ou bien la saison suivante
+    def current_apps_season
       return nil unless Season.any?
 
       s = Season.current
@@ -67,35 +66,43 @@ class Season < ApplicationRecord
 
       s
     end
-  end
 
-  def self.is_pre_application_period
-    season = current_apps_season || current
+    def is_pre_application_period
+      season = current_apps_season || current
 
-    return false if season.nil?
+      return false if season.nil?
 
-    the_time = DateTime.now
+      the_time = DateTime.now
 
-    the_time < season.closing_date_for_applications &&
-      the_time >= season.opening_date_for_applications &&
-      the_time < season.opening_date_for_new_applications
-  end
+      the_time < season.closing_date_for_applications &&
+        the_time >= season.opening_date_for_applications &&
+        the_time < season.opening_date_for_new_applications
+    end
 
-  def self.registration_opened
-    season = current_apps_season || current
+    def registration_opened
+      season = current_apps_season || current
 
-    # si on n'a pas de saison en cours, on considère que les inscriptions sont ouvertes (bdd vide)
-    return true if season.nil?
+      # si on n'a pas de saison en cours, on considère que les inscriptions sont ouvertes (bdd vide)
+      return true if season.nil?
 
-    the_time = DateTime.now
+      the_time = DateTime.now
 
-    the_time >= season.opening_date_for_new_applications &&
-      the_time < season.closing_date_for_applications
-  end
+      the_time >= season.opening_date_for_new_applications &&
+        the_time < season.closing_date_for_applications
+    end
 
-  def self.all_seasons_cached
-    Rails.cache.fetch("seasons:all", expires_in: 5.minutes) do
+    def all_seasons_cached
       Season.all
+    end
+
+    def next
+      next_id = current.next_season_id
+
+      includes(:holidays).where(id: next_id).first
+    end
+
+    def current
+      includes(:holidays).where(is_current: true).first
     end
   end
 
@@ -117,18 +124,6 @@ class Season < ApplicationRecord
 
   def next
     neighbour_season("desc")
-  end
-
-  def self.next
-    next_id = current.next_season_id
-
-    includes(:holidays).where(id: next_id).first
-  end
-
-  def self.current
-    Rails.cache.fetch("current_season", expires_in: 12.hours) do
-      includes(:holidays).where(is_current: true).first
-    end
   end
 
   def is_next
@@ -225,4 +220,6 @@ class Season < ApplicationRecord
       return sorted_seasons[self_index - 1]
     end
   end
+
+  self.use_cache_for_methods %i[current current_apps_season all_seasons_cached]
 end
