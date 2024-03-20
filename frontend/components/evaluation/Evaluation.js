@@ -127,6 +127,7 @@ class Evaluation extends React.Component {
                     l.season_id == season.previous.id || (l.season_id == undefined)
                 )
                     && l.activity_ref && l.activity_ref.activity_ref_kind_id == activity.activity_ref.activity_ref_kind_id);
+
             return (
                 <CollapsePanel
                     key={u.id}
@@ -136,9 +137,9 @@ class Evaluation extends React.Component {
                     collapsed={currentStudent !== u.id}
                 >
                     <div className="p">
-                        <span className={`label label-${previousSeasonLevel ? "info" : "danger"}`}>
+                        <span className={`label label-${previousSeasonLevel && previousSeasonLevel.evaluation_level_ref ? "info" : "danger"}`}>
                             {
-                                (previousSeasonLevel ?
+                                (previousSeasonLevel && previousSeasonLevel.evaluation_level_ref ?
                                     `Niveau ${previousSeasonLevel.evaluation_level_ref.label} pour ${activity.activity_ref.activity_ref_kind.name} en ${season.previous.label}`
                                     :
                                     `Pas de niveau trouvé pour ${activity.activity_ref.activity_ref_kind.name} en ${season.previous.label}`).toUpperCase()
