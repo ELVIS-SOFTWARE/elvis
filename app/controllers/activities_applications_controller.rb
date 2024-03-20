@@ -481,6 +481,7 @@ class ActivitiesApplicationsController < ApplicationController
     show_payment_schedule_options = show_payment_schedule_options_param.parse
 
     @avail_payment_schedule_options = show_payment_schedule_options ? PaymentScheduleOptions.all.as_json : []
+    @avail_payment_methods = show_payment_schedule_options ? PaymentMethod.displayable.as_json(only: [:id, :label]) : []
     @payment_step_display_text = show_payment_schedule_options ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
     @adhesion_prices = Adhesion.all.as_json
   end
