@@ -603,7 +603,7 @@ class ActivitiesApplicationsController < ApplicationController
 
         set_status = Parameter.find_by(label: "activityApplication.default_status")
 
-        status = ActivityApplicationStatus.find(set_status ? set_status.value.to_i : ActivityApplicationStatus::SUBMITTED_ID)
+        status = ActivityApplicationStatus.find(set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::SUBMITTED_ID)
 
         if params[:preApplicationActivityId].present? && params[:preApplicationActivityId] != "0" #  == "Change"
           pre_application_activity = PreApplicationActivity.find(params[:preApplicationActivityId])
