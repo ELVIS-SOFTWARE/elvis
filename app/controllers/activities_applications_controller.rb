@@ -1045,7 +1045,7 @@ class ActivitiesApplicationsController < ApplicationController
       value_type: "integer"
     )
 
-    status.value = params[:status_id][:id]
+    status.value = params[:status_id]
     res = status.save
 
     respond_to do |format|

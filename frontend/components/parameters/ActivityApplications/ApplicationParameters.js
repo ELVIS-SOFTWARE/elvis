@@ -7,12 +7,12 @@ export default function ApplicationParameters() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [parameters, setParameters] = useState([]);
-    const [selectedParameter, setSelectedParameter] = useState(null);
+    const [selectedParameter, setSelectedParameter] = useState(0);
 
     useEffect(() => {
         api.set()
             .success((data) => {
-                setSelectedParameter(data.default);
+                setSelectedParameter((data.default || {}).id || 0);
                 setParameters(data.list);
                 setIsLoading(false);
             })
@@ -56,7 +56,7 @@ export default function ApplicationParameters() {
                 <div className="col-md-5">
                     <h3>Statut d'inscription par défaut</h3>
                     <div className="form-group mb-3">
-                        <select className="form-control" defaultValue={selectedParameter.id} onChange={handleParameterChange}>
+                        <select className="form-control" defaultValue={selectedParameter} onChange={handleParameterChange}>
                             {parameters.map(parameter => (
                                 <option key={parameter.id} value={parameter.id}>{parameter.label}</option>
                             ))}
