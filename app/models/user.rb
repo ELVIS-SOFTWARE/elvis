@@ -240,7 +240,11 @@ class User < ApplicationRecord
   end
 
   def self.find_first_by_auth_conditions(warden_conditions)
-    conditions = warden_conditions.dup.permit(:attached_to_id, :login, :birthday, :first_name, :last_name)
+    conditions = warden_conditions.dup
+
+    if conditions.is_a? ActionController::Parameters
+      conditions = conditions.permit(:attached_to_id, :login, :birthday, :first_name, :last_name)
+    end
 
     if login = conditions.delete(:login)
       where(conditions).where(["lower(email) = :value OR adherent_number::varchar(255) = :value",
