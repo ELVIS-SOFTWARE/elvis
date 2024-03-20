@@ -74,6 +74,9 @@ class ContactInfos extends React.PureComponent {
             });
         }
 
+        const select_payers_all_features = family_links_with_user.map(flwu => [`${flwu.first_name} ${flwu.last_name}`, flwu.id]);
+        const select_payers_selected_features = family_links_with_user.filter(flwu => flwu.is_paying_for).map(f => f.id);
+
         return (
             <div>
                 <FormSpy
@@ -94,14 +97,14 @@ class ContactInfos extends React.PureComponent {
 
                 {canAddContacts ? (
                     <div className="m-b-md">
-                        <SelectMultiple
+                        {values.id > 0 && <SelectMultiple
                             title="Payeurs"
                             name="payers"
                             isMulti
                             mutators={this.props.mutators}
-                            all_features={family_links_with_user.map(flwu => [`${flwu.first_name} ${flwu.last_name}`, flwu.id])}
-                            features={family_links_with_user.filter(flwu => flwu.is_paying_for).map(f => f.id)}
-                        />
+                            all_features={select_payers_all_features}
+                            features={select_payers_selected_features}
+                        />}
 
                         <FamilyMembers
                             firstName={values.first_name}
