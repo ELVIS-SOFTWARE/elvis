@@ -287,7 +287,14 @@ class UsersController < ApplicationController
     fml = @user.family_links(@season)
 
     user_to_exclude_from_attached = fml.map(&:member_id) + fml.map(&:user_id)
-    @attached_account_to_show = @user.attached_accounts.where.not(id: user_to_exclude_from_attached)
+    attached_account_to_show = @user.attached_accounts.where.not(id: user_to_exclude_from_attached)
+
+    @users_to_show_in_family_list = @user
+                                      .family(@season)
+                                      .uniq
+                                      .map { |u| {user: u, fml: u.family_link_with(@user, @season), attached_to: u.attached_to}}
+                                      .sort_by { |d| -2 * (d.dig(:fml)&.is_to_call || false).to_i - (d.dig(:fml)&.is_paying_for || false).to_i }
+    @users_to_show_in_family_list += attached_account_to_show.map { |u| {user: u, fml: nil, attached_to: u.attached_to} }
 
     @adhesion = @user.get_last_adhesion
     @distance_to_end_date = nil
