@@ -153,13 +153,13 @@ class UsersController < ApplicationController
           query = query.members.not_students
         when "teacher", "admin"
           query = query.where("is_#{filter[:value]} = true")
-        when "attached"
-          query = query.where.not(attached_to_id: nil)
         else
           # type code here
         end
       when "adherent_number"
         query = query.where("adherent_number = ?", filter[:value].to_i)
+      when "attached"
+        query = filter[:value] == "true" ? query.where(attached_to_id: nil) : query.where.not(attached_to_id: nil) unless "#{filter[:value]}".empty?
       else
         query = query.where("#{filter[:id]} ILIKE ?", "#{filter[:value]}%")
       end
