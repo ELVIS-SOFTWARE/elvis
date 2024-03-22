@@ -25,6 +25,7 @@ import { toRawPhoneNumber } from "../../tools/format";
 import Input from "../common/Input";
 import AlertCheckbox from "../common/AlertCheckbox";
 import ConsentDocItem from "./ConsentDocItem";
+import Payers from "./Payers";
 
 const YES_NO_FIELDS = ["checked_image_right", "checked_newsletter"];
 
@@ -320,6 +321,14 @@ class UserForm extends React.PureComponent {
                                             organizationOptions={this.props.organizationOptions}
                                             userId={this.props.initialValues.id}
                                         />
+                                        <hr />
+
+                                        <Payers
+                                            values={values}
+                                            mutators={form.mutators}
+                                            currentUser={{ ...initialValues }}
+                                        />
+
                                         <hr />
                                         <ContactInfos
                                             values={values}

@@ -52,31 +52,6 @@ class ContactInfos extends React.PureComponent {
 
         const { push, update } = this.props.mutators;
 
-        const family_links_with_user = [...(values.family_links_with_user || [])];
-
-        // Add the current user to the list of family members users to define is_paying column
-        family_links_with_user.push({
-            id: currentUser.id,
-            first_name: currentUser.first_name,
-            last_name: currentUser.last_name,
-            is_paying_for: currentUser.is_paying
-
-        });
-
-        if(values.payers && values.payers.length > 0)
-        {
-            values.payers.forEach(payer => {
-                const payerUser = family_links_with_user.find(flu => flu.id === payer);
-                if(payerUser)
-                {
-                    payerUser.is_paying_for = true;
-                }
-            });
-        }
-
-        const select_payers_all_features = family_links_with_user.map(flwu => [`${flwu.first_name} ${flwu.last_name}`, flwu.id]);
-        const select_payers_selected_features = family_links_with_user.filter(flwu => flwu.is_paying_for).map(f => f.id);
-
         return (
             <div>
                 <FormSpy
@@ -97,14 +72,6 @@ class ContactInfos extends React.PureComponent {
 
                 {canAddContacts ? (
                     <div className="m-b-md">
-                        {values.id > 0 && <SelectMultiple
-                            title="Payeurs"
-                            name="payers"
-                            isMulti
-                            mutators={this.props.mutators}
-                            all_features={select_payers_all_features}
-                            features={select_payers_selected_features}
-                        />}
 
                         <FamilyMembers
                             firstName={values.first_name}
