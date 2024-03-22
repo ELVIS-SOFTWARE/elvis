@@ -65,8 +65,8 @@ export default function CancelApplication({activityApplicationId}) {
                         Cela annulera votre demande d'inscription. Êtes-vous sûr ?
                     </h2>
 
-                    <div className="d-flex justify-content-end mt-5 btn-secondary mr-2">
-                        <button className="btn"
+                    <div className="d-flex justify-content-end mt-5 btn-secondary">
+                        <button className="btn mr-2"
                                 style={{
                                     borderRadius: "8px",
                                     fontWeight: "bold",
