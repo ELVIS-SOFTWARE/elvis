@@ -15,8 +15,8 @@ export default function upcomingActivityInstancesList(props) {
         minimalDisplay = true;
     }
 
-    const fetchData = async () => {
-        await api.set()
+    const fetchData = () => {
+        api.set()
             .useLoading()
             .success(res =>
             {
@@ -39,7 +39,7 @@ export default function upcomingActivityInstancesList(props) {
 
     /**
      * trier les activités par mois
-     * @param data
+     * @param activities
      */
 
     function sortActivitiesByDate(activities) {
