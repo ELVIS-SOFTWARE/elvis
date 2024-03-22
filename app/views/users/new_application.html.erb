@@ -9,6 +9,7 @@
   season: @season,
   current_user: current_user,
   hasFamily: (@user.family.length > 0 && can?(:read, @user)),
-  confirm_activity_text: @confirm_activity_text
+  confirm_activity_text: @confirm_activity_text,
+  default_activity_status_id: @default_activity_status_id,
 })
 %>

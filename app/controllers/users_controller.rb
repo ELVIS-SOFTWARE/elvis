@@ -1582,6 +1582,9 @@ class UsersController < ApplicationController
                                       .map { |paa| paa.activity_application_id }
                                       .compact
 
+    set_status = Parameter.find_by(label: "activityApplication.default_status")
+
+    @default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID
     @new_activities_applications = @user_activities_applications.reject { |activity| @pre_applications_renew_ids.include?(activity["id"]) }
     @previous_season = @season.previous
     @confirm_activity_text = Parameter.find_by(label: "confirm_activity_text")
