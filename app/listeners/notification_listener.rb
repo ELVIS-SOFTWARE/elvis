@@ -65,8 +65,10 @@ class NotificationListener < BaseListener
       activity = args[:activity]
       user = args[:user]
 
-      UserCancelledAttendanceMailer.cancelled_attendance(user, activity).deliver_later
-      AdminCancelledAttendanceMailer.cancelled_attendance(activity, user).deliver_later
+      if UserCancelledAttendanceMailer.cancelled_attendance(user, activity).deliver_later
+        AdminCancelledAttendanceMailer.cancelled_attendance(activity, user).deliver_later
+      end
+
 
       # event = EventRules.find_by_eventName("activity_cancelled")
       # if event.present?
