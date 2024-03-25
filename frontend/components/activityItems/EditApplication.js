@@ -27,7 +27,7 @@ export default function EditApplication(props) {
                     }}
                     onClick={() => handleCloseEditModal()}
             >
-                Commenter
+                Ajouter un commentaire
             </button>
 
             <Modal
