@@ -1,13 +1,24 @@
 # frozen_string_literal: true
-require_relative 'liquid_drops/activity_drop'
+# require_relative 'liquid_drops/activity_drop'
+require_relative 'liquid_drops/activity_instance_drop'
 
 class AdminCancelledAttendanceMailer < ApplicationMailer
   prepend_view_path NotificationTemplate.resolver
 
-  def cancelled_attendance(activity, student)
+  def cancelled_attendance(activity_instance, student)
     name = Parameter.get_value("app.name")
     @user = student
-    @activity = LiquidDrops::ActivityDrop.new(activity.as_json(include: {activity_ref: {}, teacher: {}, room: {}, time_interval: {}}))
+    @activity_instance = LiquidDrops::ActivityInstanceDrop.new(activity.as_json(include: {
+      activity: {
+        include: {
+          activity_ref: {},
+          teacher: {},
+          room: {},
+          time_interval: {}
+        }
+      },
+      time_interval: {}
+    }))
 
     User.where(is_admin: true).each do |admin|
       mail(to: admin.email, subject: "#{name} - Annulation de cours par un élève")

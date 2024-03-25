@@ -62,12 +62,12 @@ class NotificationListener < BaseListener
     end
 
     event_ids << EventHandler.notification.activity_cancelled.subscribe(true) do |sender:, args:|
-      activity = args[:activity]
+      activity_instance = args[:activity_instance]
       user = args[:user]
 
-      if UserCancelledAttendanceMailer.cancelled_attendance(user, activity).deliver_later
-        AdminCancelledAttendanceMailer.cancelled_attendance(activity, user).deliver_later
-      end
+     UserCancelledAttendanceMailer.cancelled_attendance(user, activity_instance).deliver_later
+      AdminCancelledAttendanceMailer.cancelled_attendance(activity_instance, user).deliver_later
+
 
 
       # event = EventRules.find_by_eventName("activity_cancelled")
