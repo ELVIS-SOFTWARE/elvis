@@ -1252,38 +1252,6 @@ class PaymentsManagement extends React.Component {
         });
     }
 
-    handleIssuedPaidInvoice(payerId) {
-        const payer_id = payerId;
-
-        api.set()
-            .success(res => {
-                const pdfUrl = res.url;
-                if (pdfUrl) {
-                    window.open(pdfUrl, "_blank");
-                }
-
-                swal({
-                    title: "La facture a été éditée avec succès !",
-                    type: "success",
-                });
-            })
-            .error((res) => {
-                swal({
-                    title: "Une erreur est survenue lors de l'édition de la facture.",
-                    type: "error",
-                    text: res.error
-                });
-                this.setState({isFetching: false});
-            })
-            .post(
-                `/api/student_payments/invoice/${payer_id}/issued_paid_invoice`,
-                {
-                    payer: payer_id,
-                }
-            );
-
-    }
-
     render() {
         const itemsForPayment = generateDataForPaymentSummaryTable({
             activities: this.state.activities,
@@ -1765,14 +1733,6 @@ class PaymentsManagement extends React.Component {
                                                         onClick={() => window.open(`/payment_schedule/${(this.state.schedules[payer.id] && this.state.schedules[payer.id].id)}.pdf`)}>
                                                         <i className="fas fa-print text-primary mr-1"/>
                                                         Imprimer l'échéancier
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-primary btn-xs"
-                                                        onClick={() => this.handleIssuedPaidInvoice(this.state.payments[payer.id])}>
-                                                        <i className="fas fa-receipt m-r-sm"/>
-                                                        Générer la facture acquittée
                                                     </button>
                                                 </div>
 
