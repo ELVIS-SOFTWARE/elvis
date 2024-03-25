@@ -38,7 +38,7 @@ class ActivityApplicationStatus < ApplicationRecord
     ACTIVITY_ATTRIBUTED = find_or_create_by!(id: ACTIVITY_ATTRIBUTED_ID, label: 'Cours attribué', is_stopping: false, is_active: true)
     STOPPED = find_or_create_by!(id: STOPPED_ID, label: 'Arrêtée', is_stopping: true, is_active: true)
     CANCELED = find_or_create_by!(id: CANCELED_ID, label: 'Annulée', is_stopping: false, is_active: true)
-    TREATMENT_IMPOSSIBLE = find_or_create_by!(id: TREATMENT_IMPOSSIBLE_ID, label: 'Demande non satisfaite', is_stopping: false, is_active: false)
+    TREATMENT_IMPOSSIBLE = find_or_create_by!(id: TREATMENT_IMPOSSIBLE_ID, label: 'Demande non satisfaite', is_stopping: false, is_active: true)
     PROPOSAL_REFUSED = find_or_create_by!(id: PROPOSAL_REFUSED_ID, label: 'Proposition refusée', is_stopping: false, is_active: true)
     PROPOSAL_ACCEPTED = find_or_create_by!(id: PROPOSAL_ACCEPTED_ID, label: 'Proposition acceptée', is_stopping: false, is_active: true)
     ASSESSMENT_PENDING = find_or_create_by!(id: ASSESSMENT_PENDING_ID, label: 'Attente résultat évaluation', is_stopping: false, is_active: true)
