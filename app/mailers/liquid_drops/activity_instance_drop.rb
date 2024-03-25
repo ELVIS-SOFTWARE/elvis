@@ -9,6 +9,7 @@ class ActivityInstanceDrop
     @activity_instance["id"]
   end
 
+  # time_interval data
   def start_date
     I18n.l(DateTime.parse(@activity_instance["time_interval"]["start"]), format: "%A %d %M")
   end
@@ -19,6 +20,19 @@ class ActivityInstanceDrop
 
   def end_time
     DateTime.parse(@activity_instance["time_interval"]["end"]).strftime("%H:%M")
+  end
+
+  #  activity data
+  def label
+    @activity_instance["activity"]["activity_ref"]["label"]
+  end
+
+  def teacher_last_name
+    @activity_instance["activity"]["teacher"]["last_name"]
+  end
+
+  def teacher_first_name
+    @activity_instance["activity"]["teacher"]["first_name"]
   end
 
 end
