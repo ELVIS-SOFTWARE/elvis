@@ -363,7 +363,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     redirect_to "/401" and return unless can? :create, ActivityApplication.new(user_id: pre_selected_user.id)
 
-    @user = pre_selected_user.as_json(include: { planning: { include: [:time_intervals] }, consent_document_users: {} })
+    @user = pre_selected_user.as_json(include: { planning: { include: [:time_intervals] }, consent_document_users: {} }, methods: :family_links_with_user)
     @current_user = current_user
 
     display_activity_refs = []
@@ -481,6 +481,7 @@ class ActivitiesApplicationsController < ApplicationController
     show_payment_schedule_options = show_payment_schedule_options_param.parse
 
     @avail_payment_schedule_options = show_payment_schedule_options ? PaymentScheduleOptions.all.as_json : []
+    @avail_payment_methods = show_payment_schedule_options ? PaymentMethod.displayable.as_json(only: [:id, :label]) : []
     @payment_step_display_text = show_payment_schedule_options ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
     @adhesion_prices = Adhesion.all.as_json
   end
@@ -602,7 +603,7 @@ class ActivitiesApplicationsController < ApplicationController
 
         set_status = Parameter.find_by(label: "activityApplication.default_status")
 
-        status = set_status ? set_status.value.to_i : ActivityApplicationStatus::SUBMITTED_ID
+        status = ActivityApplicationStatus.find(set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID)
 
         if params[:preApplicationActivityId].present? && params[:preApplicationActivityId] != "0" #  == "Change"
           pre_application_activity = PreApplicationActivity.find(params[:preApplicationActivityId])
@@ -757,7 +758,7 @@ class ActivitiesApplicationsController < ApplicationController
     rescue IntervalTakenError => e
       render status: 400, json: { errors: [e.message] }
     rescue StandardError => e
-      Rails.logger.error e.message
+      Rails.logger.error "#{e.message}\n#{e.backtrace&.join("\n")} "
 
       render status: 500, json: {
         errors: ["Une erreur est survenue lors de la création de votre demande d'inscription, veuillez-contactez l'administration."],
@@ -1033,7 +1034,7 @@ class ActivitiesApplicationsController < ApplicationController
 
   def get_default_and_list_activity_application_statuses
     render json: {
-      default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::SUBMITTED_ID),
+      default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID),
       list: ActivityApplicationStatus.all,
     }
   end
@@ -1044,7 +1045,7 @@ class ActivitiesApplicationsController < ApplicationController
       value_type: "integer"
     )
 
-    status.value = params[:status_id][:id]
+    status.value = params[:status_id]
     res = status.save
 
     respond_to do |format|

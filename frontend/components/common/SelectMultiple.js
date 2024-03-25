@@ -123,17 +123,12 @@ export default class SelectMultiple extends React.Component
     render()
     {
         return <div>
-            <Field
-                name={this.props.name}
+            <input
                 type="hidden"
-                render={Input}
-                input={{
-                    value: this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : (this.state.selectedFeatures[0] || {}).value,
-                    className: "d-none none",
-                    style: {display: "none"},
-                    name: this.props.name,
-                    type: "hidden",
-                }}
+                name={this.props.name}
+                value={this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : (this.state.selectedFeatures[0] || {}).value}
+                style={{display: "none"}}
+                className={"d-none none"}
             />
 
             <label>{this.props.title}</label>

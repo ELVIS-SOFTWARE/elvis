@@ -56,6 +56,8 @@ class MyActivitiesController < ApplicationController
     # Les disponibilités sont des activités qui ne sont pas réservées par l'utilisateur
     # Mes activités sont des activités réservées par l'utilisateur
     activities.each do |activity|
+      next if activity.season&.id != pack.season_id
+
       activity.activity_instances.each do |instance|
         next if instance.nil?
         availabilities.push(instance) if DateTime.now < instance.time_interval.start

@@ -26,7 +26,8 @@ export default function EditApplication(props) {
                         fontWeight: "bold"
                     }}
                     onClick={() => handleCloseEditModal()}
-            >Modifier
+            >
+                Ajouter un commentaire
             </button>
 
             <Modal
@@ -43,7 +44,7 @@ export default function EditApplication(props) {
             >
                 <div className="m-5">
                     <h2 className="modal-header mb-3" style={{color: "#00334A", textAlign: "left"}}>
-                        Modifier votre demande d'inscription
+                        ajouter un commentaire sur votre demande
                     </h2>
                     <div className="content" style={{height: "200px"}}>
                         <textarea id="editInput" name="editInput" style={{width: "100%", height: "100%"}} wrap="soft" onChange={(e) => setEditInput(e.target.value)}

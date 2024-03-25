@@ -177,6 +177,10 @@ class SeasonsController < ApplicationController
     end
 
     if result
+      # on invalide le cache de saisons (même si ce n'est pas la saison active)
+      Rails.cache.delete("current_season")
+      Rails.cache.delete("current_apps_season")
+
       redirect_to seasons_path
     else
       #redirect_to edit_season_path(season_params), alert: {title: "Impossible de sauvegarder la saison", errors: @season.errors.to_h}

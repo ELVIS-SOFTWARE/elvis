@@ -276,16 +276,6 @@ class UserList extends React.Component {
                                 Adhérent
                             </a>
                         );
-                    } else if (d.attached_to_id) {
-                        return (
-                            <a
-                                href={`/users/${d.id}`}
-                                className="badge"
-                                style={{ backgroundColor: "#009f9a", color: "white" }}
-                            >
-                                Utilisateur rattaché
-                            </a>
-                        );
                     } else {
                         return (
                             <a
@@ -311,9 +301,26 @@ class UserList extends React.Component {
                         <option value="user">Autres</option>
                         <option value="student">Élèves</option>
                         <option value="teacher">Professeurs</option>
-                        <option value="attached">Utilisateur rattachés</option>
                     </select>
                 ),
+            },
+            {
+                id: "attached",
+                Header: "Type de compte",
+                sortable: false,
+                filterable: true,
+                Filter: ({ filter, onChange }) => (
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        style={{ width: "100%" }}
+                        value={filter ? filter.value : "all"}
+                    >
+                        <option value="">Tous les comptes</option>
+                        <option value="true">Comptes principaux</option>
+                        <option value="false">Comptes rattachés</option>
+                    </select>
+                ),
+                accessor: d => d.attached_to_id ? "Rattaché" : "Principal"
             },
             {
                 id: "last_name",

@@ -153,13 +153,13 @@ class UsersController < ApplicationController
           query = query.members.not_students
         when "teacher", "admin"
           query = query.where("is_#{filter[:value]} = true")
-        when "attached"
-          query = query.where.not(attached_to_id: nil)
         else
           # type code here
         end
       when "adherent_number"
         query = query.where("adherent_number = ?", filter[:value].to_i)
+      when "attached"
+        query = filter[:value] == "true" ? query.where(attached_to_id: nil) : query.where.not(attached_to_id: nil) unless "#{filter[:value]}".empty?
       else
         query = query.where("#{filter[:id]} ILIKE ?", "#{filter[:value]}%")
       end
@@ -287,7 +287,14 @@ class UsersController < ApplicationController
     fml = @user.family_links(@season)
 
     user_to_exclude_from_attached = fml.map(&:member_id) + fml.map(&:user_id)
-    @attached_account_to_show = @user.attached_accounts.where.not(id: user_to_exclude_from_attached)
+    attached_account_to_show = @user.attached_accounts.where.not(id: user_to_exclude_from_attached)
+
+    @users_to_show_in_family_list = @user
+                                      .family(@season)
+                                      .uniq
+                                      .map { |u| {user: u, fml: u.family_link_with(@user, @season), attached_to: u.attached_to}}
+                                      .sort_by { |d| -2 * (d.dig(:fml)&.is_to_call || false).to_i - (d.dig(:fml)&.is_paying_for || false).to_i }
+    @users_to_show_in_family_list += attached_account_to_show.map { |u| {user: u, fml: nil, attached_to: u.attached_to} }
 
     @adhesion = @user.get_last_adhesion
     @distance_to_end_date = nil
@@ -1575,6 +1582,9 @@ class UsersController < ApplicationController
                                       .map { |paa| paa.activity_application_id }
                                       .compact
 
+    set_status = Parameter.find_by(label: "activityApplication.default_status")
+
+    @default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID
     @new_activities_applications = @user_activities_applications.reject { |activity| @pre_applications_renew_ids.include?(activity["id"]) }
     @previous_season = @season.previous
     @confirm_activity_text = Parameter.find_by(label: "confirm_activity_text")

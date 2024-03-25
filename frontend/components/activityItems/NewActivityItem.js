@@ -28,7 +28,6 @@ class NewActivityItem extends React.Component {
         }
         this.updateReasonRefused = this.updateReasonRefused.bind(this);
         this.handleProcessModifyApplication = this.handleProcessModifyApplication.bind(this);
-        this.handleProcessCancelApplication = this.handleProcessCancelApplication.bind(this);
     }
 
     openAssignationRefusedModal() {
@@ -138,22 +137,6 @@ class NewActivityItem extends React.Component {
             }, {});
     }
 
-    handleProcessCancelApplication() {
-        api.set()
-            .error(() => {
-                swal({
-                    title: "Erreur lors de l'annulation de l'inscription",
-                    type: "error",
-                });
-            })
-            .del(`/destroy/activity_application/${this.state.activityApplicationId}`, {})
-            .then(() => {
-                setTimeout(() => {
-                    window.location.reload();
-                }, 5000); // 5000 milliseconds = 5 seconds
-            });
-    }
-
     render() {
         const {
             data
@@ -165,7 +148,7 @@ class NewActivityItem extends React.Component {
         if (this.props.new_activity_application &&
             this.props.new_activity_application.activity_application_status &&
             _.includes(
-                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé", "Soumis"],
+                ["Cours attribué", "Cours en attente", "Proposition acceptée", "Proposition refusée", "Cours proposé", "En cours de traitement"],
                 this.props.new_activity_application.activity_application_status.label
             )
         ) {
@@ -179,8 +162,8 @@ class NewActivityItem extends React.Component {
             if (this.props.new_activity_application.activity_application_status.label === "Cours proposé")
                 actionLabel = "Cours proposé";
 
-            if (this.props.new_activity_application.activity_application_status.label === "Soumis")
-                actionLabel = "Soumis";
+            if (this.props.new_activity_application.activity_application_status.label === "En cours de traitement")
+                actionLabel = "En cours de traitement";
         } else {
             actionLabel = "En attente";
         }
@@ -242,10 +225,10 @@ class NewActivityItem extends React.Component {
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
 
-                                    {activity_application_status_id === ActivityApplicationStatus.SUBMITTED_ID && (
+                                    {activity_application_status_id === this.props.default_activity_status_id && (
                                         <Fragment>
                                             <CancelApplication
-                                                handleProcessCancelApplication={this.handleProcessCancelApplication}
+                                                activityApplicationId={this.state.activityApplicationId}
                                             />
 
                                             <EditApplication

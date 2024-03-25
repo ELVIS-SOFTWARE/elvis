@@ -2,12 +2,36 @@ import React from "react";
 import {useState} from "react";
 import swal from "sweetalert2";
 import Modal from "react-modal";
+import * as api from "../../tools/api";
 
-export default function CancelApplication(props) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+export default function CancelApplication({activityApplicationId}) {
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-    function handleModal() {
-        setIsModalOpen(!isModalOpen);
+    function handleModal(witchModal) {
+        if (witchModal === "success") {
+            setIsSuccessModalOpen(!isSuccessModalOpen);
+        } else if (witchModal === "confirm") {
+            setIsConfirmModalOpen(!isConfirmModalOpen);
+        }
+    }
+
+    function handleProcessCancelApplication() {
+        api.set()
+            .useLoading()
+            .success(() =>
+            {
+                handleModal("confirm");
+                handleModal("success");
+
+            })
+            .error(() => {
+                swal({
+                    title: "Erreur lors de l'annulation de l'inscription",
+                    type: "error",
+                }).then(() => handleModal("confirm"));
+            })
+            .del(`/destroy/activity_application/${activityApplicationId}`, {});
     }
 
     return (
@@ -19,22 +43,76 @@ export default function CancelApplication(props) {
                         fontWeight: "bold"
                     }}
                     onClick={() => {
-                        handleModal()
-                        props.handleProcessCancelApplication()
+                        handleModal("confirm");
                     }}>
                 Annuler
             </button>
 
             <Modal
-                isOpen={isModalOpen}
-                onRequestClose={() => handleModal()}
+                isOpen={isConfirmModalOpen}
+                onRequestClose={() => handleModal("confirm")}
                 className="modal-xl"
                 ariaHideApp={false}
-                contentLabel="Modifier votre inscription"
+                contentLabel="Confirmation de l'annulation de l'inscription"
                 style={{
                     content: {
                         width: "700px" // Agrandir la modal à 700px
                     }
+                }}
+            >
+                <div className="m-5">
+                    <h2 className="modal-header mb-3" style={{color: "#00334A", textAlign: "left"}}>
+                        Cela annulera votre demande d'inscription. Êtes-vous sûr ?
+                    </h2>
+
+                    <div className="d-flex justify-content-end mt-5 btn-secondary">
+                        <button className="btn mr-2"
+                                style={{
+                                    borderRadius: "8px",
+                                    fontWeight: "bold",
+                                }}
+
+                                onClick={() => {
+                                    handleModal("confirm");
+                                }}
+                        >
+                            Non
+                        </button>
+
+                        <button className="btn text-white"
+                                style={{
+                                    backgroundColor: "#00334A",
+                                    borderRadius: "8px",
+                                    fontWeight: "bold",
+                                }}
+
+                                onClick={() => {
+                                    handleProcessCancelApplication();
+                                }}
+                        >
+                            Oui
+                        </button>
+                    </div>
+                </div>
+
+
+            </Modal>
+
+
+            {/** Modal de success */}
+            <Modal
+                isOpen={isSuccessModalOpen}
+                onRequestClose={() => {
+                    handleModal("success");
+                    window.location.reload();
+                }}
+                className="modal-xl"
+                ariaHideApp={false}
+                contentLabel="Inscription annulée"
+                style={{
+                    content: {
+                        width: "700px", // Agrandir la modal à 700px
+                    },
                 }}
             >
                 <div className="m-5">
@@ -51,7 +129,7 @@ export default function CancelApplication(props) {
                                 }}
 
                                 onClick={() => {
-                                    handleModal()
+                                    handleModal("success")
                                     window.location.reload()
                                 }}
                         >

@@ -5,7 +5,7 @@
             flex-wrap: wrap;
         }
         .addNewFamily {
-            justify-content: start!important;
+            justify-content: end!important;
             padding: 0!important;
         }
         .addNewFamily div.col {
@@ -26,87 +26,110 @@
     <% if @user.family(@season).length > 0 %>
         <% family = @user.family_links_with_user(@season) %>
         <div class="contact-thumb-list">
-            <div class="d-flex contact align-items-center mb-2">
-                <h2 class="title-profile">Membres de la famille :</h2>
-                <div class="addNewFamily col-lg d-flex justify-content-end mt-2 pr-0">
-                    <% if @current_user.is_admin or @current_user.id == @user.id %>
-                        <%= react_component("userForm/HandleFamilyMember", {
-                              user: @user_json,
-                              current_user: current_user,
-                              familyMember: nil,
-                              season: @season,
-                              shouldCheckGdpr: !@user.is_admin,
-                              content_label: "Ajouter un contact",
-                              toggle_title: true,
-                              toggle_add_button: true,
-                            }) %>
-                    <% end %>
+            <div class="d-flex row contact align-items-center mb-2">
+              <div class="col-lg mb-3 row">
+                <div class="col-sm-12">
+                  <h2 class="title-profile mb-0">Foyer :</h2>
                 </div>
+                <div class="col-sm-12">
+                  <% if @current_user.id == @user.id %>
+                    <small>Personnes dont vous gérez les inscriptions</small>
+                  <% else %>
+                    <small>Personnes dont les inscriptions sont gérées par <%= @user.full_name %></small>
+                  <% end %>
+                </div>
+              </div>
+              <div class="addNewFamily col-sm d-flex justify-content-end mt-2 pr-0">
+                  <% if @current_user.is_admin or @current_user.id == @user.id %>
+                      <%= react_component("userForm/HandleFamilyMember", {
+                            user: @user_json,
+                            current_user: current_user,
+                            familyMember: nil,
+                            season: @season,
+                            shouldCheckGdpr: !@user.is_admin,
+                            content_label: "Ajouter un contact",
+                            toggle_title: true,
+                            toggle_add_button: true,
+                          }) %>
+                  <% end %>
+              </div>
             </div>
-            <% @user.family(@season).uniq.sort_by { |u| -2 * (u.family_link_with(@user, @season)&.is_to_call || false).to_i - (u.family_link_with(@user, @season)&.is_paying_for || false).to_i }.each do |m| %>
+            <% @users_to_show_in_family_list.each do |data| %>
                 <div class="contact-thumb">
                     <div class="col-sm-2 py-1" style="flex:1">
                         <div class="contact-info">
-                            <h3><%= m.first_name %> <b><%= m.last_name %></b></h3>
-                            <span class="relation"><%= "#{m.display_family_link(@user, @season)} #{@user.genitive_first_name}" %></span><br/>
-                            <% if @user.attached_accounts.where(id: m.id).any? %>
+                            <h3><%= data[:user].first_name %> <b><%= data[:user].last_name %></b></h3>
+                            <% if data[:fml].present? %>
+                              <span class="relation"><%= "#{data[:user].display_family_link(@user, @season)} #{@user.genitive_first_name}" %></span><br/>
+                            <% end %>
+                            <% if data[:attached_to]&.id == @user.id %>
                               <span class="relation">Utilisateur rattaché</span>
                             <% end %>
-                            <% m.telephones.each do |t| %>
+                            <% data[:user].telephones.each do |t| %>
                                 <p><%= t.label.nil? ? "" : t.label.capitalize %>: <%= t.number %></p>
                             <% end %>
                         </div>
                     </div>
                     <div class="member-status-icons" style="width: 100%">
-                        <% if m.is_to_call?(@user, @season) %>
+                        <% if data[:user].is_to_call?(@user, @season) %>
                             <span class="round-icon is-to-call">
                                 <i title="À contacter en premier" class="fas fa-phone"></i>
                             </span>
                         <% end %>
                         <div class="flex flex-end-justified" style="flex:1">
-                            <% if m.is_paying_for?(@user, @season) %>
+                            <% if data[:user].is_paying_for?(@user, @season) %>
                                 <span class="round-icon is-paying">
                                     <i title="Payeur" class="fas fa-euro-sign"></i>
                                 </span>
                             <% end %>
-                            <% if m.is_legal_referent?(@user, @season) %>
+                            <% if data[:user].is_legal_referent?(@user, @season) %>
                                 <span class="round-icon is-legal-referent">
                                     <i title="Représentant légal" class="fas fa-balance-scale"></i>
                                 </span>
                             <% end %>
                         </div>
                     </div>
-                    <%# if @current_user.is_admin or @current_user.is_teacher or (@user.id == @current_user.id) or (m.id == @current_user.id) %>
+
                     <% if @current_user.is_admin or (@user.id == @current_user.id) or (m.id == @current_user.id) %>
-                        <% if @current_user.is_admin #or @user.attached_accounts.where(id: m.id).any? %>
-                        <div class="col-sm-2 lienFamilial border-right py-1" style="flex:1">
-                          <h4> Rattachement </h4>
-                          <%= react_component("detachAccount", {from: "family_link", user: m.as_json(methods: %i[family_links_with_user attached_to]) }) %>
-                        </div>
+                        <% if @current_user.is_admin %>
+                          <div class="col-sm-2 lienFamilial border-right py-1" style="flex:1">
+                            <% if data[:attached_to].present? %>
+                              <h4> Rattachement </h4>
+                              <%= react_component("detachAccount", {from: "family_link", user: data[:user].as_json(methods: %i[family_links_with_user attached_to]) }) %>
+                            <% else %>
+                              <h4>Utilisateur autonome</h4>
+                            <% end %>
+                          </div>
                         <% end %>
+
                         <div class="col-sm-3 lienFamilial py-1" style="flex:1">
+                          <% if data[:fml].present? %>
                             <h4> Lien Familial </h4>
                                 <%= react_component("userForm/HandleFamilyMember", {
                                       user: @user_json,
                                       current_user: current_user,
-                                      familyMember: family.select { |fmu| fmu[:id] == m.id }.first,
+                                      familyMember: family.select { |fmu| fmu[:id] == data[:user].id }.first,
                                       season: @season,
                                       shouldCheckGdpr: !@user.is_admin,
                                       content_label: "Edition du lien familial",
                                       toggle_title: true,
                                       toggle_edit_buton: true,
                                       toggle_delete_button: true,
-                                    }) %>
+                                }) %>
+                          <% else %>
+                            <h4> Pas de lien familial </h4>
+                          <% end %>
                         </div>
+
                         <div class="col-sm-3 profil border-left py-1 <%= @season.closing_date_for_applications >= DateTime.now ? "border-right" : "" %>" style="flex:1"->
                             <h4 class="mt-3 mb-2"> Profil </h4>
-                            <% if !(m.id == @current_user.id) || @current_user.is_admin %>
-                                <%= link_to(user_path(m), class: "btn btn-primary btn-outline") do %>
+                            <% if !(data[:user].id == @current_user.id) || @current_user.is_admin %>
+                                <%= link_to(user_path(data[:user]), class: "btn btn-primary btn-outline") do %>
 
                                     <i class="fas fa-eye"></i> Voir
 
                                 <% end %>
-                                <%= link_to edit_user_path(m.id), class: "btn btn-outline btn-primary m-2" do %>
+                                <%= link_to edit_user_path(data[:user].id), class: "btn btn-outline btn-primary m-2" do %>
                                     <i class="fas fa-edit"></i> Éditer
                                 <% end %>
                             <% end %>
@@ -114,8 +137,8 @@
                         <% if Season.registration_opened %>
                           <div class="col-sm-2 border-dark" style="flex: 1;">
                             <h4> Activités </h4>
-                            <% if !(m.id == @current_user.id) || @current_user.is_admin %>
-                              <%= link_to new_application_path(m), class: "btn btn-primary" do %>
+                            <% if !(data[:user].id == @current_user.id) || @current_user.is_admin %>
+                              <%= link_to new_application_path(data[:user]), class: "btn btn-primary" do %>
                                 <i class="fas fa-graduation-cap"></i> Pré-inscrire
                               <% end %>
                             <% end %>
@@ -144,55 +167,5 @@
                 <% end %>
             </div>
         </div>
-    <% end %>
-
-    <% if @attached_account_to_show.any? %>
-      <hr /><br/>
-      <h2 class="title-profile">Utilisateurs rattachés :</h2>
-
-      <% @attached_account_to_show.each do |attached_user| %>
-        <div class="contact-thumb">
-          <div class="col-sm" style="flex:1">
-            <div class="contact-info">
-              <h3><%= attached_user.first_name %> <b><%= attached_user.last_name %></b></h3>
-              <span class="relation">Utilisateur rattaché</span>
-              <% attached_user.telephones.each do |t| %>
-                <p><%= t.label.nil? ? "" : t.label.capitalize %>: <%= t.number %></p>
-              <% end %>
-            </div>
-          </div>
-          <% if @current_user.is_admin or (@user.id == @current_user.id) %>
-            <% if @current_user.is_admin %>
-              <div class="col-sm lienFamilial" style="flex:1">
-                <h4> Rattachement </h4>
-                <%= react_component("detachAccount", {from: "attached_account", user: attached_user.as_json(methods: %i[family_links_with_user attached_to]) }) %>
-              </div>
-            <% end %>
-            <div class="col-sm profil border-left <%= @season.closing_date_for_applications >= DateTime.now ? "border-right" : "" %>" style="flex:1"->
-              <h4 class="mt-3 mb-2"> Profil </h4>
-              <% if @user.id == @current_user.id || @current_user.is_admin || attached_user.id == @current_user %>
-                <%= link_to(user_path(attached_user), class: "btn btn-primary btn-outline") do %>
-
-                  <i class="fas fa-eye"></i> Voir
-
-                <% end %>
-                <%= link_to edit_user_path(attached_user.id), class: "btn btn-outline btn-primary" do %>
-                  <i class="fas fa-edit"></i> Éditer
-                <% end %>
-              <% end %>
-            </div>
-            <% if Season.registration_opened %>
-              <div class="col-sm border-dark" style="flex: 1;">
-                <h4> Activités </h4>
-                <% if !(attached_user.id == @current_user.id) || @current_user.is_admin %>
-                  <%= link_to new_application_path(attached_user), class: "btn btn-primary" do %>
-                    <i class="fas fa-graduation-cap"></i> Pré-inscrire
-                  <% end %>
-                <% end %>
-              </div>
-            <% end %>
-          <% end %>
-        </div>
-      <% end %>
     <% end %>
 </div>
