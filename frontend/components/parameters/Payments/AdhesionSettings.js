@@ -95,8 +95,10 @@ export default function AdhesionSettings()
             title: `Souhaitez-vous supprimer le prix d'adhésion "${adh.label}" ?`,
             type: 'warning',
             showCancelButton: true,
+            cancelButtonText: 'Annuler',
             confirmButtonText: 'Supprimer',
-            cancelButtonText: 'Annuler'
+            cancelButtonClass: 'order-1',
+            confirmButtonClass: 'order-2',
         }).then((result) =>
         {
             if(result.value)
