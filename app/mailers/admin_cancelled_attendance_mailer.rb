@@ -8,7 +8,7 @@ class AdminCancelledAttendanceMailer < ApplicationMailer
   def cancelled_attendance(activity_instance, student)
     name = Parameter.get_value("app.name")
     @user = student
-    @activity_instance = LiquidDrops::ActivityInstanceDrop.new(activity.as_json(include: {
+    @activity_instance = LiquidDrops::ActivityInstanceDrop.new(activity_instance.as_json(include: {
       activity: {
         include: {
           activity_ref: {},
