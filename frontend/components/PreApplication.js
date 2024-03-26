@@ -72,6 +72,7 @@ class PreApplication extends React.Component {
                     user_id={this.props.user.id}
                     allowPreApplication={allowPreApplication}
                     confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
+                    default_activity_status_id={this.props.default_activity_status_id}
                 />
             ))
             .value();

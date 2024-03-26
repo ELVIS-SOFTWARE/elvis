@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import _ from "lodash";
 import * as ActivityApplicationStatus from "../utils/ActivityApplicationsStatuses";
 import {csrfToken} from "../utils";
@@ -7,6 +7,9 @@ import moment from "moment/moment";
 import Modal from "react-modal";
 import renderActivityAction from "./renderActivityAction";
 import AnswerProposal from "./AnswerProposal";
+import CancelApplication from "./CancelApplication";
+import EditApplication from "./EditApplication";
+import * as api from "../../tools/api";
 
 class RenewActivityItem extends React.Component {
     nextCycles = null;
@@ -118,6 +121,22 @@ class RenewActivityItem extends React.Component {
         });
     }
 
+    handleProcessModifyApplication(content) {
+        api.set()
+            .error(() => {
+                swal({
+                    title: "Erreur lors de l'envoi du commentaire",
+                    type: "error",
+                });
+            })
+            .post("/comments", {
+                commentable_id: this.state.preApplicationActivity.id,
+                commentable_type: "ActivityApplication",
+                user_id: this.props.current_user.id,
+                content: content,
+            }, {});
+    }
+
     render() {
         const {
             data,
@@ -215,6 +234,10 @@ class RenewActivityItem extends React.Component {
                                         openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
+
+                                    {activity_application_status_id === this.props.default_activity_status_id && <EditApplication
+                                        handleProcessModifyApplication={this.handleProcessModifyApplication}
+                                    />}
                                 </div>
                             </div>
                         </div>
