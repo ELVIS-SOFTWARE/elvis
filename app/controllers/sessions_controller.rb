@@ -34,13 +34,13 @@ class SessionsController < Devise::SessionsController
 
   def pick_user
     @user = User.find(params[:id])
-    @users = User.where(email: @user.email)
+    @users = User.where(email: @user.email, attached_to_id: nil)
   end
 
   def user_picked
     pwd = params[:user][:password]
-    user = User.find(params[:user][:id])
-    if user.valid_password?(pwd)
+    user = User.find_by(id: params[:user][:id], attached_to_id: nil)
+    if user&.valid_password?(pwd)
       sign_in :user, user
       redirect_to controller: "users", action: "current_user_root"
     else
@@ -57,7 +57,7 @@ class SessionsController < Devise::SessionsController
   # end
 
   def switch_to
-    user = User.find(params[:id])
+    user = User.find_by(id: params[:id], attached_to_id: nil)
     pwd = params[:password]
 
     if current_user.email == user.email && user.valid_password?(pwd)

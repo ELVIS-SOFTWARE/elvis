@@ -143,7 +143,7 @@
 
 
                 <% unless @current_user.first_connection %>
-                  <% @same_email_users = User.where(email: @current_user.email).to_a - [@current_user] %>
+                  <% @same_email_users = User.where(email: @current_user.email, attached_to_id: nil).to_a - [@current_user] %>
 
                   <ul id="profile-menu" class="dropdown-menu m-t-sm p-sm m-r-sm" style="border-radius: 10px; right: 0; left: initial!important;">
                     <% render_menu my_menu %>
