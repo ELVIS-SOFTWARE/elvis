@@ -13,8 +13,6 @@ class UserCancelledAttendanceMailer < ApplicationMailer
         include: {
           activity_ref: {},
           teacher: {},
-          room: {},
-          time_interval: {}
         }
       },
       time_interval: {}

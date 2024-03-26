@@ -18,9 +18,6 @@ class ActivityInstanceDrop
     DateTime.parse(@activity_instance["time_interval"]["start"]).strftime("%H:%M")
   end
 
-  def end_time
-    DateTime.parse(@activity_instance["time_interval"]["end"]).strftime("%H:%M")
-  end
 
   #  activity data
   def label
