@@ -21,8 +21,7 @@ module Seasons
           Season.first.save
 
           # on invalide le cache de saisons
-          Rails.cache.delete("current_season")
-          Rails.cache.delete("current_apps_season")
+          Season.clear_method_cache :current, :current_apps_season
         end
 
         true
