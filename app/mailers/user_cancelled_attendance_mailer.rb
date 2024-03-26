@@ -26,7 +26,7 @@ class UserCancelledAttendanceMailer < ApplicationMailer
       "school_logo" => getSchoolLogo,
       'first_name' => @user.first_name.capitalize,
       'last_name' => @user.last_name.capitalize,
-      'activity' => @activity,
+      'activity_instance' => @activity_instance,
       'school_link' => get_button_school_link,
     }
   end
