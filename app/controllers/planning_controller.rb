@@ -564,7 +564,7 @@ class PlanningController < ApplicationController
     render json: "already filled or planning locked", status: :bad_request and return if planning.is_locked || exist_intervals.count > 0
 
     # @type [Array<TimeInterval>]
-    default_intervals = School.first&.planning&.time_intervals&.to_a || []
+    default_intervals = School.first&.planning&.time_intervals&.where(start: season.start..season.end)&.to_a || []
 
     return render json: {message: "pas de planning par défaut de saisie par l'école"}, status: :ok if default_intervals.nil?
 
