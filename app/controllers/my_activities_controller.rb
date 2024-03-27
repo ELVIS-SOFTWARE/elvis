@@ -325,13 +325,14 @@ class MyActivitiesController < ApplicationController
     saved = user_pack.save!
 
     if saved
+      puts "Activity removed from user's wish list"
       EventHandler.notification.activity_cancelled.trigger(
         sender: {
           controller_name: self.class.name,
         },
         args: {
           user: attendance.user,
-          activity: attendance.activity_instance.activity,
+          activity_instance: attendance.activity_instance,
         }
       )
 

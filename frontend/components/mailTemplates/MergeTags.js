@@ -13,7 +13,7 @@ export const APPLICATION_TAGS = {
 
     activity_label: {
         name: "Nom de l'activité",
-        value: "{{activity.label}}",
+        value: "{{activity_instance.label}}",
         sample: "Nom de l'activité"
     },
 
@@ -45,31 +45,31 @@ export const APPLICATION_TAGS = {
 export const ACTIVITY_TAGS = {
     activity_start_date: {
         name: "Date de début de l'activité",
-        value: "{{activity.startDate}}",
+        value: "{{activity_instance.start_date}}",
         sample: "Date de début de l'activité"
     },
 
     activity_start_hour: {
         name: "Heure de début de l'activité",
-        value: "{{activity.activity_start}}",
+        value: "{{activity_instance.activity_start}}",
         sample: "Heure de début de l'activité"
     },
 
     activity_end: {
         name: "Heure de fin de l'activité",
-        value: "{{activity.activity_end}}",
+        value: "{{activity_instance.activity_end}}",
         sample: "Heure de fin de l'activité"
     },
 
     activity_teacher_first_name: {
         name: "Prénom du professeur",
-        value: "{{activity.teacher_first_name}}",
+        value: "{{activity_instance.teacher_first_name}}",
         sample: "Prénom du professeur"
     },
 
     activity_teacher_last_name: {
         name: "Nom du professeur",
-        value: "{{activity.teacher_last_name}}",
+        value: "{{activity_instance.teacher_last_name}}",
         sample: "Nom du professeur"
     }
 }
