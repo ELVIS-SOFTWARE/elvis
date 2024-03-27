@@ -22,7 +22,7 @@ export default function myActivities() {
                 const currentSeason = res.seasons.find(season => season.is_current) || res.seasons[0];
 
                 setSelectedSeason(currentSeason.id);
-                setSeasonList(res.seasons);
+                setSeasonList(_.sortBy(res.seasons || [], 'start').reverse());
                 return res.current_season;
             })
             .error(res => {
