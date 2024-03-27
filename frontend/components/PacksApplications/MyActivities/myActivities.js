@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import * as api from "../../../tools/api";
 import swal from "sweetalert2";
 import ActivityCard from "./activityCards";
@@ -8,7 +8,7 @@ import PlaceholderCard from "./placeholderCard";
 
 export default function myActivities() {
     const [loading, setLoading] = useState(true);
-    const [selectedSeason, setSelectedSeason] = useState(null);
+    const [selectedSeason, setSelectedSeason] = useState(0);
     const [season_list, setSeasonList] = useState(null);
     const [user, setUser] = useState(null);
     const [userActivities, setUserActivities] = useState(null);
@@ -17,8 +17,11 @@ export default function myActivities() {
     const fetchSeason = async () => {
         return await api.set()
             .useLoading()
-            .success(res => {
-                setSelectedSeason(res.current_season);
+            .success(res =>
+            {
+                const currentSeason = res.seasons.find(season => season.is_current) || res.seasons[0];
+
+                setSelectedSeason(currentSeason.id);
                 setSeasonList(res.seasons);
                 return res.current_season;
             })
@@ -49,6 +52,20 @@ export default function myActivities() {
 
     function isDesiredActivitySet(da) {
         return !!da[0].activity;
+    }
+
+    function isRegistrationOpen()
+    {
+        const ss = season_list.find(season => season.id == selectedSeason);
+
+        if (!ss)
+            return false;
+
+        const now = new Date();
+        const opening_date_for_new_applications = new Date(ss.opening_date_for_new_applications);
+        const closing_date_for_applications = new Date(ss.closing_date_for_applications);
+
+        return now >= opening_date_for_new_applications && now < closing_date_for_applications;
     }
 
     // Appel API pour récupérer les saisons et les données de la saison en cours
@@ -84,7 +101,7 @@ export default function myActivities() {
 
                             <div className="px-lg-4 mr-3">
                                 {season_list.length > 1 &&
-                                    <select className="custom-select" value={selectedSeason.id}
+                                    <select className="custom-select" value={selectedSeason}
                                             onChange={handleSeasonChange}>
                                         <option value="">Selectionner une saison</option>
                                         {season_list.map((season) => (
@@ -98,9 +115,9 @@ export default function myActivities() {
 
                         </div>
                         <div className="d-inline-flex flex-wrap activity-cards">
-                            <PlaceholderCard
+                            { isRegistrationOpen() && <PlaceholderCard
                                 user={user}
-                            />
+                            /> }
 
                             {regularActivities.length > 0 &&
                                 regularActivities.map((activity, index) => (
