@@ -656,7 +656,7 @@ class PaymentsList extends React.Component {
                                             value={this.state.bulkEdit.operation}
                                             defaultValue={""}
                                             onChange={e => this.handleBulkEditChange(e)}>
-                                            <option value=""></option>    
+                                            <option value=""></option>
                                             <option value="+">+</option>
                                             <option value="-">-</option>
                                             <option value="0">0</option>
