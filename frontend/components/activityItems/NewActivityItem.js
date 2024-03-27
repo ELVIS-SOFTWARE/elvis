@@ -24,7 +24,7 @@ class NewActivityItem extends React.Component {
             reasonOfRefusal: "",
             proposalAnswered: (activity_application_status_id === ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID
                 || activity_application_status_id === ActivityApplicationStatus.PROPOSAL_REFUSED_ID),
-            activityApplicationId: this.props.new_activity_application.desired_activities[0].activity_application_id
+            activityApplicationId: this.props.new_activity_application.id || this.props.new_activity_application.desired_activities[0].activity_application_id
         }
         this.updateReasonRefused = this.updateReasonRefused.bind(this);
         this.handleProcessModifyApplication = this.handleProcessModifyApplication.bind(this);

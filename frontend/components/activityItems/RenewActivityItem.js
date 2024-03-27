@@ -235,9 +235,15 @@ class RenewActivityItem extends React.Component {
                                         openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
                                     />
 
-                                    {activity_application_status_id === this.props.default_activity_status_id && <EditApplication
-                                        handleProcessModifyApplication={this.handleProcessModifyApplication}
-                                    />}
+                                    {activity_application_status_id === this.props.default_activity_status_id &&  <Fragment>
+                                        <CancelApplication
+                                            activityApplicationId={this.state.pre_application_activity.id}
+                                        />
+
+                                        <EditApplication
+                                            handleProcessModifyApplication={this.handleProcessModifyApplication}
+                                        />
+                                    </Fragment>}
                                 </div>
                             </div>
                         </div>
