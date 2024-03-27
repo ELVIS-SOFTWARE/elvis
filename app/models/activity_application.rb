@@ -173,6 +173,14 @@ class ActivityApplication < ApplicationRecord
   end
 
   def pre_destroy
+    unless @current_user.is_admin
+      set_status = Parameter.find_by(label: "activityApplication.default_status")
+
+      default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID
+
+      raise "La demande d'inscription ne peut être supprimée, car l'administration traite ou à traiter cette demande." if self.activity_application_status_id != default_activity_status_id
+    end
+
     self.pre_application_activity.reset if self.pre_application_activity
   end
 end
