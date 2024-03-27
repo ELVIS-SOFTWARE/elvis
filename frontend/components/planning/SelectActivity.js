@@ -179,6 +179,7 @@ class SelectActivity extends React.Component {
                     className="m-r-sm"
                     styles={SELECT_STYLES} />}
                 <Select
+                    placeholder="Sélectionner d'autres activités"
                     isMulti
                     isClearable
                     hideSelectedOptions
