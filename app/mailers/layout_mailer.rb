@@ -13,7 +13,7 @@ class LayoutMailer < ActionMailer::Base
     end
   end
 
-  def get_button_school_link(text = "Se rendre sur Elvis")
+  def get_button_school_link(text = "Se rendre sur #{Parameter.get_value("app.name") || "Elvis"}")
     "<a href='#{Rails.env.kubernetes? ? "https://#{ENV['DOMAIN']}/" : root_url}' target='_blank' class='v-button' style='box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #000000; background-color: #86d69e; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;'>
       <span style='display:block;padding:10px 20px;line-height:120%;'>
         <span style='line-height: 16.8px;'>
