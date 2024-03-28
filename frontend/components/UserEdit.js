@@ -125,7 +125,7 @@ class UserEdit extends React.Component {
                             ),
                             active: true,
                         },
-                        (this.props.current_user || {}).is_admin ? {
+                        (this.props.current_user || {}).is_admin || (this.props.current_user || {}).is_teacher ? {
                             id: "levels",
                             header: "Évaluations",
                             body: (
