@@ -237,7 +237,7 @@ class RenewActivityItem extends React.Component {
 
                                     {activity_application_status_id === this.props.default_activity_status_id &&  <Fragment>
                                         <CancelApplication
-                                            activityApplicationId={this.state.pre_application_activity.id}
+                                            activityApplicationId={this.state.preApplicationActivity.id}
                                         />
 
                                         <EditApplication
