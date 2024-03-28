@@ -125,7 +125,7 @@ class UserEdit extends React.Component {
                             ),
                             active: true,
                         },
-                        {
+                        (this.props.current_user || {}).is_admin ? {
                             id: "levels",
                             header: "Évaluations",
                             body: (
@@ -153,7 +153,7 @@ class UserEdit extends React.Component {
                                     handleSaveInfos={() => this.handleSubmit()}
                                 />
                             ),
-                        },
+                        } : undefined,
                         (this.props.current_user || {}).is_admin ? {
                             id: "roles",
                             header: "Rôles",
