@@ -557,16 +557,28 @@ class PlanningController < ApplicationController
 
   def add_default_to_planning
     planning = Planning.find(params[:id])
+    school = School.first
     season = params[:season_id].present? ? Season.find(params[:season_id]) : Season.current_apps_season || Season.current
 
     exist_intervals = planning.time_intervals.where({ start: (season.start..season.end), kind: "p" })
 
     render json: "already filled or planning locked", status: :bad_request and return if planning.is_locked || exist_intervals.count > 0
 
-    # @type [Array<TimeInterval>]
-    default_intervals = School.first&.planning&.time_intervals&.where(start: season.start..season.end)&.to_a || []
+    if school.planning.nil?
+      school.create_planning
+      school.save!
+    end
 
-    return render json: {message: "pas de planning par défaut de saisie par l'école"}, status: :ok if default_intervals.nil?
+    # @type [Array<TimeInterval>]
+    default_intervals = school.planning&.time_intervals&.where(start: season.start..season.end)&.to_a || []
+    school_has_default = default_intervals.any?
+
+    if default_intervals.empty?
+      previous_season = season.previous
+      default_intervals = school.planning&.time_intervals&.where(start: previous_season.start..previous_season.end)&.to_a || []
+    end
+
+    return render json: {message: "pas de planning par défaut de saisie par l'école"}, status: :not_found if default_intervals.empty?
 
     default_intervals = default_intervals.map do |interval|
       interval = interval.dup
@@ -575,6 +587,17 @@ class PlanningController < ApplicationController
       interval.convert_to_first_week_of_season(season)
 
       interval
+    end
+
+    # also create default intervals for the school in case it doesn't have any for the season
+    unless school_has_default
+      school.planning.time_intervals << default_intervals
+      school.planning.save!
+
+      default_intervals = default_intervals.map do |interval|
+        interval = interval.dup
+        interval.id = nil # reset id to avoid conflict
+      end
     end
 
     planning.time_intervals << default_intervals

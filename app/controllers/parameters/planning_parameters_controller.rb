@@ -19,6 +19,26 @@ class Parameters::PlanningParametersController < ApplicationController
       @school.create_planning
       @school.save!
     end
+
+    current_season = Season.current
+
+    if @school.planning.time_intervals.where(start: current_season.start..current_season.end).empty?
+      previous_season = Season.previous
+      school_availabilities = @school.planning.time_intervals.where(start: previous_season.start..previous_season.end).to_a
+
+      school_availabilities = school_availabilities.map do |availability|
+        av = availability.dup
+        av.id = nil
+
+        av.convert_to_first_week_of_season(current_season)
+
+        av
+      end
+
+      @school.planning.time_intervals << school_availabilities
+      @school.planning.save!
+    end
+
     @seasons = Season.all
   end
 
