@@ -1618,6 +1618,16 @@ class UsersController < ApplicationController
     render json: user_sended, status: :ok
   end
 
+  def reset_password
+    user = User.find(params[:user_id])
+
+    return render json: {}, status: :unauthorized if !current_user.is_admin || user.id == current_user.id
+
+    Devise::Mailer.reset_password_instructions(user, user.set_reset_password_token).deliver_later
+
+    render json: {}, status: :ok
+  end
+
   def all_doc_consented
     # @type [User]
     @user = User.find(params[:id])

@@ -209,6 +209,7 @@ Rails.application.routes.draw do
   put "/users/:id/update_family", to: "users#update_family"
 
   post "/users/resend_confirmation", to: "users#resend_confirmation"
+  post "/users/reset_password", to: "users#reset_password"
 
   get "/u/first_login", to: "users#first_login", as: "welcome"
   patch "/u/update_email", to: "users#update_email", as: "update_email"
