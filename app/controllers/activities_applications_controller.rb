@@ -294,6 +294,15 @@ class ActivitiesApplicationsController < ApplicationController
                               .transform_values { |values| values.max_by { |ar| ar["display_price"] } }
                               .values
 
+    # If default activityRef is set, we replace the activityRef (id) with the default one
+    display_activity_refs.each do |ar|
+      default = ActivityRefKind.find_by(id: ar["activity_ref_kind_id"])&.default_activity_ref
+
+      if default
+        ar["id"] = default.id
+      end
+    end
+
     @activity_refs = display_activity_refs
                        .flatten
                        .sort_by { |a| a["kind"] }
