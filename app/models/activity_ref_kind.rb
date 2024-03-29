@@ -18,6 +18,10 @@ class ActivityRefKind < ApplicationRecord
 
   has_many :activity_refs
 
+  belongs_to :default_activity_ref, class_name: "ActivityRef", optional: true
+
+  validate :verify_default_activity_ref_is_for_same_activity_ref_kind
+
   def self.display_class_name(singular = true)
     singular ? "famille d'activité" : "familles d'activités"
   end
@@ -26,4 +30,11 @@ class ActivityRefKind < ApplicationRecord
     return :F
   end
 
+  private
+
+  def verify_default_activity_ref_is_for_same_activity_ref_kind
+    if default_activity_ref && default_activity_ref.activity_ref_kind != self
+      errors.add(:default_activity_ref, "doit être de la même famille d'activité")
+    end
+  end
 end

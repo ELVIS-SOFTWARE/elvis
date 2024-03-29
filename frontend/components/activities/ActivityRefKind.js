@@ -17,6 +17,11 @@ export default class ActivityRefKind extends BaseDataTable
                 accessor: d => d.name,
             },
             {
+                id: "default_activity_ref",
+                Header: "Activité par défaut",
+                accessor: d => d.default_activity_ref ? d.default_activity_ref.label : "",
+            },
+            {
                 id: "actions",
                 Header: "Actions",
                 Cell: props => {

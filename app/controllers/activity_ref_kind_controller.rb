@@ -18,7 +18,7 @@ class ActivityRefKindController < ApplicationController
     query = ActivityRefKind.all.order(:name)
 
     respond_to do |format|
-      format.json { render json: { status:query.as_json, pages:1, total:1} }
+      format.json { render json: { status:query.as_json(include: { default_activity_ref: {} }), pages:1, total:1} }
     end
   end
 
@@ -87,6 +87,8 @@ class ActivityRefKindController < ApplicationController
     begin
       kind.name = name
       kind.is_for_child = is_for_child
+      kind.default_activity_ref_id = activity_ref_kind_params[:default_activity_ref_id]
+
       kind.save!
     rescue StandardError => e
       redirect_to edit_activity_ref_kind_path(kind, error: instrument.errors.full_messages)
@@ -97,12 +99,13 @@ class ActivityRefKindController < ApplicationController
 
   def edit
     @activity_ref_kind = ActivityRefKind.find params[:id]
+    @activity_refs = @activity_ref_kind.activity_refs
     @errors = params[:error]
   end
 
   private
 
   def activity_ref_kind_params
-    params.require(:activity_ref_kind).permit(:name, :is_for_child)
+    params.require(:activity_ref_kind).permit(:name, :is_for_child, :default_activity_ref_id)
   end
 end
