@@ -19,6 +19,8 @@ class ApplicationMailer < LayoutMailer
                        .map(&:activity_ref)
                        .compact
 
+    @activity = @activity_refs.first
+
     @school_informations = School.first
 
     @user = application.user
