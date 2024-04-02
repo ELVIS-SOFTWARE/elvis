@@ -1746,7 +1746,7 @@ class ActivityEdition extends React.Component {
                         style={{flex: "1 1"}}>
                         <option value={RoomModes.SINGULAR}>N'affecter que cette séance</option>
                         <option value={RoomModes.FOLLOWING}>Affecter cette séance et les suivantes</option>
-                        <option value={RoomModes.ALL}>Affecter tous les séances de la saison</option>
+                        <option value={RoomModes.ALL}>Affecter toutes les séances de la saison</option>
                     </select>
                 </div>
 
