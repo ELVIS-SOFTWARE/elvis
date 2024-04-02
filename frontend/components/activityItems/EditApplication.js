@@ -68,9 +68,9 @@ export default function EditApplication(props) {
                                         return;
                                     }
 
+                                    props.handleProcessModifyApplication(editInput);
                                     handleCloseEditModal();
                                     handleCloseConfirmationModal();
-                                    props.handleProcessModifyApplication(editInput);
                                 }}
                         >
                             Modifier

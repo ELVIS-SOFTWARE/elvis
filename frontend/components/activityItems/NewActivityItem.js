@@ -232,7 +232,7 @@ class NewActivityItem extends React.Component {
                                             />
 
                                             <EditApplication
-                                                handleProcessModifyApplication={this.handleProcessModifyApplication}
+                                                handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
                                             />
                                         </Fragment>
                                     )}
