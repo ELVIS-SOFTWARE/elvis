@@ -173,7 +173,11 @@ class ActivityApplication < ApplicationRecord
   end
 
   def pre_destroy
-    unless @current_user.is_admin
+    # get current_user if destroy job called from a controller
+    current_user = RequestStore.read(:request)&.controller_instance&.current_user
+
+    # if user is not admin or destroy request not coming from a controller
+    unless current_user&.is_admin
       set_status = Parameter.find_by(label: "activityApplication.default_status")
 
       default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID
