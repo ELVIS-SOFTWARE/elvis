@@ -1623,7 +1623,8 @@ const RoomSelection = ({
 class ActivityEdition extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {...props.selection,
+        this.state = {
+            ...props.selection,
             startDate: moment(props.startTime).format('YYYY-MM-DD'),
             endTime: moment(props.endTime).format('HH:mm'),
             startTime: moment(props.startTime).format('HH:mm')
@@ -1654,11 +1655,18 @@ class ActivityEdition extends React.Component {
 
         const _onChange = (name, value) => {
             onChange(name, value);
-            this.setState({
-                ...this.state,
-                [name]: value,
-            })
-        }
+
+            const newState = {...this.state};
+            newState[name] = value;
+
+            if (newState.startTime && newState.endTime) {
+                if (newState.endTime <= newState.startTime) {
+                    return;
+                }
+            }
+
+            this.setState(newState);
+        };
 
         return (
             <div>
