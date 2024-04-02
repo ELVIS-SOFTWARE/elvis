@@ -61,16 +61,24 @@ class ActivityInstanceController < ApplicationController
   def edit_activity_instance
     instance = ActivityInstance.includes(activity: :activity_instances).find(params[:id])
 
+    start_time = params[:startTime]&.split(":")
+    end_time = params[:endTime]&.split(":")
+
+    update_hash = {}
+    update_hash[:start] = instance.time_interval.start.change(hour: start_time&.first, min: start_time&.second) if start_time.present?
+    update_hash[:end] = instance.time_interval.end.change(hour: end_time&.first, min: end_time&.second) if end_time.present?
+
     case params[:room_mode]
     when RoomMode::FOLLOWING
-
       instances = instance
                     .activity
                     .activity_instances
                     .joins(:time_interval)
                     .where("time_intervals.start >= ?", instance.time_interval.start)
                     .each { |i| i.update(permitted_params) }
+
     when RoomMode::ALL
+
       instances = instance
                     .activity
                     .activity_instances
@@ -79,13 +87,7 @@ class ActivityInstanceController < ApplicationController
       instance.activity.update!(params.permit(:room_id, :location_id))
     else
 
-      if params[:startTime].present?
-        instance.time_interval.update!(start: instance.time_interval.start.change(hour: params[:startTime].split(":")[0], min: params[:startTime].split(":")[1]))
-      end
-      if params[:endTime].present?
-        instance.time_interval.update!(end: instance.time_interval.end.change(hour: params[:endTime].split(":")[0], min: params[:endTime].split(":")[1]))
-      end
-
+      instance.time_interval.update!(update_hash) unless update_hash.empty?
       instance.update!(permitted_params)
     end
 
