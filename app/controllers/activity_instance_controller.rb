@@ -65,14 +65,7 @@ class ActivityInstanceController < ApplicationController
     end_time = params[:endTime]&.split(":")
     start_date = params[:startDate]&.split("-")
 
-    update_hash = {}
-    update_hash[:start] = instance.time_interval.start.change(hour: start_time&.first, min: start_time&.second) if start_time.present?
-    update_hash[:end] = instance.time_interval.end.change(hour: end_time&.first, min: end_time&.second) if end_time.present?
-    if start_date.present?
-      update_hash[:start] = instance.time_interval.start.change(year: start_date&.first, month: start_date&.second, day: start_date&.third)
-      update_hash[:end] = instance.time_interval.end.change(year: start_date&.first, month: start_date&.second, day: start_date&.third)
-    end
-
+    time_update = build_time_updates(instance, start_time, end_time, start_date)
 
     case params[:room_mode]
     when RoomMode::FOLLOWING
@@ -91,7 +84,7 @@ class ActivityInstanceController < ApplicationController
 
       instance.activity.update!(params.permit(:room_id, :location_id))
     else
-      instance.time_interval.update!(update_hash) unless update_hash.empty?
+      instance.time_interval.update!(time_update) unless time_update.empty?
       instance.update!(permitted_params)
     end
 
@@ -157,4 +150,36 @@ class ActivityInstanceController < ApplicationController
   def permitted_params
     params.permit(:room_id, :location_id, :are_hours_counted)
   end
+
+  def build_time_updates(instance, start_time, end_time, start_date)
+    time_update = {}
+
+    if start_time.present?
+      time_update[:start] = instance.time_interval.start.change(
+        hour: start_time&.first,
+        min: start_time&.second
+      )
+      if end_time.present?
+        time_update[:end] = instance.time_interval.end.change(
+          hour: end_time&.first,
+          min: end_time&.second
+        )
+      end
+      if start_date.present?
+        time_update[:start] = instance.time_interval.start.change(
+          year: start_date&.first,
+          month: start_date&.second,
+          day: start_date&.third
+        )
+        time_update[:end] = instance.time_interval.end.change(
+          year: start_date&.first,
+          month: start_date&.second,
+          day: start_date&.third
+        )
+      end
+
+    end
+    time_update
+  end
+  
 end
