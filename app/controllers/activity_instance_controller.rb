@@ -30,7 +30,7 @@ class ActivityInstanceController < ApplicationController
     end
 
     #  Check conflicts for updated intervals
-    results = { conflicts: [], success: 0}
+    results = { conflicts: [], success: 0 }
 
     instances_to_check.each do |instance|
       if instance.check_for_conflict
@@ -56,7 +56,6 @@ class ActivityInstanceController < ApplicationController
     @instance = ActivityInstance.find(params[:id])
     cover_teacher = User.find_by(id: params[:cover_teacher_id])
 
-
   end
 
   def edit_activity_instance
@@ -64,20 +63,29 @@ class ActivityInstanceController < ApplicationController
 
     case params[:room_mode]
     when RoomMode::FOLLOWING
+
       instances = instance
-                  .activity
-                  .activity_instances
-                  .joins(:time_interval)
-                  .where("time_intervals.start >= ?", instance.time_interval.start)
-                  .each { |i| i.update(permitted_params) }
+                    .activity
+                    .activity_instances
+                    .joins(:time_interval)
+                    .where("time_intervals.start >= ?", instance.time_interval.start)
+                    .each { |i| i.update(permitted_params) }
     when RoomMode::ALL
       instances = instance
-                  .activity
-                  .activity_instances
-                  .update_all(permitted_params.to_h)
+                    .activity
+                    .activity_instances
+                    .update_all(permitted_params.to_h)
 
       instance.activity.update!(params.permit(:room_id, :location_id))
     else
+
+      if params[:startTime].present?
+        instance.time_interval.update!(start: instance.time_interval.start.change(hour: params[:startTime].split(":")[0], min: params[:startTime].split(":")[1]))
+      end
+      if params[:endTime].present?
+        instance.time_interval.update!(end: instance.time_interval.end.change(hour: params[:endTime].split(":")[0], min: params[:endTime].split(":")[1]))
+      end
+
       instance.update!(permitted_params)
     end
 
@@ -95,14 +103,14 @@ class ActivityInstanceController < ApplicationController
   def bulkdelete
 
     a_param = params.permit(
-      :activity_id, 
+      :activity_id,
       :instance_ids,
       :time_interval_ids
     )
 
     activity_instances = ActivityInstance.where(id: a_param[:instance_ids].split(","))
 
-    if activity_instances 
+    if activity_instances
       activity_instances.destroy_all
     end
 
@@ -112,7 +120,6 @@ class ActivityInstanceController < ApplicationController
 
       activity = Activity.find(a_param[:activity_id])
       teacher = activity.teacher
-      
 
       activity&.destroy
 
@@ -124,10 +131,9 @@ class ActivityInstanceController < ApplicationController
         .new(teacher, season)
         .execute
     end
-    
+
     render json: activity_instances
   end
-
 
   def delete
     activity_instance = ActivityInstance.includes(:time_interval).find params[:id]
@@ -141,6 +147,7 @@ class ActivityInstanceController < ApplicationController
   end
 
   private
+
   def permitted_params
     params.permit(:room_id, :location_id, :are_hours_counted)
   end
