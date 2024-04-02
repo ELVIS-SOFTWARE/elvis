@@ -291,17 +291,13 @@ class ActivitiesApplicationsController < ApplicationController
     display_activity_refs = activity_refs
                               .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and !ar["allows_timeslot_selection"] }
                               .group_by { |ar| ar["kind"] }
-                              .transform_values { |values| values.max_by { |ar| ar["display_price"] } }
+                              .transform_values  do |values|
+                                default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
+                                default_activity = values.find { |ar| ar["id"] == default_activity_id }
+
+                                default_activity || values.max_by { |ar| ar["display_price"] }
+                              end
                               .values
-
-    # If default activityRef is set, we replace the activityRef (id) with the default one
-    display_activity_refs.each do |ar|
-      default = ActivityRefKind.find_by(id: ar["activity_ref_kind_id"])&.default_activity_ref
-
-      if default
-        ar["id"] = default.id
-      end
-    end
 
     @activity_refs = display_activity_refs
                        .flatten
