@@ -158,8 +158,8 @@
         <% end %>
 
         <div class="">
-          <% if @current_user == @user || !@current_user.teacher? %>
-            <%= link_to("/inscriptions/new?user_id=#{current_user.id}", class: "btn btn-primary btn-block m-t-sm") do %>
+          <% if (@current_user == @user || !@current_user.teacher?) && Season.registration_opened %>
+            <%= link_to("/inscriptions/new?user_id=#{@current_user.id}", class: "btn btn-primary btn-block m-t-sm") do %>
               <i class="fas fa-plus"></i> S'inscrire
             <% end %>
         <% end %>

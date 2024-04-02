@@ -650,9 +650,25 @@ class Wizard extends React.Component {
         return selectionLabels;
     }
 
+    isApplicationAuthorized(season_id)
+    {
+        if(this.props.currentUserIsAdmin)
+            return true;
+
+        const season = this.props.seasons.find(s => s.id === season_id);
+
+        if(!season)
+            return false;
+
+        const dateToUse = this.props.preApplicationActivity ? season.opening_date_for_applications : season.opening_date_for_new_applications;
+
+        return moment().isBetween(moment(dateToUse), moment(season.closing_date_for_applications));
+    }
+
     render() {
 
-        if (!this.state.season_id) {
+        if (!this.isApplicationAuthorized(this.state.season_id))
+        {
             return <Fragment>
                 <div
                     className={`m-t m-b-sm h-auto img-rounded p-sm text-dark ${this.state.user.is_admin ? "bg-warning" : "bg-danger"}`}>

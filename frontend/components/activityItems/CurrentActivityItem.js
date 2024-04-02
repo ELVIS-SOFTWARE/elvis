@@ -250,7 +250,7 @@ class CurrentActivityItem extends React.Component {
                                 <div className="col-sm-4 p-xs">
                                     <p className="pb-0"> {data.activity_ref.label} </p>
                                     {activityState !== undefined ?
-                                        <p className="pb-0"> {activityDetails} </p>
+                                        <div className="pb-0"> {activityDetails} </div>
                                         : ""
                                     }
                                 </div>
