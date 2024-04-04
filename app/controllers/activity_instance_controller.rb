@@ -65,7 +65,9 @@ class ActivityInstanceController < ApplicationController
     end_time = params[:endTime]&.split(":")
     start_date = params[:startDate]&.split("-")
 
-    time_update = build_time_updates(instance, start_time, end_time, start_date)
+
+    time_update = build_time_updates(instance, start_time, end_time)
+    date_update = build_date_updates(instance, start_date)
 
     case params[:room_mode]
     when RoomMode::FOLLOWING
@@ -84,7 +86,9 @@ class ActivityInstanceController < ApplicationController
 
       instance.activity.update!(params.permit(:room_id, :location_id))
     else
+
       instance.time_interval.update!(time_update) unless time_update.empty?
+      instance.time_interval.update!(date_update) unless date_update.empty?
       instance.update!(permitted_params)
     end
 
@@ -151,7 +155,7 @@ class ActivityInstanceController < ApplicationController
     params.permit(:room_id, :location_id, :are_hours_counted)
   end
 
-  def build_time_updates(instance, start_time, end_time, start_date)
+  def build_time_updates(instance, start_time, end_time)
     time_update = {}
 
     if start_time.present?
@@ -165,21 +169,50 @@ class ActivityInstanceController < ApplicationController
           min: end_time&.second
         )
       end
-      if start_date.present?
-        time_update[:start] = instance.time_interval.start.change(
-          year: start_date&.first,
-          month: start_date&.second,
-          day: start_date&.third
-        )
-        time_update[:end] = instance.time_interval.end.change(
-          year: start_date&.first,
-          month: start_date&.second,
-          day: start_date&.third
-        )
-      end
-
     end
     time_update
   end
-  
+
+  def build_date_updates(instance, start_date)
+    date_update = {}
+
+    instance_date_obj = instance.time_interval.start
+    current_week_start = instance_date_obj.beginning_of_week
+    current_week_end = instance_date_obj.end_of_week
+    start_date_obj = Time.zone.local(start_date&.first, start_date&.second, start_date&.third, instance_date_obj.hour, instance_date_obj.min, instance_date_obj.sec)
+
+    if start_date.present?
+      puts "test"
+      puts start_date_obj
+      puts instance.time_interval.start
+      puts current_week_start
+      puts current_week_end
+
+      if start_date_obj < current_week_start || start_date_obj > current_week_end
+        puts "date is not in the same week"
+        render json: { error: "Date is not in the same week" }, status: :bad_request
+        return
+      else
+        puts "date is in the same week"
+      end
+
+      # if instance_date_obj < current_week_start || instance_date_obj > current_week_end
+      #    render json: { error: "Date is not in the same week" }, status: :bad_request
+      #   return
+      # else
+      #   date_update[:start] = instance.time_interval.start.change(
+      #     year: start_date&.first,
+      #     month: start_date&.second,
+      #     day: start_date&.third
+      #   )
+      #   date_update[:end] = instance.time_interval.end.change(
+      #     year: start_date&.first,
+      #     month: start_date&.second,
+      #     day: start_date&.third
+      #   )
+      # end
+      date_update
+    end
+
+  end
 end
