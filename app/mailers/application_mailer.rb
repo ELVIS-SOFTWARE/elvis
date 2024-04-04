@@ -19,7 +19,7 @@ class ApplicationMailer < LayoutMailer
                        .map(&:activity_ref)
                        .compact
 
-    @activity = @activity_refs.first
+    @activity = LiquidDrops::ActivityDrop.new(@activity_refs.first.as_json(include: {activity: {}}))
 
     @school_informations = School.first
 
