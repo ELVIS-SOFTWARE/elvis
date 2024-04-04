@@ -1652,7 +1652,6 @@ class ActivityEdition extends React.Component {
             evaluation_level_ref_id: selectedEvaluationLevelRefId,
         } = this.state;
 
-
         const _onChange = (name, value) => {
             onChange(name, value);
 

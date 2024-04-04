@@ -66,7 +66,11 @@ class ActivityInstanceController < ApplicationController
     start_date = params[:startDate]&.split("-")
 
     time_update = build_time_updates(instance, start_time, end_time)
-    date_update = build_date_updates(instance, start_date)
+    begin
+      date_update = build_date_updates(instance, start_date)
+    rescue => error
+      @error_message = error.message
+    end
 
     case params[:room_mode]
     when RoomMode::FOLLOWING
@@ -99,7 +103,7 @@ class ActivityInstanceController < ApplicationController
     instance.activity.change_teacher(instance.teacher.id, params[:teacher_id])
     instance.change_cover_teacher(params[:cover_teacher_id])
 
-    render json: instance
+    render json: { instance: instance, error_message: @error_message }
   end
 
   def bulkdelete
@@ -183,7 +187,7 @@ class ActivityInstanceController < ApplicationController
       start_date_obj = Time.zone.local(start_date&.first, start_date&.second, start_date&.third, instance_date_obj.hour, instance_date_obj.min, instance_date_obj.sec)
 
       if start_date_obj < current_week_start || start_date_obj > current_week_end
-        return nil
+        raise ArgumentError, "La date doit être dans la même semaine que l'instance actuelle."
       else
         date_update[:start] = instance.time_interval.start.change(
           year: start_date&.first,
