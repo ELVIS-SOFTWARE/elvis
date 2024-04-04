@@ -1420,7 +1420,11 @@ class UsersController < ApplicationController
               include: [:activity_application_status]
             },
             desired_activity: {
-              include: [:activity_ref]
+              include: {
+                activity_ref: {
+                  methods: %i[is_default_in_kind?]
+                }
+              }
             }
           }
         },
@@ -1434,9 +1438,14 @@ class UsersController < ApplicationController
                     activity_ref: {
                       include: {
                         next_cycles: {
-                          include: :to
+                          include: {
+                            to: {
+                              methods: %i[is_default_in_kind?]
+                            }
+                          }
                         }
-                      }
+                      },
+                      methods: %i[is_default_in_kind?]
                     }
                   }
                 }
@@ -1447,9 +1456,14 @@ class UsersController < ApplicationController
                 activity_ref: {
                   include: {
                     next_cycles: {
-                      include: :to
+                      include: {
+                        to: {
+                          methods: %i[is_default_in_kind?]
+                        }
+                      }
                     }
-                  }
+                  },
+                  methods: %i[is_default_in_kind?]
                 },
                 teacher: {},
                 room: {},
@@ -1534,13 +1548,20 @@ class UsersController < ApplicationController
                                                                                                                           activity_ref: {
                                                                                                                             include: {
                                                                                                                               next_cycles: {
-                                                                                                                                include: :to
+                                                                                                                                include: {
+                                                                                                                                  to: {
+                                                                                                                                    methods: %i[is_default_in_kind?]
+                                                                                                                                  }
+                                                                                                                                }
                                                                                                                               }
-                                                                                                                            }
+                                                                                                                            },
+                                                                                                                            methods: %i[is_default_in_kind?]
                                                                                                                           },
                                                                                                                           activity: {
                                                                                                                             include: {
-                                                                                                                              activity_ref: {},
+                                                                                                                              activity_ref: {
+                                                                                                                                methods: %i[is_default_in_kind?]
+                                                                                                                              },
                                                                                                                               teacher: {},
                                                                                                                               room: {},
                                                                                                                               time_interval: {}
@@ -1564,10 +1585,14 @@ class UsersController < ApplicationController
     @user_activities_applications = user.activity_applications.where(season_id: @season).as_json(include: { activity_application_status: {},
                                                                                                             desired_activities: {
                                                                                                               include: {
-                                                                                                                activity_ref: {},
+                                                                                                                activity_ref: {
+                                                                                                                  methods: %i[is_default_in_kind?]
+                                                                                                                },
                                                                                                                 activity: {
                                                                                                                   include: {
-                                                                                                                    activity_ref: {},
+                                                                                                                    activity_ref: {
+                                                                                                                      methods: %i[is_default_in_kind?]
+                                                                                                                    },
                                                                                                                     teacher: {},
                                                                                                                     room: {},
                                                                                                                     time_interval: {}

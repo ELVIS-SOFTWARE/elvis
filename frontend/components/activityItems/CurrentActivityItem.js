@@ -175,7 +175,17 @@ class CurrentActivityItem extends React.Component {
             if (this.isChildPreApplicationActivity() && this.state.preApplicationActivity.activity_application === undefined) {
                 this.nextCycles = this.getChildActivityNextCycles();
 
-                let nextActivityRefKinds = _.uniqBy(this.nextCycles, "to.activity_ref_kind_id");
+                const groupedNextActivityRefKinds = _.groupBy(this.nextCycles, "to.activity_ref_kind_id");
+
+                let nextActivityRefKinds = _.map(groupedNextActivityRefKinds, (nextCycles) =>
+                {
+                    // find default in kind or first
+                    return _.find(nextCycles, (nextCycle) =>
+                    {
+                        return nextCycle.to["is_default_in_kind?"];
+                    }) || nextCycles[0];
+                });
+
                 let timeslotActivities = this.nextCycles.filter(a => a.to.allows_timeslot_selection === true);
                 nextActivityRefKinds = nextActivityRefKinds.concat(timeslotActivities);
                 nextActivityRefKinds = _.uniqBy(nextActivityRefKinds, "id");

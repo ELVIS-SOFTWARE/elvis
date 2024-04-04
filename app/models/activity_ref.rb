@@ -182,6 +182,10 @@ class ActivityRef < ApplicationRecord
     end
   end
 
+  def is_default_in_kind?
+    activity_ref_kind&.default_activity_ref_id == id
+  end
+
   def self.destroy_params
     base_params = ApplicationRecord.destroy_params
 
