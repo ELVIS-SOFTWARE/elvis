@@ -1749,25 +1749,26 @@ class PaymentsManagement extends React.Component {
 
                                         {this.state.payments[payer.id] && this.state.payments[payer.id].length > 0 &&
                                             <Fragment>
-                                                <div className="col-lg-6 col-md-6 d-flex justify-content-between m-b-sm">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-primary btn-xs"
-                                                            onClick={() => window.open(`/payments/summary/${this.props.user.id}.pdf?season_id=${this.state.season}&payer_id=${payer.id}`)}>
-                                                            <i className="fas fa-print text-primary mr-1"/>
-                                                            Imprimer une attestation de paiement
-                                                        </button>
+                                                <div
+                                                    className="col-lg-12 col-md-12 d-flex justify-content-between m-b-sm">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-primary btn-xs"
+                                                        onClick={() => window.open(`/payments/summary/${this.props.user.id}.pdf?season_id=${this.state.season}&payer_id=${payer.id}`)}>
+                                                        <i className="fas fa-print text-primary mr-1"/>
+                                                        Imprimer une attestation de paiement
+                                                    </button>
 
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-primary btn-xs"
-                                                            onClick={() => window.open(`/payment_schedule/${(this.state.schedules[payer.id] && this.state.schedules[payer.id].id)}.pdf`)}>
-                                                            <i className="fas fa-print text-primary mr-1"/>
-                                                            Imprimer l'échéancier
-                                                        </button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-primary btn-xs"
+                                                        onClick={() => window.open(`/payment_schedule/${(this.state.schedules[payer.id] && this.state.schedules[payer.id].id)}.pdf`)}>
+                                                        <i className="fas fa-print text-primary mr-1"/>
+                                                        Imprimer l'échéancier
+                                                    </button>
                                                 </div>
 
-                                                <div className="col-lg-6 col-md-6 m-b-lg print-none">
+                                                <div className="col-lg-12 col-md-12 print-none">
                                                     &nbsp;
                                                 </div>
                                             </Fragment>
