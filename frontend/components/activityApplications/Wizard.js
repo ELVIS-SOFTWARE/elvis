@@ -27,8 +27,6 @@ import UserSearch from "./UserSearch.js";
 import {PRE_APPLICATION_ACTIONS} from "../../tools/constants";
 import Select from "react-select";
 import Swal from 'sweetalert2'
-import activity from "./summary/Activity";
-import PayerPaymentTerms from "../PayerPaymentTerms";
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
@@ -625,29 +623,25 @@ class Wizard extends React.Component {
     }
 
     getLabelsFromSelectedActivities() {
-        let selectedArray = this.state.selectedActivities.slice();
+        let selectedActivityRefIds = this.state.selectedActivities.slice();
 
-        let activitiesThatRequirePreferencesSelection = this.props.allActivityRefs
+        // Lister les activités qui nécessitent une sélection de préférences
+        const prefsReqActivityRefIds = this.props.allActivityRefs
             .filter(ref => ref.allows_timeslot_selection)
             .map(ref => ref.id);
 
-        if (activitiesThatRequirePreferencesSelection) {
-            activitiesThatRequirePreferencesSelection.map(ref => {
-                let index = selectedArray.indexOf(ref);
-                index !== -1 ? selectedArray.splice(index, 1) : "";
-            });
-        }
+        // Filtrer notre sélection pour ne conserver que les activités qui ne nécessitent pas de préférences
+        selectedActivityRefIds = selectedActivityRefIds.filter(activity => !prefsReqActivityRefIds.includes(activity));
 
-        let selectionLabels = [];
-        this.props.allActivityRefs.map(element => {
-            selectedArray.map(id => {
-                if (element.id === id && element.id) {
-                    selectionLabels.push(element.display_name);
-                }
-            });
-        });
+        // Retourner un tableau avec les noms des activités sélectionnées
+        return selectedActivityRefIds.reduce((labels, id) => {
+            const element = this.props.allActivityRefs.find(activityRef => activityRef.id === id);
+            if (element) {
+                labels.push(element.display_name);
+            }
+            return labels;
+        }, []);
 
-        return selectionLabels;
     }
 
     isApplicationAuthorized(season_id)

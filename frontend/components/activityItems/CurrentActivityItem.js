@@ -199,7 +199,7 @@ class CurrentActivityItem extends React.Component {
                                 className="btn btn-info m-sm">
                                 <i className="fas fa-edit"/>
                                 S'inscrire à l'activité&nbsp;
-                                {activity.to.allows_timeslot_selection ? activity.to.label : activity.to.kind }
+                                {activity.to.display_name }
                             </a>
                         )}
                         {StopButton}
