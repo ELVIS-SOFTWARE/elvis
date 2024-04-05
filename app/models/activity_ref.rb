@@ -121,27 +121,12 @@ class ActivityRef < ApplicationRecord
     return :F
   end
 
-  # Indique si l'activité est *substituable* au sein d'une famille d'activités.
-  # Une activité *substituable* est une activité qui, dans le processus d'inscription, peut être remplacée indifféremment
-  # par une autre activité de la même famille.
-  #
-  # Toutes les activités sont considérées substituables sauf
-  # * les activités enfance,
-  # * les activités CHAM
-  # * et les activités qui autorisent le choix d'un créneau
-  def substitutable?
-    !(
-      allows_timeslot_selection ||
-        activity_type == "child" ||
-        activity_type == "cham"
-    )
-  end
 
   # Retourne le nom à afficher pour une activité
   # Renvoie le nom de la famille d'activités ou le nom de l'activité pour les activités enfance, CHAM
   # et celles qui autorisent le choix d'un créneau
   def display_name
-    if substitutable?
+    if substitutable
       activity_ref_kind.name
     else
       label
@@ -153,7 +138,7 @@ class ActivityRef < ApplicationRecord
       ActivityRefs::MaxPricesCalculator.new.call
     end
 
-    if substitutable?
+    if substitutable
       Rails.cache.read("activity_ref_kind_id:#{activity_ref_kind_id}:#{season.id}:price")
     else
       Rails.cache.read("activity_ref_id:#{id}:#{season.id}:price")

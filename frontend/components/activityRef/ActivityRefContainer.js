@@ -10,37 +10,60 @@ import * as api from "../../tools/api.js";
 import { redirectTo } from "../../tools/url";
 import ActivityRefTeachers from "./ActivityRefTeachers";
 
+
 export default class ActivityRefContainer extends React.Component {
     constructor(props) {
         super(props);
+        const applicationOptions = this.buildApplicationOptions(this.props.activityRef);
+
         this.initialValues = {
             activityRef: this.props.activityRef,
-            //applicationOptions: this.props.activityRefApplicationOptions,
-            ...this.props.activityRefApplicationOptions,
-            nextCycles: this.props.nextCycles
-        }
+            applicationOptions,
+            substitutable:
+                this.props.activityRef.substitutable === null ?
+                    "true" :
+                    this.props.activityRef.substitutable.toString(),
+            allowsTimeslotSelection:
+                this.props.activityRef.allows_timeslot_selection === null ?
+                    "false" :
+                    this.props.activityRef.allows_timeslot_selection.toString(),
+            nextCycles: this.props.nextCycles,
+        };
+
         this.instruments = _(props.activityInstruments)
             .groupBy("id")
             .mapValues(_.size)
             .value();
 
         this.teachers = this.props.teachers;
-        this.imageChanged = false
+        this.imageChanged = false;
         this.route =
             this.props.postTo === "update" ?
                 `/activity_ref/${this.props.activityRef.id}/update`
                 : `/activity_ref`;
 
         this.state = {
-            pricingCategoriesToSave: []
-        }
+            pricingCategoriesToSave: [],
+        };
+    }
+
+    buildApplicationOptions(activityRef) {
+        const options = [];
+
+        activityRef.has_additional_student && options.push("has_additional_student");
+        activityRef.is_lesson && options.push("is_lesson");
+        activityRef.is_visible_to_admin && options.push("is_visible_to_admin");
+        activityRef.is_unpopular && options.push("is_unpopular");
+        activityRef.is_evaluable && options.push("is_evaluable");
+
+        return options;
     }
 
     addPricingCategoriesToSave(pricing) {
         // on ajoute le pricing à la liste des pricings à sauvegarder
         this.setState({
-            pricingCategoriesToSave: [...this.state.pricingCategoriesToSave, pricing]
-        })
+            pricingCategoriesToSave: [...this.state.pricingCategoriesToSave, pricing],
+        });
     }
 
     updatePricingCategoriesToSave(updatedPricing) {
@@ -51,29 +74,29 @@ export default class ActivityRefContainer extends React.Component {
                     return updatedPricing;
                 }
                 return pricing;
-            })
-        })
+            }),
+        });
     }
 
     deletePricingCategoriesToSave(pricing) {
         // on supprime le pricing de la liste des pricings à sauvegarder
         this.setState({
-            pricingCategoriesToSave: this.state.pricingCategoriesToSave.filter(p => p.id !== pricing.id)
-        })
+            pricingCategoriesToSave: this.state.pricingCategoriesToSave.filter(p => p.id !== pricing.id),
+        });
     }
 
     onWorkgroupChange({ values }) {
-        this.instruments = values
+        this.instruments = values;
     }
 
 
     /**
      * @param {[]} teachers
      */
-    onTeachersChange(teachers)
-    {
-        this.teachers = teachers
+    onTeachersChange(teachers) {
+        this.teachers = teachers;
     }
+
     sendImage(activityRefId) {
         let formData = new FormData();
         formData.append("picture", this.image);
@@ -84,21 +107,21 @@ export default class ActivityRefContainer extends React.Component {
             headers: {
                 "X-CSRF-Token": csrfToken,
             },
-            body: formData
+            body: formData,
         }).then(res => {
             if (res.ok) {
                 res.json().then(json => {
                     redirectTo("/activity_ref");
                     swal({
                         type: "success",
-                        title: "Enregistrement effectué"
+                        title: "Enregistrement effectué",
                     });
                 });
             } else {
                 swal({
                     type: "error",
-                    title: "Une erreur est survenue"
-                })
+                    title: "Une erreur est survenue",
+                });
             }
         });
 
@@ -123,12 +146,13 @@ export default class ActivityRefContainer extends React.Component {
             is_visible_to_admin: values.applicationOptions.includes("is_visible_to_admin"),
             is_unpopular: values.applicationOptions.includes("is_unpopular"),
             is_evaluable: values.applicationOptions.includes("is_evaluable"),
-            allows_timeslot_selection: values.applicationOptions.includes("allows_timeslot_selection"),
+            allows_timeslot_selection: values.allowsTimeslotSelection === "true",
+            substitutable: values.substitutable === "true",
             is_work_group: values.activityRef.is_work_group,
             instruments: this.instruments,
             users: (this.teachers || []).map(t => t.id),
-            pricings: this.state.pricingCategoriesToSave
-        }
+            pricings: this.state.pricingCategoriesToSave,
+        };
 
         api
             .set()
@@ -145,7 +169,7 @@ export default class ActivityRefContainer extends React.Component {
                     redirectTo("/activity_ref");
                     swal({
                         type: "success",
-                        title: "Enregistrement effectué"
+                        title: "Enregistrement effectué",
                     });
                 }
 
@@ -154,8 +178,8 @@ export default class ActivityRefContainer extends React.Component {
                 console.log("error updating activity ref : ", msg);
                 swal({
                     type: "error",
-                    title: "Une erreur est survenue"
-                })
+                    title: "Une erreur est survenue",
+                });
 
             })
             .post(this.route, { activity_ref: activityRef });
@@ -166,10 +190,10 @@ export default class ActivityRefContainer extends React.Component {
         const errors = { activityRef: {} };
 
         if (isIntStrInf(values.activityRef.occupation_hard_limit, values.activityRef.occupation_limit))
-            errors.activityRef.occupation_hard_limit = 'doit être supérieur au nombre de places';
+            errors.activityRef.occupation_hard_limit = "doit être supérieur au nombre de places";
 
-        if ( isIntStrInf(values.activityRef.to_age, values.activityRef.from_age) )
-            errors.activityRef.to_age = 'doit être supérieur à l\'âge min';
+        if (isIntStrInf(values.activityRef.to_age, values.activityRef.from_age))
+            errors.activityRef.to_age = "doit être supérieur à l'âge min";
 
         return errors;
     }
@@ -214,10 +238,7 @@ export default class ActivityRefContainer extends React.Component {
                                     id: "activity_ref_application",
                                     header: "Inscription",
                                     body: <ActivityRefApplication
-                                        activityRef={this.props.activityRef}
                                         activityRefs={this.props.activityRefs}
-                                        applicationOptions={this.props.activityRefApplicationOptions}
-                                        nextCycles={this.props.nextCycles}
                                     />,
                                 },
 
@@ -238,8 +259,8 @@ export default class ActivityRefContainer extends React.Component {
                                     body: <ActivityRefTeachers
                                         teachers={this.props.teachers}
                                         onChange={this.onTeachersChange.bind(this)}
-                                    />
-                                }
+                                    />,
+                                },
 
                             ]}>
 
@@ -247,8 +268,12 @@ export default class ActivityRefContainer extends React.Component {
 
 
                             <div style={{ padding: 20, display: "flex", justifyContent: "flex-end", gap: "20px" }}>
-                                <div><button type="reset" className="btn btn-block">Annuler</button></div>
-                                <div><button type="submit" className="btn btn-primary btn-block">Valider</button></div>
+                                <div>
+                                    <button type="reset" className="btn btn-block">Annuler</button>
+                                </div>
+                                <div>
+                                    <button type="submit" className="btn btn-primary btn-block">Valider</button>
+                                </div>
                             </div>
                         </form>
                     )}
@@ -259,13 +284,11 @@ export default class ActivityRefContainer extends React.Component {
     }
 }
 
-function isIntStrInf(str1, str2)
-{
+function isIntStrInf(str1, str2) {
     return (intOrUndefined(str1) || str1) < (intOrUndefined(str2) || str2);
 }
 
-function intOrUndefined(str)
-{
+function intOrUndefined(str) {
     const val = parseInt(str);
 
     return isNaN(val) ? undefined : val;
