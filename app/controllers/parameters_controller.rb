@@ -54,19 +54,17 @@ class ParametersController < ApplicationController
     min_captcha_score.value = school_params["recaptcha_score_min"] || 0.7
     min_captcha_score.save
 
-    # get academy
-    academy = zone = nil
+    # get academy and zone
+    academy = "#{params[:academy]}"
+    zone = "#{params[:zone]}"
 
-    academy = params[:academy]
-    zone = params[:zone]
-
-    if zone.nil?
+    if zone.empty? || academy.empty?
       if school_params["street"] != "" && school_params["postalCode"] != "" && school_params["city"] != ""
         address = "#{school_params["street"]} #{school_params["postalCode"]} #{school_params["city"]}"
         location = Holidays::SchoolHolidays.fetch_location_for_address(address)
 
         unless location.nil?
-          academy = Holidays::SchoolHolidays.fetch_academie_from_location(location)
+          academy = "#{Holidays::SchoolHolidays.fetch_academie_from_location(location)}"
           zone = Holidays::SchoolHolidays.new(Season.current.start.year, academy).fetch_school_zone if academy
         end
       end
@@ -83,7 +81,7 @@ class ParametersController < ApplicationController
 
       new_school.logo.attach(school_params["picture"]) if school_params[:picture] != "undefined"
 
-      unless academy.nil?
+      unless academy.empty?
         new_school[:academy] = academy
         new_school[:zone] = zone
       end
@@ -107,7 +105,7 @@ class ParametersController < ApplicationController
 
       school.logo.attach(school_params["picture"]) if school_params[:picture] != "undefined"
 
-      unless academy.nil?
+      unless academy.empty?
         school.academy = academy
         school.zone = zone
       end
