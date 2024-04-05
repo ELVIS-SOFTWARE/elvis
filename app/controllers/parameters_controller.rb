@@ -58,6 +58,12 @@ class ParametersController < ApplicationController
     academy = "#{params[:academy]}"
     zone = "#{params[:zone]}"
 
+    # if front send undefined or null, we set it to empty
+    %w[undefined null].each do |value|
+      academy = "" if academy == value
+      zone = "" if zone == value
+    end
+
     if zone.empty? || academy.empty?
       if school_params["street"] != "" && school_params["postalCode"] != "" && school_params["city"] != ""
         address = "#{school_params["street"]} #{school_params["postalCode"]} #{school_params["city"]}"
