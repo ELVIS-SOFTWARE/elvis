@@ -165,7 +165,6 @@ class ActivityInstanceController < ApplicationController
       if start_time >= instance.time_interval.end || end_time.present? && start_time >= end_time
         raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin actuelle."
       end
-
       time_update[:start] = instance.time_interval.start.change(
         hour: start_time&.first,
         min: start_time&.second
@@ -176,7 +175,6 @@ class ActivityInstanceController < ApplicationController
       if end_time <= instance.time_interval.start || start_time.present? && end_time <= start_time
         raise ArgumentError, "L'heure de fin doit être postérieure à l'heure de début actuelle."
       end
-
       time_update[:end] = instance.time_interval.end.change(
         hour: end_time&.first,
         min: end_time&.second
