@@ -161,20 +161,20 @@ class ActivityInstanceController < ApplicationController
   def build_time_updates(instance, start_time, end_time)
     time_update = {}
 
-    start_interval = instance.time_interval.start
-    end_interval = instance.time_interval.end
+    start_interval_obj = instance.time_interval.start
+    end_interval_obj = instance.time_interval.end
     start_time_obj = Time.zone.local(start_interval.year, start_interval.month, start_interval.day, start_time&.first, start_time&.second) if start_time.present?
     end_time_obj = Time.zone.local(end_interval.year, end_interval.month, end_interval.day, end_time&.first, end_time&.second) if end_time.present?
 
-    if start_time.present? && start_time_obj > end_interval
-      raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin actuelle."
+    if start_time.present? && start_time_obj > end_interval_obj
+      raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin."
     end
 
     if start_time.present? && end_time.present? && start_time_obj > end_time_obj
       raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin."
     end
 
-    if end_time.present? && end_time_obj < start_interval
+    if end_time.present? && end_time_obj < start_interval_obj
       raise ArgumentError, "L'heure de fin doit être postérieure à l'heure de début."
     end
 
