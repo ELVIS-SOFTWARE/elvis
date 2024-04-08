@@ -161,28 +161,29 @@ class ActivityInstanceController < ApplicationController
   def build_time_updates(instance, start_time, end_time)
     time_update = {}
 
-    if start_time.present?
-      if start_time >= instance.time_interval.end || end_time.present? && start_time >= end_time
-        raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin actuelle."
-      end
-      time_update[:start] = instance.time_interval.start.change(
-        hour: start_time&.first,
-        min: start_time&.second
-      )
+    start_interval = instance.time_interval.start
+    end_interval = instance.time_interval.end
+    start_time_obj = Time.zone.local(start_interval.year, start_interval.month, start_interval.day, start_time&.first, start_time&.second) if start_time.present?
+    end_time_obj = Time.zone.local(end_interval.year, end_interval.month, end_interval.day, end_time&.first, end_time&.second) if end_time.present?
+
+    if start_time.present? && start_time_obj > end_interval
+      raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin actuelle."
     end
 
-    if end_time.present?
-      if end_time <= instance.time_interval.start || start_time.present? && end_time <= start_time
-        raise ArgumentError, "L'heure de fin doit être postérieure à l'heure de début actuelle."
-      end
-      time_update[:end] = instance.time_interval.end.change(
-        hour: end_time&.first,
-        min: end_time&.second
-      )
+    if start_time.present? && end_time.present? && start_time_obj > end_time_obj
+      raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin."
     end
+
+    if end_time.present? && end_time_obj < start_interval
+      raise ArgumentError, "L'heure de fin doit être postérieure à l'heure de début."
+    end
+
+    time_update[:start] = instance.time_interval.start.change(hour: start_time&.first, min: start_time&.second) if start_time_obj.present?
+    time_update[:end] = instance.time_interval.end.change(hour: end_time&.first, min: end_time&.second) if end_time_obj.present?
 
     time_update
   end
+
 
   def build_date_updates(instance, start_date)
     date_update = {}
