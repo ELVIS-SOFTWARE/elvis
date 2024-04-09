@@ -14,6 +14,19 @@ const getDisplayPrice = (ref, season) => {
     return ref.display_prices_by_season[season.id] || ref.display_price || "--";
 };
 
+const getDisplayDuration = ref => {
+    if (ref == undefined) return "--";
+    if (ref.duration >= 60) {
+        const hours = Math.floor(ref.duration / 60);
+        const minutes = ref.duration % 60;
+        return `${hours}h${minutes < 10 ? "0" : ""}${minutes}`;
+    } else if (ref.duration > 0) {
+        return `${ref.duration} min`;
+    } else {
+        return "";
+    }
+}
+
 const ActivityChoice = ({
                             schoolName,
                             adhesionPrices,
@@ -143,7 +156,13 @@ const ActivityChoice = ({
     });
 
 
-    const individualRefs = _.uniqBy(_.union(filteredActivityRefsChildhood, allActivityRefs.filter(ar => ar.allows_timeslot_selection == true && isInAgeRange(ar))), "id");
+    const individualRefs =
+        _.uniqBy(
+            _.union(
+                filteredActivityRefsChildhood,
+                allActivityRefs.filter(ar => ar.allows_timeslot_selection == true && isInAgeRange(ar))
+            ),
+            "id");
     const filteredIndividualActivityRefsDisplay = _.map(
         individualRefs,
         (ref, i) => {
@@ -153,11 +172,16 @@ const ActivityChoice = ({
             ).length;
 
             return (
-                <div key={i} className="row m-b-md">
+                <div key={i} className="row m-b-md d-flex align-items-center">
                     <div className="col-xs-6">
                         <strong>{ref.label}</strong>
                     </div>
-                    <div className="col-xs-6 text-center">
+                    <div className="col-xs-2 text-center">
+                        <span className="activite-amount pull-left">
+                            {getDisplayDuration(ref)}
+                        </span>
+                    </div>
+                    <div className="col-xs-4 text-center">
                         <span className="activite-amount pull-left">
                             {getDisplayPrice(ref, season)}{" "}
                             €
@@ -415,8 +439,7 @@ const ActivityChoice = ({
         });
     }
 
-    const showTarifInformation = () =>
-    {
+    const showTarifInformation = () => {
         const selectedAct = allActivityRefs.filter(ar => selectedActivities.includes(ar.id));
 
         return !!selectedAct.find(ar => ar.allows_timeslot_selection === false);
@@ -498,7 +521,7 @@ const ActivityChoice = ({
                         </div>
                     )}
 
-                    { showTarifInformation() && <div className="alert alert-info">
+                    {showTarifInformation() && <div className="alert alert-info">
                         <p className="m-b-xs">
                             Les tarifs affichés sont à titre indicatif. Ils
                             correspondent au coût pour une personne inscrite en
