@@ -281,7 +281,8 @@ class ActivityRefController < ApplicationController
       :is_work_group,
       :activity_type,
       :users,
-      :nb_lessons
+      :nb_lessons,
+      :duration,
     )
   end
 end

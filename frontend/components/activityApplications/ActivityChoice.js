@@ -14,6 +14,19 @@ const getDisplayPrice = (ref, season) => {
     return ref.display_prices_by_season[season.id] || ref.display_price || "--";
 };
 
+const getDisplayDuration = ref => {
+    if (ref == undefined) return "--";
+    if (ref.duration >= 60) {
+        const hours = Math.floor(ref.duration / 60);
+        const minutes = ref.duration % 60;
+        return `${hours}h${minutes < 10 ? "0" : ""}${minutes}`;
+    } else if (ref.duration > 0) {
+        return `${ref.duration} min`;
+    } else {
+        return "";
+    }
+}
+
 const ActivityChoice = ({
                             schoolName,
                             adhesionPrices,
@@ -158,11 +171,16 @@ const ActivityChoice = ({
             ).length;
 
             return (
-                <div key={i} className="row m-b-md">
+                <div key={i} className="row m-b-md d-flex align-items-center">
                     <div className="col-xs-6">
                         <strong>{ref.label}</strong>
                     </div>
-                    <div className="col-xs-6 text-center">
+                    <div className="col-xs-2 text-center">
+                        <span className="activite-amount pull-left">
+                            {getDisplayDuration(ref)}
+                        </span>
+                    </div>
+                    <div className="col-xs-4 text-center">
                         <span className="activite-amount pull-left">
                             {getDisplayPrice(ref, season)}{" "}
                             €
@@ -201,11 +219,16 @@ const ActivityChoice = ({
         ).length;
 
         return (
-            <div key={i} className="row m-b-md">
+            <div key={i} className="row m-b-md d-flex align-items-center">
                 <div className="col-xs-6">
                     <strong>{ref.label}</strong>
                 </div>
-                <div className="col-xs-6 text-center">
+                <div className="col-xs-2 text-center">
+                    <span className="activite-amount pull-left">
+                        {getDisplayDuration(ref)}
+                    </span>
+                </div>
+                <div className="col-xs-4 text-center">
                     <span className="activite-amount pull-left">
                         {getDisplayPrice(ref, season)} €
                     </span>
@@ -330,7 +353,12 @@ const ActivityChoice = ({
                                 {pricing_category.name}
                             </p>
                         </div>
-                        <div className="col-xs-6 text-center">
+                        <div className="col-xs-2 text-center">
+                            <span className="activite-amount pull-left">
+                                {getDisplayDuration(pack.activity_ref)}
+                            </span>
+                        </div>
+                        <div className="col-xs-4 text-center">
                             <div className="pull-left">
                                 <span className="activite-amount">
                                     {pack.price} €

@@ -152,6 +152,7 @@ export default class ActivityRefContainer extends React.Component {
             instruments: this.instruments,
             users: (this.teachers || []).map(t => t.id),
             pricings: this.state.pricingCategoriesToSave,
+            duration: values.activityRef.duration,
         };
 
         api
