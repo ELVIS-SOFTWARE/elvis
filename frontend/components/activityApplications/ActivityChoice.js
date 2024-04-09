@@ -220,11 +220,16 @@ const ActivityChoice = ({
         ).length;
 
         return (
-            <div key={i} className="row m-b-md">
+            <div key={i} className="row m-b-md d-flex align-items-center">
                 <div className="col-xs-6">
                     <strong>{ref.label}</strong>
                 </div>
-                <div className="col-xs-6 text-center">
+                <div className="col-xs-2 text-center">
+                    <span className="activite-amount pull-left">
+                        {getDisplayDuration(ref)}
+                    </span>
+                </div>
+                <div className="col-xs-4 text-center">
                     <span className="activite-amount pull-left">
                         {getDisplayPrice(ref, season)} €
                     </span>
@@ -354,7 +359,12 @@ const ActivityChoice = ({
                                 {pricing_category.name}
                             </p>
                         </div>
-                        <div className="col-xs-6 text-center">
+                        <div className="col-xs-2 text-center">
+                            <span className="activite-amount pull-left">
+                                {getDisplayDuration(pack.activity_ref)}
+                            </span>
+                        </div>
+                        <div className="col-xs-4 text-center">
                             <div className="pull-left">
                                 <span className="activite-amount">
                                     {pack.price} €
