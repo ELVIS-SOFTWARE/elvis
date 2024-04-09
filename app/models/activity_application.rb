@@ -113,7 +113,6 @@ class ActivityApplication < ApplicationRecord
   # * les disponibilités renseignées, sinon
   # @return [Array<TimeInterval>] les disponibilités correspondantes
   def availabilities(include_validated: false)
-    # if childhood application, return selected preferences
     if self.desired_activities.joins(:activity_ref).where(activity_refs: { allows_timeslot_selection: true }).any?
       self
         .time_interval_preferences
@@ -122,7 +121,6 @@ class ActivityApplication < ApplicationRecord
         .map(&:time_interval)
         .compact
 
-      # else return non validated intervals in season's bounds
     else
       query = self
         .user

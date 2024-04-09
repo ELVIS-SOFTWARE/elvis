@@ -245,7 +245,6 @@ Rails.application.routes.draw do
   get "/update_family_members_unsafe", to: "family_members#update_all"
 
   # (pour élèves/admin) page de demande d'inscription pour la saison prochaine (renouveler/arrêter les activités actuelles + nouvelles activités)
-  get "/new_application_v1/:id", to: "users#new_application_v1", as: "new_application_v1"
   get "/new_application/:id", to: "users#new_application", as: "new_application"
   get "/create_account/:id", to: "users#create_account"
   patch "/save_new_account/:id", to: "users#save_new_account"

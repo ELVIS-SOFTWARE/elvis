@@ -109,7 +109,7 @@ const ActivityChoice = ({
         }
     };
 
-    const groupedRefs = _.groupBy(filteredActivityRefs.filter(r => r.allows_timeslot_selection == false), "kind");
+    const groupedRefs = _.groupBy(filteredActivityRefs.filter(r => r.substitutable === true), "kind");
 
     const filteredActivityRefsDisplay = _.map(groupedRefs, (refs, kind) => {
         const displayRefs = refs.map((ref, i) => {
@@ -155,14 +155,13 @@ const ActivityChoice = ({
         return <div key={kind}>{_.compact(displayRefs)}</div>;
     });
 
-
     const individualRefs =
         _.uniqBy(
             _.union(
                 filteredActivityRefsChildhood,
-                allActivityRefs.filter(ar => ar.allows_timeslot_selection == true && isInAgeRange(ar))
-            ),
-            "id");
+                allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar))
+            ), "id");
+
     const filteredIndividualActivityRefsDisplay = _.map(
         individualRefs,
         (ref, i) => {
@@ -268,11 +267,6 @@ const ActivityChoice = ({
             let selectedActivity = _.find(
                 allActivityRefs,
                 ar => ar.id == parseInt(selectedActivityId, 10)
-            );
-
-            let selectedActivityDisplayPrice = _.find(
-                [...filteredActivityRefs, ...filteredActivityRefsChildhood],
-                ar => ar.activity_type != "child" && ar.kind == selectedActivity.kind
             );
 
             let displayPrice = "--";
@@ -449,10 +443,13 @@ const ActivityChoice = ({
         });
     }
 
-    const showTarifInformation = () => {
+    // si une des activités sélectionnée est substituable,
+    // on doit informer l'utilisateur que le tarif affiché est indicatif
+    const showPriceWarning = () =>
+    {
         const selectedAct = allActivityRefs.filter(ar => selectedActivities.includes(ar.id));
 
-        return !!selectedAct.find(ar => ar.allows_timeslot_selection === false);
+        return !!selectedAct.find(ar => ar.substitutable === true);
     }
 
     return (
@@ -531,7 +528,7 @@ const ActivityChoice = ({
                         </div>
                     )}
 
-                    {showTarifInformation() && <div className="alert alert-info">
+                    { showPriceWarning() && <div className="alert alert-info">
                         <p className="m-b-xs">
                             Les tarifs affichés sont à titre indicatif. Ils
                             correspondent au coût pour une personne inscrite en

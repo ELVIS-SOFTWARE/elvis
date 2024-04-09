@@ -289,7 +289,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
-                              .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and !ar["allows_timeslot_selection"] }
+                              .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and ar["substitutable"] }
                               .group_by { |ar| ar["kind"] }
                               .transform_values  do |values|
                                 default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
