@@ -75,7 +75,7 @@ module LiquidDrops
     end
 
     def startDate
-      I18n.l(DateTime.parse(@activity["time_interval"]["end"]), format: "%A %d")
+      I18n.l(DateTime.parse(@activity["time_interval"]["end"]), format: "%A %d ")
     end
 
   end
