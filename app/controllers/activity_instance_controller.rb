@@ -159,8 +159,8 @@ class ActivityInstanceController < ApplicationController
     end
 
     # build the new time interval start and end
-    new_time_interval[:start] = Time.zone.local(new_time_interval_array[:date]&.first, new_time_interval_array[:date]&.second, new_time_interval_array[:date]&.third, new_time_interval_array[:startTime]&.first, new_time_interval_array[:startTime]&.second)
-    new_time_interval[:end] = Time.zone.local(new_time_interval_array[:date]&.first, new_time_interval_array[:date]&.second, new_time_interval_array[:date]&.third, new_time_interval_array[:endTime]&.first, new_time_interval_array[:endTime]&.second)
+    new_time_interval[:start] = Time.zone.local(*new_time_interval_array[:date], *new_time_interval_array[:startTime])
+    new_time_interval[:end] = Time.zone.local(*new_time_interval_array[:date], *new_time_interval_array[:endTime])
 
     # Check if the new time interval is valid
     if new_time_interval[:start] > new_time_interval[:end]
