@@ -30,12 +30,13 @@ class ActivityInstanceController < ApplicationController
     instance = ActivityInstance.includes(activity: :activity_instances).find(params[:id])
 
     begin
+      old_time_interval = instance.time_interval
       new_time_interval_array = {
         startTime: params[:startTime]&.split(":").present? ? params[:startTime]&.split(":") : [],
         endTime: params[:endTime]&.split(":").present? ? params[:endTime]&.split(":") : [],
         date: params[:startDate]&.split("-").present? ? params[:startDate]&.split("-") : []
       }
-      old_time_interval = instance.time_interval
+
       new_time_interval = build_new_time_interval(new_time_interval_array, old_time_interval)
     rescue => error
       @error_message = error.message
@@ -76,7 +77,13 @@ class ActivityInstanceController < ApplicationController
     instance.activity.change_teacher(instance.teacher.id, params[:teacher_id])
     instance.change_cover_teacher(params[:cover_teacher_id])
 
-    render json: { instance: instance, error_message: @error_message, success: conflicts_results[:success], conflicts: conflicts_results[:conflicts] }
+
+    render json: {
+      instance: instance,
+      error_message: @error_message,
+      success: conflicts_results.present? ? conflicts_results[:success] : "",
+      conflicts: conflicts_results.present? ? conflicts_results[:conflicts] : ""
+    }
   end
 
   def bulkdelete
