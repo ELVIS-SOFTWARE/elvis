@@ -7,18 +7,7 @@ class ActivityInstanceController < ApplicationController
 
   def update_all
     instances_to_check = Activities::TimeIntervalUpdater.new(params[:id], params[:time_interval_id]).execute
-
-    #  Check conflicts for updated intervals
-    results = { conflicts: [], success: 0 }
-
-    instances_to_check.each do |instance|
-      if instance.check_for_conflict
-        c = instance.check_for_conflict
-        results[:conflicts] << c
-      else
-        results[:success] += 1
-      end
-    end
+    results = Activities::ConflictsChecker.new(instances_to_check).execute
 
     tis = instances_to_check.map { |instance| instance.time_interval }
 
@@ -47,13 +36,10 @@ class ActivityInstanceController < ApplicationController
         date: params[:startDate]&.split("-").present? ? params[:startDate]&.split("-") : []
       }
       old_time_interval = instance.time_interval
-
       new_time_interval = build_new_time_interval(new_time_interval_array, old_time_interval)
     rescue => error
       @error_message = error.message
     end
-
-    puts "WOOP WOOP new_time_interval: #{new_time_interval}"
 
     case params[:room_mode]
     when RoomMode::FOLLOWING
@@ -63,6 +49,12 @@ class ActivityInstanceController < ApplicationController
                     .joins(:time_interval)
                     .where("time_intervals.start >= ?", instance.time_interval.start)
                     .each { |i| i.update(permitted_params) }
+
+      if new_time_interval.present?
+        instance.time_interval.update!(new_time_interval)
+        following_instances_to_update = Activities::TimeIntervalUpdater.new(instance.id, instance.time_interval.id).execute
+        conflicts_results = Activities::ConflictsChecker.new(following_instances_to_update).execute
+      end
 
     when RoomMode::ALL
       instances = instance
@@ -84,7 +76,7 @@ class ActivityInstanceController < ApplicationController
     instance.activity.change_teacher(instance.teacher.id, params[:teacher_id])
     instance.change_cover_teacher(params[:cover_teacher_id])
 
-    render json: { instance: instance, error_message: @error_message }
+    render json: { instance: instance, error_message: @error_message, success: conflicts_results[:success], conflicts: conflicts_results[:conflicts] }
   end
 
   def bulkdelete
@@ -158,9 +150,13 @@ class ActivityInstanceController < ApplicationController
       end
     end
 
-    # build the new time interval start and end
-    new_time_interval[:start] = Time.zone.local(*new_time_interval_array[:date], *new_time_interval_array[:startTime])
-    new_time_interval[:end] = Time.zone.local(*new_time_interval_array[:date], *new_time_interval_array[:endTime])
+    # build the new time interval
+    new_time_interval.merge!({
+                               start: Time.zone.local(*new_time_interval_array[:date], *new_time_interval_array[:startTime]),
+                               end: Time.zone.local(*new_time_interval_array[:date], *new_time_interval_array[:endTime]),
+                               kind: 'c',
+                               is_validated: true
+                             })
 
     # Check if the new time interval is valid
     if new_time_interval[:start] > new_time_interval[:end]
@@ -169,9 +165,6 @@ class ActivityInstanceController < ApplicationController
     if new_time_interval[:start].strftime("%U") != old_time_interval.start.strftime("%U")
       raise ArgumentError, "La date doit être dans la même semaine que l'instance actuelle."
     end
-
-    # Add the time interval kind "c" and is_validated true
-    new_time_interval.merge!({ kind: 'c', is_validated: true })
 
     # Return the new time interval
     new_time_interval
