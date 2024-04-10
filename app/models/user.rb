@@ -583,13 +583,17 @@ class User < ApplicationRecord
   end
 
   def get_is_legal_referent_users(season = Season.current_apps_season)
+    get_legal_referent_users(season)
+      .uniq { |u| "#{u.first_name.downcase} #{u.last_name.downcase}" }
+  end
+
+  def get_legal_referent_users(season = Season.current_apps_season)
     inverse_family_members
       .includes(:user)
       .for_season(season)
       .where(is_legal_referent: true)
       .map(&:user)
       .compact
-      .uniq { |u| "#{u.first_name.downcase} #{u.last_name.downcase}" }
   end
 
   def is_to_call?(u = nil, season = Season.current_apps_season)
