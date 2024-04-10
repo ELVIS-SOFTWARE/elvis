@@ -6,28 +6,7 @@ class ActivityInstanceController < ApplicationController
   end
 
   def update_all
-    time_interval = TimeInterval.find(params[:time_interval_id])
-    new_time_intervals = time_interval.generate_for_rest_of_season.select { |i| i[:start] != time_interval.start || i[:end] != time_interval.end }
-
-    instance = ActivityInstance.find(params[:id])
-    instances_to_update = instance.activity.activity_instances.select { |instance| instance.time_interval.start > time_interval.start }
-
-    instances_to_check = instances_to_update
-
-    new_time_intervals.each do |new_time_interval|
-      # For each instance, we need to find the time_interval that is the same week
-      corresponding_activity_instance = instances_to_update.select { |activity_instance| activity_instance.time_interval.start.strftime("%U") == new_time_interval[:start].strftime("%U") }.first
-
-      if corresponding_activity_instance.nil?
-        new_interval = TimeInterval.create(start: new_time_interval[:start], end: new_time_interval[:end], kind: 'c', is_validated: true)
-        corresponding_activity_instance = ActivityInstance.create(time_interval: new_interval, room: instance.room, location: instance.location, activity: instance.activity)
-        instances_to_check << corresponding_activity_instance
-      end
-
-      ti = corresponding_activity_instance.time_interval
-      ti.change_start_and_end(new_time_interval[:start], new_time_interval[:end])
-      ti.save
-    end
+    instances_to_check = Activities::TimeIntervalUpdater.new(params[:id], params[:time_interval_id]).execute
 
     #  Check conflicts for updated intervals
     results = { conflicts: [], success: 0 }
@@ -61,16 +40,20 @@ class ActivityInstanceController < ApplicationController
   def edit_activity_instance
     instance = ActivityInstance.includes(activity: :activity_instances).find(params[:id])
 
-    start_time = params[:startTime]&.split(":")
-    end_time = params[:endTime]&.split(":")
-    start_date = params[:startDate]&.split("-")
-
-    time_update = build_time_updates(instance, start_time, end_time)
     begin
-      date_update = build_date_updates(instance, start_date)
+      new_time_interval_array = {
+        startTime: params[:startTime]&.split(":").present? ? params[:startTime]&.split(":") : [],
+        endTime: params[:endTime]&.split(":").present? ? params[:endTime]&.split(":") : [],
+        date: params[:startDate]&.split("-").present? ? params[:startDate]&.split("-") : []
+      }
+      old_time_interval = instance.time_interval
+
+      new_time_interval = build_new_time_interval(new_time_interval_array, old_time_interval)
     rescue => error
       @error_message = error.message
     end
+
+    puts "WOOP WOOP new_time_interval: #{new_time_interval}"
 
     case params[:room_mode]
     when RoomMode::FOLLOWING
@@ -89,9 +72,7 @@ class ActivityInstanceController < ApplicationController
 
       instance.activity.update!(params.permit(:room_id, :location_id))
     else
-
-      instance.time_interval.update!(time_update) if time_update.present?
-      instance.time_interval.update!(date_update) if date_update.present?
+      instance.time_interval.update!(new_time_interval) if new_time_interval.present?
       instance.update!(permitted_params)
     end
 
@@ -158,59 +139,43 @@ class ActivityInstanceController < ApplicationController
     params.permit(:room_id, :location_id, :are_hours_counted)
   end
 
-  def build_time_updates(instance, start_time, end_time)
-    time_update = {}
+  def build_new_time_interval(new_time_interval_array, old_time_interval)
+    new_time_interval = {}
 
-    start_interval_obj = instance.time_interval.start
-    end_interval_obj = instance.time_interval.end
-    start_time_obj = Time.zone.local(start_interval.year, start_interval.month, start_interval.day, start_time&.first, start_time&.second) if start_time.present?
-    end_time_obj = Time.zone.local(end_interval.year, end_interval.month, end_interval.day, end_time&.first, end_time&.second) if end_time.present?
-
-    if start_time.present? && start_time_obj > end_interval_obj
-      raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin."
-    end
-
-    if start_time.present? && end_time.present? && start_time_obj > end_time_obj
-      raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin."
-    end
-
-    if end_time.present? && end_time_obj < start_interval_obj
-      raise ArgumentError, "L'heure de fin doit être postérieure à l'heure de début."
-    end
-
-    time_update[:start] = instance.time_interval.start.change(hour: start_time&.first, min: start_time&.second) if start_time_obj.present?
-    time_update[:end] = instance.time_interval.end.change(hour: end_time&.first, min: end_time&.second) if end_time_obj.present?
-
-    time_update
-  end
-
-
-  def build_date_updates(instance, start_date)
-    date_update = {}
-
-    if start_date.present?
-      instance_date_obj = instance.time_interval.start
-      current_week_start = instance_date_obj.beginning_of_week
-      current_week_end = instance_date_obj.end_of_week
-      start_date_obj = Time.zone.local(start_date&.first, start_date&.second, start_date&.third, instance_date_obj.hour, instance_date_obj.min, instance_date_obj.sec)
-
-      if start_date_obj < current_week_start || start_date_obj > current_week_end
-        raise ArgumentError, "La date doit être dans la même semaine que l'instance actuelle."
-      else
-        date_update[:start] = instance.time_interval.start.change(
-          year: start_date&.first,
-          month: start_date&.second,
-          day: start_date&.third
-        )
-        date_update[:end] = instance.time_interval.end.change(
-          year: start_date&.first,
-          month: start_date&.second,
-          day: start_date&.third
-        )
+    time_keys = [:date, :startTime, :endTime]
+    time_keys.each do |key|
+      if new_time_interval_array[key].empty?
+        case key
+        when :date
+          new_time_interval_array[key].push(old_time_interval.start.year, old_time_interval.start.month, old_time_interval.start.day)
+        when :startTime
+          new_time_interval_array[key].push(old_time_interval.start.hour, old_time_interval.start.min)
+        when :endTime
+          new_time_interval_array[key].push(old_time_interval.end.hour, old_time_interval.end.min)
+        else
+          raise ArgumentError, "La clé #{key} n'est pas reconnue."
+        end
       end
-
-      date_update
     end
 
+    # build the new time interval start and end
+    new_time_interval[:start] = Time.zone.local(new_time_interval_array[:date]&.first, new_time_interval_array[:date]&.second, new_time_interval_array[:date]&.third, new_time_interval_array[:startTime]&.first, new_time_interval_array[:startTime]&.second)
+    new_time_interval[:end] = Time.zone.local(new_time_interval_array[:date]&.first, new_time_interval_array[:date]&.second, new_time_interval_array[:date]&.third, new_time_interval_array[:endTime]&.first, new_time_interval_array[:endTime]&.second)
+
+    # Check if the new time interval is valid
+    if new_time_interval[:start] > new_time_interval[:end]
+      raise ArgumentError, "L'heure de début doit être postérieure à l'heure de fin."
+    end
+    if new_time_interval[:start].strftime("%U") != old_time_interval.start.strftime("%U")
+      raise ArgumentError, "La date doit être dans la même semaine que l'instance actuelle."
+    end
+
+    # Add the time interval kind "c" and is_validated true
+    new_time_interval.merge!({ kind: 'c', is_validated: true })
+
+    # Return the new time interval
+    new_time_interval
   end
+
 end
+

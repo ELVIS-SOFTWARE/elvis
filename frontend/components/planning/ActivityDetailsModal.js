@@ -1658,12 +1658,6 @@ class ActivityEdition extends React.Component {
             const newState = {...this.state};
             newState[name] = value;
 
-            if (newState.startTime && newState.endTime) {
-                if (newState.endTime <= newState.startTime) {
-                    return;
-                }
-            }
-
             this.setState(newState);
         };
 
