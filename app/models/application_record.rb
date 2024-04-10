@@ -111,7 +111,7 @@ class ApplicationRecord < ActiveRecord::Base
 
   # permit caching of any static methods result (with args)
   # cache for 12 hours by default
-  def self.use_cache_for_methods(*methods_to_cache)
+  def self.use_cache_for_methods(*methods_to_cache, expires_in: 12.hours)
     methods_to_cache.flatten!
 
     (methods_to_cache || []).each do |method_to_cache|
@@ -120,7 +120,7 @@ class ApplicationRecord < ActiveRecord::Base
       m = self.method(method_to_cache).to_proc
 
       define_singleton_method method_to_cache do |*args|
-        Rails.cache.fetch("#{self.name}:#{method_to_cache}", expires_in: 12.hours) do
+        Rails.cache.fetch("#{self.name}:#{method_to_cache}", expires_in: expires_in) do
           m.call(*args)
         end
       end
