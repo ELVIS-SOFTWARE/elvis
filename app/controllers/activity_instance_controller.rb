@@ -1,5 +1,5 @@
 class ActivityInstanceController < ApplicationController
-  module RoomMode
+  module InstancesUpdateScope
     SINGULAR = 0
     FOLLOWING = 1
     ALL = 2
@@ -42,8 +42,8 @@ class ActivityInstanceController < ApplicationController
       @error_message = error.message
     end
 
-    case params[:room_mode]
-    when RoomMode::FOLLOWING
+    case params[:instances_update_scope]
+    when InstancesUpdateScope::FOLLOWING
       instances = instance
                     .activity
                     .activity_instances
@@ -57,7 +57,7 @@ class ActivityInstanceController < ApplicationController
         conflicts_results = Activities::ConflictsChecker.new(following_instances_to_update).execute
       end
 
-    when RoomMode::ALL
+    when InstancesUpdateScope::ALL
       instances = instance
                     .activity
                     .activity_instances

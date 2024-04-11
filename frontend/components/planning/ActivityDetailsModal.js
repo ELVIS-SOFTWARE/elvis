@@ -24,7 +24,7 @@ const getTime = momentObj => {
     return momentObj.format("HH:mm");
 };
 
-const RoomModes = Object.freeze({
+const InstancesUpdateScope = Object.freeze({
     SINGULAR: 0, // Affect a single instance
     FOLLOWING: 1, // Affect instance and the ones after
     ALL: 2, // Affect season's room and all instances' rooms
@@ -110,7 +110,7 @@ class ActivityDetailsModal extends React.Component {
         const instance = {
             teacher_id: _.get(this.props.interval, "activity_instance.teachers_activity_instances[0].user_id"),
             evaluation_level_ref_id: _.get(this.props.interval, "activity_instance.activity.evaluation_level_ref_id"),
-            room_mode: RoomModes.SINGULAR,
+            instances_update_scope: InstancesUpdateScope.SINGULAR,
             ..._.pick(_.get(this.props.interval, "activity_instance"), ["room_id", "location_id", "are_hours_counted", "cover_teacher_id"]),
         };
 
@@ -1648,7 +1648,7 @@ class ActivityEdition extends React.Component {
             teacher_id: selectedTeacherId,
             location_id: selectedLocationId,
             room_id: selectedRoomId,
-            room_mode: selectedRoomMode = RoomModes.SINGULAR,
+            instances_update_scope: selectedInstancesUpdateScope = InstancesUpdateScope.SINGULAR,
             evaluation_level_ref_id: selectedEvaluationLevelRefId,
         } = this.state;
 
@@ -1733,13 +1733,13 @@ class ActivityEdition extends React.Component {
                     </div>
                     <select
                         onChange={({target: {name, value}}) => _onChange(name, parseInt(value))}
-                        value={selectedRoomMode}
+                        value={selectedInstancesUpdateScope}
                         className="form-control mb-4"
-                        name="room_mode"
+                        name="instances_update_scope"
                         style={{flex: "1 1"}}>
-                        <option value={RoomModes.SINGULAR}>N'affecter que cette séance</option>
-                        <option value={RoomModes.FOLLOWING}>Affecter cette séance et les suivantes</option>
-                        <option value={RoomModes.ALL}>Affecter toutes les séances de la saison</option>
+                        <option value={InstancesUpdateScope.SINGULAR}>N'affecter que cette séance</option>
+                        <option value={InstancesUpdateScope.FOLLOWING}>Affecter cette séance et les suivantes</option>
+                        <option value={InstancesUpdateScope.ALL}>Affecter toutes les séances de la saison</option>
                     </select>
                 </div>
 

@@ -455,7 +455,7 @@ class Planning extends React.Component {
 
         const BASIC_CHANGES_FILTER = [
             "room_id",
-            "room_mode",
+            "instances_update_scope",
             "location_id",
             "cover_teacher_id",
         ];
