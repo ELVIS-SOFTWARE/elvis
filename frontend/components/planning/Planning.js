@@ -520,7 +520,13 @@ class Planning extends React.Component {
                 .then(response => response.json())
                 .then((data) => {
                     if (data.error_message) {
-                        toast.error(data.error_message);
+                        toast.error(
+                            `${data.error_message}`,
+                            {
+                                position: toast.POSITION.BOTTOM_CENTER,
+                                autoClose: 3000,
+                            }
+                        );
                     }
                     if (hasIntervalOwnerChanged) {
 
@@ -555,8 +561,6 @@ class Planning extends React.Component {
                                         activity_instance: instance,
                                     };
                                 }
-
-
                                 return i;
                             })
                         );
@@ -569,8 +573,24 @@ class Planning extends React.Component {
                             });
                         });
                     }
-
                     this.closeDetailModal();
+                    if (data.result) {
+                        toast.success(
+                            ` Mise à jour de ${data.result.success} cours et création de ${data.result.conflicts.length} conflits`,
+                            {
+                                position: toast.POSITION.BOTTOM_CENTER,
+                                autoClose: 3000,
+                            }
+                        );
+                    } else {
+                        toast.success(
+                            `Le cours est mis à jour !`,
+                            {
+                                position: toast.POSITION.BOTTOM_CENTER,
+                                autoClose: 3000,
+                            }
+                        );
+                    }
                 })
         }
     }

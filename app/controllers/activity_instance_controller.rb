@@ -81,8 +81,7 @@ class ActivityInstanceController < ApplicationController
     render json: {
       instance: instance,
       error_message: @error_message,
-      success: conflicts_results.present? ? conflicts_results[:success] : "",
-      conflicts: conflicts_results.present? ? conflicts_results[:conflicts] : ""
+      result: conflicts_results.present? ? conflicts_results : ""
     }
   end
 
