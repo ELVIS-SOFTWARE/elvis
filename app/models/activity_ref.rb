@@ -75,7 +75,7 @@ class ActivityRef < ApplicationRecord
 
   validate :check_ages_are_corrects, :check_occupation_limits_are_corrects
 
-  validate :duration, numericality: { only_integer: true, greater_than: 0, less_than: 1440 }, allow_nil: true
+  validates :duration, numericality: { only_integer: true, greater_than: 0, less_than: 1440 }, allow_nil: true
 
   attribute :kind
 
