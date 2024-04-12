@@ -6,7 +6,7 @@ class ActivityInstanceController < ApplicationController
   end
 
   def update_all
-    instances_to_check = Activities::TimeIntervalUpdater.new(params[:id], params[:time_interval_id]).execute
+    instances_to_check = Activities::TimeIntervalUpdater.new(params[:id], params[:time_interval_id], "following").execute
     results = Activities::ConflictsChecker.new(instances_to_check).execute
 
     tis = instances_to_check.map { |instance| instance.time_interval }
@@ -53,7 +53,7 @@ class ActivityInstanceController < ApplicationController
 
       if new_time_interval.present?
         instance.time_interval.update!(new_time_interval)
-        following_instances_to_update = Activities::TimeIntervalUpdater.new(instance.id, instance.time_interval.id).execute
+        following_instances_to_update = Activities::TimeIntervalUpdater.new(instance.id, instance.time_interval.id, "following").execute
         conflicts_results = Activities::ConflictsChecker.new(following_instances_to_update).execute
       end
 
@@ -64,6 +64,11 @@ class ActivityInstanceController < ApplicationController
                     .update_all(permitted_params.to_h)
 
       instance.activity.update!(params.permit(:room_id, :location_id))
+      if new_time_interval.present?
+        instance.time_interval.update!(new_time_interval)
+        all_instances_to_update = Activities::TimeIntervalUpdater.new(instance.id, instance.time_interval.id, "all").execute
+        conflicts_results = Activities::ConflictsChecker.new(all_instances_to_update).execute
+      end
     else
       instance.time_interval.update!(new_time_interval) if new_time_interval.present?
       instance.update!(permitted_params)

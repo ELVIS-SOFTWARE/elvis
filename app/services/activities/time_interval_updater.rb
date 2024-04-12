@@ -3,16 +3,20 @@
 module Activities
   class TimeIntervalUpdater
 
-    def initialize(activity_instance_id, new_time_interval_id)
+    def initialize(activity_instance_id, new_time_interval_id, scope)
+      @instances_update_scope = scope
       @activity_instance = ActivityInstance.find(activity_instance_id)
       @new_time_interval = TimeInterval.find(new_time_interval_id)
     end
 
     def execute
-      new_time_intervals = @new_time_interval.generate_for_rest_of_season.select { |i| i[:start] != @new_time_interval.start || i[:end] != @new_time_interval.end }
+
+      @instances_update_scope == 'following' ?
+        new_time_intervals = @new_time_interval.generate_for_rest_of_season.select { |i| i[:start] != @new_time_interval.start || i[:end] != @new_time_interval.end } :
+        new_time_intervals = @new_time_interval.generate_over_season.select { |i| i[:start] != @new_time_interval.start || i[:end] != @new_time_interval.end }
+
       instances_to_update = @activity_instance.activity.activity_instances.select { |instance| instance.time_interval.start > @new_time_interval.start }
       instances_to_check = instances_to_update
-
 
       new_time_intervals.each do |new_time_interval|
         # For each instance, we need to find the time_interval that is the same week
