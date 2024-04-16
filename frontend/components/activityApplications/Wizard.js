@@ -47,9 +47,7 @@ class Wizard extends React.Component {
             possibleMatches: [],
             selectedActivities: [],
             selectedPacks: {},
-            selectedTeachers: {},
             intervals,
-            locations: [],
             additionalStudents: [],
             childhoodTimeAvailabilities: [],
             childhoodPreferences: {},
@@ -71,11 +69,6 @@ class Wizard extends React.Component {
             availPaymentScheduleOptions: this.props.availPaymentScheduleOptions,
             availPaymentMethods: this.props.availPaymentMethods,
         };
-
-        _.map(
-            props.activityRefs,
-            activity => (this.state.selectedTeachers[activity.id] = [])
-        );
 
         this.state.shouldCheckGdpr = !this.state.infos.checked_gdpr;
     }
@@ -370,13 +363,7 @@ class Wizard extends React.Component {
         this.setState({buttonDisabled: true});
 
         const state = {...this.state};
-        const selectedTeachers = _.chain(this.state.selectedTeachers)
-            .reduce((result, value) => {
-                return _.concat(result, value);
-            }, [])
-            .uniq()
-            .value();
-        state.selectedTeachers = selectedTeachers;
+
         const authToken = _.get(this.state, "infos.authentication_token");
 
         api.set()
@@ -881,7 +868,6 @@ class Wizard extends React.Component {
                         application={this.state}
                         buttonDisabled={this.state.buttonDisabled}
                         teachers={this.props.teachers}
-                        locations={this.props.locations}
                         activityRefs={this.props.activityRefs}
                         activityRefsChildhood={this.props.activityRefsChildhood}
                         allActivityRefs={this.props.allActivityRefs}

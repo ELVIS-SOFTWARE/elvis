@@ -549,18 +549,6 @@ class ActivitiesApplicationsController < ApplicationController
 
         additional_students = params[:application][:additionalStudents]
 
-        selectedTeachers = []
-        params[:application][:selectedTeachers].each do |teacherId|
-          teacher = User.find(teacherId)
-          selectedTeachers << teacher
-        end
-
-        selectedLocations = []
-        params[:application][:locations].each do |locationId|
-          location = Location.find(locationId)
-          selectedLocations << location
-        end
-
         @user.planning.update_intervals(params[:application][:intervals], season.id)
 
         params.dig(:application, :infos, :consent_docs)&.each do |doc|
@@ -628,8 +616,6 @@ class ActivitiesApplicationsController < ApplicationController
         params[:application][:selectedActivities].each do |act|
           @activity_application = ActivityApplication.create!(
             user: @user,
-            users: selectedTeachers,
-            locations: selectedLocations,
             activity_application_status: status,
             season: season,
             begin_at: params[:application][:begin_at] || season.start,

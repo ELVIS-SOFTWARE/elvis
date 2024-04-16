@@ -37,12 +37,6 @@ class ActivityApplication < ApplicationRecord
   has_many :desired_activities_csv, -> { select(:id, :activity_application_id, :activity_ref_id) }, class_name: "DesiredActivity"
   has_many :activity_refs, through: :desired_activities
 
-  has_many :desired_teachers
-  has_many :users, through: :desired_teachers
-
-  has_many :desired_locations
-  has_many :locations, through: :desired_locations
-
   has_many :comments, as: :commentable
   has_many :comments_csv, -> { select(:id, :content, :commentable_id, :user_id) }, class_name: "Comment", as: :commentable
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_04_05_065822) do
+ActiveRecord::Schema.define(version: 2024_04_16_095839) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -344,24 +344,6 @@ ActiveRecord::Schema.define(version: 2024_04_05_065822) do
     t.index ["activity_id"], name: "index_desired_activities_on_activity_id"
     t.index ["activity_ref_id"], name: "index_desired_activities_on_activity_ref_id"
     t.index ["deleted_at"], name: "index_desired_activities_on_deleted_at"
-  end
-
-  create_table "desired_locations", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "activity_application_id"
-    t.bigint "location_id"
-    t.index ["activity_application_id"], name: "index_desired_locations_on_activity_application_id"
-    t.index ["location_id"], name: "index_desired_locations_on_location_id"
-  end
-
-  create_table "desired_teachers", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "activity_application_id"
-    t.bigint "user_id"
-    t.index ["activity_application_id"], name: "index_desired_teachers_on_activity_application_id"
-    t.index ["user_id"], name: "index_desired_teachers_on_user_id"
   end
 
   create_table "desired_time_intervals", force: :cascade do |t|
