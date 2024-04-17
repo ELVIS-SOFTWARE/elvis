@@ -29,8 +29,6 @@ class Planning < ApplicationRecord
       return :M
     end
 
-    # the boolean attribute is used to determine whether the new
-    # availabilities are created from a generic planning or not
     def update_intervals(intervals, season_id)
         intervalList = Array.new()
 

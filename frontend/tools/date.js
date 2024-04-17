@@ -3,12 +3,13 @@ import { WEEKDAYS, TIME_STEPS } from "./constants";
 
 export const getNextWeekWithoutSunday = date => {
     const week = [];
+    const firstMondayOffset = 1 - date.getDay();
 
     for (let i = 0; i < WEEKDAYS.length; i++) {
         const value = new Date();
         value.setFullYear(date.getFullYear());
         value.setMonth(date.getMonth());
-        value.setDate(date.getDate() + i);
+        value.setDate(date.getDate() + i + firstMondayOffset);  // on recale sur le lundi
 
         if (value.getDay() === 0) {
             continue;

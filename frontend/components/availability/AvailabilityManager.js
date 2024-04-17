@@ -64,7 +64,7 @@ class AvailabilityManager extends PureComponent {
             .error(errors => this.setState({ errors, isFetching: false }))
             .patch(addToken(`/plannings/availabilities/${this.props.planningId}`, this.props.authToken), {
                 ...interval,
-                day: this.props.day,
+                season_id: this.props.seasonId,
             });
     }
 
@@ -124,6 +124,7 @@ class AvailabilityManager extends PureComponent {
     render() {
         const {
             day,
+            seasonId,
             user,
             locked,
             isTeacher,

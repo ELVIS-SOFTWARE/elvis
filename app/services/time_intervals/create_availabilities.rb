@@ -1,11 +1,24 @@
 module TimeIntervals
-    class CreateAvailabilities
-        def initialize(from, to, kind, planning_id, day, comment)
+
+
+  # Permet de créer un intervalle de temps de type "disponibilité" dans un planning.
+  # Si des conflits sont détectés, l'intervalle ne sera pas créé.
+  # Si le paramètre INTERVAL_STEPS est défini, l'intervalle sera segmenté en plusieurs intervalles de taille égale
+  # Paramètres :
+  # - from : Date de début de l'intervalle
+  # - to : Date de fin de l'intervalle
+  # - season_id : ID de la saison (pour la vérification des conflits)
+  # - planning_id : ID du planning dans lequel créer l'intervalle (planning d'un utilisateur)
+  # - comment : Commentaire à ajouter à l'intervalle
+  # Retourne : Tableau du (ou des) intervalle(s) créés())
+  class CreateAvailabilities
+        def initialize(from, to, season_id, planning_id, comment)
             @from = from
             @to = to
-            @kind = kind
+            @kind = 'p'
             @planning = Planning.includes(:time_intervals).find(planning_id)
-            day_start = day.to_date
+            season = Season.find(season_id)
+            day_start = season.start
             day_end = day_start + 7.day
             @potential_conflicts = @planning
                 .time_intervals
@@ -58,6 +71,7 @@ module TimeIntervals
         end
 
         private
+
 
         def segment_interval(from, to, step)
             intervals = []

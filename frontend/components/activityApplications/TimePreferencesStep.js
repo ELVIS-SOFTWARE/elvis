@@ -70,6 +70,7 @@ export default function TimePreferencesStep({
                     selectionLabels={selectionLabels}
                     ref={availabilityRef}
                     day={season.start}
+                    seasonId={season.id}
                     intervals={intervals}
                     authToken={authToken}
                     isTeacher={false}

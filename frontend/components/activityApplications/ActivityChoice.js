@@ -1,8 +1,8 @@
-import React, {Fragment} from "react";
+import React, { Fragment } from "react";
 import _ from "lodash";
 
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
-import {frenchEnumeration} from "../utils/index.js";
+import { frenchEnumeration } from "../utils/index.js";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -25,7 +25,7 @@ const getDisplayDuration = ref => {
     } else {
         return "";
     }
-}
+};
 
 const ActivityChoice = ({
                             schoolName,
@@ -59,7 +59,7 @@ const ActivityChoice = ({
 
             return a.from_age <= age && age < a.to_age;
         } else {
-            const seasonEnd = moment(season.end)
+            const seasonEnd = moment(season.end);
             // const seasonEnd = moment(); // tmp : reset the calculated age to "relative from today"
             const userAge = seasonEnd.diff(moment(infos.birthday), "years");
             return userAge >= a.from_age && userAge <= a.to_age;
@@ -72,13 +72,13 @@ const ActivityChoice = ({
     const cantSelectChildhood =
         _.intersection(
             selectedActivities,
-            filteredActivityRefsChildhood.map(aref => aref.id)
+            filteredActivityRefsChildhood.map(aref => aref.id),
         ).length > 0;
     const unpopularActivities = allActivityRefs.filter(ref => ref.is_unpopular);
     const unpopularActivityChosen =
         _.intersection(
             unpopularActivities.map(a => a.id),
-            selectedActivities
+            selectedActivities,
         ).length > 0;
 
     const renderChildrenAccompaniments = () => {
@@ -115,7 +115,7 @@ const ActivityChoice = ({
         const displayRefs = refs.map((ref, i) => {
             const amount = _.filter(
                 selectedActivities,
-                activity_id => activity_id == ref.id
+                activity_id => activity_id == ref.id,
             ).length;
 
             return (
@@ -159,7 +159,7 @@ const ActivityChoice = ({
         _.uniqBy(
             _.union(
                 filteredActivityRefsChildhood,
-                allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar))
+                allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
             ), "id");
 
     const filteredIndividualActivityRefsDisplay = _.map(
@@ -167,7 +167,7 @@ const ActivityChoice = ({
         (ref, i) => {
             const amount = _.filter(
                 selectedActivities,
-                activity_id => activity_id == ref.id
+                activity_id => activity_id == ref.id,
             ).length;
 
             return (
@@ -209,13 +209,13 @@ const ActivityChoice = ({
                     </div>
                 </div>
             );
-        }
+        },
     );
 
     const activityRefsDisplayCham = _.map(activityRefsCham, (ref, i) => {
         const amount = _.filter(
             selectedActivities,
-            activity_id => activity_id == ref.id
+            activity_id => activity_id == ref.id,
         ).length;
 
         return (
@@ -259,14 +259,14 @@ const ActivityChoice = ({
 
     const selectedActivitiesCounted = _.countBy(selectedActivities);
     const unpopularActivitiesSelected = unpopularActivities.filter(a =>
-        selectedActivities.includes(a.id)
+        selectedActivities.includes(a.id),
     );
     const selectedActivityRefsDisplay = _.map(
         selectedActivitiesCounted,
         (amount, selectedActivityId) => {
             let selectedActivity = _.find(
                 allActivityRefs,
-                ar => ar.id == parseInt(selectedActivityId, 10)
+                ar => ar.id == parseInt(selectedActivityId, 10),
             );
 
             let displayPrice = "--";
@@ -279,7 +279,7 @@ const ActivityChoice = ({
                 displayPrice =
                     parseInt(
                         getDisplayPrice(selectedActivity, season),
-                        10
+                        10,
                     ) * amount;
 
                 if (isNaN(displayPrice))
@@ -312,7 +312,7 @@ const ActivityChoice = ({
                                     className="btn btn-white btn-secondary"
                                     onClick={() =>
                                         handleRemoveActivity(
-                                            selectedActivity.id
+                                            selectedActivity.id,
                                         )
                                     }
                                     disabled={amount == 0}
@@ -337,7 +337,7 @@ const ActivityChoice = ({
                     </div>
                 </React.Fragment>
             );
-        }
+        },
     );
 
 
@@ -445,12 +445,11 @@ const ActivityChoice = ({
 
     // si une des activités sélectionnée est substituable,
     // on doit informer l'utilisateur que le tarif affiché est indicatif
-    const showPriceWarning = () =>
-    {
+    const showPriceWarning = () => {
         const selectedAct = allActivityRefs.filter(ar => selectedActivities.includes(ar.id));
 
         return !!selectedAct.find(ar => ar.substitutable === true);
-    }
+    };
 
     return (
         <Fragment>
@@ -528,7 +527,7 @@ const ActivityChoice = ({
                         </div>
                     )}
 
-                    { showPriceWarning() && <div className="alert alert-info">
+                    {showPriceWarning() && <div className="alert alert-info">
                         <p className="m-b-xs">
                             Les tarifs affichés sont à titre indicatif. Ils
                             correspondent au coût pour une personne inscrite en
@@ -546,6 +545,7 @@ const ActivityChoice = ({
                         </small>
                     </div>}
                 </div>
+
                 <div className="col-lg-12 text-center">
                     {renderChildrenAccompaniments()}
                 </div>
