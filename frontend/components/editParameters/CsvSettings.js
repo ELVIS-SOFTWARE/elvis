@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
-import { useForm } from "react-hook-form";
+import React, {useState} from 'react';
+import {useForm} from "react-hook-form";
 import {csrfToken} from "../utils";
 import swal from "sweetalert2";
 
-export default function CsvSettings(props)
-{
-    const { register, formState: { errors }, handleSubmit } = useForm();
+export default function CsvSettings(props) {
+    const {register, formState: {errors}, handleSubmit} = useForm();
 
-    function onSubmit(data)
-    {
+    function onSubmit(data) {
         fetch('/parameters/csv_export', {
             method: 'POST',
             credentials: 'same-origin',
@@ -29,8 +27,7 @@ export default function CsvSettings(props)
                     text: 'Les paramètres ont bien été pris en compte',
                     icon: 'success'
                 });
-            }
-            else {
+            } else {
                 swal({
                     title: 'Erreur',
                     text: 'Une erreur est survenue. Contactez un administrateur',
@@ -41,30 +38,29 @@ export default function CsvSettings(props)
     }
 
     return <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="row">
-            <div className="col-sm-4">
+        <div className="col-md-6 col-xs-12">
+            <div>
                 <label>Séparateur de colonnes</label>
-                <input className="form-control" type="text" {...register("colSep", {required: true})} defaultValue={props.csv_settings.col_sep}/>
+                <input className="form-control" type="text" {...register("colSep", {required: true})}
+                       defaultValue={props.csv_settings.col_sep}/>
                 <p className="text-danger">{errors.col_sep && "Le séparateur de colonnes est requis"}</p>
             </div>
-        </div>
 
-        <div className="row">
-            <div className="col-sm-4">
+            <div>
                 <label>Encodage de caractères</label>
-                <select className="form-control" type="select" {...register("encoding", {required: true})} defaultValue={props.csv_settings.encoding}>
+                <select className="form-control" type="select" {...register("encoding", {required: true})}
+                        defaultValue={props.csv_settings.encoding}>
                     <option value="UTF-8">UTF-8</option>
                     <option value="ISO-8859-15">ISO-8859-15</option>
                     <option value="windows-1252">Windows-1252</option>
                 </select>
                 <p className="text-danger">{errors.encoding && "L'encodage de caractères est requis"}</p>
             </div>
-        </div>
 
-        <div className="row">
-            <div className="col-sm-12 text-right">
-                <input type="submit" value="Enregistrer" className="btn text-white black-bg" />
+            <div className="text-right mt-5">
+                <input type="submit" value="Enregistrer" className="btn btn-primary text-white"/>
             </div>
         </div>
+
     </form>
 }
