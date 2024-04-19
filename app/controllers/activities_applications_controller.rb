@@ -71,8 +71,6 @@ class ActivitiesApplicationsController < ApplicationController
     activity_application = ActivityApplication.includes(
       { user: [{ planning: [:time_intervals] }] },
       activity_refs: { activity_ref_kind: {} },
-      users: {},
-      locations: {},
       activity_application_status: {},
       evaluation_appointments: %i[time_interval teacher],
       comments: [:user],
@@ -127,8 +125,6 @@ class ActivitiesApplicationsController < ApplicationController
                                                                },
                                                              },
                                                              activity_refs: { include: [:activity_ref_kind] },
-                                                             users: {},
-                                                             locations: {},
                                                              activity_application_status: {},
                                                              pre_application_activity: {
                                                                include: {
@@ -547,10 +543,15 @@ class ActivitiesApplicationsController < ApplicationController
           @user.update_addresses params[:application][:infos][:addresses]
         end
 
+        # cette ligne de code est à supprimer
+        # dans le cadre du décommissionnement de
+        # la fonctionnalité "accompagnant / additional_student"
         additional_students = params[:application][:additionalStudents]
 
+        # enregistrement des disponibilités de l'élève
         @user.planning.update_intervals(params[:application][:intervals], season.id)
 
+        # enregistrement des consentements de l'élève
         params.dig(:application, :infos, :consent_docs)&.each do |doc|
 
           consentement = @user.consent_document_users.find_or_create_by(consent_document_id: "#{doc[0]}".gsub("id_", ""))
@@ -559,6 +560,7 @@ class ActivitiesApplicationsController < ApplicationController
           consentement.save!
         end
 
+        # mise à jour de l'indicateur de paiement
         payers = params.dig(:application, :infos, :payers)
 
         if payers
@@ -594,9 +596,8 @@ class ActivitiesApplicationsController < ApplicationController
           end
         end
 
-        set_status = Parameter.find_by(label: "activityApplication.default_status")
-
-        status = ActivityApplicationStatus.find(set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID)
+        default_aa_status = Parameter.find_by(label: "activityApplication.default_status")
+        initial_aa_status = ActivityApplicationStatus.find(default_aa_status&.parse&.positive? ? default_aa_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID)
 
         if params[:preApplicationActivityId].present? && params[:preApplicationActivityId] != "0" #  == "Change"
           pre_application_activity = PreApplicationActivity.find(params[:preApplicationActivityId])
@@ -614,16 +615,19 @@ class ActivitiesApplicationsController < ApplicationController
         end
 
         params[:application][:selectedActivities].each do |act|
+          # Création de l'inscription
           @activity_application = ActivityApplication.create!(
             user: @user,
-            activity_application_status: status,
+            activity_application_status: initial_aa_status,
             season: season,
             begin_at: params[:application][:begin_at] || season.start,
           )
 
+          # Ajout, à l'inscription, des activités souhaitées
           #  Here, additionalStudenst are indexed incrementaly by their position in family, because they may not be already created
           @activity_application.add_activities([act], additional_students, @user.family)
 
+          # Ajout des commentaires à l'inscription
           unless params[:application][:comment].blank?
             content = params[:application][:comment].strip
             @activity_application.comments << Comment.new(user_id: params[:application][:user][:id], content: content)
