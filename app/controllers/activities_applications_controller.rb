@@ -656,7 +656,7 @@ class ActivitiesApplicationsController < ApplicationController
 
             pre_application_activity.save
           else
-            pre_application_desired_activity = PreApplicationDesiredActivity.create(
+            pre_application_desired_activity = PreApplicationDesiredActivity.create!(
               desired_activity: @activity_application.desired_activities.last,
               pre_application: pre_application,
               activity_application: @activity_application,

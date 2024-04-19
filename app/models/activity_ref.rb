@@ -78,6 +78,7 @@ class ActivityRef < ApplicationRecord
   validates :duration, numericality: { only_integer: true, greater_than: 0, less_than: 1440 }, allow_nil: true
 
   attribute :kind
+  attribute :display_name
 
   update_index("activities") { self }
 
@@ -96,6 +97,7 @@ class ActivityRef < ApplicationRecord
 
   has_one_attached :picture
 
+  has_many :activity_refs_instruments, dependent: :destroy
   has_many :activity_refs_instruments, dependent: :destroy
   has_many :instruments, through: :activity_refs_instruments
 
@@ -129,7 +131,7 @@ class ActivityRef < ApplicationRecord
   # et celles qui autorisent le choix d'un créneau
   def display_name
     if substitutable
-      activity_ref_kind.name
+      activity_ref_kind&.name || label
     else
       label
     end
