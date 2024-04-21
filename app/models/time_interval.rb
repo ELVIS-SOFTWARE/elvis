@@ -360,28 +360,17 @@ class TimeInterval < ApplicationRecord
     TimeInterval.new(start: iso_start, end: iso_end)
   end
 
-  def convert_to_first_week_of_season(season)
+  def convert_to_first_week_of_season(season, ensure_day_in_season = true)
     return if self.activity || self.activity_instance
 
-    target = DateTime.parse(season.start.to_s)
-    target_year = target.cwyear
-    target_week = target.cweek
-    target_weekday = self.start.to_datetime.cwday
+    new_start = season.start.beginning_of_week + (self.start.wday-1).days + self.start.hour.hours + self.start.min.minutes
+    new_end = season.start.beginning_of_week + (self.end.wday-1).days  + self.end.hour.hours + self.end.min.minutes
 
-    datetime_format = "Y%GW%VD%uH%HM%M"
+    new_start += 1.week if new_start < season.start && ensure_day_in_season
+    new_end += 1.week if new_end < season.start && ensure_day_in_season
 
-    start_date_string = "Y#{"%04d" % target_year}W#{"%02d" % target_week}D#{target_weekday}H#{"%02d" % self.start.hour}M#{"%02d" % self.start.min}"
-    end_date_string = "Y#{"%04d" % target_year}W#{"%02d" % target_week}D#{target_weekday}H#{"%02d" % self.end.hour}M#{"%02d" % self.end.min}"
-
-    new_start = DateTime.strptime(start_date_string, datetime_format)
-    new_end = DateTime.strptime(end_date_string, datetime_format)
-
-    new_start += 1.week if new_start < season.start
-    new_end += 1.week if new_end < season.start
-
-    # DONT TOUCH, IT IS DONE THIS WAY TO PRESERVE OFFSET OF ORIGINAL DATETIME
-    self.start = self.start.change(year: new_start.year, month: new_start.month, day: new_start.day, hour: new_start.hour, min: new_start.min)
-    self.end = self.end.change(year: new_end.year, month: new_end.month, day: new_end.day, hour: new_end.hour, min: new_end.min)
+    self.start = new_start
+    self.end = new_end
   end
 
   def unlink_dependencies

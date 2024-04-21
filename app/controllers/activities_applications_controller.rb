@@ -243,6 +243,7 @@ class ActivitiesApplicationsController < ApplicationController
       end,
     }
 
+    @can_edit_availabilities = Parameter.get_value("activity_applications.can_edit_availabilities") == true
     respond_to do |format|
       format.html
       format.json { render json: @activity_application }
@@ -287,12 +288,12 @@ class ActivitiesApplicationsController < ApplicationController
     display_activity_refs = activity_refs
                               .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and ar["substitutable"] }
                               .group_by { |ar| ar["kind"] }
-                              .transform_values  do |values|
-                                default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
-                                default_activity = values.find { |ar| ar["id"] == default_activity_id }
+                              .transform_values do |values|
+      default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
+      default_activity = values.find { |ar| ar["id"] == default_activity_id }
 
-                                default_activity || values.max_by { |ar| ar["display_price"] }
-                              end
+      default_activity || values.max_by { |ar| ar["display_price"] }
+    end
                               .values
 
     @activity_refs = display_activity_refs
@@ -562,7 +563,6 @@ class ActivitiesApplicationsController < ApplicationController
 
         # mise à jour de l'indicateur de paiement
         payers = params.dig(:application, :infos, :payers)
-
         if payers
           @user.is_paying = payers.any? { |p| p == @user.id }
         end

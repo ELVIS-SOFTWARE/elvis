@@ -592,7 +592,7 @@ class PlanningController < ApplicationController
       interval = interval.dup
       interval.id = nil
 
-      interval.convert_to_first_week_of_season(season)
+      interval.convert_to_first_week_of_season(season, false)
 
       interval
     end
@@ -620,7 +620,7 @@ class PlanningController < ApplicationController
                   .new(
                     params[:from],
                     params[:to],
-                    params[:season_id],
+                    params[:season_id] || Season.current_apps_season.id,
                     params[:id],
                     params[:comment])
                   .execute

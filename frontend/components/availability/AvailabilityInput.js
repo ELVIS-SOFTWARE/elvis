@@ -71,8 +71,8 @@ class AvailabilityInput extends React.PureComponent {
             <div className="ibox">
                 {this.props.selectionLabels &&
                     <div className="ibox-title bg-primary">
-                        {this.props.selectionLabels.length > 1 ?
-                            <h3>Préférences horaires pour l'activité ({this.props.selectionLabels[0]})</h3>
+                        {this.props.selectionLabels.length === 1 ?
+                            <h3>Préférences horaires pour l'activité {this.props.selectionLabels[0]}</h3>
                             :
                             <h3>Préférences horaires pour les activités ({this.props.selectionLabels.join(', ')})</h3>
                         }

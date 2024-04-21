@@ -49,9 +49,13 @@ class AvailabilityManager extends PureComponent {
     }
 
     handleAdd(interval) {
+        console.log("want add", interval);
         api.set()
             .before(this.toggleFetching)
             .success(data => {
+                console.log("success add ; result=", data);
+                console.log("list before=", this.state.list);
+                console.log("list after=", this.state.list.concat(data.intervals));
                 if (this.props.onAdd) {
                     this.props.onAdd(data.intervals);
                 }

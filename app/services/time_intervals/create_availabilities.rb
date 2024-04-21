@@ -42,6 +42,9 @@ module TimeIntervals
             new_intervals = []
             TimeInterval.transaction do
                 new_intervals = segment_interval(@from, @to, step).map{ |int|
+                    existing_interval = TimeInterval.find_by(start: int[:start], end: int[:end], kind: @kind, is_validated: false)
+                    next if existing_interval
+
                     interval = TimeInterval.new
                     interval.start = int[:start]
                     interval.end = int[:end]
