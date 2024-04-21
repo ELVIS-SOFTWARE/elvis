@@ -70,10 +70,9 @@ export const timeToDate = (timestr, refDate = null) => {
     if (refDate) {
         const refDateObj =
             typeof refDate === "string" ? toDate(refDate) : refDate;
-
-        date.setDate(refDateObj.getDate());
         date.setFullYear(refDateObj.getFullYear());
         date.setMonth(refDateObj.getMonth());
+        date.setDate(refDateObj.getDate());
     }
 
     return date;

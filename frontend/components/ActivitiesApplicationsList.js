@@ -6,10 +6,10 @@ require("moment/locale/fr");
 
 import ReactTable from "react-table";
 import Select from "react-select";
-import Loader from 'react-loader-spinner'
+import Loader from "react-loader-spinner";
 import swal from "sweetalert2";
 
-import { age, levelDisplay, } from "./planning/TimeIntervalHelpers";
+import { age, levelDisplay } from "./planning/TimeIntervalHelpers";
 import { csrfToken, optionMapper, USER_OPTIONS_SHORT } from "./utils";
 import { makeDebounce } from "../tools/inputs";
 import { PRE_APPLICATION_ACTION_LABELS, PRE_APPLICATION_ACTIONS } from "../tools/constants";
@@ -56,7 +56,7 @@ const debounce = makeDebounce();
 class ActivitiesApplicationsList extends React.Component {
     constructor(props) {
         super(props);
-      
+
         const localStorageFilter = localStorage.getItem(FILTER_STORAGE_KEY);
         const filter =
             localStorageFilter != null
@@ -75,13 +75,10 @@ class ActivitiesApplicationsList extends React.Component {
             bulkTargets: [],
             bulkEdit: {
                 activity_application_status_id: "",
-            }
+            },
         };
-    }
 
-    componentDidMount() {
-        this.nameInput.focus();
-      
+        this.fileInput = React.createRef();
     }
 
     componentDidMount() {
@@ -91,19 +88,19 @@ class ActivitiesApplicationsList extends React.Component {
     componentDidUpdate() {
         localStorage.setItem(
             FILTER_STORAGE_KEY,
-            JSON.stringify(this.state.filter)
+            JSON.stringify(this.state.filter),
         );
     }
 
     handleUpdateListPreferences(prefs) {
         this.setState(
             {
-                listPreferences : prefs,
+                listPreferences: prefs,
             },
             () => localStorage.setItem(
                 PREFERENCES_STORAGE_KEY,
                 JSON.stringify(prefs),
-            )
+            ),
         );
     }
 
@@ -116,11 +113,11 @@ class ActivitiesApplicationsList extends React.Component {
             this.state.filter.page,
             this.state.filter.sorted,
             this.state.filter.filtered,
-            "csv"
+            "csv",
         )
             .then(res => res.blob())
             .then(file => {
-                this.setState({exportOngoing: false});
+                this.setState({ exportOngoing: false });
 
                 const download = document.createElement("a");
                 download.download = `${moment().format("DD_MM_YYYY-HH_mm_ss")}.csv`;
@@ -130,6 +127,55 @@ class ActivitiesApplicationsList extends React.Component {
                 document.body.removeChild(download);
             });
     }
+
+    handleFileSelect() {
+        const file = this.fileInput.current.files[0];
+        const formData = new FormData();
+        formData.append("file", file);
+
+        this.setState({
+            importOngoing: true,
+        });
+        fetch("/inscriptions/create_import_csv", {
+            method: "POST",
+            headers: {
+                "X-Csrf-Token": csrfToken,
+            },
+            body: formData,
+        })
+            .then(res => {
+                this.setState({
+                    importOngoing: false,
+                });
+
+                return res.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    swal.fire({
+                        title: "Erreur d'importation",
+                        text: data.error,
+                        type: "error",
+                    });
+                } else {
+                    this.fetchData(this.state.filter);
+
+                    let message = `<p>${data.message}</p>`;
+                    if(data.errors.length>0){
+                        message += `<ul>Erreurs rencontrées</ul>`;
+                        data.errors.forEach(e => {
+                            message += `<li>à la ligne ${e.line} : ${e.message}</li>`;
+                        });
+                    }
+                    swal.fire({
+                        title: "Import réussie",
+                        html: message,
+                        type: "success",
+                    });
+                }
+            });
+    }
+
 
     handleUpdateBulkEdit(name, value) {
         this.setState({
@@ -177,7 +223,7 @@ class ActivitiesApplicationsList extends React.Component {
     resetFilters() {
         localStorage.setItem(
             FILTER_STORAGE_KEY,
-            JSON.stringify(defaultTableProps())
+            JSON.stringify(defaultTableProps()),
         );
         this.setState({ filter: defaultTableProps() }, () => {
             this.fetchData(this.state.filter);
@@ -216,15 +262,15 @@ class ActivitiesApplicationsList extends React.Component {
             <div className="flex flex-space-between-justified flex-center-aligned">
                 <div id="targets-infos">
                     Vous avez sélectionné {count} demande(s) {
-                        this.state.bulkTargets.length === this.state.data.length &&
-                            Math.max(this.state.total - this.state.bulkTargets.length, 0) ?
-                            <button
-                                onClick={() => this.setState({ bulkTargets: "all" })}
-                                className="btn btn-info m-l-sm">
-                                Sélectionner les {this.state.total - this.state.bulkTargets.length} restantes
-                            </button>
-                            : null
-                    }
+                    this.state.bulkTargets.length === this.state.data.length &&
+                    Math.max(this.state.total - this.state.bulkTargets.length, 0) ?
+                        <button
+                            onClick={() => this.setState({ bulkTargets: "all" })}
+                            className="btn btn-info m-l-sm">
+                            Sélectionner les {this.state.total - this.state.bulkTargets.length} restantes
+                        </button>
+                        : null
+                }
                 </div>
                 <div id="targets-actions">
                     <a
@@ -293,14 +339,14 @@ class ActivitiesApplicationsList extends React.Component {
     sendGroupConfirmationMail() {
         swal({
             title: "Envoi mail confirmation",
-            html: '<p>Un mail de confirmation va être envoyé pour <strong>chaque demande d\'inscription sélectionnée dont le cours est attribué ou proposition accepté.</strong></p>',
+            html: "<p>Un mail de confirmation va être envoyé pour <strong>chaque demande d'inscription sélectionnée dont le cours est attribué ou proposition accepté.</strong></p>",
             type: "question",
             showCancelButton: true,
             cancelButtonText: "Annuler",
             reverseButtons: true,
             input: "checkbox",
             inputValue: 0,
-            inputPlaceholder: '<p class="mt-3">Renvoyer les mails ?</p>',
+            inputPlaceholder: "<p class=\"mt-3\">Renvoyer les mails ?</p>",
         }).then(v => {
             console.log(v.value);
             if (v.value !== undefined) {
@@ -322,10 +368,10 @@ class ActivitiesApplicationsList extends React.Component {
                 }).then(response => response.json())
                     .then(res => {
                         if (res.success)
-                            swal.fire('', 'Les mails vont être envoyés', 'success')
+                            swal.fire("", "Les mails vont être envoyés", "success");
                         else
-                            swal.fire('', res.message, 'error')
-                    })
+                            swal.fire("", res.message, "error");
+                    });
             }
         });
     }
@@ -335,7 +381,7 @@ class ActivitiesApplicationsList extends React.Component {
             .uniq()
             .map(a => ({
                 label: a.label,
-                value: a.label
+                value: a.label,
             }))
             .sortBy("label")
             .value();
@@ -344,7 +390,7 @@ class ActivitiesApplicationsList extends React.Component {
             .filter(a => a.kind != undefined)
             .map(a => ({
                 label: a.kind,
-                value: a.kind
+                value: a.kind,
             }))
             .uniqBy("label")
             .sortBy("label")
@@ -590,14 +636,14 @@ class ActivitiesApplicationsList extends React.Component {
                 Cell: row => {
                     let status = _.find(
                         this.props.statuses,
-                        status => status.id === row.value
+                        status => status.id === row.value,
                     );
                     const referent = row.original.referent;
                     return (
-                        status &&
-                        `${status.label} ${row.original.status_updated_at ?
-                            `(${moment(row.original.status_updated_at).fromNow()})`
-                            : ""}`)
+                            status &&
+                            `${status.label} ${row.original.status_updated_at ?
+                                `(${moment(row.original.status_updated_at).fromNow()})`
+                                : ""}`)
                         || "??";
                 },
                 Filter: ({ filter, onChange }) =>
@@ -616,7 +662,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 ...base,
                                 display: "none",
                             }),
-                        }} />
+                        }} />,
             },
         ];
 
@@ -624,13 +670,13 @@ class ActivitiesApplicationsList extends React.Component {
 
         let filteredColumns = [...columns];
 
-        if(this.state.listPreferences) {
+        if (this.state.listPreferences) {
             filteredColumns = [
                 columns[0],
                 // Only take enabled columns, and order them according to prefs order
                 ..._(columns)
-                    .filter(c => _.find(this.state.listPreferences, {id: c.id, disabled: false}))
-                    .sortBy(c => _.findIndex(this.state.listPreferences, { id : c.id }))
+                    .filter(c => _.find(this.state.listPreferences, { id: c.id, disabled: false }))
+                    .sortBy(c => _.findIndex(this.state.listPreferences, { id: c.id }))
                     .value(),
             ];
         }
@@ -660,6 +706,26 @@ class ActivitiesApplicationsList extends React.Component {
                                         onClick={() => this.fetchData(this.state.filter)}>
                                         <i className="fas fa-sync"></i>
                                     </button>
+                                    <input
+                                        type="file"
+                                        ref={this.fileInput}
+                                        style={{ display: "none" }}
+                                        onChange={this.handleFileSelect.bind(this)}
+                                    />
+                                    <button
+                                        className="btn btn-primary m-r-sm"
+                                        data-tippy-content="Importer un fichier d'inscriptions"
+                                        onClick={() => this.fileInput.current.click()}>
+                                        {
+                                            this.state.importOngoing ?
+                                                <Loader
+                                                    type="Oval"
+                                                    color="white"
+                                                    height={15}
+                                                    width={15} /> :
+                                                <i className="fas fa-download" />
+                                        }
+                                    </button>
                                     <button
                                         className="btn btn-primary m-r-sm"
                                         data-tippy-content="Exporter en CSV"
@@ -686,7 +752,7 @@ class ActivitiesApplicationsList extends React.Component {
                                         data-tippy-content="Envoi groupé mail confirmation"
                                         disabled={false}>
                                         <i className="fas fa-envelope" />
-                                        
+
                                     </button>
                                 </div>
                                 <div className="flex">
@@ -697,12 +763,12 @@ class ActivitiesApplicationsList extends React.Component {
                                                     width: "750px",
                                                     margin: "auto",
                                                     inset: "unset",
-                                                }
-                                            }
+                                                },
+                                            },
                                         }}
                                         className="btn btn-primary m-r-sm"
                                         tooltip="Statistiques d'inscriptions"
-                                        label={<i className="fas fa-chart-pie"/>}>
+                                        label={<i className="fas fa-chart-pie" />}>
                                         <ActivitiesApplicationsDashboard
                                             {...this.props.dashboardInfos} />
                                     </ButtonModal>
@@ -764,7 +830,7 @@ class ActivitiesApplicationsList extends React.Component {
                             pageText="Page"
                             ofText="sur"
                             rowsText="résultats"
-                            pageSizeOptions={[5,10,15,16,20]}
+                            pageSizeOptions={[5, 10, 15, 16, 20]}
                             getTdProps={(state, rowInfo, column, instance) => {
                                 if (column.id !== "selection" && column.id !== "name")
                                     return {
@@ -785,7 +851,7 @@ class ActivitiesApplicationsList extends React.Component {
                             <h3>
                                 {`${
                                     this.state.total
-                                    } Demandes d'inscription au total`}
+                                } Demandes d'inscription au total`}
                             </h3>
                         </div>
                     </div>

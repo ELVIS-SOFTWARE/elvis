@@ -761,6 +761,25 @@ class ActivitiesApplicationsController < ApplicationController
     end
   end
 
+  def create_import_csv
+    importer_name = Parameter.get_value('activity_applications.importer_name')
+    importer = case importer_name
+                when 'tes_importer'
+                  ActivityApplications::TesImporter.new params[:file]
+                else
+                  nil
+               end
+
+    render json: { error: "L'import de fichiers CSV est désactivé" }, status: :unprocessable_entity and return if importer.nil?
+
+    result = importer.call
+
+    status = result.delete(:status)
+    render json: result, status: status
+  end
+
+
+
   def bulk_update
     query = get_query_from_params params[:filter]
 
