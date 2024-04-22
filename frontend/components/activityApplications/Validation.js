@@ -22,34 +22,6 @@ const ChildhoodActivities = ({activityRef, preferences}) => {
     );
 };
 
-const displayPacks = ({packs, selectedPacks}) => {
-    return _.map(selectedPacks, (pack, activityRef) => {
-        let packToDisplay;
-        if (packs && packs[activityRef]) {
-            packToDisplay = packs[activityRef].filter(p => pack.includes(p.pricing_category_id));
-        }
-
-        if (!packToDisplay)
-            return null;
-
-        return _.map(packToDisplay, (activityRefPricing, i) => (
-            <li className="list-group-item" key={i}>
-                <div className="row">
-                    <div className="col-lg-10">
-                        <strong>{activityRefPricing.activity_ref.label}</strong>
-                        <br/>
-                        <small>{activityRefPricing.pricing_category.name}</small>
-                    </div>
-                    <div className="col-lg-2 text-right">
-                        <strong>{activityRefPricing.price}€</strong>
-                    </div>
-                </div>
-            </li>
-        ));
-    });
-};
-
-
 const Validation = ({
                         application,
                         activityRefs,
@@ -107,8 +79,71 @@ const Validation = ({
         .map(([refId, timeInterval]) => ({refId, timeInterval}));
 
 
+    const displayDuration = (duration) => {
+        if (duration) {
+            if (duration >= 60) {
+                const hours = Math.floor(duration / 60);
+                const minutes = duration % 60;
+                return `${hours}h${minutes.toString().padStart(2, '0')}`;
+            } else {
+                return `${duration.toString().padStart(2, '0')}min`;
+            }
+        } else {
+            return "/";
+        }
+    }
+
+    // Activities and packs display
+    const groupByDisplayName = (items) => {
+        return items.reduce((groups, item) => {
+            const key = item.display_name;
+            if (!groups[key]) {
+                groups[key] = [];
+            }
+            groups[key].push(item);
+            return groups;
+        }, {});
+    };
+    const createDisplayItems = (groupedItems) => {
+        return Object.values(groupedItems).map(group => {
+            return {
+                display_name: group[0].display_name,
+                duration: group[0].duration,
+                display_price: group.reduce((total, item) => total + item.display_price, 0),
+                amount: group.length
+            };
+        });
+    };
+    const getPacks = ({packs, selectedPacks}) => {
+        return _.flatMap(selectedPacks, (pack, activityRef) => {
+            const packToDisplay = packs[activityRef]
+                ? packs[activityRef].filter(p => pack.includes(p.pricing_category_id))
+                : null;
+            return packToDisplay
+                ? packToDisplay.map(activityRefPricing => ({
+                    display_name: `${activityRefPricing.activity_ref.label} - ${activityRefPricing.pricing_category.name}`,
+                    duration: activityRefPricing.activity_ref.duration,
+                    display_price: activityRefPricing.price,
+                }))
+                : [];
+        });
+    };
+
+    // Group activities by display name
+    const groupedActivities = groupByDisplayName(selectedActivities);
+    const groupedPacks = groupByDisplayName(
+        getPacks({ packs: packs, selectedPacks: selectedPacks })
+    );
+
+    // Create display items
+    const displayActivities = createDisplayItems(groupedActivities);
+    const displayPacks = createDisplayItems(groupedPacks);
+
+    // Concatenate activities and packs
+    const displayActivitiesAndPacks = [...displayActivities, ...displayPacks];
+
     return (
-        <div className="row">
+        <div className="row mb-5">
 
             <div className="col-md-8">
                 <p className="small font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
@@ -120,10 +155,10 @@ const Validation = ({
                     {/*Elève*/}
                     <div className="d-inline-flex m-4 pt-3">
                         <div className="mr-5">
-                            Avatar
+                            <img className="img-circle m-t-none" alt="avatar" src="" width="60" height="60"/>
                         </div>
                         <div>
-                            <h4 className="font-weight-bold" style={{color: "black"}}>
+                            <h4 className="font-weight-bold" style={{color: "#00283B"}}>
                                 {application.infos.first_name}{" "}
                                 {application.infos.last_name}
                                 {application.infos.adherent_number == ""
@@ -135,14 +170,14 @@ const Validation = ({
                     </div>
 
                     {/*Informations personnelles*/}
-                    <div className="ml-4">
-                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                    <div className="m-4">
+                        <p className="small font-weight-bold mb-3" style={{color: "#8AA4B1"}}>
                             INFORMATIONS PERSONNELLES
                         </p>
                         <div className="row">
                             <div className="col-md-6">
                                 <p className="m-0 small">Date de naissance</p>
-                                <p style={{color: "black"}}>
+                                <p className="font-weight-bold" style={{color: "#00283B"}}>
                                     {moment(application.infos.birthday).format(
                                         "DD/MM/YYYY"
                                     )}
@@ -151,129 +186,105 @@ const Validation = ({
                             {application.infos.sex ?
                                 <div className="col">
                                     <p className="m-0 small">Sexe</p>
-                                    <p style={{color: "black"}}>{application.infos.sex}</p>
+                                    <p className="font-weight-bold"
+                                       style={{color: "#00283B"}}>{application.infos.sex}</p>
                                 </div>
                                 : ""}
-
                         </div>
                     </div>
 
                     {/*Coordonnées personnelles*/}
+                    <div className="m-4">
+                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                            COORDONNES PERSONNELLES
+                        </p>
 
-                    <div className="ibox">
-                        <div className="ibox-title">
-                            <h4>Coordonnées de l’élève</h4>
-                        </div>
-                        <div className="ibox-content">
+                        <div className="row">
+                            <div className="col-md-6">
+                                <p className="m-0 small">Adresse(s)</p>
+                                {_.map(application.infos.addresses, (address, i) => (
+                                    <div key={i}>
+                                        <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                            {address.street_address}<br/>
+                                            {address.postcode} {address.city}<br/>
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
 
-
-                            {address ? (
-                                <React.Fragment>
-                                    <div className="hr-line-dashed"/>
-                                    <p>
-                                        <b>Adresse :</b>
-                                        {address.street_address}
-                                    </p>
-                                    <p>
-                                        {address.postcode} {address.city}
-                                    </p>
-                                    <p>{address.department}</p>
-                                </React.Fragment>
-                            ) : null}
-
-                            <div className="hr-line-dashed"/>
-
-                            {_.map(_.filter(application.infos.telephones, p => p.label && p.number), (p, i) => (
-                                <p key={i}>
-                                    <b>Télephone {p.label}:</b> {p.number}
-                                </p>
-                            ))}
-
-                            {application.infos.telephones &&
-                            application.infos.telephones.length > 0 ? (
-                                <div key={1} className="hr-line-dashed"/>
-                            ) : null}
-
-                            {application.infos.handicap_description ? <p>
-                                <b>Informations complémentaires:</b>
-                                {application.infos.handicap_description}
-                            </p> : ""}
+                            <div className="col">
+                                {_.map(_.filter(application.infos.telephones, p => p.label && p.number), (p, i) => (
+                                    <div key={i}>
+                                        <p className="m-0 small">Télephone {p.label}:</p>
+                                        <p className="font-weight-bold" style={{color: "#00283B"}}>{p.number}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
                     {/*Contacts*/}
+                    <div className="m-4">
+                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                            CONTACTS
+                        </p>
+                        <div className="row">
+                            <div className="col-md-6">
+                                <div className="mb-3">
+                                    <p className="m-0 small">Représentant légal</p>
+                                    <p className="font-weight-bold" style={{color: "#00283B"}}>...</p>
+                                </div>
+                                <div>
+                                    <p className="m-0 small">Accompagnant</p>
+                                    <p className="font-weight-bold" style={{color: "#00283B"}}>...</p>
+                                </div>
+                            </div>
 
+                            <div className="col">
+                                <p className="m-0 small">Contact d'urgence</p>
+                                <p className="font-weight-bold" style={{color: "#00283B"}}>...</p>
+                            </div>
+                        </div>
+
+                    </div>
 
                     {/*Activités sélectionnées*/}
-                    <div>
-                        <ul className="list-group">
-                            {_.map(
-                                distinctSelectedActivityIds,
-                                (element, i) => {
-                                    const sa = _.find(
-                                        selectedActivities,
-                                        act => act.id == element[0],
-                                    );
-
-                                    const amount = element[1];
-
-                                    const ind = _.includes(
-                                        activitiesWithEveilIds,
-                                        sa.id,
-                                    )
-                                        ? _.findIndex(addStudents, p => {
-                                            const a = p[0] == sa.id;
-                                            return a;
-                                        })
-                                        : undefined;
-
-                                    let param = "";
-                                    if (ind != undefined && ind > -1) {
-                                        const child = _.pullAt(
-                                            addStudents,
-                                            ind,
-                                        )[0][1];
-                                        param = child
-                                            ? "Avec " + child
-                                            : "";
-                                    }
-
-                                    return (
-                                        <li
-                                            className="list-group-item"
-                                            key={i}
-                                            style={{border: 0}}
-                                        >
-                                            <div className="row">
-                                                <div className="col-lg-10">
-                                                    <strong>
-                                                        {sa.display_name}
-                                                    </strong>
-                                                    <br/>
-                                                    <small>{param}</small>
-                                                </div>
-                                                <div className="col-lg-2 text-right">
-                                                    <strong>
-                                                        x{amount}
-                                                    </strong>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    );
-                                },
-                            )}
-
-                            {Object.keys(selectedPacks).length > 0 && (
-                                <div>
-                                    <div className="ibox-title mt-3">
-                                        <h4>Packs souscrits</h4>
-                                    </div>
-                                    {displayPacks({packs: packs, selectedPacks: selectedPacks})}
-                                </div>
-                            )}
-                        </ul>
-                        <div className="clearfix"/>
+                    <div className="m-4">
+                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                            ACTIVITES SELECTIONNEES
+                        </p>
+                        <div>
+                            <table className="table">
+                                <thead>
+                                <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>
+                                    <th scope="col">Activité</th>
+                                    <th scope="col">Durée</th>
+                                    <th scope="col">Tarif estimé</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {displayActivitiesAndPacks.map((activity, index) => (
+                                    <tr key={index} style={{color: "#00283B"}}>
+                                        <td className="font-weight-bold">{activity.display_name}
+                                            {activity.amount > 1 ? ` x${activity.amount}` : ""}</td>
+                                        <td>{displayDuration(activity.duration)}</td>
+                                        <td>{activity.display_price}€</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                                <tfoot>
+                                <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>
+                                    <td></td>
+                                    <td className="text-right font-weight-bold">Total estimé</td>
+                                    <td className="font-weight-bold">{displayActivitiesAndPacks.reduce((total, activity) => total + activity.display_price, 0)}€</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
                     </div>
+
+                    {/*Packs sélectionnés*/}
+
 
 
                     {_.size(application.selectedEvaluationIntervals) > 0 &&
@@ -295,31 +306,33 @@ const Validation = ({
 
                     {/*Disponibilités*/}
                     {showOtherActivities ?
-                        (<div className="ibox">
-                            <div className="ibox-title">
-                                <h4>Disponibilités horaires</h4>
+                        (
+                            <div className="ibox">
+                                <div className="ibox-title">
+                                    <h4>Disponibilités horaires</h4>
+                                </div>
+                                <div className="ibox-content">
+                                    {_.chain(application.intervals)
+                                        .orderBy(i => i.start)
+                                        .map((int, i) => {
+                                            return (
+                                                <p key={i}>
+                                                    <b>
+                                                        {_.capitalize(
+                                                            moment(int.start).format(
+                                                                "dddd"
+                                                            )
+                                                        ) + " : "}
+                                                    </b>
+                                                    {moment(int.start).format("HH:mm")}{" "}
+                                                    - {moment(int.end).format("HH:mm")}
+                                                </p>
+                                            );
+                                        })
+                                        .value()}
+                                </div>
                             </div>
-                            <div className="ibox-content">
-                                {_.chain(application.intervals)
-                                    .orderBy(i => i.start)
-                                    .map((int, i) => {
-                                        return (
-                                            <p key={i}>
-                                                <b>
-                                                    {_.capitalize(
-                                                        moment(int.start).format(
-                                                            "dddd"
-                                                        )
-                                                    ) + " : "}
-                                                </b>
-                                                {moment(int.start).format("HH:mm")}{" "}
-                                                - {moment(int.end).format("HH:mm")}
-                                            </p>
-                                        );
-                                    })
-                                    .value()}
-                            </div>
-                        </div>) : null}
+                        ) : null}
 
                     {/*Préférence de paiement*/}
 
@@ -342,11 +355,13 @@ const Validation = ({
                     COMMENTAIRE
                 </div>
                 <div>
-                    <textarea name="comment" className="form-control" onChange={(e) => handleComment(e.target.value)}/>
+                        <textarea name="comment" className="form-control"
+                                  onChange={(e) => handleComment(e.target.value)}/>
                 </div>
             </div>
         </div>
-    );
+    )
+        ;
 };
 
 export default Validation;
