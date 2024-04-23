@@ -150,12 +150,14 @@ class CurrentActivityItem extends React.Component {
         let ActivityStatus = _.get(this.props, "current_activity_application.activity_application_status");
         if (ActivityStatus) {
             if ( ActivityStatus.id === ActivityApplicationStatus.STOPPED_ID ||
-                ActivityStatus.id === ActivityApplicationStatus.STOPPED ||
-                ActivityStatus.id === ActivityApplicationStatus.CANCELED_ID ||
-                ActivityStatus.id === ActivityApplicationStatus.CANCELED)
+                ActivityStatus.id === ActivityApplicationStatus.CANCELED_ID   )
             {
 
                 actionLabel = "Arrêt";
+            }
+            else if (ActivityStatus.id === ActivityApplicationStatus.TREATMENT_IMPOSSIBLE_ID)
+            {
+                actionLabel = "Unsatified";
             }
         }
 
