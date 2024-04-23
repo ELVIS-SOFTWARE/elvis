@@ -2,23 +2,60 @@ import React, {Fragment} from "react";
 import _ from "lodash";
 import EvaluationChoice from "./EvaluationChoice";
 import ItemPreferences from "./ItemPreferences";
+import {toDate, toHourMin, toLocaleDate} from "../../tools/format";
+import {WEEKDAYS} from "../../tools/constants";
 
 const moment = require("moment");
 require("moment/locale/fr");
 
 const ChildhoodActivities = ({activityRef, preferences}) => {
     return (
-        <div className="ibox">
-            <div className="ibox-title">
-                <h4>{`Préférences horaires : ${activityRef.label}`}</h4>
-            </div>
-            <div className="ibox-content">
-                <ItemPreferences
-                    sortable={false}
-                    items={preferences}
-                />
-            </div>
-        </div>
+        <table className="table m-0">
+            <thead>
+                <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>
+                    <th scope="col">{`Mes choix de créneaux pour ${activityRef.label}`}</th>
+                </tr>
+            </thead>
+
+{/*            class ItemPreferences extends React.PureComponent {*/}
+{/*            constructor(props) {*/}
+{/*            super(props);*/}
+{/*        }*/}
+
+{/*            render() {*/}
+{/*            const { items, onUp, onDown, sortable, showDate, showChoiceNumber = true } = this.props;*/}
+
+{/*            const mappedItems = items.map((item, i) => {*/}
+{/*            const start = toDate(item.start);*/}
+{/*            const end = toDate(item.end);*/}
+{/*            const location = _.get(item, "activity.location.label");*/}
+
+{/*            return (*/}
+{/*            <tr key={i} style={{color: "#00283B"}}>*/}
+{/*            <td>*/}
+{/*                        <span className="font-weight-bold">*/}
+{/*                            {WEEKDAYS[start.getDay()]}*/}
+{/*                            {showDate ? ` ${toLocaleDate(start)}` : null}*/}
+{/*                        </span><br/>*/}
+{/*                {toHourMin(start)}{" "}{"\u2192"}{toHourMin(end)}*/}
+{/*            </td>*/}
+{/*            <td style={{textAlign: "right"}}>*/}
+{/*                {showChoiceNumber && <span className="badge badge-pill badge-primary p-3" style={{borderRadius: 40, backgroundColor: "#0079BF"}}>*/}
+{/*                            {`Choix n°${i + 1}`} </span>}*/}
+{/*            </td>*/}
+{/*        </tr>*/}
+{/*    );*/}
+{/*});*/}
+
+{/*    return (*/}
+{/*        <tbody>*/}
+{/*        {mappedItems}*/}
+{/*        </tbody>*/}
+{/*    );*/}
+{/*}*/}
+{/*}*/}
+
+        </table>
     );
 };
 
@@ -93,7 +130,7 @@ const Validation = ({
         }
     }
 
-    // Activities and packs display
+    // Activities and packs display ----------------------------------------------------------------------------------
     const groupByDisplayName = (items) => {
         return items.reduce((groups, item) => {
             const key = item.display_name;
@@ -114,7 +151,7 @@ const Validation = ({
             };
         });
     };
-    const getPacks = ({packs, selectedPacks}) => {
+    const getSelectedPacks = ({packs, selectedPacks}) => {
         return _.flatMap(selectedPacks, (pack, activityRef) => {
             const packToDisplay = packs[activityRef]
                 ? packs[activityRef].filter(p => pack.includes(p.pricing_category_id))
@@ -128,49 +165,41 @@ const Validation = ({
                 : [];
         });
     };
-
     // Group activities by display name
     const groupedActivities = groupByDisplayName(selectedActivities);
-    const groupedPacks = groupByDisplayName(
-        getPacks({ packs: packs, selectedPacks: selectedPacks })
-    );
-
+    const groupedPacks = groupByDisplayName(getSelectedPacks({packs: packs, selectedPacks: selectedPacks}));
     // Create display items
     const displayActivities = createDisplayItems(groupedActivities);
     const displayPacks = createDisplayItems(groupedPacks);
-
     // Concatenate activities and packs
     const displayActivitiesAndPacks = [...displayActivities, ...displayPacks];
+
 
     return (
         <div className="row mb-5">
 
-            <div className="col-md-8">
+            <div className="col-md-7">
                 <p className="small font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
                     RECAPITULATIF DE LA DEMANDE
                 </p>
 
-                <div style={{backgroundColor: "white", borderRadius: 20}}>
+                <div className="p-5" style={{backgroundColor: "white", borderRadius: 12}}>
 
                     {/*Elève*/}
-                    <div className="d-inline-flex m-4 pt-3">
+                    <div className="d-inline-flex mb-4 pt-3">
                         <div className="mr-5">
                             <img className="img-circle m-t-none" alt="avatar" src="" width="60" height="60"/>
                         </div>
                         <div>
-                            <h4 className="font-weight-bold" style={{color: "#00283B"}}>
+                            <h3 className="font-weight-bold" style={{color: "#00283B"}}>
                                 {application.infos.first_name}{" "}
                                 {application.infos.last_name}
-                                {application.infos.adherent_number == ""
-                                    ? " (pas d'adhésion en cours)"
-                                    : ` (#${application.infos.adherent_number
-                                    })`}
-                            </h4>
+                            </h3>
                         </div>
                     </div>
 
                     {/*Informations personnelles*/}
-                    <div className="m-4">
+                    <div className="mb-4">
                         <p className="small font-weight-bold mb-3" style={{color: "#8AA4B1"}}>
                             INFORMATIONS PERSONNELLES
                         </p>
@@ -194,7 +223,7 @@ const Validation = ({
                     </div>
 
                     {/*Coordonnées personnelles*/}
-                    <div className="m-4">
+                    <div className="mb-4">
                         <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                             COORDONNES PERSONNELLES
                         </p>
@@ -211,7 +240,6 @@ const Validation = ({
                                     </div>
                                 ))}
                             </div>
-
                             <div className="col">
                                 {_.map(_.filter(application.infos.telephones, p => p.label && p.number), (p, i) => (
                                     <div key={i}>
@@ -224,7 +252,7 @@ const Validation = ({
                     </div>
 
                     {/*Contacts*/}
-                    <div className="m-4">
+                    <div className="mb-4">
                         <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                             CONTACTS
                         </p>
@@ -232,24 +260,22 @@ const Validation = ({
                             <div className="col-md-6">
                                 <div className="mb-3">
                                     <p className="m-0 small">Représentant légal</p>
-                                    <p className="font-weight-bold" style={{color: "#00283B"}}>...</p>
+                                    <p className="font-weight-bold" style={{color: "#00283B"}}>/</p>
                                 </div>
                                 <div>
                                     <p className="m-0 small">Accompagnant</p>
-                                    <p className="font-weight-bold" style={{color: "#00283B"}}>...</p>
+                                    <p className="font-weight-bold" style={{color: "#00283B"}}>/</p>
                                 </div>
                             </div>
-
                             <div className="col">
                                 <p className="m-0 small">Contact d'urgence</p>
-                                <p className="font-weight-bold" style={{color: "#00283B"}}>...</p>
+                                <p className="font-weight-bold" style={{color: "#00283B"}}>/</p>
                             </div>
                         </div>
-
                     </div>
 
                     {/*Activités sélectionnées*/}
-                    <div className="m-4">
+                    <div className="mb-4">
                         <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                             ACTIVITES SELECTIONNEES
                         </p>
@@ -283,56 +309,61 @@ const Validation = ({
                         </div>
                     </div>
 
-                    {/*Packs sélectionnés*/}
+                    {/*Disponibilités*/}
+                    <div className="mb-4">
+                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                            DISPONIBILITES
+                        </p>
+
+                        {/*Mes disponibilités*/}
+                        {application.intervals.length > 0 ? (
+                            <table className="table m-0">
+                                {/*<thead>*/}
+                                {/*<tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>*/}
+                                {/*    <th scope="col">*/}
+                                {/*        Mes disponibilités*/}
+                                {/*    </th>*/}
+                                {/*</tr>*/}
+                                {/*</thead>*/}
+                                <tbody>
+                                {_.chain(application.intervals)
+                                    .orderBy(i => i.start)
+                                    .map((int, i) => (
+                                        <tr key={i} style={{color: "#00283B"}}>
+                                            <td>
+                                                    <span className="font-weight-bold">{
+                                                        _.capitalize(moment(int.start).format("dddd"))}
+                                                    </span><br/>
+                                                {moment(int.start).format("HH:mm")}{" "}
+                                                {"\u2192"} {moment(int.end).format("HH:mm")}
+                                            </td>
+                                        </tr>
+                                    ))
+                                    .value()}
+                                </tbody>
+                            </table>
+                        ) : null}
+
+                        {/*Mes choix de créneaux*/}
+                        {showChildhoodActivities ? Object.keys(application.childhoodPreferences).map(
+                            refId => (
+                                <ChildhoodActivities
+                                    key={refId}
+                                    activityRef={allActivityRefs.find(ref => ref.id === parseInt(refId))}
+                                    preferences={application.childhoodPreferences[refId]}
+                                />
+                            )
+                        ) : null}
+                    </div>
 
 
-
-                    {_.size(application.selectedEvaluationIntervals) > 0 &&
+                    {/*Evaluations*/}
+                    {selectedEvaluations.length > 0 && _.size(application.selectedEvaluationIntervals) > 0 ? (
                         <EvaluationChoice
                             activityRefs={allActivityRefs}
                             data={selectedEvaluations}
-                            showChoiceNumber={false}/>}
-
-                    {/* Chilhood activities if any selected */}
-                    {showChildhoodActivities ? Object.keys(application.childhoodPreferences).map(
-                        refId => (
-                            <ChildhoodActivities
-                                key={refId}
-                                activityRef={allActivityRefs.find(ref => ref.id === parseInt(refId))}
-                                preferences={application.childhoodPreferences[refId]}
-                            />
-                        )
+                            showChoiceNumber={false}/>
                     ) : null}
-
-                    {/*Disponibilités*/}
-                    {showOtherActivities ?
-                        (
-                            <div className="ibox">
-                                <div className="ibox-title">
-                                    <h4>Disponibilités horaires</h4>
-                                </div>
-                                <div className="ibox-content">
-                                    {_.chain(application.intervals)
-                                        .orderBy(i => i.start)
-                                        .map((int, i) => {
-                                            return (
-                                                <p key={i}>
-                                                    <b>
-                                                        {_.capitalize(
-                                                            moment(int.start).format(
-                                                                "dddd"
-                                                            )
-                                                        ) + " : "}
-                                                    </b>
-                                                    {moment(int.start).format("HH:mm")}{" "}
-                                                    - {moment(int.end).format("HH:mm")}
-                                                </p>
-                                            );
-                                        })
-                                        .value()}
-                                </div>
-                            </div>
-                        ) : null}
 
                     {/*Préférence de paiement*/}
 
@@ -345,17 +376,17 @@ const Validation = ({
                     {buttonDisabled ? (
                         <Fragment><i className="fa fa-spinner fa-spin"/> &nbsp;</Fragment>
                     ) : ""}
-                    {"Terminer l'inscription"}
+                    {"Envoyer la demande"}
                 </button>
             </div>
 
 
-            <div className="col-md-4">
-                <div className=" small font-weight-bold mb-2">
+            <div className="col-md-5">
+                <div className=" small font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
                     COMMENTAIRE
                 </div>
                 <div>
-                        <textarea name="comment" className="form-control"
+                        <textarea name="comment" className="form-control" style={{borderRadius: 12, border: 0}}
                                   onChange={(e) => handleComment(e.target.value)}/>
                 </div>
             </div>
