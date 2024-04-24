@@ -24,8 +24,6 @@ export default function TimePreferencesTable(props) {
             </tr>
         );
     }
-
-    console.log("items", items);
     const timeTable = items.map(createTimeTable);
 
     return (

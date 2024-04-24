@@ -2,8 +2,7 @@ import React, {Fragment} from "react";
 import _ from "lodash";
 import EvaluationChoice from "./EvaluationChoice";
 import TimePreferencesTable from "./TimePreferencesTable";
-import {toDate, toHourMin, toLocaleDate} from "../../tools/format";
-import {WEEKDAYS} from "../../tools/constants";
+import SelectedActivitiesTable from "./SelectedActivitiesTable";
 
 const moment = require("moment");
 require("moment/locale/fr");
@@ -229,32 +228,39 @@ const Validation = ({
                             ACTIVITES SELECTIONNEES
                         </p>
                         <div>
-                            <table className="table">
-                                <thead>
-                                <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>
-                                    <th scope="col">Activité</th>
-                                    <th scope="col">Durée</th>
-                                    <th scope="col">Tarif estimé</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {displayActivitiesAndPacks.map((activity, index) => (
-                                    <tr key={index} style={{color: "#00283B"}}>
-                                        <td className="font-weight-bold">{activity.display_name}
-                                            {activity.amount > 1 ? ` x${activity.amount}` : ""}</td>
-                                        <td>{displayDuration(activity.duration)}</td>
-                                        <td>{activity.display_price}€</td>
-                                    </tr>
-                                ))}
-                                </tbody>
-                                <tfoot>
-                                <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>
-                                    <td></td>
-                                    <td className="text-right font-weight-bold">Total estimé</td>
-                                    <td className="font-weight-bold">{displayActivitiesAndPacks.reduce((total, activity) => total + activity.display_price, 0)}€</td>
-                                </tr>
-                                </tfoot>
-                            </table>
+                            <SelectedActivitiesTable
+                                duration={application.duration}
+                                selectedActivities={selectedActivities}
+                                selectedPacks={selectedPacks}
+                                packs={packs}
+                                allActivityRefs={allActivityRefs}
+                            />
+                            {/*<table className="table">*/}
+                            {/*    <thead>*/}
+                            {/*    <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>*/}
+                            {/*        <th scope="col">Activité</th>*/}
+                            {/*        <th scope="col">Durée</th>*/}
+                            {/*        <th scope="col">Tarif estimé</th>*/}
+                            {/*    </tr>*/}
+                            {/*    </thead>*/}
+                            {/*    <tbody>*/}
+                            {/*    {displayActivitiesAndPacks.map((activity, index) => (*/}
+                            {/*        <tr key={index} style={{color: "#00283B"}}>*/}
+                            {/*            <td className="font-weight-bold">{activity.display_name}*/}
+                            {/*                {activity.amount > 1 ? ` x${activity.amount}` : ""}</td>*/}
+                            {/*            <td>{displayDuration(activity.duration)}</td>*/}
+                            {/*            <td>{activity.display_price}€</td>*/}
+                            {/*        </tr>*/}
+                            {/*    ))}*/}
+                            {/*    </tbody>*/}
+                            {/*    <tfoot>*/}
+                            {/*    <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>*/}
+                            {/*        <td></td>*/}
+                            {/*        <td className="text-right font-weight-bold">Total estimé</td>*/}
+                            {/*        <td className="font-weight-bold">{displayActivitiesAndPacks.reduce((total, activity) => total + activity.display_price, 0)}€</td>*/}
+                            {/*    </tr>*/}
+                            {/*    </tfoot>*/}
+                            {/*</table>*/}
                         </div>
                     </div>
 
@@ -267,13 +273,6 @@ const Validation = ({
                         {/*Mes disponibilités*/}
                         {application.intervals.length > 0 ? (
                             <table className="table m-0">
-                                {/*<thead>*/}
-                                {/*<tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>*/}
-                                {/*    <th scope="col">*/}
-                                {/*        Mes disponibilités*/}
-                                {/*    </th>*/}
-                                {/*</tr>*/}
-                                {/*</thead>*/}
                                 <tbody>
                                 {_.chain(application.intervals)
                                     .orderBy(i => i.start)
