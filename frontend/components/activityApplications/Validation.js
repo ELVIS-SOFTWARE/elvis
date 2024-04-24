@@ -1,63 +1,12 @@
 import React, {Fragment} from "react";
 import _ from "lodash";
 import EvaluationChoice from "./EvaluationChoice";
-import ItemPreferences from "./ItemPreferences";
+import TimePreferencesTable from "./TimePreferencesTable";
 import {toDate, toHourMin, toLocaleDate} from "../../tools/format";
 import {WEEKDAYS} from "../../tools/constants";
 
 const moment = require("moment");
 require("moment/locale/fr");
-
-const ChildhoodActivities = ({activityRef, preferences}) => {
-    return (
-        <table className="table m-0">
-            <thead>
-                <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>
-                    <th scope="col">{`Mes choix de créneaux pour ${activityRef.label}`}</th>
-                </tr>
-            </thead>
-
-{/*            class ItemPreferences extends React.PureComponent {*/}
-{/*            constructor(props) {*/}
-{/*            super(props);*/}
-{/*        }*/}
-
-{/*            render() {*/}
-{/*            const { items, onUp, onDown, sortable, showDate, showChoiceNumber = true } = this.props;*/}
-
-{/*            const mappedItems = items.map((item, i) => {*/}
-{/*            const start = toDate(item.start);*/}
-{/*            const end = toDate(item.end);*/}
-{/*            const location = _.get(item, "activity.location.label");*/}
-
-{/*            return (*/}
-{/*            <tr key={i} style={{color: "#00283B"}}>*/}
-{/*            <td>*/}
-{/*                        <span className="font-weight-bold">*/}
-{/*                            {WEEKDAYS[start.getDay()]}*/}
-{/*                            {showDate ? ` ${toLocaleDate(start)}` : null}*/}
-{/*                        </span><br/>*/}
-{/*                {toHourMin(start)}{" "}{"\u2192"}{toHourMin(end)}*/}
-{/*            </td>*/}
-{/*            <td style={{textAlign: "right"}}>*/}
-{/*                {showChoiceNumber && <span className="badge badge-pill badge-primary p-3" style={{borderRadius: 40, backgroundColor: "#0079BF"}}>*/}
-{/*                            {`Choix n°${i + 1}`} </span>}*/}
-{/*            </td>*/}
-{/*        </tr>*/}
-{/*    );*/}
-{/*});*/}
-
-{/*    return (*/}
-{/*        <tbody>*/}
-{/*        {mappedItems}*/}
-{/*        </tbody>*/}
-{/*    );*/}
-{/*}*/}
-{/*}*/}
-
-        </table>
-    );
-};
 
 const Validation = ({
                         application,
@@ -347,7 +296,7 @@ const Validation = ({
                         {/*Mes choix de créneaux*/}
                         {showChildhoodActivities ? Object.keys(application.childhoodPreferences).map(
                             refId => (
-                                <ChildhoodActivities
+                                <TimePreferencesTable
                                     key={refId}
                                     activityRef={allActivityRefs.find(ref => ref.id === parseInt(refId))}
                                     preferences={application.childhoodPreferences[refId]}
