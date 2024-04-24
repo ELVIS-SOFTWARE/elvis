@@ -1,5 +1,7 @@
 import React, {Fragment} from "react";
 import _ from "lodash";
+import {toDate, toHourMin} from "../../tools/format";
+import {WEEKDAYS} from "../../tools/constants";
 import EvaluationChoice from "./EvaluationChoice";
 import TimePreferencesTable from "./TimePreferencesTable";
 import SelectedActivitiesTable from "./SelectedActivitiesTable";
@@ -235,32 +237,6 @@ const Validation = ({
                                 packs={packs}
                                 allActivityRefs={allActivityRefs}
                             />
-                            {/*<table className="table">*/}
-                            {/*    <thead>*/}
-                            {/*    <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>*/}
-                            {/*        <th scope="col">Activité</th>*/}
-                            {/*        <th scope="col">Durée</th>*/}
-                            {/*        <th scope="col">Tarif estimé</th>*/}
-                            {/*    </tr>*/}
-                            {/*    </thead>*/}
-                            {/*    <tbody>*/}
-                            {/*    {displayActivitiesAndPacks.map((activity, index) => (*/}
-                            {/*        <tr key={index} style={{color: "#00283B"}}>*/}
-                            {/*            <td className="font-weight-bold">{activity.display_name}*/}
-                            {/*                {activity.amount > 1 ? ` x${activity.amount}` : ""}</td>*/}
-                            {/*            <td>{displayDuration(activity.duration)}</td>*/}
-                            {/*            <td>{activity.display_price}€</td>*/}
-                            {/*        </tr>*/}
-                            {/*    ))}*/}
-                            {/*    </tbody>*/}
-                            {/*    <tfoot>*/}
-                            {/*    <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>*/}
-                            {/*        <td></td>*/}
-                            {/*        <td className="text-right font-weight-bold">Total estimé</td>*/}
-                            {/*        <td className="font-weight-bold">{displayActivitiesAndPacks.reduce((total, activity) => total + activity.display_price, 0)}€</td>*/}
-                            {/*    </tr>*/}
-                            {/*    </tfoot>*/}
-                            {/*</table>*/}
                         </div>
                     </div>
 
@@ -271,27 +247,31 @@ const Validation = ({
                         </p>
 
                         {/*Mes disponibilités*/}
-                        {application.intervals.length > 0 ? (
-                            <table className="table m-0">
-                                <tbody>
-                                {_.chain(application.intervals)
-                                    .orderBy(i => i.start)
-                                    .map((int, i) => (
-                                        <tr key={i} style={{color: "#00283B"}}>
-                                            <td>
-                                                    <span className="font-weight-bold">{
-                                                        _.capitalize(moment(int.start).format("dddd"))}
-                                                    </span><br/>
-                                                {moment(int.start).format("HH:mm")}{" "}
-                                                {"\u2192"} {moment(int.end).format("HH:mm")}
-                                            </td>
-                                        </tr>
-                                    ))
-                                    .value()}
-                                </tbody>
-                            </table>
-                        ) : null}
+                        {/*{application.intervals.length > 0 ? (*/}
+                        {/*    <table className="table m-0">*/}
+                        {/*        <tbody>*/}
+                        {/*        {_.chain(application.intervals)*/}
+                        {/*            .orderBy(i => i.start)*/}
+                        {/*            .map((int, i) => (*/}
+                        {/*                <tr key={i} style={{color: "#00283B"}}>*/}
+                        {/*                    <td>*/}
+                        {/*                        <span className="font-weight-bold">*/}
+                        {/*                            {WEEKDAYS[toDate(int.start).getDay()]}*/}
+                        {/*                        </span><br/>*/}
+                        {/*                        {toHourMin(toDate(int.start))}{" "}{"\u2192"}{toHourMin(toDate(int.end))}*/}
+                        {/*                    </td>*/}
+                        {/*                </tr>*/}
+                        {/*            ))*/}
+                        {/*            .value()}*/}
+                        {/*        </tbody>*/}
+                        {/*    </table>*/}
+                        {/*) : null}*/}
 
+                        {application.intervals.length > 0 ? (
+                            <TimePreferencesTable
+                                intervals={application.intervals}
+                            />
+                        ) : null}
                         {/*Mes choix de créneaux*/}
                         {showChildhoodActivities ? Object.keys(application.childhoodPreferences).map(
                             refId => (
@@ -302,6 +282,8 @@ const Validation = ({
                                 />
                             )
                         ) : null}
+
+
                     </div>
 
 
