@@ -67,7 +67,7 @@ function renderActivityAction(actionLabel) {
                     <span className="label label-warning mt-1">En cours de traitement</span>
                 </React.Fragment>
             );
-        case "Unsatified": return <React.Fragment>
+        case "Unsatisfied": return <React.Fragment>
             <i className="fas  fa-times-circle fa-lg bg-danger img-circle mt-0 mb-2 p-1" />
             <span className="label label-danger">Demande non satisfaite</span>
         </React.Fragment>
