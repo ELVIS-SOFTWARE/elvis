@@ -25,7 +25,7 @@ function createTimeTable(item, i) {
 }
 
 function createIntervalTable(intervals) {
-    return intervals.length > 0 ? _.chain(intervals)
+    return _.chain(intervals)
         .orderBy(i => i.start)
         .map((int, i) => (
             <tr key={i} style={{color: "#00283B"}}>
@@ -37,7 +37,7 @@ function createIntervalTable(intervals) {
                 </td>
             </tr>
         ))
-        .value() : null;
+        .value() ;
 }
 
 export default function TimePreferencesTable({ preferences = [], intervals = [], activityRef = {} }) {
@@ -54,8 +54,8 @@ export default function TimePreferencesTable({ preferences = [], intervals = [],
                 </thead>
             )}
             <tbody>
-            {timeTable}
             {intervalTable}
+            {timeTable}
             </tbody>
         </table>
     );

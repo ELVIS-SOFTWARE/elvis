@@ -1,7 +1,5 @@
 import React, {Fragment} from "react";
 import _ from "lodash";
-import {toDate, toHourMin} from "../../tools/format";
-import {WEEKDAYS} from "../../tools/constants";
 import EvaluationChoice from "./EvaluationChoice";
 import TimePreferencesTable from "./TimePreferencesTable";
 import SelectedActivitiesTable from "./SelectedActivitiesTable";
@@ -59,6 +57,7 @@ const Validation = ({
 
     const showChildhoodActivities = Object.keys(application.childhoodPreferences).length > 0;
     const showOtherActivities = _.intersection(activityRefs.filter(a => a.allow_timeslot_selection == false).map(a => a.id), application.selectedActivities).length > 0;
+    const showTimePreferences = application.intervals.length > 0 || showChildhoodActivities || showOtherActivities;
 
     const address = Object.values(application.infos.addresses).filter(a => a.city && a.country && a.postcode)[0];
 
@@ -66,64 +65,20 @@ const Validation = ({
         .map(([refId, timeInterval]) => ({refId, timeInterval}));
 
 
-    const displayDuration = (duration) => {
-        if (duration) {
-            if (duration >= 60) {
-                const hours = Math.floor(duration / 60);
-                const minutes = duration % 60;
-                return `${hours}h${minutes.toString().padStart(2, '0')}`;
-            } else {
-                return `${duration.toString().padStart(2, '0')}min`;
-            }
-        } else {
-            return "/";
-        }
+    const preferencesArray = [];
+    if (application.intervals.length > 0) {
+        preferencesArray.push({
+            intervals: application.intervals
+        });
     }
-
-    // Activities and packs display ----------------------------------------------------------------------------------
-    const groupByDisplayName = (items) => {
-        return items.reduce((groups, item) => {
-            const key = item.display_name;
-            if (!groups[key]) {
-                groups[key] = [];
-            }
-            groups[key].push(item);
-            return groups;
-        }, {});
-    };
-    const createDisplayItems = (groupedItems) => {
-        return Object.values(groupedItems).map(group => {
-            return {
-                display_name: group[0].display_name,
-                duration: group[0].duration,
-                display_price: group.reduce((total, item) => total + item.display_price, 0),
-                amount: group.length
-            };
+    if (showChildhoodActivities) {
+        Object.keys(application.childhoodPreferences).forEach(refId => {
+            preferencesArray.push({
+                activityRef: allActivityRefs.find(ref => ref.id === parseInt(refId)),
+                preferences: application.childhoodPreferences[refId]
+            });
         });
-    };
-    const getSelectedPacks = ({packs, selectedPacks}) => {
-        return _.flatMap(selectedPacks, (pack, activityRef) => {
-            const packToDisplay = packs[activityRef]
-                ? packs[activityRef].filter(p => pack.includes(p.pricing_category_id))
-                : null;
-            return packToDisplay
-                ? packToDisplay.map(activityRefPricing => ({
-                    display_name: `${activityRefPricing.activity_ref.label} - ${activityRefPricing.pricing_category.name}`,
-                    duration: activityRefPricing.activity_ref.duration,
-                    display_price: activityRefPricing.price,
-                }))
-                : [];
-        });
-    };
-    // Group activities by display name
-    const groupedActivities = groupByDisplayName(selectedActivities);
-    const groupedPacks = groupByDisplayName(getSelectedPacks({packs: packs, selectedPacks: selectedPacks}));
-    // Create display items
-    const displayActivities = createDisplayItems(groupedActivities);
-    const displayPacks = createDisplayItems(groupedPacks);
-    // Concatenate activities and packs
-    const displayActivitiesAndPacks = [...displayActivities, ...displayPacks];
-
+    }
 
     return (
         <div className="row mb-5">
@@ -241,50 +196,23 @@ const Validation = ({
                     </div>
 
                     {/*Disponibilités*/}
-                    <div className="mb-4">
-                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                            DISPONIBILITES
-                        </p>
-
-                        {/*Mes disponibilités*/}
-                        {/*{application.intervals.length > 0 ? (*/}
-                        {/*    <table className="table m-0">*/}
-                        {/*        <tbody>*/}
-                        {/*        {_.chain(application.intervals)*/}
-                        {/*            .orderBy(i => i.start)*/}
-                        {/*            .map((int, i) => (*/}
-                        {/*                <tr key={i} style={{color: "#00283B"}}>*/}
-                        {/*                    <td>*/}
-                        {/*                        <span className="font-weight-bold">*/}
-                        {/*                            {WEEKDAYS[toDate(int.start).getDay()]}*/}
-                        {/*                        </span><br/>*/}
-                        {/*                        {toHourMin(toDate(int.start))}{" "}{"\u2192"}{toHourMin(toDate(int.end))}*/}
-                        {/*                    </td>*/}
-                        {/*                </tr>*/}
-                        {/*            ))*/}
-                        {/*            .value()}*/}
-                        {/*        </tbody>*/}
-                        {/*    </table>*/}
-                        {/*) : null}*/}
-
-                        {application.intervals.length > 0 ? (
-                            <TimePreferencesTable
-                                intervals={application.intervals}
-                            />
-                        ) : null}
-                        {/*Mes choix de créneaux*/}
-                        {showChildhoodActivities ? Object.keys(application.childhoodPreferences).map(
-                            refId => (
+                    {showTimePreferences ? (
+                        <div className="mb-4">
+                            <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                                DISPONIBILITES
+                            </p>
+                            {preferencesArray.map((pref, index) => (
                                 <TimePreferencesTable
-                                    key={refId}
-                                    activityRef={allActivityRefs.find(ref => ref.id === parseInt(refId))}
-                                    preferences={application.childhoodPreferences[refId]}
+                                    key={index}
+                                    activityRef={pref.activityRef}
+                                    preferences={pref.preferences}
+                                    intervals={pref.intervals}
                                 />
-                            )
-                        ) : null}
+                            ))}
+                        </div>
+                    ) : null}
 
 
-                    </div>
 
 
                     {/*Evaluations*/}
