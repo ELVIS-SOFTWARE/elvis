@@ -52,10 +52,13 @@ function getSelectedPacks({packs, selectedPacks}) {
     });
 }
 export default function SelectedActivitiesTable(props) {
+    // regroup activities by display name
     const groupedActivities = useMemo(() => groupByDisplayName(props.selectedActivities), [props.selectedActivities]);
     const groupedPacks = useMemo(() => groupByDisplayName(getSelectedPacks({packs: props.packs, selectedPacks: props.selectedPacks})), [props.packs, props.selectedPacks]);
+    // create display items
     const displayActivities = useMemo(() => createDisplayItems(groupedActivities), [groupedActivities]);
     const displayPacks = useMemo(() => createDisplayItems(groupedPacks), [groupedPacks]);
+    // merge activities and packs
     const displayActivitiesAndPacks = useMemo(() => [...displayActivities, ...displayPacks], [displayActivities, displayPacks]);
 
     return (
