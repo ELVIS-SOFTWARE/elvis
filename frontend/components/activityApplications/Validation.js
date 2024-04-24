@@ -1,8 +1,8 @@
 import React, {Fragment} from "react";
 import _ from "lodash";
-import EvaluationChoice from "./EvaluationChoice";
 import TimePreferencesTable from "./TimePreferencesTable";
 import SelectedActivitiesTable from "./SelectedActivitiesTable";
+import EvaluationChoiceTable from "./EvaluationChoiceTable";
 
 const moment = require("moment");
 require("moment/locale/fr");
@@ -212,16 +212,20 @@ const Validation = ({
                         </div>
                     ) : null}
 
-
-
-
                     {/*Evaluations*/}
                     {selectedEvaluations.length > 0 && _.size(application.selectedEvaluationIntervals) > 0 ? (
-                        <EvaluationChoice
-                            activityRefs={allActivityRefs}
-                            data={selectedEvaluations}
-                            showChoiceNumber={false}/>
+                            <div className="mb-4">
+                                <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                                    EVALUATION DE NIVEAU
+                                </p>
+                                <EvaluationChoiceTable
+                                    activityRefs={allActivityRefs}
+                                    data={selectedEvaluations}
+                                    showChoiceNumber={false}/>
+                            </div>
+
                     ) : null}
+
 
                     {/*Préférence de paiement*/}
 
