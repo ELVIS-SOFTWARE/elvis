@@ -1,67 +1,62 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import _ from "lodash";
 
-export default function SelectedActivitiesTable(props) {
-
-    function displayDuration(duration) {
-        if (duration) {
-            if (duration >= 60) {
-                const hours = Math.floor(duration / 60);
-                const minutes = duration % 60;
-                return `${hours}h${minutes.toString().padStart(2, '0')}`;
-            } else {
-                return `${duration.toString().padStart(2, '0')}min`;
-            }
-
+function displayDuration(duration) {
+    if (duration) {
+        if (duration >= 60) {
+            const hours = Math.floor(duration / 60);
+            const minutes = duration % 60;
+            return `${hours}h${minutes.toString().padStart(2, '0')}`;
         } else {
-            return "/";
+            return `${duration.toString().padStart(2, '0')}min`;
         }
-    }
-    function groupByDisplayName(items) {
-        return items.reduce((groups, item) => {
-            const key = item.display_name;
-            if (!groups[key]) {
-                groups[key] = [];
-            }
-            groups[key].push(item);
-            return groups;
-        }, {});
-    }
 
-    function createDisplayItems(groupedItems) {
-        return Object.values(groupedItems).map(group => {
-            return {
-                display_name: group[0].display_name,
-                duration: group[0].duration,
-                display_price: group.reduce((total, item) => total + item.display_price, 0),
-                amount: group.length
-            };
-        });
+    } else {
+        return "/";
     }
+}
+function groupByDisplayName(items) {
+    return items.reduce((groups, item) => {
+        const key = item.display_name;
+        if (!groups[key]) {
+            groups[key] = [];
+        }
+        groups[key].push(item);
+        return groups;
+    }, {});
+}
 
-    function getSelectedPacks({packs, selectedPacks}) {
-        return _.flatMap(selectedPacks, (pack, activityRef) => {
-            const packToDisplay = packs[activityRef]
-                ? packs[activityRef].filter(p => pack.includes(p.pricing_category_id))
-                : null;
-            return packToDisplay
-                ? packToDisplay.map(activityRefPricing => ({
-                    display_name: `${activityRefPricing.activity_ref.label} - ${activityRefPricing.pricing_category.name}`,
-                    duration: activityRefPricing.activity_ref.duration,
-                    display_price: activityRefPricing.price,
-                }))
-                : [];
-        });
-    }
+function createDisplayItems(groupedItems) {
+    return Object.values(groupedItems).map(group => {
+        return {
+            display_name: group[0].display_name,
+            duration: group[0].duration,
+            display_price: group.reduce((total, item) => total + item.display_price, 0),
+            amount: group.length
+        };
+    });
+}
 
-    // Group activities by display name
-    const groupedActivities = groupByDisplayName(props.selectedActivities);
-    const groupedPacks = groupByDisplayName(getSelectedPacks({packs: props.packs, selectedPacks: props.selectedPacks}));
-    // Create display items
-    const displayActivities = createDisplayItems(groupedActivities);
-    const displayPacks = createDisplayItems(groupedPacks);
-    // Concatenate activities and packs
-    const displayActivitiesAndPacks = [...displayActivities, ...displayPacks];
+function getSelectedPacks({packs, selectedPacks}) {
+    return _.flatMap(selectedPacks, (pack, activityRef) => {
+        const packToDisplay = packs[activityRef]
+            ? packs[activityRef].filter(p => pack.includes(p.pricing_category_id))
+            : null;
+        return packToDisplay
+            ? packToDisplay.map(activityRefPricing => ({
+                display_name: `${activityRefPricing.activity_ref.label} - ${activityRefPricing.pricing_category.name}`,
+                duration: activityRefPricing.activity_ref.duration,
+                display_price: activityRefPricing.price,
+            }))
+            : [];
+    });
+}
+export default function SelectedActivitiesTable(props) {
+    const groupedActivities = useMemo(() => groupByDisplayName(props.selectedActivities), [props.selectedActivities]);
+    const groupedPacks = useMemo(() => groupByDisplayName(getSelectedPacks({packs: props.packs, selectedPacks: props.selectedPacks})), [props.packs, props.selectedPacks]);
+    const displayActivities = useMemo(() => createDisplayItems(groupedActivities), [groupedActivities]);
+    const displayPacks = useMemo(() => createDisplayItems(groupedPacks), [groupedPacks]);
+    const displayActivitiesAndPacks = useMemo(() => [...displayActivities, ...displayPacks], [displayActivities, displayPacks]);
 
     return (
         <table className="table">
