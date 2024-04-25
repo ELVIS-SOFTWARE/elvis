@@ -58,6 +58,8 @@ class ContactForm extends React.PureComponent {
             is_inverse: props.initialValues.is_inverse,
             is_attached: props.initialValues.is_attached,
         };
+
+        this.showFamilyLinkInfos = props.showFamilyLinkInfos == undefined ? true : props.showFamilyLinkInfos;
     }
 
     handleContactInfosChange({ values: {
@@ -91,6 +93,7 @@ class ContactForm extends React.PureComponent {
         if (current_user && current_user.is_admin && (first_name && first_name.length > 0) && (last_name && last_name.length > 0) && birthday) {
             this.setState({
                 isUserSearchOver: true,
+                is_attached: true
             });
             return;
         }
@@ -297,7 +300,7 @@ class ContactForm extends React.PureComponent {
                             }
 
                             {
-                                isUserSearchOver && <React.Fragment>
+                                isUserSearchOver && this.showFamilyLinkInfos && <React.Fragment>
                                     <div className="row">
                                         <Field
                                             name="link"
