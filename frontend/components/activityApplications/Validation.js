@@ -142,9 +142,9 @@ const Validation = ({
                 <div className="p-5" style={{backgroundColor: "white", borderRadius: 12}}>
 
                     {/*Elève*/}
-                    <div className="d-inline-flex mb-4 pt-3">
+                    <div className="d-inline-flex mb-5 pt-3">
                         <div className="mr-5">
-                            <img className="img-circle m-t-none" alt="avatar" src="" width="60" height="60"/>
+                            <img className="img-circle" alt="avatar" src="" width="60" height="60"/>
                         </div>
                         <div>
                             <h3 className="font-weight-bold" style={{color: "#00283B"}}>
@@ -155,7 +155,7 @@ const Validation = ({
                     </div>
 
                     {/*Informations personnelles*/}
-                    <div className="mb-4">
+                    <div className="mb-5">
                         <p className="small font-weight-bold mb-3" style={{color: "#8AA4B1"}}>
                             INFORMATIONS PERSONNELLES
                         </p>
@@ -179,7 +179,7 @@ const Validation = ({
                     </div>
 
                     {/*Coordonnées personnelles*/}
-                    <div className="mb-4">
+                    <div className="mb-5">
                         <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                             COORDONNES PERSONNELLES
                         </p>
@@ -208,7 +208,7 @@ const Validation = ({
                     </div>
 
                     {/*Contacts*/}
-                    <div className="mb-4">
+                    <div className="mb-5">
                         <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                             CONTACTS
                         </p>
@@ -237,7 +237,7 @@ const Validation = ({
                     </div>
 
                     {/*Activités sélectionnées*/}
-                    <div className="mb-4">
+                    <div className="mb-5">
                         <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                             ACTIVITES SELECTIONNEES
                         </p>
@@ -254,7 +254,7 @@ const Validation = ({
 
                     {/*Disponibilités*/}
                     {showTimePreferences ? (
-                        <div className="mb-4">
+                        <div className="mb-5">
                             <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                                 DISPONIBILITES
                             </p>
@@ -271,7 +271,7 @@ const Validation = ({
 
                     {/*Evaluations*/}
                     {selectedEvaluations.length > 0 && _.size(application.selectedEvaluationIntervals) > 0 ? (
-                        <div className="mb-4">
+                        <div className="mb-5">
                             <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                                 EVALUATION DE NIVEAU
                             </p>
@@ -285,7 +285,7 @@ const Validation = ({
 
                     {/*Préférence de paiement*/}
                     {paymentTerms.length > 0 ? (
-                        <div className="mb-4">
+                        <div className="mb-5">
                             <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
                                 PREFERENCE DE PAIEMENT
                             </p>
@@ -293,11 +293,13 @@ const Validation = ({
                                 <div className="col-md-6">
                                     <div className="mb-3">
                                         <p className="m-0 small">Echéancier</p>
-                                        <p className="font-weight-bold" style={{color: "#00283B"}}>{selectedPaymentScheduleOption}</p>
+                                        <p className="font-weight-bold"
+                                           style={{color: "#00283B"}}>{selectedPaymentScheduleOption}</p>
                                     </div>
                                     <div>
                                         <p className="m-0 small">Moyen de paiement</p>
-                                        <p className="font-weight-bold" style={{color: "#00283B"}}>{selectedPaymentMethod}</p>
+                                        <p className="font-weight-bold"
+                                           style={{color: "#00283B"}}>{selectedPaymentMethod}</p>
                                     </div>
                                 </div>
                                 <div className="col">
