@@ -500,7 +500,7 @@ class ActivitiesApplicationsController < ApplicationController
         else
           # @type [User] new user
           @user = if (params[:application][:infos][:id]).zero?
-                    User.new
+                    User.new(attached_to_id: params[:application][:infos][:attached_to_id])
                   else
                     User.find(params[:application][:infos][:id])
                   end

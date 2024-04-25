@@ -75,6 +75,7 @@ export default class WizardUserSelectMember extends React.Component
             availabilities: [],
             addresses: [],
             telephones: [],
+            attached_to_id: this.props.user.id
         });
 
         this.setState({
@@ -148,7 +149,7 @@ export default class WizardUserSelectMember extends React.Component
         user.first_name = otherUser.first_name ;
         user.last_name = otherUser.last_name ;
         user.sex = otherUser.sex ;
-        user.telephone = otherUser.telephones ;
+        user.telephones = otherUser.telephones ;
         user.addresses = otherUser.addresses ;
         user.email = otherUser.email ;
         user.birthday = otherUser.birthday ;
