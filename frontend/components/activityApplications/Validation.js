@@ -84,9 +84,8 @@ const Validation = ({
 
     const { infos } = application;
     const { is_paying, id, first_name, last_name, family_links_with_user, payers } = infos;
-
-    // vérification si l'utilisateur principal est payeur
     is_paying && (!payers || payers.includes(id)) ? pushPayerToList({ first_name, last_name }, payersList) : null;
+
     // récupération des contacts et des payeurs parmis les membres de la famille
     family_links_with_user && family_links_with_user.forEach(familyMember => {
         const { id, first_name, last_name, is_paying_for, is_accompanying, is_to_call, is_legal_referent } = familyMember;
@@ -95,7 +94,6 @@ const Validation = ({
         is_to_call ? emergencyContacts.push({ name: `${first_name} ${last_name}` }) : null;
         is_legal_referent ? legalReferents.push({ name: `${first_name} ${last_name}` }) : null;
     });
-
     payersList.length === 0 ? payersList.push({ name: "/" }) : null;
     accompanying.length === 0 ? accompanying.push({ name: "/" }) : null;
     emergencyContacts.length === 0 ? emergencyContacts.push({ name: "/" }) : null;
