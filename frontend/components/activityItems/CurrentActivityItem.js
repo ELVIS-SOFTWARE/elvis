@@ -157,7 +157,7 @@ class CurrentActivityItem extends React.Component {
             }
             else if (ActivityStatus.id === ActivityApplicationStatus.TREATMENT_IMPOSSIBLE_ID)
             {
-                actionLabel = "Unsatified";
+                actionLabel = "Unsatisfied";
             }
         }
 
