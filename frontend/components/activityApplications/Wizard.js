@@ -28,6 +28,7 @@ import {PRE_APPLICATION_ACTIONS} from "../../tools/constants";
 import Select from "react-select";
 import Swal from 'sweetalert2'
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
+import WizardUserSelectMember from "./WizardUserSelectMember";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
     "already_practiced_instrument";
@@ -687,14 +688,19 @@ class Wizard extends React.Component {
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
         const steps = [
-            this.props.currentUserIsAdmin && !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
+            !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
                 name: "Choisir un utilisateur",
                 component: (
-                    <UserSearch
+                    this.props.currentUserIsAdmin && false ? <UserSearch
                         user={this.props.user}
                         onSelect={this.handleSelectUser.bind(this)}
                         season={this.state.season}
-                    />
+                    /> :
+                        <WizardUserSelectMember
+                            user={this.props.user}
+                            onSelect={this.handleSelectUser.bind(this)}
+                            season={this.state.season}
+                        />
                 ),
             },
             {

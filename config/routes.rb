@@ -233,6 +233,7 @@ Rails.application.routes.draw do
   post "/users/search_for_admin", to: "users#search_for_admin"
   post "/users/:id/family_links_with_user", to: "users#get_family_links_with_user"
   post "/users/list", to: "users#list"
+  get "/users/:user_id/family", to: "users#family"
    # Utilisé pour peupler un select
   post "/users/simple_list", to: "users#simple_list"
   post "/users/:id/absences_list", to: "users#list_abscences"
