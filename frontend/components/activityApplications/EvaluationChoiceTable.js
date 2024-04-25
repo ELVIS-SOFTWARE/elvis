@@ -11,46 +11,47 @@ export default function EvaluationChoiceTable({
                                                   noIntervalMessage = DEFAULT_NO_INTERVAL_MESSAGE,
                                                   ...prefsProps
                                               }) {
-    const choices = data.map(({refId, timeInterval}) => {
-        const ref = activityRefs.find(ref => ref.id == refId);
+
+    let ref = activityRefs[0];
+
+    const choices = data.map(({refId, timeInterval}, i) => {
+        ref = activityRefs.find(ref => ref.id == refId) || ref;
 
         return (
-            <tr key={refId} style={{color: "#00283B"}}>
-                <td>
-                    {timeInterval ?
-                        <div className="space-between flex-center-aligned bg-muted p-sm m-sm">
-                            <div className="row flex-fill timeslot-weekday">
-                                <div className="col-xs-12 col-sm-8">
-                                    <span className="font-bold">
-                                        {WEEKDAYS[toDate(timeInterval.start).getDay()]}
-                                    </span>
-                                </div>
-                                <div className="col-xs-12 col-sm-4">
-                                    <div className="timeslot-hours">
-                                        <span>{toHourMin(toDate(timeInterval.start))}</span>{" "}
-                                        <i className="fas fa-angle-right" />{" "}
-                                        <span>{toHourMin(toDate(timeInterval.end))}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> :
-                        <span className="text-danger font-bold">
-                            {noIntervalMessage}
-                        </span>
-                    }
-                </td>
-            </tr>
+            timeInterval ?
+                <tr key={i} style={{color: "#00283B"}}>
+                    <td>
+                    <span className="font-weight-bold">
+                        {WEEKDAYS[toDate(timeInterval.start).getDay()]}
+                    </span><br/>
+                        {toHourMin(timeInterval.start)}{" "}{"\u2192"}{toHourMin(timeInterval.end)}
+                    </td>
+                    <td style={{textAlign: "right"}}>
+                    <span className="badge badge-pill badge-primary p-3"
+                          style={{borderRadius: 40, backgroundColor: "#0079BF"}}>
+                        {`Choix n°${i + 1}`}
+                    </span>
+                    </td>
+                </tr> :
+                <tr>
+                    <td>
+                    <span className="text-danger font-bold">
+                        {noIntervalMessage}
+                    </span>
+                    </td>
+                </tr>
         );
     });
 
     return <table className="table m-0">
         <thead>
         <tr style={{backgroundColor: "#F7FBFC", color: "#8AA4B1"}}>
-            <th scope="col">{`Créneaux d'évaluation sélectionnés pour ${activityRefs.kind}`}</th>
+            <th scope="col">{`Créneaux d'évaluation sélectionnés pour ${ref.kind}`}</th>
         </tr>
         </thead>
         <tbody>
         {choices}
         </tbody>
     </table>
-};
+}
+;
