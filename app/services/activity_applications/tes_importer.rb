@@ -48,10 +48,10 @@ module ActivityApplications
 
           # enregistrement de tel_1, tel_2, tel_3 comme téléphones
           telephones = []
-          telephones << Telephone.new(number: row["tel_1"], label: "Tel 1") if row["tel_1"].present? && user.telephones.none? { |t| t.number == row["tel_1"] }
-          telephones << Telephone.new(number: row["tel_2"], label: "Tel 2") if row["tel_2"].present? && user.telephones.none? { |t| t.number == row["tel_2"] }
-          telephones << Telephone.new(number: row["tel_3"], label: "Tel 3") if row["tel_3"].present? && user.telephones.none? { |t| t.number == row["tel_3"] }
-          user.telephones = telephones
+          telephones << get_clean_phone(row['tel_1'], "Tel 1", user)
+          telephones << get_clean_phone(row['tel_2'], "Tel 2", user)
+          telephones << get_clean_phone(row['tel_3'], "Tel 3", user)
+          user.telephones = telephones.compact
 
           # enregistrement de l'adresse
           user.addresses = [Address.new(
@@ -132,6 +132,15 @@ module ActivityApplications
     end
 
     private
+
+    def get_clean_phone(phone_number, label, user)
+      return if phone_number.nil?
+      return if phone_number.downcase == "n/a"
+
+      phone_number = phone_number.phony_formatted normalize: :FR
+
+      Telephone.new(number: phone_number, label: label) if user.telephones.none? { |t| t.number == phone_number }
+    end
 
     AA_CSV_HEADERS = %w[
 num_adh
