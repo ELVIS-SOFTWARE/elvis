@@ -301,7 +301,7 @@ export default class WizardUserSelectMember extends React.Component
                                             family_links_with_user: [
                                                 ...m.family_links_with_user.filter(fl => values.value !== fl.id).map(fl => ({...fl, is_to_call: false})),
                                                 (() => {
-                                                    const otherUser = members.find(member => member.id === v.value);
+                                                    const otherUser = members.find(member => member.id === values.value);
 
                                                     let res = {
                                                         ...(m.family_links_with_user.find(fl => fl.id === otherUser.id) || {}),
@@ -344,10 +344,10 @@ export default class WizardUserSelectMember extends React.Component
                                         members: members.map((m, i) => i === selected ? {
                                             ...m,
                                             family_links_with_user: [
-                                                ...m.family_links_with_user.filter(fl => !values.map(v => v.value).includes(fl.id)).map(fl => ({...fl, is_accompanying: false})),
-                                                ...values.map(v =>
+                                                ...m.family_links_with_user.filter(fl => values.value !== fl.id).map(fl => ({...fl, is_accompanying: false})),
+                                                (() =>
                                                 {
-                                                    const otherUser = members.find(member => member.id === v.value);
+                                                    const otherUser = members.find(member => member.id === values.value);
 
                                                     let res = {
                                                         ...(m.family_links_with_user.find(fl => fl.id === otherUser.id) || {}),
@@ -361,7 +361,7 @@ export default class WizardUserSelectMember extends React.Component
                                                     }
 
                                                     return res;
-                                                })
+                                                })()
                                             ],
                                         } : m),
                                     })}
