@@ -4,6 +4,8 @@ import TimePreferencesTable from "./TimePreferencesTable";
 import SelectedActivitiesTable from "./SelectedActivitiesTable";
 import EvaluationChoiceTable from "./EvaluationChoiceTable";
 
+
+
 const moment = require("moment");
 require("moment/locale/fr");
 
@@ -17,7 +19,10 @@ const Validation = ({
                         buttonDisabled,
                         handleComment,
                         selectedPacks,
-                        packs
+                        packs,
+                        paymentTerms,
+                        availPaymentScheduleOptions,
+                        availPaymentMethods,
                     }) => {
     const addStudents = [...additionalStudents];
 
@@ -65,6 +70,7 @@ const Validation = ({
         .map(([refId, timeInterval]) => ({refId, timeInterval}));
 
 
+    // affichage des disponibilités
     const preferencesArray = [];
     if (application.intervals.length > 0) {
         preferencesArray.push({
@@ -79,6 +85,49 @@ const Validation = ({
             });
         });
     }
+
+    // affichage des préférences de paiement
+    if (paymentTerms && paymentTerms.length > 0) {
+    const selectedPaymentMethod = availPaymentMethods.find(pm => pm.id === paymentTerms[0].payment_method_id).label;
+    const selectedPaymentScheduleOption = availPaymentScheduleOptions.find(pso => pso.id === paymentTerms[0].payment_schedule_options_id).label;
+    }
+
+
+    // récupération des contacts
+    const payers = [];
+    const emergencyContacts = [];
+    const legalReferents = [];
+    const accompanying = [];
+    if (application.infos.is_paying) {
+        payers.push({
+            name: application.infos.first_name + " " + application.infos.last_name,
+        });
+    }
+    if (application.infos.family_links_with_user && application.infos.family_links_with_user.length > 0) {
+        application.infos.family_links_with_user.forEach(familyMember => {
+            if (familyMember.is_paying_for) {
+                payers.push({
+                    name: familyMember.first_name + " " + familyMember.last_name,
+                });
+            }
+            if (familyMember.is_accompanying) {
+                accompanying.push({
+                        name: familyMember.first_name + " " + familyMember.last_name,
+                });
+            }
+            if (familyMember.is_to_call) {
+                emergencyContacts.push({
+                        name: familyMember.first_name + " " + familyMember.last_name,
+                });
+            }
+            if (familyMember.is_legal_referent) {
+                legalReferents.push( {
+                        name: familyMember.first_name + " " + familyMember.last_name,
+                });
+            }
+        });
+    }
+
 
     return (
         <div className="row mb-5">
@@ -214,20 +263,45 @@ const Validation = ({
 
                     {/*Evaluations*/}
                     {selectedEvaluations.length > 0 && _.size(application.selectedEvaluationIntervals) > 0 ? (
-                            <div className="mb-4">
-                                <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                                    EVALUATION DE NIVEAU
-                                </p>
-                                <EvaluationChoiceTable
-                                    activityRefs={allActivityRefs}
-                                    data={selectedEvaluations}
-                                    showChoiceNumber={false}/>
-                            </div>
+                        <div className="mb-4">
+                            <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                                EVALUATION DE NIVEAU
+                            </p>
+                            <EvaluationChoiceTable
+                                activityRefs={allActivityRefs}
+                                data={selectedEvaluations}
+                                showChoiceNumber={false}/>
+                        </div>
 
                     ) : null}
 
-
                     {/*Préférence de paiement*/}
+                    {paymentTerms.length > 0 ? (
+                        <div className="mb-4">
+                            <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
+                                PREFERENCE DE PAIEMENT
+                            </p>
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <div className="mb-3">
+                                        <p className="m-0 small">Echéancier</p>
+                                        <p className="font-weight-bold" style={{color: "#00283B"}}>{selectedPaymentScheduleOption}</p>
+                                    </div>
+                                    <div>
+                                        <p className="m-0 small">Moyen de paiement</p>
+                                        <p className="font-weight-bold" style={{color: "#00283B"}}>{selectedPaymentMethod}</p>
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <p className="m-0 small">Payeur(s)</p>
+                                    <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                        {payers.map(p => p.name).join(", ")}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : null}
+
 
                 </div>
                 <button
