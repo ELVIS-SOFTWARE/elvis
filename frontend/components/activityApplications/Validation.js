@@ -70,7 +70,39 @@ const Validation = ({
         .map(([refId, timeInterval]) => ({refId, timeInterval}));
 
 
-    // affichage des disponibilités
+    // Récupération des contacts et des payeurs -------------------------------------------------------------------------------------------------------------
+    const pushPayerToList = (payer, list) => {
+        const { first_name, last_name } = payer;
+        list.push({
+            name: `${first_name} ${last_name}`,
+        });
+    };
+    const payersList = [];
+    const emergencyContacts = [];
+    const legalReferents = [];
+    const accompanying = [];
+
+    const { infos } = application;
+    const { is_paying, id, first_name, last_name, family_links_with_user, payers } = infos;
+
+    // vérification si l'utilisateur principal est payeur
+    is_paying && (!payers || payers.includes(id)) ? pushPayerToList({ first_name, last_name }, payersList) : null;
+    // récupération des contacts et des payeurs parmis les membres de la famille
+    family_links_with_user && family_links_with_user.forEach(familyMember => {
+        const { id, first_name, last_name, is_paying_for, is_accompanying, is_to_call, is_legal_referent } = familyMember;
+        is_paying_for && (!payers || payers.includes(id)) ? pushPayerToList({ first_name, last_name }, payersList) : null;
+        is_accompanying ? accompanying.push({ name: `${first_name} ${last_name}` }) : null;
+        is_to_call ? emergencyContacts.push({ name: `${first_name} ${last_name}` }) : null;
+        is_legal_referent ? legalReferents.push({ name: `${first_name} ${last_name}` }) : null;
+    });
+
+    payersList.length === 0 ? payersList.push({ name: "/" }) : null;
+    accompanying.length === 0 ? accompanying.push({ name: "/" }) : null;
+    emergencyContacts.length === 0 ? emergencyContacts.push({ name: "/" }) : null;
+    legalReferents.length === 0 ? legalReferents.push({ name: "/" }) : null;
+
+
+    // Affichage des disponibilités -------------------------------------------------------------------------------------------------------------
     const preferencesArray = [];
     if (application.intervals.length > 0) {
         preferencesArray.push({
@@ -86,46 +118,18 @@ const Validation = ({
         });
     }
 
-    // affichage des préférences de paiement
-    if (paymentTerms && paymentTerms.length > 0) {
-    const selectedPaymentMethod = availPaymentMethods.find(pm => pm.id === paymentTerms[0].payment_method_id).label;
-    const selectedPaymentScheduleOption = availPaymentScheduleOptions.find(pso => pso.id === paymentTerms[0].payment_schedule_options_id).label;
-    }
-
-
-    // récupération des contacts
-    const payers = [];
-    const emergencyContacts = [];
-    const legalReferents = [];
-    const accompanying = [];
-    if (application.infos.is_paying) {
-        payers.push({
-            name: application.infos.first_name + " " + application.infos.last_name,
-        });
-    }
-    if (application.infos.family_links_with_user && application.infos.family_links_with_user.length > 0) {
-        application.infos.family_links_with_user.forEach(familyMember => {
-            if (familyMember.is_paying_for) {
-                payers.push({
-                    name: familyMember.first_name + " " + familyMember.last_name,
-                });
-            }
-            if (familyMember.is_accompanying) {
-                accompanying.push({
-                        name: familyMember.first_name + " " + familyMember.last_name,
-                });
-            }
-            if (familyMember.is_to_call) {
-                emergencyContacts.push({
-                        name: familyMember.first_name + " " + familyMember.last_name,
-                });
-            }
-            if (familyMember.is_legal_referent) {
-                legalReferents.push( {
-                        name: familyMember.first_name + " " + familyMember.last_name,
-                });
-            }
-        });
+    // Affichage des préférences de paiement -------------------------------------------------------------------------------------------------------------
+    let selectedPaymentMethod
+    let selectedPaymentScheduleOption
+    if (paymentTerms && paymentTerms[0]) {
+        const paymentMethod = availPaymentMethods.find(pm => pm.id === paymentTerms[0].payment_method_id);
+        if (paymentMethod) {
+            selectedPaymentMethod = paymentMethod.label;
+        }
+        const paymentScheduleOption = availPaymentScheduleOptions.find(pso => pso.id === paymentTerms[0].payment_schedule_options_id);
+        if (paymentScheduleOption) {
+            selectedPaymentScheduleOption = paymentScheduleOption.label;
+        }
     }
 
 
@@ -214,16 +218,22 @@ const Validation = ({
                             <div className="col-md-6">
                                 <div className="mb-3">
                                     <p className="m-0 small">Représentant légal</p>
-                                    <p className="font-weight-bold" style={{color: "#00283B"}}>/</p>
+                                    <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                        {legalReferents.map(p => p.name).join(", ")}
+                                    </p>
                                 </div>
                                 <div>
                                     <p className="m-0 small">Accompagnant</p>
-                                    <p className="font-weight-bold" style={{color: "#00283B"}}>/</p>
+                                    <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                        {accompanying.map(p => p.name).join(", ")}
+                                    </p>
                                 </div>
                             </div>
                             <div className="col">
                                 <p className="m-0 small">Contact d'urgence</p>
-                                <p className="font-weight-bold" style={{color: "#00283B"}}>/</p>
+                                <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                    {emergencyContacts.map(p => p.name).join(", ")}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -295,7 +305,7 @@ const Validation = ({
                                 <div className="col">
                                     <p className="m-0 small">Payeur(s)</p>
                                     <p className="font-weight-bold" style={{color: "#00283B"}}>
-                                        {payers.map(p => p.name).join(", ")}
+                                        {payersList.map(p => p.name).join(", ")}
                                     </p>
                                 </div>
                             </div>
