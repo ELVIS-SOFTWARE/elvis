@@ -325,16 +325,6 @@ const Validation = ({
 
 
                 </div>
-                <button
-                    onClick={handleSubmit}
-                    disabled={buttonDisabled}
-                    className="btn btn-primary btn-md submit-activity"
-                >
-                    {buttonDisabled ? (
-                        <Fragment><i className="fa fa-spinner fa-spin"/> &nbsp;</Fragment>
-                    ) : ""}
-                    {"Envoyer la demande"}
-                </button>
             </div>
 
 
@@ -347,6 +337,16 @@ const Validation = ({
                                   onChange={(e) => handleComment(e.target.value)}/>
                 </div>
             </div>
+            <button
+                onClick={handleSubmit}
+                disabled={buttonDisabled}
+                className="btn btn-primary btn-md submit-activity mt-5"
+            >
+                {buttonDisabled ? (
+                    <Fragment><i className="fa fa-spinner fa-spin"/> &nbsp;</Fragment>
+                ) : ""}
+                {"Envoyer la demande"}
+            </button>
         </div>
     )
         ;
