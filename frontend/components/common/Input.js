@@ -14,7 +14,7 @@ const Input = props => {
         if (isArea) {
             return <textarea
                 className="form-control"
-                style={{ minHeight: "100px", borderRadius: "5px", resize: "vertical" }}
+                style={{ minHeight: "100px", borderRadius: "8px", resize: "vertical" }}
                 {...input}
                 {...htmlOptions}
                 maxLength={maxLength}
@@ -34,6 +34,7 @@ const Input = props => {
         } else {
             return <input
                 className="form-control"
+                style={{ borderRadius: "8px" , color: "#00283B"}}
                 {...input}
                 {...htmlOptions}
                 maxLength={maxLength}

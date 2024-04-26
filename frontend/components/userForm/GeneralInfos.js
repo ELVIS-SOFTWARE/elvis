@@ -7,8 +7,8 @@ import {toBirthday, toAge} from "../../tools/format";
 import CreateOrganizationModal from "./CreateOrganizationModal";
 
 const genders = [
-    {value: "F", label: "Féminin"},
-    {value: "M", label: "Masculin"},
+    {value: "F", label: "Madame"},
+    {value: "M", label: "Monsieur"},
     {value: "A", label: "Autre"},
 ];
 
@@ -23,34 +23,67 @@ const GeneralInfos = ({
                           userId
                       }) => (
     <Fragment>
-        <h3 className="m-b-md">Identité du contact</h3>
         <div className="row">
-            <div className="col-lg-10">
-                <Field
-                    label="Nom"
-                    name="last_name"
-                    type="text"
-                    validate={!ignoreValidate && required}
-                    required
-                    render={Input}
-                />
+
+
+            {displayGender && (
+                <div className="col mt-3">
+                    <Field name="sex" validate={!ignoreValidate && required} required>
+                        {({ input, meta }) => (
+                            <div>
+                                <label className="small" style={{color: "#003E5C"}}>Civilité</label><br/>
+                                <div className="d-inline-flex">
+                                    {genders.map((gender, index) => (
+                                        <div key={index} className="mr-5" style={{color: "#155979", fontWeight: "light"}}>
+                                            <Field
+                                                name={input.name}
+                                                component="input"
+                                                type="radio"
+                                                value={gender.value}S
+                                                checked={gender.value === input.value}
+                                                onChange={input.onChange}
+                                                className="mr-2"
+                                            />
+                                            {gender.label}
+                                        </div>
+                                    ))}
+                                </div>
+                                {meta.touched && meta.error && <span>{meta.error}</span>}
+                            </div>
+                        )}
+                    </Field>
+                </div>
+            )}
+
+            <div className="col mt-4">
+                <div className="col-md-6 p-0">
+                    <label className="small" style={{color: "#003E5C"}}>Nom</label><br/>
+                    <Field
+                        name="last_name"
+                        type="text"
+                        validate={!ignoreValidate && required}
+                        required
+                        render={Input}
+                    />
+                </div>
+
+                <div className="col-md-6">
+                    <label className="small" style={{color: "#003E5C"}}>Prénom</label><br/>
+                    <Field
+                        name="first_name"
+                        type="text"
+                        validate={!ignoreValidate && required}
+                        required
+                        render={Input}
+                    />
+                </div>
             </div>
 
-            <div className="col-lg-10">
-                <Field
-                    label="Prénom"
-                    name="first_name"
-                    type="text"
-                    validate={!ignoreValidate && required}
-                    required
-                    render={Input}
-                />
-            </div>
 
             {displayBirthday && (
-                <div className="col-lg-10">
+                <div className="col-md-6 pr-0">
+                    <label className="small" style={{color: "#003E5C"}}>Date de naissance</label><br/>
                     <Field
-                        label="Date de naissance"
                         name="birthday"
                         type="date"
                         validate={!ignoreValidate && composeValidators(required, isValidAge)}
@@ -62,26 +95,14 @@ const GeneralInfos = ({
                 </div>
             )}
 
-            {displayGender && (
-                <div className="col-sm-3">
-                    <Field
-                        label="Genre"
-                        name="sex"
-                        type="select"
-                        validate={!ignoreValidate && required}
-                        required
-                        render={InputSelect}
-                        options={genders}
-                    />
-                </div>
-            )}
+
         </div>
 
+        <div className="row">
         {displayIdentificationNumber &&
-            <div className="row">
-                <div className="col-sm-3">
+                <div className="col-md-6 p-0">
+                    <label className="small" style={{color: "#003E5C"}}>Numéro national d'identification</label><br/>
                     <Field
-                        label="Numéro national d'identification"
                         name="identification_number"
                         type="text"
                         validate={!ignoreValidate && (requireIdentificationNumber ? composeValidators(required, isValidNN) : isValidNN)}
@@ -91,12 +112,11 @@ const GeneralInfos = ({
                         render={Input}
                     />
                 </div>
-            </div>
         }
 
         {ignoreValidate && organizationOptions &&
-            <div className="row">
-                <div className="col-sm-4">
+                <div className="col-md-6">
+                    <label className="small" style={{color: "#003E5C"}}>Organisation</label><br/>
                     <Field
                         label="Ce contact représente l'organisation"
                         name="organization_id"
@@ -105,12 +125,11 @@ const GeneralInfos = ({
                         options={organizationOptions}
                         render={InputSelect}
                         disabled={organizationOptions.length === 0}
-
                     />
+                    <CreateOrganizationModal urlRedirect={`/users/${userId}/edit`}/>
                 </div>
-                <CreateOrganizationModal urlRedirect={`/users/${userId}/edit`}/>
-            </div>
         }
+        </div>
     </Fragment>
 );
 

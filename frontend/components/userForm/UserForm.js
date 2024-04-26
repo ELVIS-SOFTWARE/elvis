@@ -286,9 +286,9 @@ class UserForm extends React.PureComponent {
 
         return (
             <div className="padding-page application-form">
-                <div className="ibox m-b-lg">
-                    <h4 className="ibox-title">{"Coordonnées"}</h4>
-                    <div className="ibox-content">
+                <div>
+                    <h4 style={{color: "#8AA4B1"}}>INFORMATIONS PERSONNELLES DE {initialValues.first_name.toUpperCase()}</h4>
+                    <div>
                         <Form
                             onSubmit={this.submit.bind(this)}
                             mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType }}
