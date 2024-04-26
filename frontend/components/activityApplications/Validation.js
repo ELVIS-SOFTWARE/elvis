@@ -130,7 +130,6 @@ const Validation = ({
         }
     }
 
-
     return (
         <div className="row mb-5">
 
@@ -142,12 +141,24 @@ const Validation = ({
                 <div className="p-5" style={{backgroundColor: "white", borderRadius: 12}}>
 
                     {/*Elève*/}
-                    <div className="d-inline-flex mb-5 pt-3">
-                        <div className="mr-5">
-                            <img className="img-circle" alt="avatar" src="" width="60" height="60"/>
+                    <div className="d-inline-flex mb-5 pt-3 align-items-center">
+                        <div
+                            className="img-fluid text-center d-block font-bold"
+                            style={{
+                                width: "75px",
+                                height: "75px",
+                                borderRadius: "50%",
+                                backgroundColor: "rgb(253, 214, 217)",
+                                lineHeight: "75px",
+                                fontSize: "30px",
+                                color: "rgb(247, 71, 84)",
+                            }}
+                        >
+                            {application.infos.first_name.charAt(0).toUpperCase()}
+                            {application.infos.last_name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                            <h3 className="font-weight-bold" style={{color: "#00283B"}}>
+                            <h3 className="font-weight-bold ml-3" style={{color: "#00283B"}}>
                                 {application.infos.first_name}{" "}
                                 {application.infos.last_name}
                             </h3>
