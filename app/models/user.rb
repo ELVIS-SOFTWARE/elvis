@@ -983,6 +983,7 @@ class User < ApplicationRecord
   def availabilities(season = Season.current_apps_season)
     planning
       &.time_intervals
+      &.where(kind: "p")
       &.where(is_validated: false)
       &.for_season(season)
   end
