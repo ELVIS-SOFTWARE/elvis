@@ -321,15 +321,7 @@ class UserForm extends React.PureComponent {
                                             organizationOptions={this.props.organizationOptions}
                                             userId={this.props.initialValues.id}
                                         />
-                                        <hr />
 
-                                        <Payers
-                                            values={values}
-                                            mutators={form.mutators}
-                                            currentUser={{ ...initialValues }}
-                                        />
-
-                                        <hr />
                                         <ContactInfos
                                             values={values}
                                             form={form}

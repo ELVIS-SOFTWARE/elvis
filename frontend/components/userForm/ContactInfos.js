@@ -53,47 +53,41 @@ class ContactInfos extends React.PureComponent {
         const { push, update } = this.props.mutators;
 
         return (
-            <div>
+            <div className="mt-3">
                 <FormSpy
                     subscription={{ values: true }}
                     onChange={props => this.handleChangeInfos(props)} />
 
-                <h3 className="m-b-md">{"Informations de contact"}</h3>
+                <h4 style={{color: "#8AA4B1"}}>COORDONNEES PERSONNELLES DU DEMANDEUR</h4>
 
-                <div className="alert alert-warning">
-                    <p>
-                        Le courriel et le numéro de téléphone renseignés seront
-                        utilisés pour le suivi de la demande. C'est pourquoi,
-                        nous vous recommandons vivement de renseigner ces
-                        informations au maximum afin de faciliter les contacts
-                        entre nous.
-                    </p>
+                <div className="col p-0 mb-5">
+                    <FieldArray
+                        name="addresses"
+                        render={props => <AddressFields {...props} ignoreValidate={ignoreValidate} />}
+                        family={displaySameAs ? values.family : undefined}
+                        validate={!ignoreValidate && required}
+                        setSameAs={
+                            displaySameAs
+                                ? (i, value) =>
+                                    update(
+                                        "addresses",
+                                        i,
+                                        value ? JSON.parse(value) : undefined
+                                    )
+                                : undefined
+                        }
+                        currentUser={currentUser}
+                    />
+
+                    <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        style={{backgroundColor: "#00334A",borderRadius: "12px"}}
+                        onClick={() => push("addresses", { isNew: true })}
+                    >
+                        <i className="fas fa-plus" /> {"Ajouter une adresse"}
+                    </button>
                 </div>
-
-                {canAddContacts ? (
-                    <div className="m-b-md">
-
-                        <FamilyMembers
-                            firstName={values.first_name}
-                            family={values.family}
-                            onEdit={onContactEdit}
-                            onDelete={onContactDelete}
-                        />
-
-                        {/* # display: none */}
-                        <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={onContactAdd}
-                            style={{
-                                display: 'none',
-                            }}
-                        >
-                            <i className="fas fa-plus m-r-xs" />
-                            {"Ajouter un contact"}
-                        </button>
-                    </div>
-                ) : null}
 
                 <div className="m-b-md">
                     {displaySameAs && <Fragment>
@@ -155,35 +149,7 @@ class ContactInfos extends React.PureComponent {
                     </button>
                 </div>
 
-                <div>
-                    <h4>{"Adresses"} <span className="text-danger">{" *"}</span></h4>
 
-                    <FieldArray
-                        name="addresses"
-                        render={props => <AddressFields {...props} ignoreValidate={ignoreValidate} />}
-                        family={displaySameAs ? values.family : undefined}
-                        validate={!ignoreValidate && required}
-                        setSameAs={
-                            displaySameAs
-                                ? (i, value) =>
-                                    update(
-                                        "addresses",
-                                        i,
-                                        value ? JSON.parse(value) : undefined
-                                    )
-                                : undefined
-                        }
-                        currentUser={currentUser}
-                    />
-
-                    <button
-                        type="button"
-                        className="btn btn-primary btn-sm m-b-md"
-                        onClick={() => push("addresses", { isNew: true })}
-                    >
-                        <i className="fas fa-plus" /> {"Ajouter une adresse"}
-                    </button>
-                </div>
             </div>
         );
     }
