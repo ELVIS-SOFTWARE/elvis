@@ -347,15 +347,8 @@ class UserForm extends React.PureComponent {
                                         />
                                         <hr />
                                         <HandicapInfos />
-                                        <hr />
 
-                                        {/*<GDPR*/}
-                                        {/*    schoolName={this.props.schoolName}*/}
-                                        {/*    ignoreValidate={user ? user.is_admin : false}*/}
-                                        {/*    shouldCheckGdpr={this.props.shouldCheckGdpr} />*/}
-
-                                        {
-                                            this.props.consent_docs && this.props.consent_docs.map(doc =>
+                                        {this.props.consent_docs && this.props.consent_docs.map(doc =>
                                                 <ConsentDocItem
                                                     key={doc.id}
                                                     docItem={doc}
@@ -363,13 +356,6 @@ class UserForm extends React.PureComponent {
                                                     defaultValue={((initialValues.consent_document_users || []).find(cdu => cdu.consent_document_id === doc.id) || {}).has_consented}
                                                 />)
                                         }
-
-                                        {/*<ImageRight*/}
-                                        {/*    schoolName={this.props.schoolName}*/}
-                                        {/*    ignoreValidate={user ? user.is_admin : false} />*/}
-                                        {/*<NewsLetter*/}
-                                        {/*    schoolName={this.props.schoolName}*/}
-                                        {/*    ignoreValidate={user ? user.is_admin : false} />*/}
 
                                         {this.props.displaySubmit && (
                                             <button

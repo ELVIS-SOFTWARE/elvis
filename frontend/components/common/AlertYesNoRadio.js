@@ -15,31 +15,35 @@ const Radio = ({ input, children }) =>
 
 const AlertYesNoRadio = ({ ignoreValidate, text, alertType, name }) => {
     return (
-        <div className={`p-sm alert alert-${alertType}`}>
-            <div className="flex flex-start-justified flex-start-aligned">
-                <label className="form-group flex m-r-sm">
-                    <Field
-                        name={name}
-                        validate={!ignoreValidate && required}
-                        type="radio"
-                        value="true"
-                        component={Radio}
-                        style={{marginRight: "5px"}} />
-                    <span>Oui</span>
-                </label>
-                <label className="form-group flex m-r-sm">
-                    <Field
-                        name={name}
-                        validate={!ignoreValidate && required}
-                        type="radio"
-                        value="false"
-                        component={Radio}
-                        style={{marginRight: "5px"}} />
-                    <span>Non</span>
-                </label>
+        <div className={`p-0 m-0 alert alert-${alertType}`}>
+            <div>
                 <p>
                     {text}
                 </p>
+                <div className="d-inline-flex">
+                    <label className="form-group flex mr-5 align-items-baseline">
+                        <Field
+                            name={name}
+                            validate={!ignoreValidate && required}
+                            type="radio"
+                            value="true"
+                            component={Radio}
+                            style={{marginRight: "10px"}} />
+                        <span className="ml-3" style={{color: "rgb(0, 51, 74)", fontWeight: "lighter"}}>Oui</span>
+                    </label>
+                    <label className="form-group flex align-items-baseline">
+                        <Field
+                            name={name}
+                            validate={!ignoreValidate && required}
+                            type="radio"
+                            value="false"
+                            component={Radio}
+                            style={{marginRight: "10px"}} />
+                        <span className="ml-3" style={{color: "rgb(0, 51, 74)", fontWeight: "lighter"}}>Non</span>
+                    </label>
+                </div>
+
+
             </div>
             <Field
                 name={name}
