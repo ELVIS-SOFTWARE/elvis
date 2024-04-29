@@ -1,5 +1,5 @@
 import React from "react";
-import { MESSAGES } from "../../tools/constants";
+import {MESSAGES} from "../../tools/constants";
 
 const InputSelect = ({
                          input,
@@ -13,7 +13,8 @@ const InputSelect = ({
                          button,
                          tooltip,
                          componentAdd,
-                         disabled
+                         disabled,
+                         className
                      }) => {
     const hasError = meta && meta.error && meta.touched;
 
@@ -29,16 +30,15 @@ const InputSelect = ({
     };
 
     return (
-        <div className={`${inline? "" : "form-group"} ${hasError ? "has-error" : ""}`}>
-            {!inline && <label htmlFor={input.name}>
+        <div className={`${inline ? "" : "form-group"} ${hasError ? "has-error" : ""}`}>
+            {!inline && !className && <label htmlFor={input.name}>
                 {label}
-                {required && <span className="text-danger">{" *"}</span>}
             </label>}
-
             <div className={tooltip || componentAdd ? "input-group" : ""}>
-                {tooltip ? renderInputGroupAddon(<i className="fa fa-exclamation-circle" data-tippy-content={tooltip} />) : null}
+                {tooltip ? renderInputGroupAddon(<i className="fa fa-exclamation-circle"
+                                                    data-tippy-content={tooltip}/>) : null}
                 {renderInputGroupAddon(componentAdd)}
-                <select className="form-control" {...input} disabled={disabled}>
+                <select className="form-control" style={{borderRadius: "8px"}} {...input} disabled={disabled}>
                     {renderOptions()}
                 </select>
                 {button && renderInputGroupAddon(<a href={button.href_path} className={button.icon}>{button.text}</a>)}

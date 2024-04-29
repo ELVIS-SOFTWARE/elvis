@@ -55,10 +55,10 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
                 />
             )}
 
-            <div className="row">
-                <div className="col-md-6">
+            <div className="row d-flex align-items-center">
+                <div className="col-md-6 pr-0">
+                    <label className="small" style={{color: "#003E5C"}}>Téléphone</label><br/>
                     <Field
-                        label="Numéro"
                         name={`${field}.number`}
                         render={Input}
                         validate={!ignoreValidate && composeValidators(required, isPhoneNumber)}
@@ -69,29 +69,32 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
                     />
                 </div>
 
-                <div className="col-md-6">
+                <div className="col">
+                    <label className="small" style={{color: "#003E5C"}}>Type</label><br/>
                     <Field
-                        label="Type"
                         name={`${field}.label`}
                         render={InputSelect}
                         validate={!ignoreValidate && required}
                         required
                         options={phoneTypes}
+                        className="no inline"
                     />
                 </div>
+
+                {fields.length > 1 ? (
+                    <div className="col text-right">
+                        <button
+                            className="btn btn-sm btn-warning"
+                            onClick={() => fields.remove(i)}
+                        >
+                            <i className="fas fa-trash"/>
+                            {"supprimer"}
+                        </button>
+                    </div>
+                ) : null}
             </div>
 
-            {fields.length > 1 ? (
-                <div>
-                    <button
-                        className="btn btn-sm btn-warning"
-                        onClick={() => fields.remove(i)}
-                    >
-                        <i className="fas fa-trash"/>
-                        {"supprimer"}
-                    </button>
-                </div>
-            ) : null}
+
         </div>
     ));
 }
@@ -119,8 +122,8 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
 
 
                 <div className="row d-flex align-items-center">
-                    <div className="col-md-6">
-                        <label className="small" style={{color: "#003E5C"}}>Voie</label><br/>
+                    <div className="col-md-6 pr-0">
+                        <label className="small" style={{color: "#003E5C"}}>Adresse</label><br/>
                         <Field
                             name={`${field}.street_address`}
                             render={Input}
@@ -129,7 +132,7 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
 
-                    <div className="col-md-2">
+                    <div className="col-md-1 pr-0">
                         <label className="small" style={{color: "#003E5C"}}>Code Postal</label><br/>
                         <Field
                             name={`${field}.postcode`}
@@ -140,7 +143,7 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
 
-                    <div className="col-md-2S">
+                    <div className="col">
                         <label className="small" style={{color: "#003E5C"}}>Ville</label><br/>
                         <Field
                             name={`${field}.city`}
@@ -150,7 +153,7 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
                     {fields.length > 1 ? (
-                        <div className="col-md-1 mt-1">
+                        <div className="col mt-1 text-right">
                             <button
                                 type="button"
                                 className="btn btn-sm btn-warning"

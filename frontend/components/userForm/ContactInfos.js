@@ -53,12 +53,12 @@ class ContactInfos extends React.PureComponent {
         const { push, update } = this.props.mutators;
 
         return (
-            <div className="mt-3">
+            <div className="mt-4">
                 <FormSpy
                     subscription={{ values: true }}
                     onChange={props => this.handleChangeInfos(props)} />
 
-                <h4 style={{color: "#8AA4B1"}}>COORDONNEES PERSONNELLES DU DEMANDEUR</h4>
+                <h4 className="pb-3" style={{color: "#8AA4B1"}}>COORDONNEES PERSONNELLES DU DEMANDEUR</h4>
 
                 <div className="col p-0 mb-5">
                     <FieldArray
@@ -89,9 +89,8 @@ class ContactInfos extends React.PureComponent {
                     </button>
                 </div>
 
-                <div className="m-b-md">
+                <div>
                     {displaySameAs && <Fragment>
-                        <h4>Email<span className="text-danger">*</span></h4>
                         {Array.isArray(values.family) &&
                             values.family.length > 0 && (
                                 <SelectSameAs
@@ -108,7 +107,7 @@ class ContactInfos extends React.PureComponent {
                                 />
                             )}
                     </Fragment>}
-
+                    <label className="small" style={{color: "#003E5C"}}>Email</label><br/>
                     <Field
                         label={!displaySameAs && "Email"}
                         name="email"
@@ -120,8 +119,6 @@ class ContactInfos extends React.PureComponent {
                 </div>
 
                 <div className="m-b-md">
-                    <h4>{"Téléphones"} <span className="text-danger">{" *"}</span></h4>
-
                     <FieldArray
                         name="telephones"
                         render={(props) => <TelephoneFields {...props} ignoreValidate={ignoreValidate} />}
@@ -142,7 +139,8 @@ class ContactInfos extends React.PureComponent {
 
                     <button
                         type="button"
-                        className="btn btn-primary btn-sm m-b-md"
+                        className="btn btn-primary btn-sm"
+                        style={{backgroundColor: "#00334A",borderRadius: "12px"}}
                         onClick={() => push("telephones", undefined)}
                     >
                         <i className="fas fa-plus" /> {"Ajouter un téléphone"}

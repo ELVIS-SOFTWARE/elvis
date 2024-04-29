@@ -67,7 +67,7 @@ const GeneralInfos = ({
                     />
                 </div>
 
-                <div className="col-md-6">
+                <div className="col-md-6 pr-0">
                     <label className="small" style={{color: "#003E5C"}}>Prénom</label><br/>
                     <Field
                         name="first_name"
