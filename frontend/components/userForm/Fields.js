@@ -120,7 +120,6 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                 />
             )}
 
-
                 <div className="row d-flex align-items-center mb-4">
                     <div className="col-md-6 pr-0">
                         <label className="small" style={{color: "#003E5C"}}>Adresse</label><br/>
