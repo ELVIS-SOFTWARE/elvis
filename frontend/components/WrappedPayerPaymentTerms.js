@@ -69,6 +69,14 @@ class WrappedPayerPaymentTerms extends React.Component {
         this.props.onChangePaymentMethod && this.props.onChangePaymentMethod(paymentMethodId);
     }
 
+    handleChangePayers(payers) {
+        this.setState(prevState => {
+            return {
+                payers: payers
+            };
+        });
+        this.props.onChangePayers && this.props.onChangePayers(payers);
+    }
 
     render() {
 
@@ -87,26 +95,32 @@ class WrappedPayerPaymentTerms extends React.Component {
 
         return <Fragment>
 
+            {this.props.paymentStepDisplayText && <div className="alert alert-info w-100 pre-wrap">
+                {<Editor editorState={editorState} readOnly={true} />}
+            </div>}
+
             {this.props.informationalStepOnly ? (
-                this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 && <PayerPaymentTermsInfo
+                this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 &&
+                <PayerPaymentTermsInfo
                     availPaymentScheduleOptions={this.props.availPaymentScheduleOptions}
                 />
             ) : (
                 <PayerPaymentTerms
+                    user={this.props.user}
+                    family={this.props.family}
+                    initialSelectedPayers={this.props.initialSelectedPayers}
                     paymentTerms={this.props.paymentTerms}
                     availPaymentScheduleOptions={this.props.availPaymentScheduleOptions}
                     availPaymentMethods={this.props.availPaymentMethods}
                     onChangePaymentTerms={this.handleChangePaymentTerms.bind(this)}
                     onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                     onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
+                    onChangePayers={this.handleChangePayers.bind(this)}
                 />
             )
             }
 
 
-            {this.props.paymentStepDisplayText && <div className="alert alert-info w-100 pre-wrap">
-                {<Editor editorState={editorState} readOnly={true} />}
-            </div>}
         </Fragment>;
     }
 }

@@ -106,7 +106,7 @@ class UserForm extends React.PureComponent {
             this.mutators.update(
                 "family",
                 this.state.selectedFamilyMember,
-                values
+                values,
             );
         }
     }
@@ -130,30 +130,31 @@ class UserForm extends React.PureComponent {
             let Msg;
             if (!this.isValidID) {
                 const redirect = () => {
-                    window.location.href = "/u/sign_in"
-                }
+                    window.location.href = "/u/sign_in";
+                };
                 Msg = ({ closeToast, toastProps }) => (
                     <div>
                         {MESSAGES.err_is_invalid_id}
-                        <button onClick={redirect} className="btn btn-warning">Me rediriger vers la page de Connexion</button>
+                        <button onClick={redirect} className="btn btn-warning">Me rediriger vers la page de Connexion
+                        </button>
                     </div>
-                )
+                );
                 toast.error(<Msg />, {
                     autoClose: 5000,
                     closeOnClick: true,
-                })
+                });
             } else if (this.errors.is_paying) {
-                let { initialValues, user } = this.props
-                let title = '<h5>Aucun payeur n\' est déclaré pour ' + initialValues.first_name + ' ' + initialValues.last_name + '</h5>';
-                let htmltext = '<p>' + initialValues.first_name + ' ' + initialValues.last_name + ', si vous êtes le payeur, merci de cocher la case' + '<br/>'
-                    + '<b>"L\'élève est aussi le payeur"</b>' + '<br/>'
-                    + '<br/>'
-                    + 'Si vous êtes payeur pour ' + user.first_name + ' ' + user.last_name + ', merci de l\'indiquer sur votre profil dans l\'édition du lien familial.' + '<br/>'
-                    + '<br/>'
-                    + '</p>';
+                let { initialValues, user } = this.props;
+                let title = "<h5>Aucun payeur n' est déclaré pour " + initialValues.first_name + " " + initialValues.last_name + "</h5>";
+                let htmltext = "<p>" + initialValues.first_name + " " + initialValues.last_name + ", si vous êtes le payeur, merci de cocher la case" + "<br/>"
+                    + "<b>\"L'élève est aussi le payeur\"</b>" + "<br/>"
+                    + "<br/>"
+                    + "Si vous êtes payeur pour " + user.first_name + " " + user.last_name + ", merci de l'indiquer sur votre profil dans l'édition du lien familial." + "<br/>"
+                    + "<br/>"
+                    + "</p>";
 
-                let confirmtext = 'Redirection vers la page de profil de ' + user.first_name + ' ' + user.last_name;
-                let cancelText = 'Retours à la demande d\'inscription';
+                let confirmtext = "Redirection vers la page de profil de " + user.first_name + " " + user.last_name;
+                let cancelText = "Retours à la demande d'inscription";
                 Swal.fire({
                     title: title,
                     html: htmltext,
@@ -163,14 +164,14 @@ class UserForm extends React.PureComponent {
                     cancelButtonText: cancelText,
                 }).then(result => {
                     if (result.value) {
-                        window.location.href = "/"
+                        window.location.href = "/";
                     }
-                })
+                });
             } else {
                 toast.error(MESSAGES.err_is_invalid, {
                     autoClose: 3000,
                     closeOnClick: true,
-                })
+                });
             }
             return false;
         }
@@ -184,18 +185,18 @@ class UserForm extends React.PureComponent {
                 .success(data => {
                     this.isValidID = !data;
                     return data === true
-                        ? { username: 'name/surname/birthday combinaison doit être identique' }
-                        : {}
+                        ? { username: "name/surname/birthday combinaison doit être identique" }
+                        : {};
                 })
                 .error(errors => console.log(errors))
                 .post("/users/exist", {
                     first_name: values.first_name,
                     last_name: values.last_name,
                     birthday: values.birthday,
-                })
-            return this.errors
+                });
+            return this.errors;
         }
-        return {}
+        return {};
     }
 
     validate(values) {
@@ -217,13 +218,11 @@ class UserForm extends React.PureComponent {
             if (!values.checked_rules)
                 this.errors.checked_rules = "err_must_check_rules";
 
-        if (this.props.consent_docs)
-        {
+        if (this.props.consent_docs) {
             this.props.consent_docs.forEach(doc => {
                 const consentvalue = _.get(values.consent_docs, `id_${doc.id}.agreement`);
 
-                if(doc.expected_answer && !consentvalue || consentvalue === undefined)
-                {
+                if (doc.expected_answer && !consentvalue || consentvalue === undefined) {
                     this.errors.consent_docs = this.errors.consent_docs || {};
                     this.errors.consent_docs[`id_${doc.id}`] = this.errors.consent_docs[`id_${doc.id}`] || {};
                     this.errors.consent_docs[`id_${doc.id}`].agreement = doc.expected_answer ? "err_must_check_consent" : "err_must_respond";
@@ -231,7 +230,7 @@ class UserForm extends React.PureComponent {
             });
         }
 
-        return Object.keys(this.errors).length ? this.errors : this.checkValidUser(values)
+        return Object.keys(this.errors).length ? this.errors : this.checkValidUser(values);
     }
 
     submit(values, form) {
@@ -263,8 +262,8 @@ class UserForm extends React.PureComponent {
         });
 
         this.setState({
-            requireIdentificationNumber: this.props.displayIdentificationNumber && (values.is_paying || userIsMinor(values.birthday))
-        })
+            requireIdentificationNumber: this.props.displayIdentificationNumber && (values.is_paying || userIsMinor(values.birthday)),
+        });
     }
 
     render() {
@@ -340,7 +339,7 @@ class UserForm extends React.PureComponent {
                                             onContactDelete={(idx, member) => {
                                                 this.removeFamilyMember(
                                                     idx,
-                                                    member
+                                                    member,
                                                 );
                                             }}
                                             currentUser={{ ...initialValues }}

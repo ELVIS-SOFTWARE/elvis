@@ -29,7 +29,14 @@ export default function TemplateEditor()  {
     }, [])
 
     useEffect(() => {
-        setMergeTags({ ...MergeTags.ACTIVITY_TAGS, ...MergeTags.APPLICATION_TAGS, ...MergeTags.PAYMENT_TAGS, ...MergeTags.REGLEMENTS_TAGS, ...MergeTags.UTILS_TAGS });
+        setMergeTags({
+            ...MergeTags.ACTIVITY_TAGS,
+            ...MergeTags.ACTIVITY_INSTANCE_TAGS,
+            ...MergeTags.APPLICATION_TAGS,
+            ...MergeTags.PAYMENT_TAGS,
+            ...MergeTags.REGLEMENTS_TAGS,
+            ...MergeTags.UTILS_TAGS
+        });
     }, [event]);
 
     if (!loading) {
