@@ -1,8 +1,8 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import _ from "lodash";
 
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
-import { frenchEnumeration } from "../utils/index.js";
+import {frenchEnumeration} from "../utils/index.js";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -172,10 +172,10 @@ const ActivityChoice = ({
 
             return (
                 <div key={i} className="row m-b-md d-flex align-items-center">
-                    <div className="col-xs-6">
+                    <div className="col-xs-5">
                         <strong>{ref.label}</strong>
                     </div>
-                    <div className="col-xs-2 text-center">
+                    <div className="col-xs-3 text-center">
                         <span className="activite-amount pull-left">
                             {getDisplayDuration(ref)}
                         </span>
@@ -220,10 +220,10 @@ const ActivityChoice = ({
 
         return (
             <div key={i} className="row m-b-md d-flex align-items-center">
-                <div className="col-xs-6">
+                <div className="col-xs-5">
                     <strong>{ref.label}</strong>
                 </div>
-                <div className="col-xs-2 text-center">
+                <div className="col-xs-3 text-center">
                     <span className="activite-amount pull-left">
                         {getDisplayDuration(ref)}
                     </span>
@@ -288,22 +288,26 @@ const ActivityChoice = ({
 
             return (
                 <React.Fragment key={selectedActivityId}>
-                    <div className="row m-b-md">
-                        <div className="col-xs-5 m-t-sm">
+                    <div className="row d-flex align-items-center">
+                        <div className="col-xs-5">
                             <strong>
                                 {selectedActivity.display_name}
+                                {amount > 1 && (
+                                    <span className="activite-amount"> x{amount}</span>
+                                )}
                             </strong>
                         </div>
-                        <div className="col-xs-7 text-center">
-                            <div className="pull-left">
-                                <span className="activite-amount">
-                                    x{amount}
+                        <div className="col-xs-3 text-center">
+                            <span className="activite-amount mr-5">
+                                {getDisplayDuration(selectedActivity)}
                                 </span>
-                                <span className="activite-amount">
+                        </div>
+                        <div className="col-xs-2 text-center">
+                            <span className="activite-amount">
                                     {displayPrice} €
                                 </span>
-                            </div>
-
+                        </div>
+                        <div className="col text-center">
                             <div
                                 className="btn-group-horizontal pull-right btn-group"
                                 role="group"
@@ -348,12 +352,12 @@ const ActivityChoice = ({
             return (
                 <Fragment key={pack.id}>
                     <div className="row m-b-md">
-                        <div className="col-xs-6 m-t-sm">
+                        <div className="col-xs-5 m-t-sm">
                             <p className="ml-3">
                                 {pricing_category.name}
                             </p>
                         </div>
-                        <div className="col-xs-2 text-center">
+                        <div className="col-xs-3 text-center">
                             <span className="activite-amount pull-left">
                                 {getDisplayDuration(pack.activity_ref)}
                             </span>
@@ -402,7 +406,7 @@ const ActivityChoice = ({
             return (
                 <Fragment key={packId}>
                     <div className="row m-b-md">
-                        <div className="col-xs-6 m-t-sm">
+                        <div className="col-xs- m-t-sm">
                             <p className="ml-3">
                                 {pricing_category.name}
                             </p>
