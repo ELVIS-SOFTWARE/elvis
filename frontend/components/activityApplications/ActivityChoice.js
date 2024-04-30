@@ -1,8 +1,8 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import _ from "lodash";
 
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
-import { frenchEnumeration } from "../utils/index.js";
+import {frenchEnumeration} from "../utils/index.js";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -453,103 +453,120 @@ const ActivityChoice = ({
 
     return (
         <Fragment>
-            <div className="row">
-                <div className="col-lg-6">
-                    <div className="ibox">
-                        <div className="ibox-title">
-                            <h3>Choix de l&rsquo;activité</h3>
-                        </div>
-                        {filteredActivityRefsDisplay.length > 0 && (
-                            <div className="ibox-content">
-                                {filteredActivityRefsDisplay}
-                            </div>
-                        )}
-                        {activityRefsDisplayCham.length > 0 && (
-                            <div className="ibox-content">
-                                {activityRefsDisplayCham}
-                            </div>
-                        )}
-                        {filteredIndividualActivityRefsDisplay.length > 0 && (
-                            <div className="ibox-content">
-                                {filteredIndividualActivityRefsDisplay}
-                            </div>
-                        )}
 
-                        {Object.keys(packs).length !== 0 && (
-                            <div>
-                                <div className="ibox-title">
-                                    <h3>Choix des Packs</h3>
-                                </div>
+            <div>
 
+                    {showPriceWarning() &&
+                        <div className="alert alert-info col-md-8 d-inline-flex align-items-center m-b-md pl-0"
+                             style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
+                            <div className="col-1 p-0 text-center">
+                                <i className="fas fa-info-circle"></i>
+                            </div>
+                            <div className="col p-0">
+                                <small className="m-b-xs">
+                                    Les tarifs affichés sont à titre indicatif. Ils
+                                    correspondent au coût pour une personne inscrite en
+                                    cours collectif payé mensuellement.
+                                </small>
+                                {adhesionEnabled && adhesionPrices.length > 0 && <small className="m-b-xs">
+                                    À ce tarif, s'ajoute une adhésion annuelle à{" "}
+                                    {schoolName}. Cette dernière est d'un montant de{" "}
+                                    {(adhesionPrices.find(a => a.season_id == season.id) || _.maxBy(adhesionPrices, a => a.season_id) || {}).price || 0} euros.
+                                </small>}
+                                <small>
+                                    Des réductions sont possibles. Elles seront
+                                    précisées lors de votre passage au secrétariat pour
+                                    valider votre inscription.
+                                </small>
+                            </div>
+
+                        </div>}
+
+
+
+                <div className="row">
+                    <div className="col-lg-6">
+                        <div className="ibox">
+                            <div className="ibox-title">
+                                <h3>Choix de l&rsquo;activité</h3>
+                            </div>
+                            {filteredActivityRefsDisplay.length > 0 && (
                                 <div className="ibox-content">
-                                    {Object.keys(packs).map(key => (
-                                        <div key={key}>
-                                            <strong>{key}</strong>
-                                            {DisplayPacks(packs[key], key)}
-                                        </div>
-                                    ))}
+                                    {filteredActivityRefsDisplay}
                                 </div>
+                            )}
+                            {activityRefsDisplayCham.length > 0 && (
+                                <div className="ibox-content">
+                                    {activityRefsDisplayCham}
+                                </div>
+                            )}
+                            {filteredIndividualActivityRefsDisplay.length > 0 && (
+                                <div className="ibox-content">
+                                    {filteredIndividualActivityRefsDisplay}
+                                </div>
+                            )}
+
+                            {Object.keys(packs).length !== 0 && (
+                                <div>
+                                    <div className="ibox-title">
+                                        <h3>Choix des Packs</h3>
+                                    </div>
+
+                                    <div className="ibox-content">
+                                        {Object.keys(packs).map(key => (
+                                            <div key={key}>
+                                                <strong>{key}</strong>
+                                                {DisplayPacks(packs[key], key)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="col-lg-6">
+                        <div className="ibox">
+                            <div className="ibox-title">
+                                <h3>Activités sélectionnées</h3>
+                            </div>
+                            <div className="ibox-content">
+                                {selectedActivityRefsDisplay}
+                                {Object.keys(selectedPacks).map(key => (
+                                    <div key={key}>
+                                        <strong>{key}</strong>
+                                        {selectedPacksDisplay(selectedPacks[key], key)}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {unpopularActivityChosen && (
+                            <div className="alert alert-danger">
+                                <div className="m-b-sm">
+                                    Les inscriptions aux activités suivantes sont
+                                    soumises à un nombre minimum d'élèves par cours:
+                                </div>
+                                <ul>
+                                    {unpopularActivitiesSelected.map(unpopularA => {
+                                        return (
+                                            <li key={unpopularA.id}>
+                                                {unpopularA.label}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
                             </div>
                         )}
-                    </div>
-                </div>
-                <div className="col-lg-6">
-                    <div className="ibox">
-                        <div className="ibox-title">
-                            <h3>Activités sélectionnées</h3>
-                        </div>
-                        <div className="ibox-content">
-                            {selectedActivityRefsDisplay}
-                            {Object.keys(selectedPacks).map(key => (
-                                <div key={key}>
-                                    <strong>{key}</strong>
-                                    {selectedPacksDisplay(selectedPacks[key], key)}
-                                </div>
-                            ))}
-                        </div>
+
+
                     </div>
 
-                    {unpopularActivityChosen && (
-                        <div className="alert alert-danger">
-                            <div className="m-b-sm">
-                                Les inscriptions aux activités suivantes sont
-                                soumises à un nombre minimum d'élèves par cours:
-                            </div>
-                            <ul>
-                                {unpopularActivitiesSelected.map(unpopularA => {
-                                    return (
-                                        <li key={unpopularA.id}>
-                                            {unpopularA.label}
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
-                    )}
-
-                    {showPriceWarning() && <div className="alert alert-info">
-                        <p className="m-b-xs">
-                            Les tarifs affichés sont à titre indicatif. Ils
-                            correspondent au coût pour une personne inscrite en
-                            cours collectif payé mensuellement.
-                        </p>
-                        {adhesionEnabled && adhesionPrices.length > 0 && <small className="m-b-xs">
-                            À ce tarif, s'ajoute une adhésion annuelle à{" "}
-                            {schoolName}. Cette dernière est d'un montant de{" "}
-                            {(adhesionPrices.find(a => a.season_id == season.id) || _.maxBy(adhesionPrices, a => a.season_id) || {}).price || 0} euros.
-                        </small>}
-                        <small>
-                            Des réductions sont possibles. Elles seront
-                            précisées lors de votre passage au secrétariat pour
-                            valider votre inscription.
-                        </small>
-                    </div>}
-                </div>
-
-                <div className="col-lg-12 text-center">
-                    {renderChildrenAccompaniments()}
+                    <div className="col-lg-12 text-center">
+                        {renderChildrenAccompaniments()}
+                    </div>
                 </div>
             </div>
+
         </Fragment>
     );
 };
