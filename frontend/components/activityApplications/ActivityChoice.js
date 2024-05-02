@@ -126,8 +126,8 @@ const ActivityChoice = ({
         const disableAddButton = isPack ? false : cantSelectChildhood;
 
         return (
-            <tr key={i}>
-                <td>{label}</td>
+            <tr key={i} style={{color: "rgb(0, 51, 74)"}}>
+                <td style={{fontWeight: "bold"}}>{label}</td>
                 <td className="text-center">{duration}</td>
                 <td className="text-center">{price}</td>
                 <td>
@@ -161,19 +161,15 @@ const ActivityChoice = ({
             allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
         ), "id"
     );
-
     const filteredActivityRefsDisplay = _.flatMap(groupedRefs, refs =>
         refs.map((ref, i) => generateTableRow(ref, i))
     );
-
     const filteredIndividualActivityRefsDisplay = individualRefs.map((ref, i) =>
         generateTableRow(ref, i, null, false)
     );
-
     const activityRefsDisplayCham = activityRefsCham.map((ref, i) =>
         generateTableRow(ref, i, null, false)
     );
-
     const packsDisplay = _.flatMap(packs, (packArray, key) =>
         packArray.map((pack, i) => generateTableRow(pack, i, key, true))
     );
