@@ -119,16 +119,11 @@ const ActivityChoice = ({
             ).length;
 
             return (
-                <div key={i} className="row m-b-md">
-                    <div className="col-xs-6">
-                        <strong>{ref.kind}</strong>
-                    </div>
-                    <div className="col-xs-6 text-center">
-                        <span className="activite-amount pull-left">
-                            {getDisplayPrice(ref, season)}{" "}
-                            €
-                        </span>
-
+                <tr key={i}>
+                    <td>{ref.kind}</td>
+                    <td>{getDisplayDuration(ref)}</td>
+                    <td>{getDisplayPrice(ref, season)} €</td>
+                    <td>
                         <div
                             className="btn-group-horizontal pull-right btn-group btn-group-flex"
                             role="group"
@@ -147,12 +142,12 @@ const ActivityChoice = ({
                                 &nbsp;+&nbsp;
                             </button>
                         </div>
-                    </div>
-                </div>
+                    </td>
+                </tr>
             );
         });
 
-        return <div key={kind}>{_.compact(displayRefs)}</div>;
+        return displayRefs;
     });
 
     const individualRefs =
@@ -171,23 +166,13 @@ const ActivityChoice = ({
             ).length;
 
             return (
-                <div key={i} className="row m-b-md d-flex align-items-center">
-                    <div className="col-xs-6">
-                        <strong>{ref.label}</strong>
-                    </div>
-                    <div className="col-xs-2 text-center">
-                        <span className="activite-amount pull-left">
-                            {getDisplayDuration(ref)}
-                        </span>
-                    </div>
-                    <div className="col-xs-4 text-center">
-                        <span className="activite-amount pull-left">
-                            {getDisplayPrice(ref, season)}{" "}
-                            €
-                        </span>
-
+                <tr key={i}>
+                    <td>{ref.label}</td>
+                    <td>{getDisplayDuration(ref)}</td>
+                    <td>{getDisplayPrice(ref, season)} €</td>
+                    <td>
                         <div
-                            className="btn-group-horizontal pull-right btn-group"
+                            className="btn-group-horizontal pull-right btn-group btn-group-flex"
                             role="group"
                         >
                             <button
@@ -202,12 +187,11 @@ const ActivityChoice = ({
                                 onClick={() => handleAddActivity(ref.id)}
                                 disabled={cantSelectChildhood}
                             >
-                                {" "}
-                                +{" "}
+                                &nbsp;+&nbsp;
                             </button>
                         </div>
-                    </div>
-                </div>
+                    </td>
+                </tr>
             );
         },
     );
@@ -219,22 +203,13 @@ const ActivityChoice = ({
         ).length;
 
         return (
-            <div key={i} className="row m-b-md d-flex align-items-center">
-                <div className="col-xs-6">
-                    <strong>{ref.label}</strong>
-                </div>
-                <div className="col-xs-2 text-center">
-                    <span className="activite-amount pull-left">
-                        {getDisplayDuration(ref)}
-                    </span>
-                </div>
-                <div className="col-xs-4 text-center">
-                    <span className="activite-amount pull-left">
-                        {getDisplayPrice(ref, season)} €
-                    </span>
-
+            <tr key={i}>
+                <td>{ref.label}</td>
+                <td>{getDisplayDuration(ref)}</td>
+                <td>{getDisplayPrice(ref, season)} €</td>
+                <td>
                     <div
-                        className="btn-group-horizontal pull-right btn-group"
+                        className="btn-group-horizontal pull-right btn-group btn-group-flex"
                         role="group"
                     >
                         <button
@@ -248,14 +223,14 @@ const ActivityChoice = ({
                             className="btn btn-white btn-secondary"
                             onClick={() => handleAddActivity(ref.id)}
                         >
-                            {" "}
-                            +{" "}
+                            &nbsp;+&nbsp;
                         </button>
                     </div>
-                </div>
-            </div>
+                </td>
+            </tr>
         );
     });
+
 
     const selectedActivitiesCounted = _.countBy(selectedActivities);
     const unpopularActivitiesSelected = unpopularActivities.filter(a =>
@@ -521,21 +496,38 @@ const ActivityChoice = ({
                                     </div>
                                 </div>
                             </div>
-                            {filteredActivityRefsDisplay.length > 0 && (
-                                <div className="ibox-content">
-                                    {filteredActivityRefsDisplay}
-                                </div>
-                            )}
-                            {activityRefsDisplayCham.length > 0 && (
-                                <div className="ibox-content">
-                                    {activityRefsDisplayCham}
-                                </div>
-                            )}
-                            {filteredIndividualActivityRefsDisplay.length > 0 && (
-                                <div className="ibox-content">
-                                    {filteredIndividualActivityRefsDisplay}
-                                </div>
-                            )}
+                            <div>
+                                <table className="table table-striped" style={{borderRadius: '20px', overflow: 'hidden'}}>
+                                    <thead>
+                                    <tr style={{backgroundColor:"#00334A", color:"white"}}>
+                                        <th className="pl-4">Activité</th>
+                                        <th>Durée</th>
+                                        <th>Tarif estimé</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {filteredActivityRefsDisplay.length > 0 && (
+                                        <Fragment>
+                                            {filteredActivityRefsDisplay}
+                                        </Fragment>
+                                    )}
+                                    {activityRefsDisplayCham.length > 0 && (
+                                        <Fragment>
+                                            {activityRefsDisplayCham}
+                                        </Fragment>
+                                    )}
+                                    {filteredIndividualActivityRefsDisplay.length > 0 && (
+                                        <Fragment>
+                                            {filteredIndividualActivityRefsDisplay}
+                                        </Fragment>
+                                    )}
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+
 
                             {Object.keys(packs).length !== 0 && (
                                 <div>
