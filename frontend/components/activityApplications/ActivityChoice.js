@@ -111,102 +111,25 @@ const ActivityChoice = ({
 
     const groupedRefs = _.groupBy(filteredActivityRefs.filter(r => r.substitutable === true), "kind");
 
-    const filteredActivityRefsDisplay = _.map(groupedRefs, (refs, kind) => {
-        const displayRefs = refs.map((ref, i) => {
-            const amount = _.filter(
-                selectedActivities,
-                activity_id => activity_id == ref.id,
-            ).length;
-
-            return (
-                <tr key={i}>
-                    <td>{ref.kind}</td>
-                    <td>{getDisplayDuration(ref)}</td>
-                    <td>{getDisplayPrice(ref, season)} €</td>
-                    <td>
-                        <div
-                            className="btn-group-horizontal pull-right btn-group btn-group-flex"
-                            role="group"
-                        >
-                            <button
-                                className="btn btn-white btn-secondary"
-                                onClick={() => handleRemoveActivity(ref.id)}
-                                disabled={amount == 0}
-                            >
-                                -
-                            </button>
-                            <button
-                                className="btn btn-white btn-secondary"
-                                onClick={() => handleAddActivity(ref.id)}
-                            >
-                                &nbsp;+&nbsp;
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            );
-        });
-
-        return displayRefs;
-    });
-
-    const individualRefs =
-        _.uniqBy(
-            _.union(
-                filteredActivityRefsChildhood,
-                allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
-            ), "id");
-
-    const filteredIndividualActivityRefsDisplay = _.map(
-        individualRefs,
-        (ref, i) => {
-            const amount = _.filter(
-                selectedActivities,
-                activity_id => activity_id == ref.id,
-            ).length;
-
-            return (
-                <tr key={i}>
-                    <td>{ref.label}</td>
-                    <td>{getDisplayDuration(ref)}</td>
-                    <td>{getDisplayPrice(ref, season)} €</td>
-                    <td>
-                        <div
-                            className="btn-group-horizontal pull-right btn-group btn-group-flex"
-                            role="group"
-                        >
-                            <button
-                                className="btn btn-white btn-secondary"
-                                onClick={() => handleRemoveActivity(ref.id)}
-                                disabled={amount == 0}
-                            >
-                                -
-                            </button>
-                            <button
-                                className="btn btn-white btn-secondary"
-                                onClick={() => handleAddActivity(ref.id)}
-                                disabled={cantSelectChildhood}
-                            >
-                                &nbsp;+&nbsp;
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            );
-        },
-    );
-
-    const activityRefsDisplayCham = _.map(activityRefsCham, (ref, i) => {
+    // Display the available activities
+    const generateTableRow = (item, i, key, isPack = false) => {
         const amount = _.filter(
             selectedActivities,
-            activity_id => activity_id == ref.id,
+            activity_id => activity_id == item.id,
         ).length;
+
+        const label = isPack ? `${key} - ${item.pricing_category.name}` : item.label || item.kind;
+        const duration = isPack ? getDisplayDuration(item.activity_ref) : getDisplayDuration(item);
+        const price = isPack ? `${item.price} €` : `${getDisplayPrice(item, season)} €`;
+        const handleRemove = isPack ? () => handleRemovePack(key, item.pricing_category.id) : () => handleRemoveActivity(item.id);
+        const handleAdd = isPack ? () => handleAddPack(key, item.pricing_category.id) : () => handleAddActivity(item.id);
+        const disableAddButton = isPack ? false : cantSelectChildhood;
 
         return (
             <tr key={i}>
-                <td>{ref.label}</td>
-                <td>{getDisplayDuration(ref)}</td>
-                <td>{getDisplayPrice(ref, season)} €</td>
+                <td>{label}</td>
+                <td className="text-center">{duration}</td>
+                <td className="text-center">{price}</td>
                 <td>
                     <div
                         className="btn-group-horizontal pull-right btn-group btn-group-flex"
@@ -214,14 +137,15 @@ const ActivityChoice = ({
                     >
                         <button
                             className="btn btn-white btn-secondary"
-                            onClick={() => handleRemoveActivity(ref.id)}
+                            onClick={handleRemove}
                             disabled={amount == 0}
                         >
                             -
                         </button>
                         <button
                             className="btn btn-white btn-secondary"
-                            onClick={() => handleAddActivity(ref.id)}
+                            onClick={handleAdd}
+                            disabled={disableAddButton}
                         >
                             &nbsp;+&nbsp;
                         </button>
@@ -229,9 +153,33 @@ const ActivityChoice = ({
                 </td>
             </tr>
         );
-    });
+    };
+
+    const individualRefs = _.uniqBy(
+        _.union(
+            filteredActivityRefsChildhood,
+            allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
+        ), "id"
+    );
+
+    const filteredActivityRefsDisplay = _.flatMap(groupedRefs, refs =>
+        refs.map((ref, i) => generateTableRow(ref, i))
+    );
+
+    const filteredIndividualActivityRefsDisplay = individualRefs.map((ref, i) =>
+        generateTableRow(ref, i, null, false)
+    );
+
+    const activityRefsDisplayCham = activityRefsCham.map((ref, i) =>
+        generateTableRow(ref, i, null, false)
+    );
+
+    const packsDisplay = _.flatMap(packs, (packArray, key) =>
+        packArray.map((pack, i) => generateTableRow(pack, i, key, true))
+    );
 
 
+    // Display the selected activities
     const selectedActivitiesCounted = _.countBy(selectedActivities);
     const unpopularActivitiesSelected = unpopularActivities.filter(a =>
         selectedActivities.includes(a.id),
@@ -315,60 +263,6 @@ const ActivityChoice = ({
         },
     );
 
-
-    function DisplayPacks(packArray, key) {
-        return packArray.map((pack, i) => {
-            const pricing_category = pack.pricing_category;
-
-            return (
-                <Fragment key={pack.id}>
-                    <div className="row m-b-md">
-                        <div className="col-xs-6 m-t-sm">
-                            <p className="ml-3">
-                                {pricing_category.name}
-                            </p>
-                        </div>
-                        <div className="col-xs-2 text-center">
-                            <span className="activite-amount pull-left">
-                                {getDisplayDuration(pack.activity_ref)}
-                            </span>
-                        </div>
-                        <div className="col-xs-4 text-center">
-                            <div className="pull-left">
-                                <span className="activite-amount">
-                                    {pack.price} €
-                                </span>
-                            </div>
-
-                            <div
-                                className="btn-group-horizontal pull-right btn-group"
-                                role="group"
-                            >
-                                <button
-                                    className="btn btn-white btn-secondary"
-                                    onClick={() =>
-                                        handleRemovePack(key, pricing_category.id)
-                                    }
-                                >
-                                    -
-                                </button>
-                                <button
-                                    className="btn btn-white btn-secondary"
-                                    onClick={() =>
-                                        handleAddPack(key, pricing_category.id)
-                                    }
-                                >
-                                    {" "}
-                                    +{" "}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </Fragment>
-            );
-        });
-    }
-
     function selectedPacksDisplay(packArray, key) {
         return packArray.map((packId, i) => {
             const pack = packs[key].find(p => p.pricing_category.id === packId);
@@ -444,12 +338,12 @@ const ActivityChoice = ({
                                 cours collectif payé mensuellement.
                             </small>
                             {adhesionEnabled && adhesionPrices.length > 0 && <small className="m-b-xs">
-                                À ce tarif, s'ajoute une adhésion annuelle à{" "}
+                                 À ce tarif, s'ajoute une adhésion annuelle à{" "}
                                 {schoolName}. Cette dernière est d'un montant de{" "}
                                 {(adhesionPrices.find(a => a.season_id == season.id) || _.maxBy(adhesionPrices, a => a.season_id) || {}).price || 0} euros.
                             </small>}
                             <small>
-                                Des réductions sont possibles. Elles seront
+                                 Des réductions sont possibles. Elles seront
                                 précisées lors de votre passage au secrétariat pour
                                 valider votre inscription.
                             </small>
@@ -461,7 +355,7 @@ const ActivityChoice = ({
                     <div className="col-md-6">
                         <div>
                             <div>
-                                <h3>Choix de l&rsquo;activité</h3>
+                                <h3>CHOIX DE L'ACTIVITE</h3>
                                 <div className="d-inline-flex justify-content-between mb-2 w-100">
                                     <div>
                                         <button
@@ -507,44 +401,17 @@ const ActivityChoice = ({
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {filteredActivityRefsDisplay.length > 0 && (
-                                        <Fragment>
-                                            {filteredActivityRefsDisplay}
-                                        </Fragment>
-                                    )}
-                                    {activityRefsDisplayCham.length > 0 && (
-                                        <Fragment>
-                                            {activityRefsDisplayCham}
-                                        </Fragment>
-                                    )}
-                                    {filteredIndividualActivityRefsDisplay.length > 0 && (
-                                        <Fragment>
-                                            {filteredIndividualActivityRefsDisplay}
-                                        </Fragment>
-                                    )}
-
+                                    {filteredActivityRefsDisplay}
+                                    {activityRefsDisplayCham}
+                                    {filteredIndividualActivityRefsDisplay}
+                                    {packsDisplay}
                                     </tbody>
                                 </table>
                             </div>
 
 
 
-                            {Object.keys(packs).length !== 0 && (
-                                <div>
-                                    <div className="ibox-title">
-                                        <h3>Choix des Packs</h3>
-                                    </div>
 
-                                    <div className="ibox-content">
-                                        {Object.keys(packs).map(key => (
-                                            <div key={key}>
-                                                <strong>{key}</strong>
-                                                {DisplayPacks(packs[key], key)}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     </div>
                     <div className="col-lg-6">
