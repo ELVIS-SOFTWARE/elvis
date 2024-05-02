@@ -456,39 +456,70 @@ const ActivityChoice = ({
 
             <div>
 
-                    {showPriceWarning() &&
-                        <div className="alert alert-info col-md-8 d-inline-flex align-items-center m-b-md pl-0"
-                             style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
-                            <div className="col-1 p-0 text-center">
-                                <i className="fas fa-info-circle"></i>
-                            </div>
-                            <div className="col p-0">
-                                <small className="m-b-xs">
-                                    Les tarifs affichés sont à titre indicatif. Ils
-                                    correspondent au coût pour une personne inscrite en
-                                    cours collectif payé mensuellement.
-                                </small>
-                                {adhesionEnabled && adhesionPrices.length > 0 && <small className="m-b-xs">
-                                    À ce tarif, s'ajoute une adhésion annuelle à{" "}
-                                    {schoolName}. Cette dernière est d'un montant de{" "}
-                                    {(adhesionPrices.find(a => a.season_id == season.id) || _.maxBy(adhesionPrices, a => a.season_id) || {}).price || 0} euros.
-                                </small>}
-                                <small>
-                                    Des réductions sont possibles. Elles seront
-                                    précisées lors de votre passage au secrétariat pour
-                                    valider votre inscription.
-                                </small>
-                            </div>
+                {showPriceWarning() &&
+                    <div className="alert alert-info col-md-8 d-inline-flex align-items-center m-b-md pl-0"
+                         style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
+                        <div className="col-1 p-0 text-center">
+                            <i className="fas fa-info-circle"></i>
+                        </div>
+                        <div className="col p-0">
+                            <small className="m-b-xs">
+                                Les tarifs affichés sont à titre indicatif. Ils
+                                correspondent au coût pour une personne inscrite en
+                                cours collectif payé mensuellement.
+                            </small>
+                            {adhesionEnabled && adhesionPrices.length > 0 && <small className="m-b-xs">
+                                À ce tarif, s'ajoute une adhésion annuelle à{" "}
+                                {schoolName}. Cette dernière est d'un montant de{" "}
+                                {(adhesionPrices.find(a => a.season_id == season.id) || _.maxBy(adhesionPrices, a => a.season_id) || {}).price || 0} euros.
+                            </small>}
+                            <small>
+                                Des réductions sont possibles. Elles seront
+                                précisées lors de votre passage au secrétariat pour
+                                valider votre inscription.
+                            </small>
+                        </div>
 
-                        </div>}
-
-
+                    </div>}
 
                 <div className="row">
-                    <div className="col-lg-6">
-                        <div className="ibox">
-                            <div className="ibox-title">
+                    <div className="col-md-6">
+                        <div>
+                            <div>
                                 <h3>Choix de l&rsquo;activité</h3>
+                                <div className="d-inline-flex justify-content-between mb-2 w-100">
+                                    <div>
+                                        <button
+                                            className="btn btn-xs mr-3"
+                                            style={{
+                                                borderRadius: '40px',
+                                                border: '1px solid #00334A',
+                                                color: '#00334A'
+                                            }}
+                                        >
+                                            Niveau <i className="fas fa-caret-down"></i>
+
+                                        </button>
+                                        <button
+                                            className="btn btn-xs"
+                                            style={{
+                                                borderRadius: '40px',
+                                                border: '1px solid #00334A',
+                                                color: '#00334A'
+                                            }}
+                                        >
+                                            Durée <i className="fas fa-caret-down"></i>
+
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <input
+                                            type="text"
+                                            placeholder={` Rechercher  \uD83D\uDD0D`}
+                                            style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                             {filteredActivityRefsDisplay.length > 0 && (
                                 <div className="ibox-content">
