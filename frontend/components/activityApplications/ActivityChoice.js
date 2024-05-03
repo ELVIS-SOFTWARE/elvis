@@ -113,6 +113,7 @@ const ActivityChoice = ({
 
     // Display the available activities
     const generateTableRow = (item, i, key, isPack = false) => {
+        const [selected, setSelected] = React.useState(false);
         const amount = _.filter(
             selectedActivities,
             activity_id => activity_id == item.id,
@@ -125,8 +126,17 @@ const ActivityChoice = ({
         const handleAdd = isPack ? () => handleAddPack(key, item.pricing_category.id) : () => handleAddActivity(item.id);
         const disableAddButton = isPack ? false : cantSelectChildhood;
 
+        const handleClick = () => {
+            if (selected) {
+                handleRemove();
+            } else {
+                handleAdd();
+            }
+            setSelected(!selected);
+        }
+
         return (
-            <tr key={i} style={{color: "rgb(0, 51, 74)"}}>
+            <tr key={item.id} style={{color: "rgb(0, 51, 74)"}}>
                 <td style={{fontWeight: "bold"}}>{label}</td>
                 <td className="text-center">{duration}</td>
                 <td className="text-center">{price}</td>
@@ -136,18 +146,18 @@ const ActivityChoice = ({
                         role="group"
                     >
                         <button
-                            className="btn btn-white btn-secondary"
-                            onClick={handleRemove}
-                            disabled={amount == 0}
-                        >
-                            -
-                        </button>
-                        <button
-                            className="btn btn-white btn-secondary"
-                            onClick={handleAdd}
+                            onClick={handleClick}
                             disabled={disableAddButton}
+                            style={{
+                                borderRadius: "50%",
+                                color: "white",
+                                backgroundColor: selected ? "#86D69E" : "#0079BF",
+                                border: 0,
+                                width: "32px",
+                                height: "32px",
+                            }}
                         >
-                            &nbsp;+&nbsp;
+                            {selected ? <i className="fas fa-check"></i> : <i className="fas fa-plus"></i>}
                         </button>
                     </div>
                 </td>
@@ -207,22 +217,11 @@ const ActivityChoice = ({
 
             return (
                 <React.Fragment key={selectedActivityId}>
-                    <div className="row m-b-md">
-                        <div className="col-xs-5 m-t-sm">
-                            <strong>
-                                {selectedActivity.display_name}
-                            </strong>
-                        </div>
-                        <div className="col-xs-7 text-center">
-                            <div className="pull-left">
-                                <span className="activite-amount">
-                                    x{amount}
-                                </span>
-                                <span className="activite-amount">
-                                    {displayPrice} €
-                                </span>
-                            </div>
-
+                    <tr style={{color: "rgb(0, 51, 74)"}}>
+                        <td style={{fontWeight: "bold"}}>{selectedActivity.display_name}</td>
+                        <td className="text-center">{getDisplayDuration(selectedActivity)}</td>
+                        <td className="text-center">{displayPrice} €</td>
+                        <td>
                             <div
                                 className="btn-group-horizontal pull-right btn-group"
                                 role="group"
@@ -252,8 +251,8 @@ const ActivityChoice = ({
                                     +{" "}
                                 </button>
                             </div>
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                 </React.Fragment>
             );
         },
@@ -266,28 +265,16 @@ const ActivityChoice = ({
 
             return (
                 <Fragment key={packId}>
-                    <div className="row m-b-md">
-                        <div className="col-xs-6 m-t-sm">
-                            <p className="ml-3">
-                                {pricing_category.name}
-                            </p>
-                        </div>
-                        <div className="col-xs-6 text-center">
-                            <div className="pull-left">
-                                <span className="activite-amount">
-                                    {pack.price} €
-                                </span>
-                            </div>
-
-                            <div
-                                className="btn-group-horizontal pull-right btn-group"
-                                role="group"
-                            >
-                                <button
-                                    className="btn btn-white btn-secondary"
-                                    onClick={() =>
-                                        handleRemovePack(key, pricing_category.id)
-                                    }
+                    <tr style={{color: "rgb(0, 51, 74)"}}>
+                        <td style={{fontWeight: "bold"}}> {key} - {pricing_category.name}</td>
+                        <td className="text-center">{getDisplayDuration(pack.activity_ref)}</td>
+                        <td className="text-center">{pack.price} €</td>
+                        <td>
+                            <div className="btn-group-horizontal pull-right btn-group" role="group">
+                                <button className="btn btn-white btn-secondary"
+                                        onClick={() =>
+                                            handleRemovePack(key, pricing_category.id)
+                                        }
                                 >
                                     -
                                 </button>
@@ -301,12 +288,14 @@ const ActivityChoice = ({
                                     +{" "}
                                 </button>
                             </div>
-                        </div>
-                    </div>
+                        </td>
+
+                    </tr>
                 </Fragment>
             );
         });
     }
+
 
     // si une des activités sélectionnée est substituable,
     // on doit informer l'utilisateur que le tarif affiché est indicatif
@@ -334,12 +323,12 @@ const ActivityChoice = ({
                                 cours collectif payé mensuellement.
                             </small>
                             {adhesionEnabled && adhesionPrices.length > 0 && <small className="m-b-xs">
-                                 À ce tarif, s'ajoute une adhésion annuelle à{" "}
+                                À ce tarif, s'ajoute une adhésion annuelle à{" "}
                                 {schoolName}. Cette dernière est d'un montant de{" "}
                                 {(adhesionPrices.find(a => a.season_id == season.id) || _.maxBy(adhesionPrices, a => a.season_id) || {}).price || 0} euros.
                             </small>}
                             <small>
-                                 Des réductions sont possibles. Elles seront
+                                Des réductions sont possibles. Elles seront
                                 précisées lors de votre passage au secrétariat pour
                                 valider votre inscription.
                             </small>
@@ -350,102 +339,99 @@ const ActivityChoice = ({
                 <div className="row">
                     <div className="col-md-6">
                         <div>
-                            <div>
-                                <h3>CHOIX DE L'ACTIVITE</h3>
-                                <div className="d-inline-flex justify-content-between mb-2 w-100">
-                                    <div>
-                                        <button
-                                            className="btn btn-xs mr-3"
-                                            style={{
-                                                borderRadius: '40px',
-                                                border: '1px solid #00334A',
-                                                color: '#00334A'
-                                            }}
-                                        >
-                                            Niveau <i className="fas fa-caret-down"></i>
-
-                                        </button>
-                                        <button
-                                            className="btn btn-xs"
-                                            style={{
-                                                borderRadius: '40px',
-                                                border: '1px solid #00334A',
-                                                color: '#00334A'
-                                            }}
-                                        >
-                                            Durée <i className="fas fa-caret-down"></i>
-
-                                        </button>
-                                    </div>
-                                    <div>
-                                        <input
-                                            type="text"
-                                            placeholder={` Rechercher  \uD83D\uDD0D`}
-                                            style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}
-                                        />
-                                    </div>
+                            <h4 style={{color: "#8AA4B1"}}>CHOIX DE L'ACTIVITE</h4>
+                            <div className="d-inline-flex justify-content-between mb-2 w-100">
+                                <div>
+                                    <button className="btn btn-xs mr-3" style={{
+                                        borderRadius: '40px',
+                                        border: '1px solid #00334A',
+                                        color: '#00334A'
+                                    }}>
+                                        Niveau <i className="fas fa-caret-down"></i>
+                                    </button>
+                                    <button className="btn btn-xs" style={{
+                                        borderRadius: '40px',
+                                        border: '1px solid #00334A',
+                                        color: '#00334A'
+                                    }}>
+                                        Durée <i className="fas fa-caret-down"></i>
+                                    </button>
+                                </div>
+                                <div>
+                                    <input type="text" placeholder={` Rechercher  \uD83D\uDD0D`}
+                                           style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}/>
                                 </div>
                             </div>
-                            <div>
-                                <table className="table table-striped" style={{borderRadius: '20px', overflow: 'hidden'}}>
-                                    <thead>
-                                    <tr style={{backgroundColor:"#00334A", color:"white"}}>
-                                        <th className="pl-4">Activité</th>
-                                        <th>Durée</th>
-                                        <th>Tarif estimé</th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {filteredActivityRefsDisplay}
-                                    {activityRefsDisplayCham}
-                                    {filteredIndividualActivityRefsDisplay}
-                                    {packsDisplay}
-                                    </tbody>
-                                </table>
-                            </div>
-
-
-
-
+                        </div>
+                        <div>
+                            <table className="table table-striped" style={{borderRadius: '20px', overflow: 'hidden'}}>
+                                <thead>
+                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                    <th className="pl-4">Activité</th>
+                                    <th>Durée</th>
+                                    <th>Tarif estimé</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {filteredActivityRefsDisplay}
+                                {activityRefsDisplayCham}
+                                {filteredIndividualActivityRefsDisplay}
+                                {packsDisplay}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+
+
                     <div className="col-lg-6">
-                        <div className="ibox">
-                            <div className="ibox-title">
-                                <h3>Activités sélectionnées</h3>
-                            </div>
-                            <div className="ibox-content">
-                                {selectedActivityRefsDisplay}
-                                {Object.keys(selectedPacks).map(key => (
-                                    <div key={key}>
-                                        <strong>{key}</strong>
-                                        {selectedPacksDisplay(selectedPacks[key], key)}
-                                    </div>
-                                ))}
-                            </div>
+
+                        <div>
+                            <h4 style={{color: "#8AA4B1"}}>ACTIVITES SELECTIONNEES </h4>
                         </div>
+                        <div>
+                            <table className="table table-striped" style={{borderRadius: '20px', overflow: 'hidden'}}>
+                                <thead>
+                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                    <th className="pl-4">Activité</th>
+                                    <th>Durée</th>
+                                    <th>Tarif estimé</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {/*{selectedActivityRefsDisplay}*/}
+                                {/*{Object.keys(selectedPacks).map(key => (*/}
+                                {/*    <div key={key}>*/}
+                                {/*        {selectedPacksDisplay(selectedPacks[key], key)}*/}
+                                {/*    </div>*/}
+                                {/*))}*/}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="ibox-content">
 
-                        {unpopularActivityChosen && (
-                            <div className="alert alert-danger">
-                                <div className="m-b-sm">
-                                    Les inscriptions aux activités suivantes sont
-                                    soumises à un nombre minimum d'élèves par cours:
-                                </div>
-                                <ul>
-                                    {unpopularActivitiesSelected.map(unpopularA => {
-                                        return (
-                                            <li key={unpopularA.id}>
-                                                {unpopularA.label}
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-                        )}
-
-
+                        </div>
                     </div>
+
+                    {unpopularActivityChosen && (
+                        <div className="alert alert-danger">
+                            <div className="m-b-sm">
+                                Les inscriptions aux activités suivantes sont
+                                soumises à un nombre minimum d'élèves par cours:
+                            </div>
+                            <ul>
+                                {unpopularActivitiesSelected.map(unpopularA => {
+                                    return (
+                                        <li key={unpopularA.id}>
+                                            {unpopularA.label}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+                    )}
+
 
                     <div className="col-lg-12 text-center">
                         {renderChildrenAccompaniments()}
