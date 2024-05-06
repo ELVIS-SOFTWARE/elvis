@@ -171,7 +171,7 @@ export default class WizardUserSelectMember extends React.Component
 
         const virtualFamilyLinks = members.filter(m => m.id && m.id !== (members[selected] || {}).id).map(m =>
         {
-            const familyLinkToUse = ((members[selected] || {}).family_links_with_user || []).find(fl => fl.id === m.id);
+            const familyLinkToUse = ((members[selected] || {}).family_links_with_user || []).find(fl => fl.member_id === m.id);
 
             return {
                 id: m.id,
@@ -263,13 +263,13 @@ export default class WizardUserSelectMember extends React.Component
                                         members: members.map((m, i) => i === selected ? {
                                             ...m,
                                             family_links_with_user: [
-                                                ...m.family_links_with_user.filter(fl => !values.map(v => v.value).includes(fl.id)).map(fl => ({...fl, is_legal_referent: false})),
+                                                ...m.family_links_with_user.filter(fl => !values.map(v => v.value).includes(fl.member_id)).map(fl => ({...fl, is_legal_referent: false})),
                                                 ...values.map(v =>
                                                 {
                                                     const otherUser = members.find(member => member.id === v.value);
 
                                                     let res = {
-                                                        ...(m.family_links_with_user.find(fl => fl.id === otherUser.id) || {}),
+                                                        ...(m.family_links_with_user.find(fl => fl.member_id === otherUser.id) || {}),
                                                         is_legal_referent: true,
                                                     };
                                                     
@@ -309,12 +309,12 @@ export default class WizardUserSelectMember extends React.Component
                                         members: members.map((m, i) => i === selected ? {
                                             ...m,
                                             family_links_with_user: [
-                                                ...m.family_links_with_user.filter(fl => values.value !== fl.id).map(fl => ({...fl, is_to_call: false})),
+                                                ...m.family_links_with_user.filter(fl => values.value !== fl.member_id).map(fl => ({...fl, is_to_call: false})),
                                                 (() => {
                                                     const otherUser = members.find(member => member.id === values.value);
 
                                                     let res = {
-                                                        ...(m.family_links_with_user.find(fl => fl.id === otherUser.id) || {}),
+                                                        ...(m.family_links_with_user.find(fl => fl.member_id === otherUser.id) || {}),
                                                         is_to_call: true,
                                                     };
 
@@ -354,13 +354,13 @@ export default class WizardUserSelectMember extends React.Component
                                         members: members.map((m, i) => i === selected ? {
                                             ...m,
                                             family_links_with_user: [
-                                                ...m.family_links_with_user.filter(fl => values.value !== fl.id).map(fl => ({...fl, is_accompanying: false})),
+                                                ...m.family_links_with_user.filter(fl => values.value !== fl.member_id).map(fl => ({...fl, is_accompanying: false})),
                                                 (() =>
                                                 {
                                                     const otherUser = members.find(member => member.id === values.value);
 
                                                     let res = {
-                                                        ...(m.family_links_with_user.find(fl => fl.id === otherUser.id) || {}),
+                                                        ...(m.family_links_with_user.find(fl => fl.member_id === otherUser.id) || {}),
                                                         is_accompanying: true,
                                                     };
 
