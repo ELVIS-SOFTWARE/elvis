@@ -116,7 +116,6 @@ const ActivityChoice = ({
     function generateAvailableActivitiesRow(item, i, key, isPack = false) {
         const [isSelected, setIsSelected] = React.useState(false);
 
-
         const label = isPack ? `${key} - ${item.pricing_category.name}` : item.label || item.kind;
         const duration = isPack ? getDisplayDuration(item.activity_ref) : getDisplayDuration(item);
         const price = isPack ? `${item.price} €` : `${getDisplayPrice(item, season)} €`;
@@ -187,7 +186,8 @@ const ActivityChoice = ({
         if (isPack) {
             const pack = packs[key].find(p => p.pricing_category.id === item);
             selectedActivity = pack.activity_ref;
-            displayPrice = `${pack.price} €`;
+            displayPrice = `${pack.price}`;
+            console.log(pack.pricing_category.id);
         } else {
             selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(item, 10));
             if (selectedActivity.activity_type == "child" || selectedActivity.activity_type == "cham") {
@@ -199,7 +199,8 @@ const ActivityChoice = ({
         }
         const handleRemove = () => {
             if (isPack) {
-                handleRemovePack(key, selectedActivity.id);
+                const pack = packs[key].find(p => p.pricing_category.id === item);
+                handleRemovePack(key, pack.pricing_category.id);
             } else {
                 handleRemoveActivity(selectedActivity.id);
             }
