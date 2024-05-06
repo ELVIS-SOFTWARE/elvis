@@ -180,23 +180,15 @@ const ActivityChoice = ({
 
     // Display the selected activities
     function generateSelectedActivitiesRow(item, key, isPack = false) {
-        let selectedActivity;
         let displayPrice = "--";
 
-        if (isPack) {
-            const pack = packs[key].find(p => p.pricing_category.id === item);
-            selectedActivity = pack.activity_ref;
-            displayPrice = `${pack.price}`;
-            console.log(pack.pricing_category.id);
-        } else {
-            selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(item, 10));
-            if (selectedActivity.activity_type == "child" || selectedActivity.activity_type == "cham") {
-                displayPrice = selectedActivity.display_price;
-            } else {
-                displayPrice = parseInt(getDisplayPrice(selectedActivity, season), 10);
-                if (isNaN(displayPrice)) displayPrice = "--";
-            }
-        }
+        const pack = isPack ? packs[key].find(p => p.pricing_category.id === item) : null;
+        const selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(item, 10));
+
+        const label = isPack ? `${pack.activity_ref.label} - ${pack.pricing_category.name}` : selectedActivity.display_name;
+        const duration = isPack ? getDisplayDuration(pack.activity_ref) : getDisplayDuration(selectedActivity);
+        const price = isPack ? `${pack.price} €` : `${getDisplayPrice(selectedActivity, season)} €`;
+
         const handleRemove = () => {
             if (isPack) {
                 const pack = packs[key].find(p => p.pricing_category.id === item);
@@ -209,9 +201,9 @@ const ActivityChoice = ({
         return (
             <React.Fragment key={item}>
                 <tr style={{color: "rgb(0, 51, 74)"}}>
-                    <td style={{fontWeight: "bold"}}>{selectedActivity.display_name}</td>
-                    <td className="text-center">{getDisplayDuration(selectedActivity)}</td>
-                    <td className="text-center">{displayPrice} €</td>
+                    <td style={{fontWeight: "bold"}}>{label}</td>
+                    <td className="text-center">{duration}</td>
+                    <td className="text-center">{price}</td>
                     <td>
                         <div className="btn-group-horizontal pull-right btn-group" role="group">
                             <button onClick={handleRemove}
