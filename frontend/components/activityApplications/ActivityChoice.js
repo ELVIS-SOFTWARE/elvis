@@ -180,26 +180,20 @@ const ActivityChoice = ({
 
     // Display the selected activities
     function generateSelectedActivitiesRow(item, key, isPack = false) {
-        let displayPrice = "--";
-
-        const pack = isPack ? packs[key].find(p => p.pricing_category.id === item) : null;
-        const selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(item, 10));
-
-        const label = isPack ? `${pack.activity_ref.label} - ${pack.pricing_category.name}` : selectedActivity.display_name;
-        const duration = isPack ? getDisplayDuration(pack.activity_ref) : getDisplayDuration(selectedActivity);
-        const price = isPack ? `${pack.price} €` : `${getDisplayPrice(selectedActivity, season)} €`;
+        const label = isPack ? `${item.activity_ref.label} - ${item.pricing_category.name}` : item.display_name;
+        const duration = isPack ? getDisplayDuration(item.activity_ref) : getDisplayDuration(item);
+        const price = isPack ? `${item.price} €` : `${getDisplayPrice(item, season)} €`;
 
         const handleRemove = () => {
             if (isPack) {
-                const pack = packs[key].find(p => p.pricing_category.id === item);
-                handleRemovePack(key, pack.pricing_category.id);
+                handleRemovePack(key, item.pricing_category.id);
             } else {
-                handleRemoveActivity(selectedActivity.id);
+                handleRemoveActivity(item.id);
             }
         };
 
         return (
-            <React.Fragment key={item}>
+            <React.Fragment key={item.id}>
                 <tr style={{color: "rgb(0, 51, 74)"}}>
                     <td style={{fontWeight: "bold"}}>{label}</td>
                     <td className="text-center">{duration}</td>
@@ -225,9 +219,15 @@ const ActivityChoice = ({
         );
     }
 
-    const selectedActivityRefsDisplay = selectedActivities.map(activityId => generateSelectedActivitiesRow(activityId));
-    const selectedPacksDisplay = Object.keys(selectedPacks).flatMap(key => selectedPacks[key].map(packId => generateSelectedActivitiesRow(packId, key, true)));
+    const selectedActivityRefsDisplay = selectedActivities.map(activityId => {
+        const selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(activityId, 10));
+        return generateSelectedActivitiesRow(selectedActivity, false);
+    });
 
+    const selectedPacksDisplay = Object.keys(selectedPacks).flatMap(key => selectedPacks[key].map(packId => {
+        const pack = packs[key].find(p => p.pricing_category.id === packId);
+        return generateSelectedActivitiesRow(pack, key,true);
+    }));
 
     // si une des activités sélectionnée est substituable,
     // on doit informer l'utilisateur que le tarif affiché est indicatif
