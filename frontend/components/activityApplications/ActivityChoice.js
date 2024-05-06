@@ -1,4 +1,5 @@
 import React, {Fragment} from "react";
+import {useState} from "react";
 import _ from "lodash";
 
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
@@ -112,27 +113,19 @@ const ActivityChoice = ({
     const groupedRefs = _.groupBy(filteredActivityRefs.filter(r => r.substitutable === true), "kind");
 
     // Display the available activities
-    const generateTableRow = (item, i, key, isPack = false) => {
-        const [selected, setSelected] = React.useState(false);
-        const amount = _.filter(
-            selectedActivities,
-            activity_id => activity_id == item.id,
-        ).length;
+    function generateAvailableActivitiesRow(item, i, key, isPack = false) {
+        const [isSelected, setIsSelected] = React.useState(false);
+
 
         const label = isPack ? `${key} - ${item.pricing_category.name}` : item.label || item.kind;
         const duration = isPack ? getDisplayDuration(item.activity_ref) : getDisplayDuration(item);
         const price = isPack ? `${item.price} €` : `${getDisplayPrice(item, season)} €`;
-        const handleRemove = isPack ? () => handleRemovePack(key, item.pricing_category.id) : () => handleRemoveActivity(item.id);
         const handleAdd = isPack ? () => handleAddPack(key, item.pricing_category.id) : () => handleAddActivity(item.id);
-        const disableAddButton = isPack ? false : cantSelectChildhood;
 
         const handleClick = () => {
-            if (selected) {
-                handleRemove();
-            } else {
-                handleAdd();
-            }
-            setSelected(!selected);
+            const itemId = isPack ? `p${item.id}` : `a${item.id}`;
+            handleAdd();
+            setIsSelected(prevState => ({...prevState, [itemId]: true}));
         }
 
         return (
@@ -147,23 +140,24 @@ const ActivityChoice = ({
                     >
                         <button
                             onClick={handleClick}
-                            disabled={disableAddButton}
+                            disabled={isSelected[`${isPack ? 'p' : 'a'}${item.id}`]}
                             style={{
                                 borderRadius: "50%",
                                 color: "white",
-                                backgroundColor: selected ? "#86D69E" : "#0079BF",
+                                backgroundColor: isSelected[`${isPack ? 'p' : 'a'}${item.id}`] ? "#86D69E" : "#0079BF",
                                 border: 0,
                                 width: "32px",
                                 height: "32px",
                             }}
                         >
-                            {selected ? <i className="fas fa-check"></i> : <i className="fas fa-plus"></i>}
+                            {isSelected[`${isPack ? 'p' : 'a'}${item.id}`] ? <i className="fas fa-check"></i> :
+                                <i className="fas fa-plus"></i>}
                         </button>
                     </div>
                 </td>
             </tr>
         );
-    };
+    }
 
     const individualRefs = _.uniqBy(
         _.union(
@@ -172,129 +166,74 @@ const ActivityChoice = ({
         ), "id"
     );
     const filteredActivityRefsDisplay = _.flatMap(groupedRefs, refs =>
-        refs.map((ref, i) => generateTableRow(ref, i))
+        refs.map((ref, i) => generateAvailableActivitiesRow(ref, i))
     );
     const filteredIndividualActivityRefsDisplay = individualRefs.map((ref, i) =>
-        generateTableRow(ref, i, null, false)
+        generateAvailableActivitiesRow(ref, i, null, false)
     );
     const activityRefsDisplayCham = activityRefsCham.map((ref, i) =>
-        generateTableRow(ref, i, null, false)
+        generateAvailableActivitiesRow(ref, i, null, false)
     );
     const packsDisplay = _.flatMap(packs, (packArray, key) =>
-        packArray.map((pack, i) => generateTableRow(pack, i, key, true))
+        packArray.map((pack, i) => generateAvailableActivitiesRow(pack, i, key, true))
     );
 
 
     // Display the selected activities
-    const selectedActivitiesCounted = _.countBy(selectedActivities);
-    const unpopularActivitiesSelected = unpopularActivities.filter(a =>
-        selectedActivities.includes(a.id),
-    );
-    const selectedActivityRefsDisplay = _.map(
-        selectedActivitiesCounted,
-        (amount, selectedActivityId) => {
-            let selectedActivity = _.find(
-                allActivityRefs,
-                ar => ar.id == parseInt(selectedActivityId, 10),
-            );
+    function generateSelectedActivitiesRow(item, key, isPack = false) {
+        let selectedActivity;
+        let displayPrice = "--";
 
-            let displayPrice = "--";
-            if (
-                selectedActivity.activity_type == "child" ||
-                selectedActivity.activity_type == "cham"
-            ) {
+        if (isPack) {
+            const pack = packs[key].find(p => p.pricing_category.id === item);
+            selectedActivity = pack.activity_ref;
+            displayPrice = `${pack.price} €`;
+        } else {
+            selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(item, 10));
+            if (selectedActivity.activity_type == "child" || selectedActivity.activity_type == "cham") {
                 displayPrice = selectedActivity.display_price;
             } else {
-                displayPrice =
-                    parseInt(
-                        getDisplayPrice(selectedActivity, season),
-                        10,
-                    ) * amount;
-
-                if (isNaN(displayPrice))
-                    displayPrice = "--";
+                displayPrice = parseInt(getDisplayPrice(selectedActivity, season), 10);
+                if (isNaN(displayPrice)) displayPrice = "--";
             }
+        }
+        const handleRemove = () => {
+            if (isPack) {
+                handleRemovePack(key, selectedActivity.id);
+            } else {
+                handleRemoveActivity(selectedActivity.id);
+            }
+        };
 
-            return (
-                <React.Fragment key={selectedActivityId}>
-                    <tr style={{color: "rgb(0, 51, 74)"}}>
-                        <td style={{fontWeight: "bold"}}>{selectedActivity.display_name}</td>
-                        <td className="text-center">{getDisplayDuration(selectedActivity)}</td>
-                        <td className="text-center">{displayPrice} €</td>
-                        <td>
-                            <div
-                                className="btn-group-horizontal pull-right btn-group"
-                                role="group"
+        return (
+            <React.Fragment key={item}>
+                <tr style={{color: "rgb(0, 51, 74)"}}>
+                    <td style={{fontWeight: "bold"}}>{selectedActivity.display_name}</td>
+                    <td className="text-center">{getDisplayDuration(selectedActivity)}</td>
+                    <td className="text-center">{displayPrice} €</td>
+                    <td>
+                        <div className="btn-group-horizontal pull-right btn-group" role="group">
+                            <button onClick={handleRemove}
+                                    style={{
+                                        borderRadius: "50%",
+                                        color: "white",
+                                        backgroundColor: "#00334A",
+                                        border: 0,
+                                        width: "32px",
+                                        height: "32px",
+                                    }}
                             >
-                                <button
-                                    className="btn btn-white btn-secondary"
-                                    onClick={() =>
-                                        handleRemoveActivity(
-                                            selectedActivity.id,
-                                        )
-                                    }
-                                    disabled={amount == 0}
-                                >
-                                    -
-                                </button>
-                                <button
-                                    className="btn btn-white btn-secondary"
-                                    onClick={() =>
-                                        handleAddActivity(selectedActivity.id)
-                                    }
-                                    disabled={
-                                        selectedActivity.activity_type ===
-                                        "child" && cantSelectChildhood
-                                    }
-                                >
-                                    {" "}
-                                    +{" "}
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </React.Fragment>
-            );
-        },
-    );
-
-    function selectedPacksDisplay(packArray, key) {
-        return packArray.map((packId, i) => {
-            const pack = packs[key].find(p => p.pricing_category.id === packId);
-            const pricing_category = pack.pricing_category;
-
-            return (
-                <Fragment key={packId}>
-                    <tr style={{color: "rgb(0, 51, 74)"}}>
-                        <td style={{fontWeight: "bold"}}> {key} - {pricing_category.name}</td>
-                        <td className="text-center">{getDisplayDuration(pack.activity_ref)}</td>
-                        <td className="text-center">{pack.price} €</td>
-                        <td>
-                            <div className="btn-group-horizontal pull-right btn-group" role="group">
-                                <button className="btn btn-white btn-secondary"
-                                        onClick={() =>
-                                            handleRemovePack(key, pricing_category.id)
-                                        }
-                                >
-                                    -
-                                </button>
-                                <button
-                                    className="btn btn-white btn-secondary"
-                                    onClick={() =>
-                                        handleAddPack(key, pricing_category.id)
-                                    }
-                                >
-                                    {" "}
-                                    +{" "}
-                                </button>
-                            </div>
-                        </td>
-
-                    </tr>
-                </Fragment>
-            );
-        });
+                                <i className="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </React.Fragment>
+        );
     }
+
+    const selectedActivityRefsDisplay = selectedActivities.map(activityId => generateSelectedActivitiesRow(activityId));
+    const selectedPacksDisplay = Object.keys(selectedPacks).flatMap(key => selectedPacks[key].map(packId => generateSelectedActivitiesRow(packId, key, true)));
 
 
     // si une des activités sélectionnée est substituable,
@@ -400,8 +339,16 @@ const ActivityChoice = ({
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {selectedActivityRefsDisplay}
-                                {Object.keys(selectedPacks).map(key => selectedPacksDisplay(selectedPacks[key], key))}
+                                {selectedActivityRefsDisplay.length === 0 && Object.keys(selectedPacks).length === 0 ? (
+                                    <tr>
+                                        <td colSpan="4" className="text-center">aucune activité sélectionnée</td>
+                                    </tr>
+                                ) : (
+                                    <React.Fragment>
+                                        {selectedActivityRefsDisplay}
+                                        {selectedPacksDisplay}
+                                    </React.Fragment>
+                                )}
                                 </tbody>
                             </table>
                         </div>
