@@ -400,17 +400,10 @@ const ActivityChoice = ({
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {/*{selectedActivityRefsDisplay}*/}
-                                {/*{Object.keys(selectedPacks).map(key => (*/}
-                                {/*    <div key={key}>*/}
-                                {/*        {selectedPacksDisplay(selectedPacks[key], key)}*/}
-                                {/*    </div>*/}
-                                {/*))}*/}
+                                {selectedActivityRefsDisplay}
+                                {Object.keys(selectedPacks).map(key => selectedPacksDisplay(selectedPacks[key], key))}
                                 </tbody>
                             </table>
-                        </div>
-                        <div className="ibox-content">
-
                         </div>
                     </div>
 
