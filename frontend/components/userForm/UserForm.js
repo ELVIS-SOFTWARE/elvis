@@ -313,7 +313,7 @@ class UserForm extends React.PureComponent {
 
                                         <GeneralInfos
                                             displayBirthday
-                                            ignoreValidate={user ? user.is_admin : false}
+                                            ignoreValidate={ false}
                                             displayGender
                                             displayIdentificationNumber={this.props.displayIdentificationNumber && this.state.requireIdentificationNumber}
                                             requireIdentificationNumber={this.state.requireIdentificationNumber}

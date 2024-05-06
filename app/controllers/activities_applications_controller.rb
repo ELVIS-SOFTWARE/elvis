@@ -570,6 +570,35 @@ class ActivitiesApplicationsController < ApplicationController
         # @user.skip_confirmation_notification!
         @user.save!
 
+        family_links_with_user = params.dig(:application, :infos, :family_links_with_user)
+
+        family_links_with_user&.each do |family_link|
+          family_link_member = User.find_by(id: family_link[:id])&.as_json(include: {
+            telephones: {},
+            addresses: {}
+          })
+
+          next if family_link_member.nil?
+
+          family_link.merge!(family_link_member: family_link_member)
+
+          # force values to boolean (possible values are true, false, nil)
+          family_link[:is_to_call] = !!family_link[:is_to_call]
+          family_link[:is_accompanying] = !!family_link[:is_accompanying]
+          family_link[:is_legal_referent] = !!family_link[:is_legal_referent]
+
+          is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
+            [family_link],
+            @user,
+            season,
+            send_confirmation: false
+          )
+
+          unless is_created
+            raise "Erreur lors de la création ou mise à jour d'un lien familial (#{current_user.id} -> #{used_user.id})"
+          end
+        end
+
         # il faut que le user soit sauvegardé pour pouvoir lui associer des membres de la famille
         @user.update_is_paying_of_family_links(payers, season, false)
 
@@ -764,10 +793,10 @@ class ActivitiesApplicationsController < ApplicationController
   def create_import_csv
     importer_name = Parameter.get_value('activity_applications.importer_name')
     importer = case importer_name
-                when 'tes_importer'
-                  ActivityApplications::TesImporter.new params[:file]
-                else
-                  nil
+               when 'tes_importer'
+                 ActivityApplications::TesImporter.new params[:file]
+               else
+                 nil
                end
 
     render json: { error: "L'import de fichiers CSV est désactivé" }, status: :unprocessable_entity and return if importer.nil?
@@ -777,8 +806,6 @@ class ActivitiesApplicationsController < ApplicationController
     status = result.delete(:status)
     render json: result, status: status
   end
-
-
 
   def bulk_update
     query = get_query_from_params params[:filter]

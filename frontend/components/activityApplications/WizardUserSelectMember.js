@@ -31,9 +31,10 @@ export default class WizardUserSelectMember extends React.Component
         };
 
         this.getErrors = this.getErrors.bind(this);
+        this.updateMembersData = this.updateMembersData.bind(this);
     }
 
-    componentDidMount()
+    updateMembersData()
     {
         api.set()
             .success((data) =>
@@ -54,12 +55,20 @@ export default class WizardUserSelectMember extends React.Component
             .get(`/users/${this.props.user.id}/family`, { season: this.props.season.id });
     }
 
+    componentDidMount()
+    {
+        this.updateMembersData();
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot)
     {
         const errors = this.getErrors();
 
         if(!_.isEqual(errors, this.state.error))
             this.setState({ error: errors });
+
+        if(this.props.season.id !== prevProps.season.id)
+            this.updateMembersData();
     }
 
     onAddMember(values)
