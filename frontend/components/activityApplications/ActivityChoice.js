@@ -109,10 +109,22 @@ const ActivityChoice = ({
             );
         }
     };
-
+    const unpopularActivitiesSelected = unpopularActivities.filter(a => selectedActivities.includes(a.id));
     const groupedRefs = _.groupBy(filteredActivityRefs.filter(r => r.substitutable === true), "kind");
 
-    // Display the available activities
+    // Duration filter ---------------------------------------------------------------------------------------------------------------------------------------------
+    const [durationFilter, setDurationFilter] = useState(null);
+    const handleDurationFilterClick = () => {
+        setDurationFilter(durationFilter === 'asc' ? 'desc' : 'asc');
+    };
+
+    // Search filter ---------------------------------------------------------------------------------------------------------------------------------------------
+    const [searchTerm, setSearchTerm] = useState("");
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    // Display the Activities and Packs ---------------------------------------------------------------------------------------------------------------------------------------------
     function generateActivityRow(item, key, isPack = false, isSelected = false) {
         const label = item.label;
         const duration = item.duration;
@@ -120,7 +132,7 @@ const ActivityChoice = ({
 
         const uniqueId = isPack ? `p${item.id}` : `a${item.id}`;
         const isItemSelected = selectedActivitiesAndPacks.some(selectedItem => selectedItem.id === item.id && selectedItem.isPack === isPack);
-
+        const iconClass = isItemSelected && !isSelected ? "fas fa-check" : (isSelected ? "fas fa-minus" : "fas fa-plus");
         const handleAction = () => {
             if (isSelected) {
                 if (isPack) {
@@ -160,9 +172,6 @@ const ActivityChoice = ({
                     width: "32px",
                     height: "32px"
                 };
-
-
-        const iconClass = isItemSelected && !isSelected ? "fas fa-check" : (isSelected ? "fas fa-minus" : "fas fa-plus");
 
         return (
             <React.Fragment key={uniqueId}>
@@ -211,7 +220,23 @@ const ActivityChoice = ({
             isSelected: false,
         };
     }));
-    const availableActivitiesAndPacks = [...availableActivities, ...availablePacks];
+    let availableActivitiesAndPacks = [...availableActivities, ...availablePacks];
+    if (durationFilter) {
+        availableActivitiesAndPacks.sort((a, b) => {
+            const durationA = parseInt(a.duration, 10);
+            const durationB = parseInt(b.duration, 10);
+
+            return isNaN(durationA) ? 1 :
+                isNaN(durationB) ? -1 :
+                    durationFilter === 'asc' ? durationA - durationB :
+                        durationB - durationA;
+        });
+    }
+    if (searchTerm) {
+        availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item => {
+            return item.label.toLowerCase().includes(searchTerm.toLowerCase());
+        });
+    }
 
     const selectedActivitiesArray = selectedActivities.map(activityId => {
         const selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(activityId, 10));
@@ -243,13 +268,13 @@ const ActivityChoice = ({
         return acc + parseFloat(item.price);
     }, 0);
 
-
     const selectedActivitiesAndPacksDisplay = selectedActivitiesAndPacks.map((item, i) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
     const availableActivitiesAndPacksDisplay = availableActivitiesAndPacks.map((item, i) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
+
 
     // si une des activités sélectionnée est substituable,
     // on doit informer l'utilisateur que le tarif affiché est indicatif
@@ -296,24 +321,21 @@ const ActivityChoice = ({
                             <h4 style={{color: "#8AA4B1"}}>CHOIX DE L'ACTIVITE</h4>
                             <div className="d-inline-flex justify-content-between mb-2 w-100">
                                 <div>
-                                    <button className="btn btn-xs mr-3" style={{
-                                        borderRadius: '40px',
-                                        border: '1px solid #00334A',
-                                        color: '#00334A'
-                                    }}>
-                                        Niveau <i className="fas fa-caret-down"></i>
-                                    </button>
                                     <button className="btn btn-xs" style={{
                                         borderRadius: '40px',
                                         border: '1px solid #00334A',
                                         color: '#00334A'
-                                    }}>
-                                        Durée <i className="fas fa-caret-down"></i>
+                                    }} onClick={handleDurationFilterClick}>
+                                        Durée <i
+                                        className={`fas fa-caret-${durationFilter === 'asc' ? 'up' : 'down'}`}></i>
                                     </button>
                                 </div>
                                 <div>
                                     <input type="text" placeholder={` Rechercher  \uD83D\uDD0D`}
-                                           style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}/>
+                                           style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}
+                                           value={searchTerm}
+                                           onChange={handleSearchChange}
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -361,8 +383,10 @@ const ActivityChoice = ({
                                     <tbody>
                                     {selectedActivitiesAndPacksDisplay}
                                     <tr>
-                                        <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total estimé</td>
-                                        <td colSpan="3" className="text-center" >{totalSelectedPrice} €</td>
+                                        <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total
+                                            estimé
+                                        </td>
+                                        <td colSpan="3" className="text-center">{totalSelectedPrice} €</td>
                                     </tr>
                                     </tbody>
                                 )}
