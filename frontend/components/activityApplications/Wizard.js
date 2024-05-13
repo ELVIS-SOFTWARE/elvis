@@ -691,7 +691,7 @@ class Wizard extends React.Component {
             !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
                 name: "Choisir un utilisateur",
                 component: (
-                    this.props.currentUserIsAdmin && false ? <UserSearch
+                    this.props.currentUserIsAdmin ? <UserSearch
                         user={this.props.user}
                         onSelect={this.handleSelectUser.bind(this)}
                         season={this.state.season}
