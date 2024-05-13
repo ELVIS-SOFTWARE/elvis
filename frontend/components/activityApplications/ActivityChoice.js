@@ -123,7 +123,7 @@ const ActivityChoice = ({
         const handleAction = () => {
             if (isSelected) {
                 if (isPack) {
-                    handleRemovePack(key, item.pricing_category.id);
+                    handleRemovePack(key, item.pricing_category_id);
                 } else {
                     handleRemoveActivity(item.id);
                 }
@@ -181,6 +181,7 @@ const ActivityChoice = ({
     const availablePacks = Object.entries(packs).flatMap(([key, packArray]) => packArray.map(item => {
         return {
             id: item.id,
+            pricing_category_id: item.pricing_category.id,
             key: key,
             label: `${item.activity_ref.label} - ${item.pricing_category.name}`,
             duration: getDisplayDuration(item.activity_ref),
