@@ -11,12 +11,6 @@ export const APPLICATION_TAGS = {
         sample: "Nom"
     },
 
-    activity_label: {
-        name: "Nom de l'activité",
-        value: "{{activity_instance.label}}",
-        sample: "Nom de l'activité"
-    },
-
     applicationId: {
         name: "ID de L'application",
         value: "{{application.id}}",
@@ -45,20 +39,57 @@ export const APPLICATION_TAGS = {
 export const ACTIVITY_TAGS = {
     activity_start_date: {
         name: "Date de début de l'activité",
-        value: "{{activity_instance.start_date}}",
+        value: "{{activity.startDate}}",
         sample: "Date de début de l'activité"
     },
 
     activity_start_hour: {
         name: "Heure de début de l'activité",
-        value: "{{activity_instance.activity_start}}",
+        value: "{{activity.activity_start}}",
         sample: "Heure de début de l'activité"
     },
 
     activity_end: {
         name: "Heure de fin de l'activité",
-        value: "{{activity_instance.activity_end}}",
+        value: "{{activity.activity_end}}",
         sample: "Heure de fin de l'activité"
+    },
+
+    activity_label: {
+        name: "Nom de l'activité",
+        value: "{{activity.label}}",
+        sample: "Nom de l'activité"
+    },
+
+    activity_teacher_first_name: {
+        name: "Prénom du professeur",
+        value: "{{activity.teacher_first_name}}",
+        sample: "Prénom du professeur"
+    },
+
+    activity_teacher_last_name: {
+        name: "Nom du professeur",
+        value: "{{activity.teacher_last_name}}",
+        sample: "Nom du professeur"
+    }
+}
+export const ACTIVITY_INSTANCE_TAGS = {
+    activity_start_date: {
+        name: "Date de début de la séance",
+        value: "{{activity_instance.start_date}}",
+        sample: "Date de début de la séance"
+    },
+
+    activity_start_hour: {
+        name: "Heure de début de la séance",
+        value: "{{activity_instance.activity_start}}",
+        sample: "Heure de début de la séance"
+    },
+
+    activity_end: {
+        name: "Heure de fin de la séance",
+        value: "{{activity_instance.activity_end}}",
+        sample: "Heure de fin de la séance"
     },
 
     activity_teacher_first_name: {
