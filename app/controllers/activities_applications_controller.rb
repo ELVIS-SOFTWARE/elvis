@@ -552,15 +552,6 @@ class ActivitiesApplicationsController < ApplicationController
         # enregistrement des disponibilités de l'élève
         @user.planning.update_intervals(params[:application][:intervals], season.id)
 
-        # enregistrement des consentements de l'élève
-        params.dig(:application, :infos, :consent_docs)&.each do |doc|
-
-          consentement = @user.consent_document_users.find_or_create_by(consent_document_id: "#{doc[0]}".gsub("id_", ""))
-
-          consentement.has_consented = doc[1][:agreement]
-          consentement.save!
-        end
-
         # mise à jour de l'indicateur de paiement
         payers = params.dig(:application, :infos, :payers)
         if payers
@@ -569,6 +560,15 @@ class ActivitiesApplicationsController < ApplicationController
 
         # @user.skip_confirmation_notification!
         @user.save!
+
+        # enregistrement des consentements de l'élève
+        params.dig(:application, :infos, :consent_docs)&.each do |doc|
+
+          consentement = @user.consent_document_users.find_or_create_by(consent_document_id: "#{doc[0]}".gsub("id_", ""))
+
+          consentement.has_consented = doc[1][:agreement]
+          consentement.save!
+        end
 
         family_links_with_user = params.dig(:application, :infos, :family_links_with_user)
 
