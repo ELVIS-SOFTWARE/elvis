@@ -119,6 +119,7 @@ const ActivityChoice = ({
         const price = item.price;
 
         const uniqueId = isPack ? `p${item.id}` : `a${item.id}`;
+        const isItemSelected = selectedActivitiesAndPacks.some(selectedItem => selectedItem.id === item.id && selectedItem.isPack === isPack);
 
         const handleAction = () => {
             if (isSelected) {
@@ -142,18 +143,27 @@ const ActivityChoice = ({
                 width: "32px",
                 height: "32px"
             }
-            : {
-                borderRadius: "50%",
-                color: "white",
-                backgroundColor: "#0079BF",
-                border: 0,
-                width: "32px",
-                height: "32px"
-            };
+            : isItemSelected
+                ? {
+                    borderRadius: "50%",
+                    color: "white",
+                    backgroundColor: "#86D69E",
+                    border: 0,
+                    width: "32px",
+                    height: "32px"
+                }
+                : {
+                    borderRadius: "50%",
+                    color: "white",
+                    backgroundColor: "#0079BF",
+                    border: 0,
+                    width: "32px",
+                    height: "32px"
+                };
 
-        const iconClass = isSelected ? "fas fa-minus" : "fas fa-plus";
 
-        // <i className="fas fa-check"></i>
+        const iconClass = isItemSelected && !isSelected ? "fas fa-check" : (isSelected ? "fas fa-minus" : "fas fa-plus");
+
         return (
             <React.Fragment key={uniqueId}>
                 <tr style={{color: "rgb(0, 51, 74)"}}>
@@ -162,7 +172,7 @@ const ActivityChoice = ({
                     <td className="text-center">{price}</td>
                     <td>
                         <div className="btn-group-horizontal pull-right btn-group" role="group">
-                            <button onClick={handleAction} style={buttonStyle}>
+                            <button onClick={handleAction} style={buttonStyle} disabled={isItemSelected && !isSelected}>
                                 <i className={iconClass}></i>
                             </button>
                         </div>
@@ -178,8 +188,6 @@ const ActivityChoice = ({
             allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
         ), "id"
     );
-
-
     const availableActivities = [...groupedRefs, ...individualRefs, ...activityRefsCham].map(item => {
         return {
             id: item.id,
@@ -204,7 +212,6 @@ const ActivityChoice = ({
         };
     }));
     const availableActivitiesAndPacks = [...availableActivities, ...availablePacks];
-
 
     const selectedActivitiesArray = selectedActivities.map(activityId => {
         const selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(activityId, 10));
@@ -242,7 +249,6 @@ const ActivityChoice = ({
     });
     const availableActivitiesAndPacksDisplay = availableActivitiesAndPacks.map((item, i) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
-
     });
 
     // si une des activités sélectionnée est substituable,
@@ -312,7 +318,7 @@ const ActivityChoice = ({
                             </div>
                         </div>
                         <div>
-                            <table className="table table-striped" style={{borderRadius: '20px', overflow: 'hidden'}}>
+                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
                                 <thead>
                                 <tr style={{backgroundColor: "#00334A", color: "white"}}>
                                     <th className="pl-4">Activité</th>
@@ -335,7 +341,7 @@ const ActivityChoice = ({
                             <h4 style={{color: "#8AA4B1"}}>ACTIVITES SELECTIONNEES </h4>
                         </div>
                         <div>
-                            <table className="table table-striped" style={{borderRadius: '20px', overflow: 'hidden'}}>
+                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
                                 <thead>
                                 <tr style={{backgroundColor: "#00334A", color: "white"}}>
                                     <th className="pl-4">Activité</th>
@@ -355,7 +361,7 @@ const ActivityChoice = ({
                                     <tbody>
                                     {selectedActivitiesAndPacksDisplay}
                                     <tr>
-                                        <td colSpan="3" style={{fontWeight: "bold"}}>Total estimé</td>
+                                        <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total estimé</td>
                                         <td colSpan="3" className="text-center" >{totalSelectedPrice} €</td>
                                     </tr>
                                     </tbody>
