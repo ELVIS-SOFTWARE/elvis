@@ -81,6 +81,7 @@ const ActivityChoice = ({
             unpopularActivities.map(a => a.id),
             selectedActivities,
         ).length > 0;
+    const unpopularActivitiesSelected = unpopularActivities.filter(a => selectedActivities.includes(a.id));
 
     const renderChildrenAccompaniments = () => {
         /* additionalStudents only exist here in Edit Mode while adding activities */
@@ -109,7 +110,6 @@ const ActivityChoice = ({
             );
         }
     };
-    const unpopularActivitiesSelected = unpopularActivities.filter(a => selectedActivities.includes(a.id));
     const groupedRefs = _.groupBy(filteredActivityRefs.filter(r => r.substitutable === true), "kind");
 
     // Duration filter ---------------------------------------------------------------------------------------------------------------------------------------------
