@@ -418,14 +418,7 @@ class Wizard extends React.Component {
                 .then((result) =>
                 {
                     if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                        let get_params = '';
-                        let redirect_url = `/new_application/${this.state.user.id}${get_params}`;
-
-                        if (data.pack_created) {
-                            redirect_url = `/my_activities/${this.state.user.id}`;
-                        }
-
-                        window.location.href = redirect_url;
+                        window.location.href = `/new_application/${this.state.user.id}`;
                     } else {
                         window.location.href = `/inscriptions/${data.activity_application.id}`;
                     }
