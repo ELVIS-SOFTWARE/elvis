@@ -115,10 +115,10 @@ const ActivityChoice = ({
     // Display the available activities
     function generateActivityRow(item, key, isPack = false, isSelected = false) {
         const label = item.label;
-        const duration = item.duration ;
-        const price = item.price ;
+        const duration = item.duration;
+        const price = item.price;
 
-        const uniqueId = isPack ? `p${item.id}`: `a${item.id}`;
+        const uniqueId = isPack ? `p${item.id}` : `a${item.id}`;
 
         const handleAction = () => {
             if (isSelected) {
@@ -134,8 +134,22 @@ const ActivityChoice = ({
         };
 
         const buttonStyle = isSelected
-            ? { borderRadius: "50%", color: "white", backgroundColor: "#00334A", border: 0, width: "32px", height: "32px" }
-            : { borderRadius: "50%", color: "white", backgroundColor: "#0079BF", border: 0, width: "32px", height: "32px" };
+            ? {
+                borderRadius: "50%",
+                color: "white",
+                backgroundColor: "#00334A",
+                border: 0,
+                width: "32px",
+                height: "32px"
+            }
+            : {
+                borderRadius: "50%",
+                color: "white",
+                backgroundColor: "#0079BF",
+                border: 0,
+                width: "32px",
+                height: "32px"
+            };
 
         const iconClass = isSelected ? "fas fa-minus" : "fas fa-plus";
 
@@ -177,7 +191,6 @@ const ActivityChoice = ({
             isSelected: false,
         };
     });
-
     const availablePacks = Object.entries(packs).flatMap(([key, packArray]) => packArray.map(item => {
         return {
             id: item.id,
@@ -190,7 +203,6 @@ const ActivityChoice = ({
             isSelected: false,
         };
     }));
-
     const availableActivitiesAndPacks = [...availableActivities, ...availablePacks];
 
 
@@ -206,7 +218,6 @@ const ActivityChoice = ({
             isSelected: true,
         };
     });
-
     const selectedPacksArray = Object.keys(selectedPacks).flatMap(key => selectedPacks[key].map(packId => {
         const item = packs[key].find(p => p.pricing_category.id === packId);
         return {
@@ -221,14 +232,14 @@ const ActivityChoice = ({
         };
     }));
     const selectedActivitiesAndPacks = [...selectedActivitiesArray, ...selectedPacksArray];
+    const totalSelectedPrice = selectedActivitiesAndPacks.reduce((acc, item) => {
+        return acc + parseFloat(item.price);
+    }, 0);
 
-    console.log("selectedActivitiesAndPacks", selectedActivitiesAndPacks);
-    console.log ("availableActivitiesAndPacks", availableActivitiesAndPacks);
 
     const selectedActivitiesAndPacksDisplay = selectedActivitiesAndPacks.map((item, i) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
-
     const availableActivitiesAndPacksDisplay = availableActivitiesAndPacks.map((item, i) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
 
@@ -333,15 +344,23 @@ const ActivityChoice = ({
                                     <th></th>
                                 </tr>
                                 </thead>
-                                <tbody>
+
                                 {selectedActivitiesAndPacksDisplay.length === 0 ? (
+                                    <tbody>
                                     <tr>
                                         <td colSpan="4" className="text-center">aucune activité sélectionnée</td>
                                     </tr>
+                                    </tbody>
                                 ) : (
-                                    selectedActivitiesAndPacksDisplay
+                                    <tbody>
+                                    {selectedActivitiesAndPacksDisplay}
+                                    <tr>
+                                        <td colSpan="3" style={{fontWeight: "bold"}}>Total estimé</td>
+                                        <td colSpan="3" className="text-center" >{totalSelectedPrice} €</td>
+                                    </tr>
+                                    </tbody>
                                 )}
-                                </tbody>
+
                             </table>
                         </div>
                     </div>
