@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import _ from "lodash";
 import CurrentActivityItem from "./activityItems/CurrentActivityItem";
 import NewActivityItem from "./activityItems/NewActivityItem";
@@ -13,7 +13,7 @@ class PreApplication extends React.Component {
     }
 
     render() {
-        const { season, current_user } = this.props;
+        const {season, current_user} = this.props;
         const today = new Date().toISOString();
         const newapp_opening_date = new Date(season.opening_date_for_new_applications).toISOString();
         const preapp_opening_date = new Date(season.opening_date_for_applications).toISOString();
@@ -133,38 +133,86 @@ class PreApplication extends React.Component {
             })
             .value();
 
+        let openingApplication = moment(this.props.season.opening_date_for_new_applications);
+        let closingApplication = moment(this.props.season.closing_date_for_applications);
+        let openingDate = openingApplication.date();
+        let closingDate = closingApplication.date();
+        let openingPeriod = openingDate < 10 ? 'début' : openingDate > 20 ? 'fin' : 'mi';
+        let closingPeriod = closingDate < 10 ? 'début' : closingDate > 20 ? 'fin' : 'mi';
+
         return (
             <React.Fragment>
-                <div className="padding-page">
+                <div className="padding-page ml-4">
                     <div className="activity-header">
-                        <h1>
-                            {this.props.user.first_name}{" "}
-                            {this.props.user.last_name}
+                        <h1 style={{color: "#00283B"}}>
+                            Mes demandes d'inscription
                         </h1>
-                        {
-                            (isPreApplicationOpened || isNewApplicationOpened) ?
-                                <div>
-                                    <h3>
-                                        Inscription aux cours pour la prochaine saison
-                                        {` ${moment(this.props.season.start).format("YYYY")}-${moment(this.props.season.end).format("YYYY")}`}
-                                    </h3>
-                                    <div className="p">
-                                        <p>La période des ré-inscriptions est{" "}
-                                            {isPreApplicationOpened ? <span className="badge badge-success">ouverte</span> :
-                                                                      <span className="badge badge-danger">fermée</span>}
-                                        </p>
-                                        <p>La période des nouvelles inscriptions est{" "}
-                                            {isNewApplicationOpened ? <span className="badge badge-success">ouverte</span> :
-                                                                      <span className="badge badge-danger">fermée</span>}
-                                        </p>
+                        {/*{*/}
+                        {/*    (isPreApplicationOpened || isNewApplicationOpened) ?*/}
+                        <div className="row ml-1">
+                            <p className="mb-5" style={{color: "#8AA4B1"}}>
+                                Inscription aux activités de la
+                                saison {` ${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`}
+                            </p>
+
+                            <div className="col-md-6 d-inline-flex justify-content-between p-0">
+                                <div className="card col-md-6 mr-4" style={{border: "none", borderRadius: "12px"}}>
+                                    <div className="row d-inline-flex align-items-center p-3">
+                                        <div style={{
+                                            backgroundColor: "#E2EDF3",
+                                            borderRadius: "50px",
+                                            width: "50px",
+                                            height: "50px",
+                                            margin: "10px 20px 10px 10px"
+                                        }}>
+                                        </div>
+                                        <div>
+                                            <h5 className="card-title" style={{color: "#00283B"}}>Période de
+                                                ré-inscription <i className="fas fa-info-circle"></i></h5>
+                                            <h6 className="card-subtitle mb-2 text-muted">
+                                                Ferme {closingPeriod} {closingApplication.format("MMMM YYYY")}
+                                            </h6>
+                                            <div>{isPreApplicationOpened ?
+                                                <span className="badge badge-success">ouverte</span> :
+                                                <span className="badge badge-danger">fermée</span>}
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
-                                : null
+                                <div className="card col-md-6 mr-4" style={{border: "none", borderRadius: "12px"}}>
+                                    <div className="row d-inline-flex align-items-center p-3">
+                                        <div style={{
+                                            backgroundColor: "#E2EDF3",
+                                            borderRadius: "50px",
+                                            width: "50px",
+                                            height: "50px",
+                                            margin: "10px 20px 10px 10px"
+                                        }}>
+                                        </div>
+                                        <div>
+                                            <h5 className="card-title" style={{color: "#00283B"}}>Période
+                                                d'inscription <i className="fas fa-info-circle"></i></h5>
+                                            <h6 className="card-subtitle mb-2 text-muted">
+                                                Ouvre {openingPeriod} {openingApplication.format("MMMM YYYY")}
+                                            </h6>
+                                            <div>{isNewApplicationOpened ?
+                                                <span className="badge badge-success">ouverte</span> :
+                                                <span className="badge badge-danger">fermée</span>}
+                                            </div>
 
-                        }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/*        : null*/}
+
+                        {/*}*/}
                     </div>
 
-                    <h2>Activités actuelles pour la saison {` ${moment(this.props.previous_season.start).format("YYYY")}-${moment(this.props.previous_season.end).format("YYYY")}`}</h2>
+                    <h2>Activités actuelles pour la
+                        saison {` ${moment(this.props.previous_season.start).format("YYYY")}-${moment(this.props.previous_season.end).format("YYYY")}`}</h2>
                     {currentActivityList.length <= 0 ? (
                         <p>
                             <i>
@@ -177,23 +225,24 @@ class PreApplication extends React.Component {
                         : null}
 
                     <div className="d-inline-flex p-2">
-                        <h2>Mes demandes pour la saison {` ${moment(this.props.season.start).format("YYYY")}-${moment(this.props.season.end).format("YYYY")}`}
-                        {hasChildhoodLesson ? null : (
-                            <button
-                                disabled={!allowNewApplication}
-                                className="btn btn-primary btn-sm ml-3"
-                                title={!allowNewApplication ? "La période d'inscription aux nouvelles activités n'a pas commencé"
-                                    : null}
-                                onClick={() => {
-                                    if (allowNewApplication) {
-                                        window.location = inscription_path;
-                                    }
-                                }}
-                            >
-                                <i className="fas fa-plus" />
-                                &nbsp;Inscription à une nouvelle activité
-                            </button>
-                        )}
+                        <h2>Mes demandes pour la
+                            saison {` ${moment(this.props.season.start).format("YYYY")}-${moment(this.props.season.end).format("YYYY")}`}
+                            {hasChildhoodLesson ? null : (
+                                <button
+                                    disabled={!allowNewApplication}
+                                    className="btn btn-primary btn-sm ml-3"
+                                    title={!allowNewApplication ? "La période d'inscription aux nouvelles activités n'a pas commencé"
+                                        : null}
+                                    onClick={() => {
+                                        if (allowNewApplication) {
+                                            window.location = inscription_path;
+                                        }
+                                    }}
+                                >
+                                    <i className="fas fa-plus"/>
+                                    &nbsp;Inscription à une nouvelle activité
+                                </button>
+                            )}
                         </h2>
                     </div>
 
@@ -210,7 +259,7 @@ class PreApplication extends React.Component {
                             <a
                                 href={user_path}
                                 className="btn btn-primary btn-lg btn-outline m-l-xs">
-                                <i className="fas fa-users" /> Retour vers mon profil
+                                <i className="fas fa-users"/> Retour vers mon profil
                             </a>
                         }
                     </div>
@@ -234,13 +283,12 @@ function displayDateForSeason(pa, season) {
     // devrait, nan doit disparaitre avec le refacto de la page
     if (paDate.getMonth() < 8) {
         return `${paDate.getFullYear() - 1}-${paDate.getFullYear()}`;
-    }
-    else {
+    } else {
         return `${paDate.getFullYear()}-${paDate.getFullYear() + 1}`;
     }
 }
 
-function OtherActivityItem({ user, season }) {
+function OtherActivityItem({user, season}) {
     let strting_activities = (_.get(user, "pre_application.pre_application_activities") || [])
         .map(pa => `${_.get(pa, "activity.activity_ref.label")} (${displayDateForSeason(pa, season)})`).join(" - ");
 
@@ -250,23 +298,24 @@ function OtherActivityItem({ user, season }) {
     }
 
     return <div className="row">
-            <div className="col-sm-9">
-                <div className="ibox">
-                    <div className="ibox-content text-align-center-sm">
-                        <div className="row">
-                            <div className="col-sm-6 p-xs">
-                                <h5 className="text-dark">{user.full_name}</h5>
-                                <span>{strting_activities}</span>
-                            </div>
+        <div className="col-sm-9">
+            <div className="ibox">
+                <div className="ibox-content text-align-center-sm">
+                    <div className="row">
+                        <div className="col-sm-6 p-xs">
+                            <h5 className="text-dark">{user.full_name}</h5>
+                            <span>{strting_activities}</span>
+                        </div>
 
-                            <div className={"col-sm-6 p-xs pt-sm-4 text-rigth"}>
-                                <a href={`/new_application/${user.id}`}
-                                    className={"btn btn-primary btn-sm"}>Gérer son inscription</a>
-                            </div>
+                        <div className={"col-sm-6 p-xs pt-sm-4 text-rigth"}>
+                            <a href={`/new_application/${user.id}`}
+                               className={"btn btn-primary btn-sm"}>Gérer son inscription</a>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
     </div>
 }
+
 export default PreApplication;
