@@ -164,10 +164,10 @@ class CurrentActivityItem extends React.Component {
         let StopButton =
             <button
                 onClick={() => this.openStopModal()}
-                className="btn btn-primary m-sm"
+                className="btn btn-danger btn-small"
+                style={ {borderRadius: "8px"} }
             >
-                <i className="fas fa-times mr-1"/>
-                Arrêter
+                <i className="fas fa-times"/>
             </button>
 
         if (isPreapplicationEnabled) {
@@ -194,7 +194,6 @@ class CurrentActivityItem extends React.Component {
                                 href={`/inscriptions/new/${user_id}/${this.state.preApplicationActivity.id
                                 }/${activity.to.id}/${PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD}?auth_token=${csrfToken}`}
                                 className="btn btn-info m-sm">
-                                <i className="fas fa-edit"/>
                                 S'inscrire à l'activité&nbsp;
                                 {activity.to.display_name}
                             </a>
@@ -207,9 +206,9 @@ class CurrentActivityItem extends React.Component {
                         <a
                             href={`/inscriptions/new/${user_id}/${pre_application_activity.id
                             }/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
-                            className="btn btn-info m-sm"
+                            className="btn btn-info m-sm font-weight-bold"
+                            style={{borderRadius: "8px"}}
                         >
-                            <i className="fas fa-edit mr-1"/>
                             Se réinscrire
                         </a>
                         {StopButton}
@@ -236,18 +235,21 @@ class CurrentActivityItem extends React.Component {
                 </p>
             </React.Fragment>;
         }
-
         return (
             <React.Fragment>
                 <tr>
-                    <td className="col-sm-4 p-xs">
-                        <p className="pb-0"> {data.activity_ref.label} </p>
-                        {activityState !== undefined ?
-                            <div className="pb-0"> {activityDetails} </div>
-                            : ""
-                        }
+                    <td>
+                        {data.activity_ref.label}
+                        {/*{activityState !== undefined ?*/}
+                        {/*    <div className="pb-0"> {activityDetails} </div>*/}
+                        {/*    : ""*/}
+                        {/*}*/}
                     </td>
-                    <td className="col-sm-6 p-xs">
+                    <td>
+                        {this.props.user.first_name} {this.props.user.last_name}
+                    </td>
+                    <td></td>
+                    <td className="text-right">
                         {actionButtons}
                     </td>
                 </tr>
