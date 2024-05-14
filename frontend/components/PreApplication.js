@@ -149,82 +149,99 @@ class PreApplication extends React.Component {
                         </h1>
                         {/*{*/}
                         {/*    (isPreApplicationOpened || isNewApplicationOpened) ?*/}
-                        <div className="row ml-1">
-                            <p className="mb-5" style={{color: "#8AA4B1"}}>
-                                Inscription aux activités de la
-                                saison {` ${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`}
-                            </p>
+                                <div className="row ml-1">
+                                    <p className="mb-5" style={{color: "#8AA4B1"}}>
+                                        Inscription aux activités de la
+                                        saison {` ${moment(this.props.season.start).format("YYYY")}/${moment(this.props.season.end).format("YYYY")}`}
+                                    </p>
 
-                            <div className="col-md-6 d-inline-flex justify-content-between p-0">
-                                <div className="card col-md-6 mr-4" style={{border: "none", borderRadius: "12px"}}>
-                                    <div className="row d-inline-flex align-items-center p-3">
-                                        <div style={{
-                                            backgroundColor: "#E2EDF3",
-                                            borderRadius: "50px",
-                                            width: "50px",
-                                            height: "50px",
-                                            margin: "10px 20px 10px 10px"
-                                        }}>
-                                        </div>
-                                        <div>
-                                            <h5 className="card-title" style={{color: "#00283B"}}>Période de
-                                                ré-inscription <i className="fas fa-info-circle"></i></h5>
-                                            <h6 className="card-subtitle mb-2 text-muted">
-                                                Ferme {closingPeriod} {closingApplication.format("MMMM YYYY")}
-                                            </h6>
-                                            <div>{isPreApplicationOpened ?
-                                                <span className="badge badge-success">ouverte</span> :
-                                                <span className="badge badge-danger">fermée</span>}
+                                    <div className="col-md-6 d-inline-flex justify-content-between p-0">
+                                        <div className="card col mr-4"
+                                             style={{border: "none", borderRadius: "12px"}}>
+                                            <div className="row d-inline-flex align-items-center p-3">
+                                                <div style={{
+                                                    backgroundColor: "#E2EDF3",
+                                                    borderRadius: "50px",
+                                                    width: "50px",
+                                                    height: "50px",
+                                                    margin: "10px 20px 10px 10px"
+                                                }}>
+                                                </div>
+                                                <div>
+                                                    <h5 className="card-title" style={{color: "#00283B"}}>Période de
+                                                        ré-inscription <i className="fas fa-info-circle"
+                                                                          title='test'></i></h5>
+                                                    <h6 className="card-subtitle mb-2 text-muted">
+                                                        Ferme {closingPeriod} {closingApplication.format("MMMM YYYY")}
+                                                    </h6>
+                                                    <div>{isPreApplicationOpened ?
+                                                        <span className="badge badge-success">ouverte</span> :
+                                                        <span className="badge badge-danger">fermée</span>}
+                                                    </div>
+
+                                                </div>
                                             </div>
+                                        </div>
+                                        <div className="card col"
+                                             style={{border: "none", borderRadius: "12px"}}>
+                                            <div className="row d-inline-flex align-items-center p-3">
+                                                <div style={{
+                                                    backgroundColor: "#E2EDF3",
+                                                    borderRadius: "50px",
+                                                    width: "50px",
+                                                    height: "50px",
+                                                    margin: "10px 20px 10px 10px"
+                                                }}>
+                                                </div>
+                                                <div>
+                                                    <h5 className="card-title" style={{color: "#00283B"}}>Période
+                                                        d'inscription <i className="fas fa-info-circle"></i></h5>
+                                                    <h6 className="card-subtitle mb-2 text-muted">
+                                                        Ouvre {openingPeriod} {openingApplication.format("MMMM YYYY")}
+                                                    </h6>
+                                                    <div>{isNewApplicationOpened ?
+                                                        <span className="badge badge-success">ouverte</span> :
+                                                        <span className="badge badge-danger">fermée</span>}
+                                                    </div>
 
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="card col-md-6 mr-4" style={{border: "none", borderRadius: "12px"}}>
-                                    <div className="row d-inline-flex align-items-center p-3">
-                                        <div style={{
-                                            backgroundColor: "#E2EDF3",
-                                            borderRadius: "50px",
-                                            width: "50px",
-                                            height: "50px",
-                                            margin: "10px 20px 10px 10px"
-                                        }}>
-                                        </div>
-                                        <div>
-                                            <h5 className="card-title" style={{color: "#00283B"}}>Période
-                                                d'inscription <i className="fas fa-info-circle"></i></h5>
-                                            <h6 className="card-subtitle mb-2 text-muted">
-                                                Ouvre {openingPeriod} {openingApplication.format("MMMM YYYY")}
-                                            </h6>
-                                            <div>{isNewApplicationOpened ?
-                                                <span className="badge badge-success">ouverte</span> :
-                                                <span className="badge badge-danger">fermée</span>}
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         {/*        : null*/}
 
                         {/*}*/}
                     </div>
 
-                    <h2>Activités actuelles pour la
-                        saison {` ${moment(this.props.previous_season.start).format("YYYY")}-${moment(this.props.previous_season.end).format("YYYY")}`}</h2>
-                    {currentActivityList.length <= 0 ? (
-                        <p>
-                            <i>
-                                L'utilisateur ne poursuit actuellement aucune activité
-                            </i>
-                        </p>
-                    ) : null}
-                    {currentActivityList.length > 0
-                        ? currentActivityList
-                        : null}
+                    <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                        ACTIVITES ACTUELLES (SAISON {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})</h4>
+                    <div className="col-md-6 p-0">
+                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                            <thead>
+                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                <th>Membre</th>
+                                <th>Séances restantes</th>
+                                <th style={{borderRadius: "0 12px 0 0"}}></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {currentActivityList.length > 0
+                                ? currentActivityList
+                                :
+                                <tr>
+                                    <td colSpan="12" className="text-center">
+                                        <i>L'utilisateur ne poursuit actuellement aucune activité</i>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <div className="d-inline-flex p-2">
+
+                    <div className="col-md-12 d-inline-flex p-2">
                         <h2>Mes demandes pour la
                             saison {` ${moment(this.props.season.start).format("YYYY")}-${moment(this.props.season.end).format("YYYY")}`}
                             {hasChildhoodLesson ? null : (
