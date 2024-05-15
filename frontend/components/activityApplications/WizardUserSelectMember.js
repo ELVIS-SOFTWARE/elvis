@@ -32,6 +32,7 @@ export default class WizardUserSelectMember extends React.Component
 
         this.getErrors = this.getErrors.bind(this);
         this.updateMembersData = this.updateMembersData.bind(this);
+        this.onFamilyLinkSelectorChange = this.onFamilyLinkSelectorChange.bind(this);
     }
 
     updateMembersData()
@@ -164,6 +165,40 @@ export default class WizardUserSelectMember extends React.Component
         user.birthday = otherUser.birthday ;
     }
 
+    onFamilyLinkSelectorChange(values, fieldForSelection)
+    {
+        const { members, selected } = this.state;
+
+        if(values.value)
+            values = [values];
+
+        this.setState({
+            members: members.map((m, i) => i === selected ? {
+                ...m,
+                family_links_with_user: [
+                    ...m.family_links_with_user.filter(fl => !values.map(v => v.value).includes(fl.member_id)).map(fl => ({...fl, [fieldForSelection]: false})),
+                    ...values.map(v =>
+                    {
+                        const otherUser = members.find(member => member.id === v.value);
+
+                        let res = {
+                            ...(m.family_links_with_user.find(fl => fl.member_id === otherUser.id) || {}),
+                            [fieldForSelection]: true,
+                        };
+
+                        if(res.member_id === undefined)
+                        {
+                            res.user_id = m.id ;
+                            this.completeUserWithOther(res, otherUser);
+                        }
+
+                        return res;
+                    })
+                ]
+            } : m),
+        })
+    }
+
     render()
     {
         const { user } = this.props;
@@ -181,7 +216,7 @@ export default class WizardUserSelectMember extends React.Component
                 is_to_call: familyLinkToUse ? familyLinkToUse.is_to_call : false,
                 is_accompanying: familyLinkToUse ? familyLinkToUse.is_accompanying : false,
             }
-        }).map(this.familyLinkWithUserToOption);
+        });
 
         return <Fragment>
             <div className="ibox">
@@ -252,40 +287,13 @@ export default class WizardUserSelectMember extends React.Component
                         <div className="row mt-4">
                             <div className="col-sm-6">
                                 <h4>Représentant légal</h4>
-                                <CreatableSelect
+                                <FamilyLinkSelector
+                                    familyLinks={virtualFamilyLinks}
                                     isMulti
-                                    options={virtualFamilyLinks}
-                                    value={
-                                        virtualFamilyLinks
-                                            .filter(fl => fl.is_legal_referent)
-                                    }
-                                    onChange={values => this.setState({
-                                        members: members.map((m, i) => i === selected ? {
-                                            ...m,
-                                            family_links_with_user: [
-                                                ...m.family_links_with_user.filter(fl => !values.map(v => v.value).includes(fl.member_id)).map(fl => ({...fl, is_legal_referent: false})),
-                                                ...values.map(v =>
-                                                {
-                                                    const otherUser = members.find(member => member.id === v.value);
-
-                                                    let res = {
-                                                        ...(m.family_links_with_user.find(fl => fl.member_id === otherUser.id) || {}),
-                                                        is_legal_referent: true,
-                                                    };
-                                                    
-                                                    if(res.member_id === undefined)
-                                                    {
-                                                        res.user_id = m.id ;
-                                                        this.completeUserWithOther(res, otherUser);
-                                                    }
-
-                                                    return res;
-                                                })
-                                            ]
-                                        } : m),
-                                    })}
-                                    isClearable={false}
+                                    fieldForSelection="is_legal_referent"
+                                    onChange={this.onFamilyLinkSelectorChange}
                                 />
+
                                 {this.state.showError && this.state.error.legal_referent && <div className="row">
                                     <div className="col-sm-12">
                                         <p className="text-danger">{this.state.error.legal_referent}</p>
@@ -298,39 +306,12 @@ export default class WizardUserSelectMember extends React.Component
                             <div className="col-sm-6">
                                 <label>Personne à contacter</label>
 
-                                <CreatableSelect
-                                    isMulti={false}
-                                    options={virtualFamilyLinks}
-                                    value={
-                                        virtualFamilyLinks
-                                            .filter(fl => fl.is_to_call)
-                                    }
-                                    onChange={values => this.setState({
-                                        members: members.map((m, i) => i === selected ? {
-                                            ...m,
-                                            family_links_with_user: [
-                                                ...m.family_links_with_user.filter(fl => values.value !== fl.member_id).map(fl => ({...fl, is_to_call: false})),
-                                                (() => {
-                                                    const otherUser = members.find(member => member.id === values.value);
-
-                                                    let res = {
-                                                        ...(m.family_links_with_user.find(fl => fl.member_id === otherUser.id) || {}),
-                                                        is_to_call: true,
-                                                    };
-
-                                                    if(res.member_id === undefined)
-                                                    {
-                                                        res.user_id = m.id ;
-                                                        this.completeUserWithOther(res, otherUser);
-                                                    }
-
-                                                    return res;
-                                                })()
-                                            ],
-                                        } : m),
-                                    })}
-                                    isClearable={false}
+                                <FamilyLinkSelector
+                                    familyLinks={virtualFamilyLinks}
+                                    fieldForSelection="is_to_call"
+                                    onChange={this.onFamilyLinkSelectorChange}
                                 />
+
                                 {this.state.showError && this.state.error.to_call && <div className="row">
                                     <div className="col-sm-12">
                                         <p className="text-danger">{this.state.error.to_call}</p>
@@ -343,40 +324,12 @@ export default class WizardUserSelectMember extends React.Component
                             <div className="col-sm-6">
                                 <label>Accompagnant</label>
 
-                                <CreatableSelect
-                                    isMulti={false}
-                                    options={virtualFamilyLinks}
-                                    value={
-                                        virtualFamilyLinks
-                                            .filter(fl => fl.is_accompanying)
-                                    }
-                                    onChange={values => this.setState({
-                                        members: members.map((m, i) => i === selected ? {
-                                            ...m,
-                                            family_links_with_user: [
-                                                ...m.family_links_with_user.filter(fl => values.value !== fl.member_id).map(fl => ({...fl, is_accompanying: false})),
-                                                (() =>
-                                                {
-                                                    const otherUser = members.find(member => member.id === values.value);
-
-                                                    let res = {
-                                                        ...(m.family_links_with_user.find(fl => fl.member_id === otherUser.id) || {}),
-                                                        is_accompanying: true,
-                                                    };
-
-                                                    if(res.member_id === undefined)
-                                                    {
-                                                        res.user_id = m.id ;
-                                                        this.completeUserWithOther(res, otherUser);
-                                                    }
-
-                                                    return res;
-                                                })()
-                                            ],
-                                        } : m),
-                                    })}
-                                    isClearable={false}
+                                <FamilyLinkSelector
+                                    familyLinks={virtualFamilyLinks}
+                                    fieldForSelection="is_accompanying"
+                                    onChange={this.onFamilyLinkSelectorChange}
                                 />
+
                                 {this.state.showError && this.state.error.accompanying && <div className="row">
                                     <div className="col-sm-12">
                                         <p className="text-danger">{this.state.error.accompanying}</p>
@@ -472,3 +425,23 @@ const renderUserItem = (currentUserId, user, i, isSelected) => <Fragment>
         </div>
     </div>
 </Fragment>;
+
+const FamilyLinkSelector = ({ isMulti, familyLinks, fieldForSelection, onChange }) =>
+{
+    const options = familyLinks.map(m => ({
+        value: m.id,
+        label: `${m.first_name} ${m.last_name}`,
+        is_legal_referent: m.is_legal_referent,
+        is_to_call: m.is_to_call,
+        is_accompanying: m.is_accompanying,
+    }));
+
+    return <CreatableSelect
+        isMulti={isMulti}
+        options={options}
+        isClearable={false}
+        value={options.filter(fl => fl[fieldForSelection])}
+        onChange={eventValues => onChange(eventValues, fieldForSelection) }
+    />
+
+};
