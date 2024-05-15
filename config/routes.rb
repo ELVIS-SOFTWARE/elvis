@@ -339,6 +339,7 @@ Rails.application.routes.draw do
   get "/plannings/availabilities", to: "planning#show_availabilities", as: :availabilities_portal
   get "/plannings/availabilities/:id(/:date)", to: "planning#show_availabilities_for_date", as: :availabilities_planning
   patch "/plannings/availabilities/:id", to: "planning#update_availabilities"
+  patch "/plannings/availabilities/:id/can_update", to: "planning#can_update_availabilities"
   post "/plannings/availabilities/:id/copy", to: "planning#copy_availabilities", as: :copy_planning
   get "/plannings/conflict/:conflict_id", to: "planning#show_for_conflict"
   get "/plannings/all_rooms", to: "planning#show_all_rooms"
