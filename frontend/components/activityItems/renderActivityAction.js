@@ -5,78 +5,81 @@ function renderActivityAction(actionLabel) {
         case "Proposition acceptée":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg fa-check-circle color-green" />
-                    <span className="label label-primary bg-green">
-                        Proposition acceptée
-                    </span>
+                    <div className="badge badge-pill badge-success text-white">
+                        <i className="fas fa-check-circle mr-2"/>Proposition acceptée
+                    </div>
                 </React.Fragment>
             );
         case "Cours proposé":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg fa-info-circle color-green" />
-                    <span className="label label-primary bg-green">
-                        Cours proposé
-                    </span>
+                    <div className="badge badge-pill badge-info text-white">
+                        <i className="fas fa-info-circle mr-2"/>Cours proposé
+                    </div>
                 </React.Fragment>
             );
         case "Proposition refusée":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg fa-times-circle" style={{color:"#ED5565"}} />
-                    <span className="label label-danger bg-danger">
-                        Proposition refusée
-                    </span>
+                    <div className="badge badge-pill badge-danger text-white">
+                        <i className="fas fa-times-circle mr-2"/>Proposition refusée
+                    </div>
                 </React.Fragment>
             );
         case "Traitée":
             return (
                 <React.Fragment>
-                    <i className="fas fa-lg fa-check-circle color-green" />
-                    <span className="label label-primary bg-green">
-                        Cours attribué
-                    </span>
+                    <div className="badge badge-pill badge-success text-white">
+                        <i className="fas fa-check-circle mr-2"/>Cours attribué
+                    </div>
                 </React.Fragment>
             );
         case "En traitement":
             return (
                 <React.Fragment>
-                    <i className="fas fa-check-circle text-info" />
-                    <span className="label label-info">En traitement</span>
+                    <div className="badge badge-pill badge-primary text-white">
+                        <i className="fas fa-check-circle mr-2"/>En traitement
+                    </div>
                 </React.Fragment>
             );
         case "Arrêt":
             return (
                 <React.Fragment>
-                    <i className="fas  fa-times-circle fa-lg bg-danger img-circle mt-0 mb-2 p-1" />
-                    <span className="label label-danger">Arrêt</span>
+                    <div className="badge badge-pill badge-danger text-white" style={{backgroundColor: "#ff6f3c"}}>
+                        <i className="fas fa-times-circle mr-2"/>Arrêt
+                    </div>
                 </React.Fragment>
             );
         case "Current":
             return (
                 <React.Fragment>
-                    <i className="fas fa-check-circle text-secondary" />
-                    <span className="label label-default">Cours actuel</span>
+                    <div className="badge badge-pill badge-success text-white">
+                        <i className="fas fa-check-circle mr-2"/>Cours actuel
+                    </div>
                 </React.Fragment>
             );
         case "En cours de traitement":
             return (
                 <React.Fragment>
-                    <i className="fas mt-4 fa-hourglass fa-sm bg-warning img-circle"
-                       style={{ padding: "1px 6px 1px 6px" }} />
-                    <span className="label label-warning mt-1">En cours de traitement</span>
+                    <div className="badge badge-pill badge-info text-white" style={{backgroundColor: "#676a6c"}}>
+                        <i className="fas fa-hourglass mr-2"/>En cours
+                    </div>
                 </React.Fragment>
             );
-        case "Unsatisfied": return <React.Fragment>
-            <i className="fas  fa-times-circle fa-lg bg-danger img-circle mt-0 mb-2 p-1" />
-            <span className="label label-danger">Demande non satisfaite</span>
-        </React.Fragment>
+        case "Unsatisfied":
+            return (
+                <React.Fragment>
+                    <div className="badge badge-pill badge-danger text-white">
+                        <i className="fas  fa-times-circle mr-2"/>Demande non satisfaite
+                    </div>
+                </React.Fragment>
+            );
         default:
             return (
                 <React.Fragment>
-                    <i className="fas m-0 fa-hourglass fa-sm bg-warning img-circle"
-                       style={{ padding: "1px 6px 1px 6px" }} />
-                    <span className="label label-warning mt-1">En attente de traitement</span>
+                    <div className="badge badge-pill badge-secondary text-white" style={{backgroundColor: "#676a6c"}}>
+                        <i className="fas fa-hourglass mr-2"/>En attente
+                    </div>
                 </React.Fragment>
             );
     }

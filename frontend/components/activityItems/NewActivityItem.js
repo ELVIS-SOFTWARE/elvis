@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import _ from "lodash";
 import moment from "moment/moment";
 import renderActivityAction from "./renderActivityAction";
@@ -190,57 +190,61 @@ class NewActivityItem extends React.Component {
         }
 
         return (
-            <div className="row">
-                <div className="col-sm-9">
-                    <div className="ibox animated fadeInRight">
-                        <div className="ibox-title">
-                            <h4>
-                                {desiredActivity.activity_ref.activity_type === "child"
-                                    ? desiredActivity.activity_ref.label
-                                    : desiredActivity.activity_ref.kind}
-                            </h4>
-                        </div>
-                        <div className="ibox-content text-align-center-sm">
-                            <div className="row d-flex align-items-center">
-                                <div className="col-sm-2 project-status p-xs">
-                                    {renderActivityAction(actionLabel)}
-                                </div>
-                                <div className="col-sm-4 p-xs">
-                                    <p className="project-number">
-                                        Demande &nbsp;
-                                        <b>
-                                            {(this.props.current_user || {}).is_admin ?
-                                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`#${this.state.activityApplicationId}`}</a> :
-                                                `#${this.state.activityApplicationId}`}
-                                        </b>
-                                    </p>
-                                    <p className="pb-0"> {desiredActivity.activity_id === null ? desiredActivity.activity_ref.kind : desiredActivity.activity_ref.label} </p>
-                                    <p className="pb-0"> {activityDetails} </p>
-                                </div>
-                                <div className="col-sm-6 p-xs d-flex justify-content-end">
-                                    <AnswerProposal
-                                        activity_application_status_id={activity_application_status_id}
-                                        proposalAnswered={this.state.proposalAnswered}
-                                        openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
-                                        openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
-                                    />
+            <React.Fragment>
+                <tr>
+                    <td>
+                        <b>
+                            {(this.props.current_user || {}).is_admin ?
+                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`#${this.state.activityApplicationId}`}</a> :
+                                `0${this.state.activityApplicationId}`}
+                        </b>
+                    </td>
+                    <td className="font-weight-bold" style={{color: "#00283B"}}>
+                        {desiredActivity.activity_ref.label}
+                    </td>
+                    <td>
+                        {this.props.user.first_name} {this.props.user.last_name}
+                    </td>
+                    <td>
+                        {moment(this.props.new_activity_application.created_at).format('DD/MM/YYYY')}
+                    </td>
+                    <td>
+                        {renderActivityAction(actionLabel)}
+                    </td>
+                    <div className="col-sm-9">
+                        <div className="ibox animated fadeInRight">
 
-                                    {activity_application_status_id === this.props.default_activity_status_id && (
-                                        <Fragment>
-                                            <CancelApplication
-                                                activityApplicationId={this.state.activityApplicationId}
-                                            />
+                            <div className="ibox-content text-align-center-sm">
+                                <div className="row d-flex align-items-center">
+                                    <div className="col-sm-2 project-status p-xs">
 
-                                            <EditApplication
-                                                handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
-                                            />
-                                        </Fragment>
-                                    )}
+                                    </div>
+
+                                    <div className="col-sm-6 p-xs d-flex justify-content-end">
+                                        <AnswerProposal
+                                            activity_application_status_id={activity_application_status_id}
+                                            proposalAnswered={this.state.proposalAnswered}
+                                            openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
+                                            openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
+                                        />
+
+                                        {activity_application_status_id === this.props.default_activity_status_id && (
+                                            <Fragment>
+                                                <CancelApplication
+                                                    activityApplicationId={this.state.activityApplicationId}
+                                                />
+
+                                                <EditApplication
+                                                    handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
+                                                />
+                                            </Fragment>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </tr>
                 <Modal
                     isOpen={this.state.isAssignationRefusedModalOpen}
                     onRequestClose={() => this.closeAssignationRefusedModal()}
@@ -308,7 +312,8 @@ class NewActivityItem extends React.Component {
                         Je confirme
                     </button>
                 </Modal>
-            </div>
+
+            </React.Fragment>
         );
     }
 }

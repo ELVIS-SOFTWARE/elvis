@@ -71,6 +71,7 @@ class PreApplication extends React.Component {
                     data={pre_application_activity.activity}
                     pre_application_activity={pre_application_activity}
                     user_id={this.props.user.id}
+                    user={this.props.user}
                     allowPreApplication={allowPreApplication}
                     confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
                     default_activity_status_id={this.props.default_activity_status_id}
@@ -90,6 +91,7 @@ class PreApplication extends React.Component {
                     authToken={this.props.user.authentication_token}
                     data={new_activity_application.desired_activities[0].activity}
                     user_id={this.props.user.id}
+                    user={this.props.user}
                     new_activity_application={new_activity_application}
                     confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
                     default_activity_status_id={this.props.default_activity_status_id}
@@ -145,132 +147,133 @@ class PreApplication extends React.Component {
             <React.Fragment>
                 <div className="padding-page ml-4">
                     <div className="activity-header">
-                        <h1 style={{color: "#00283B"}}>
-                            Mes demandes d'inscription
-                        </h1>
-                        {/*{*/}
-                        {/*    (isPreApplicationOpened || isNewApplicationOpened) ?*/}
-                                <div className="row ml-1">
-                                    <p className="mb-5" style={{color: "#8AA4B1"}}>
-                                        Inscription aux activités de la
-                                        saison {` ${moment(this.props.season.start).format("YYYY")}/${moment(this.props.season.end).format("YYYY")}`}
-                                    </p>
-
-                                    <div className="col-md-6 d-inline-flex justify-content-between p-0">
-                                        <div className="card col mr-4"
-                                             style={{border: "none", borderRadius: "12px"}}>
-                                            <div className="row d-inline-flex align-items-center p-3">
-                                                <div style={{
-                                                    backgroundColor: "#E2EDF3",
-                                                    borderRadius: "50px",
-                                                    width: "50px",
-                                                    height: "50px",
-                                                    margin: "10px 20px 10px 10px"
-                                                }}>
-                                                </div>
-                                                <div>
-                                                    <h5 className="card-title" style={{color: "#00283B"}}>Période de
-                                                        ré-inscription <i className="fas fa-info-circle"
-                                                                          title='test'></i></h5>
-                                                    <h6 className="card-subtitle mb-2 text-muted">
-                                                        Ferme {closingPeriod} {closingApplication.format("MMMM YYYY")}
-                                                    </h6>
-                                                    <div>{isPreApplicationOpened ?
-                                                        <span className="badge badge-success">ouverte</span> :
-                                                        <span className="badge badge-danger">fermée</span>}
-                                                    </div>
-
-                                                </div>
-                                            </div>
+                        <div className="d-inline-flex justify-content-between align-items-center w-100">
+                            <h1 style={{color: "#00283B"}}>Mes demandes d'inscription</h1>
+                            <div>
+                                {hasChildhoodLesson ? null : (
+                                    <button disabled={!allowNewApplication} className="btn btn-small font-weight-bold"
+                                            style={{backgroundColor: "#00334A", color: "white", borderRadius: "8px"}}
+                                            title={!allowNewApplication ? "La période d'inscription aux nouvelles activités n'a pas commencé"
+                                                : null}
+                                            onClick={() => {
+                                                if (allowNewApplication) {
+                                                    window.location = inscription_path;
+                                                }
+                                            }}
+                                    >
+                                        <i className="fas fa-plus"/><span className="ml-3">Nouvelle Demande</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        <div className="row ml-1">
+                            <p className="mb-5" style={{color: "#8AA4B1"}}>
+                                Inscription aux activités de la
+                                saison {` ${moment(this.props.season.start).format("YYYY")}/${moment(this.props.season.end).format("YYYY")}`}
+                            </p>
+                            <div className="col-md-6 d-inline-flex justify-content-between p-0">
+                                <div className="card col mr-4"
+                                     style={{border: "none", borderRadius: "12px"}}>
+                                    <div className="row d-inline-flex align-items-center p-3">
+                                        <div style={{
+                                            backgroundColor: "#E2EDF3",
+                                            borderRadius: "50px",
+                                            width: "50px",
+                                            height: "50px",
+                                            margin: "10px 20px 10px 10px"
+                                        }}>
                                         </div>
-                                        <div className="card col"
-                                             style={{border: "none", borderRadius: "12px"}}>
-                                            <div className="row d-inline-flex align-items-center p-3">
-                                                <div style={{
-                                                    backgroundColor: "#E2EDF3",
-                                                    borderRadius: "50px",
-                                                    width: "50px",
-                                                    height: "50px",
-                                                    margin: "10px 20px 10px 10px"
-                                                }}>
-                                                </div>
-                                                <div>
-                                                    <h5 className="card-title" style={{color: "#00283B"}}>Période
-                                                        d'inscription <i className="fas fa-info-circle"></i></h5>
-                                                    <h6 className="card-subtitle mb-2 text-muted">
-                                                        Ouvre {openingPeriod} {openingApplication.format("MMMM YYYY")}
-                                                    </h6>
-                                                    <div>{isNewApplicationOpened ?
-                                                        <span className="badge badge-success">ouverte</span> :
-                                                        <span className="badge badge-danger">fermée</span>}
-                                                    </div>
+                                        <div>
+                                            <h5 className="card-title" style={{color: "#00283B"}}>Période de
+                                                ré-inscription <i className="fas fa-info-circle"></i></h5>
+                                            <h6 className="card-subtitle mb-2 text-muted">Ferme {closingPeriod} {closingApplication.format("MMMM YYYY")}</h6>
+                                            <div>{isPreApplicationOpened ?
+                                                <span className="badge badge-success">ouverte</span> :
+                                                <span className="badge badge-danger">fermée</span>}
+                                            </div>
 
-                                                </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="card col"
+                                     style={{border: "none", borderRadius: "12px"}}>
+                                    <div className="row d-inline-flex align-items-center p-3">
+                                        <div style={{
+                                            backgroundColor: "#E2EDF3",
+                                            borderRadius: "50px",
+                                            width: "50px",
+                                            height: "50px",
+                                            margin: "10px 20px 10px 10px"
+                                        }}>
+                                        </div>
+                                        <div>
+                                            <h5 className="card-title" style={{color: "#00283B"}}>Période
+                                                d'inscription <i className="fas fa-info-circle"></i></h5>
+                                            <h6 className="card-subtitle mb-2 text-muted">Ouvre {openingPeriod} {openingApplication.format("MMMM YYYY")}</h6>
+                                            <div>{isNewApplicationOpened ?
+                                                <span className="badge badge-success">ouverte</span> :
+                                                <span className="badge badge-danger">fermée</span>}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                        {/*        : null*/}
-
-                        {/*}*/}
+                            </div>
+                        </div>
                     </div>
 
-                    <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>
-                        ACTIVITES ACTUELLES (SAISON {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})</h4>
-                    <div className="col-md-6 p-0">
+                    <div className="col-md-12 mb-4 p-0">
+                        <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>ACTIVITES ACTUELLES
+                            (SAISON {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})</h4>
+                        <div className="col-md-6 p-0">
+                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                                <thead>
+                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                    <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                    <th>Membre</th>
+                                    <th>Séances restantes</th>
+                                    <th style={{borderRadius: "0 12px 0 0"}}></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {currentActivityList.length > 0
+                                    ? currentActivityList
+                                    :
+                                    <tr>
+                                        <td colSpan="12" className="text-center">
+                                            <i>{this.props.user.first_name} {this.props.user.last_name} ne poursuit actuellement aucune activité</i>
+                                        </td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="col-md-12 mb-4 p-0">
+                        <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>MES DEMANDES</h4>
                         <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
                             <thead>
                             <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                <th>Réf.</th>
                                 <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
                                 <th>Membre</th>
-                                <th>Séances restantes</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Créneaux</th>
                                 <th style={{borderRadius: "0 12px 0 0"}}></th>
                             </tr>
                             </thead>
                             <tbody>
-                            {currentActivityList.length > 0
-                                ? currentActivityList
-                                :
-                                <tr>
-                                    <td colSpan="12" className="text-center">
-                                        <i>L'utilisateur ne poursuit actuellement aucune activité</i>
-                                    </td>
-                                </tr>
-                            }
+                            {renewActivityList.length > 0
+                                ? renewActivityList
+                                : null}
+                            {newActivityList.length > 0
+                                ? newActivityList
+                                : null}
                             </tbody>
                         </table>
                     </div>
 
-
-                    <div className="col-md-12 d-inline-flex p-2">
-                        <h2>Mes demandes pour la
-                            saison {` ${moment(this.props.season.start).format("YYYY")}-${moment(this.props.season.end).format("YYYY")}`}
-                            {hasChildhoodLesson ? null : (
-                                <button
-                                    disabled={!allowNewApplication}
-                                    className="btn btn-primary btn-sm ml-3"
-                                    title={!allowNewApplication ? "La période d'inscription aux nouvelles activités n'a pas commencé"
-                                        : null}
-                                    onClick={() => {
-                                        if (allowNewApplication) {
-                                            window.location = inscription_path;
-                                        }
-                                    }}
-                                >
-                                    <i className="fas fa-plus"/>
-                                    &nbsp;Inscription à une nouvelle activité
-                                </button>
-                            )}
-                        </h2>
-                    </div>
-
-                    {/* Affichage des réinscriptions et des nouvelles activités */}
-                    {renewActivityList.length > 0
-                        ? renewActivityList
-                        : null}
-                    {newActivityList.length > 0
-                        ? newActivityList
-                        : null}
 
                     <div>
                         {

@@ -203,9 +203,7 @@ class CurrentActivityItem extends React.Component {
             } else {
                 actionButtons =
                     <React.Fragment>
-                        <a
-                            href={`/inscriptions/new/${user_id}/${pre_application_activity.id
-                            }/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
+                        <a href={`/inscriptions/new/${user_id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
                             className="btn btn-info m-sm font-weight-bold"
                             style={{borderRadius: "8px"}}
                         >
@@ -216,34 +214,11 @@ class CurrentActivityItem extends React.Component {
             }
         }
 
-        /**
-         *  Affichage du jour, créneau, professeur, et salle
-         */
-        let activityDetails = "";
-        let activityState = _.get(this.props, "current_activity_application.desired_activities[0].activity");
-
-        if (activityState !== undefined && activityState !== null) {
-            let dayLabel = moment(activityState.time_interval.start).format('dddd')
-            activityDetails = <React.Fragment>
-                <p className="pb-0">
-                    {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
-                    {moment(activityState.time_interval.start).format('HH:mm')} à&nbsp;
-                    {moment(activityState.time_interval.end).format('HH:mm')} avec&nbsp;
-                    {activityState.teacher.first_name}
-                    &nbsp;{activityState.teacher.last_name},
-                    en salle : {activityState.room.label}
-                </p>
-            </React.Fragment>;
-        }
         return (
             <React.Fragment>
                 <tr>
                     <td>
                         {data.activity_ref.label}
-                        {/*{activityState !== undefined ?*/}
-                        {/*    <div className="pb-0"> {activityDetails} </div>*/}
-                        {/*    : ""*/}
-                        {/*}*/}
                     </td>
                     <td>
                         {this.props.user.first_name} {this.props.user.last_name}
