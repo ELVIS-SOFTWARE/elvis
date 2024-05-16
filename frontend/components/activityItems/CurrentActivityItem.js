@@ -204,7 +204,7 @@ class CurrentActivityItem extends React.Component {
                 actionButtons =
                     <React.Fragment>
                         <a href={`/inscriptions/new/${user_id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
-                            className="btn btn-info btn-sm m-sm font-weight-bold"
+                            className="btn btn-info btn-sm mr-2 font-weight-bold"
                             style={{borderRadius: "8px"}}
                         >
                             Se réinscrire

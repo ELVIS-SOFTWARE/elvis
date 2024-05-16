@@ -231,7 +231,6 @@ class RenewActivityItem extends React.Component {
                                 <CancelApplication
                                     activityApplicationId={this.state.preApplicationActivity.activity_application_id}
                                 />
-
                                 <EditApplication
                                     handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
                                 />

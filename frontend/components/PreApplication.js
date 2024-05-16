@@ -143,6 +143,25 @@ class PreApplication extends React.Component {
         let openingPeriod = openingDate < 10 ? 'début' : openingDate > 20 ? 'fin' : 'mi';
         let closingPeriod = closingDate < 10 ? 'début' : closingDate > 20 ? 'fin' : 'mi';
 
+        function displayActivityList(renewActivityList, newActivityList, emptyMessage) {
+            let result = [];
+            if (renewActivityList.length > 0) {
+                result.push(renewActivityList);
+            }
+            if (newActivityList.length > 0) {
+                result.push(newActivityList);
+            }
+            if (result.length === 0) {
+                result.push(
+                    <tr>
+                        <td colSpan="12" className="text-center">
+                            <i>{emptyMessage}</i>
+                        </td>
+                    </tr>
+                );
+            }
+            return result;
+        }
 
         return (
             <React.Fragment>
@@ -152,7 +171,7 @@ class PreApplication extends React.Component {
                             <h1 style={{color: "#00283B"}}>Mes demandes d'inscription</h1>
                             <div>
                                 {hasChildhoodLesson ? null : (
-                                    <button disabled={!allowNewApplication} className="btn btn-small font-weight-bold"
+                                    <button disabled={!allowNewApplication} className="btn btn-sm font-weight-bold"
                                             style={{backgroundColor: "#00334A", color: "white", borderRadius: "8px"}}
                                             title={!allowNewApplication ? "La période d'inscription aux nouvelles activités n'a pas commencé"
                                                 : null}
@@ -241,7 +260,8 @@ class PreApplication extends React.Component {
                                     :
                                     <tr>
                                         <td colSpan="12" className="text-center">
-                                            <i>{this.props.user.first_name} {this.props.user.last_name} ne poursuit actuellement aucune activité</i>
+                                            <i>{this.props.user.first_name} {this.props.user.last_name} ne poursuit
+                                                actuellement aucune activité</i>
                                         </td>
                                     </tr>
                                 }
@@ -265,33 +285,29 @@ class PreApplication extends React.Component {
                             </tr>
                             </thead>
                             <tbody>
-                            {renewActivityList.length > 0
-                                ? renewActivityList
-                                : null}
-                            {newActivityList.length > 0
-                                ? newActivityList
-                                : null}
+                            {displayActivityList(renewActivityList, newActivityList, `${this.props.user.first_name} ${this.props.user.last_name} n'a aucune demande d'inscription en cours`)}
                             </tbody>
                         </table>
                     </div>
 
+                    <div className="col-md-12 p-0">
+                        {this.props.family_users.length > 0 ?
+                            <Fragment>
+                                <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>AUTRES INSCRIPTIONS DANS LA
+                                    FAMILLE</h4>
+                                {othersActivities}
+                            </Fragment> : null}
+                    </div>
 
-
-
-                    {this.props.family_users.length > 0 ? <Fragment>
-                        <h2>Autres inscriptions dans la famille</h2>
-
-                        {othersActivities}
-
-                    </Fragment> : null}
-
-                    <div className="text-right">
+                    <div>
                         {
-                            <a href={user_path} className="btn btn-primary btn-sm btn-outline m-l-xs" style={{borderRadius: "8px"}}>
+                            <a href={user_path} className="btn btn-primary btn-sm btn-outline m-l-xs"
+                               style={{borderRadius: "8px"}}>
                                 <i className="fas fa-users"/> Retour vers mon profil
                             </a>
                         }
                     </div>
+
                 </div>
             </React.Fragment>
         );
@@ -320,13 +336,46 @@ function OtherActivityItem({user, season}) {
     }
 
     return <div className="row">
+        <div className="card col-md-3 mr-4"
+             style={{border: "none", borderRadius: "12px"}}>
+            <div className="row d-inline-flex align-items-center p-3">
+                {user.avatar_url ? (
+                        <img src={user.avatar_url} alt="avatar" style={{
+                            borderRadius: "50%",
+                            width: "50px",
+                            height: "50px",
+                            margin: "10px 20px 10px 10px"
+                        }}/>
+                    ) :
+                    <div style={{
+                        backgroundColor: "#fac5c7",
+                        borderRadius: "50%",
+                        width: "50px",
+                        height: "50px",
+                        margin: "10px 20px 10px 10px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        color: "#FF6066",
+                        fontWeight: "bold",
+                        fontSize: "20px"
+                    }}>
+                        {user.full_name.split(' ').map(name => name[0]).join('')}
+                    </div>
+                }
+
+                <div>
+                    <h5 className="text-dark">{user.full_name}</h5>
+                    <p>{strting_activities}</p>
+                </div>
+            </div>
+        </div>
         <div className="col-sm-9">
             <div className="ibox">
                 <div className="ibox-content text-align-center-sm">
                     <div className="row">
                         <div className="col-sm-6 p-xs">
-                            <h5 className="text-dark">{user.full_name}</h5>
-                            <span>{strting_activities}</span>
+
                         </div>
 
                         <div className={"col-sm-6 p-xs pt-sm-4 text-rigth"}>
