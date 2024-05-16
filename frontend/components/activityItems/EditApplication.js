@@ -19,7 +19,7 @@ export default function EditApplication(props) {
 
     return (
         <div>
-            <button className="btn text-white"
+            <button className="btn text-white btn-sm"
                     style={{
                         backgroundColor: "#00334A",
                         borderRadius: "8px",

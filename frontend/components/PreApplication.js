@@ -276,15 +276,7 @@ class PreApplication extends React.Component {
                     </div>
 
 
-                    <div>
-                        {
-                            <a
-                                href={user_path}
-                                className="btn btn-primary btn-lg btn-outline m-l-xs">
-                                <i className="fas fa-users"/> Retour vers mon profil
-                            </a>
-                        }
-                    </div>
+
 
                     {this.props.family_users.length > 0 ? <Fragment>
                         <h2>Autres inscriptions dans la famille</h2>
@@ -292,6 +284,14 @@ class PreApplication extends React.Component {
                         {othersActivities}
 
                     </Fragment> : null}
+
+                    <div className="text-right">
+                        {
+                            <a href={user_path} className="btn btn-primary btn-sm btn-outline m-l-xs" style={{borderRadius: "8px"}}>
+                                <i className="fas fa-users"/> Retour vers mon profil
+                            </a>
+                        }
+                    </div>
                 </div>
             </React.Fragment>
         );

@@ -164,7 +164,7 @@ class CurrentActivityItem extends React.Component {
         let StopButton =
             <button
                 onClick={() => this.openStopModal()}
-                className="btn btn-danger btn-small"
+                className="btn btn-danger btn-sm"
                 style={ {borderRadius: "8px"} }
             >
                 <i className="fas fa-times"/>
@@ -193,7 +193,7 @@ class CurrentActivityItem extends React.Component {
                             <a
                                 href={`/inscriptions/new/${user_id}/${this.state.preApplicationActivity.id
                                 }/${activity.to.id}/${PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD}?auth_token=${csrfToken}`}
-                                className="btn btn-info m-sm">
+                                className="btn btn-info btn-sm m-sm">
                                 S'inscrire à l'activité&nbsp;
                                 {activity.to.display_name}
                             </a>
@@ -204,7 +204,7 @@ class CurrentActivityItem extends React.Component {
                 actionButtons =
                     <React.Fragment>
                         <a href={`/inscriptions/new/${user_id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
-                            className="btn btn-info m-sm font-weight-bold"
+                            className="btn btn-info btn-sm m-sm font-weight-bold"
                             style={{borderRadius: "8px"}}
                         >
                             Se réinscrire
@@ -306,7 +306,7 @@ class CurrentActivityItem extends React.Component {
                     </div>
                     <button
                         onClick={() => this.closeStopModal()}
-                        className="btn btn-white btn-lg"
+                        className="btn btn-white btn-sm"
                     >
                         Retour
                     </button>
@@ -317,7 +317,7 @@ class CurrentActivityItem extends React.Component {
                                 "test comment"
                             )
                         }
-                        className="btn btn-primary btn-lg pull-right"
+                        className="btn btn-primary btn-sm pull-right"
                     >
                         Je confirme
                     </button>

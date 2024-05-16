@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import _ from "lodash";
 import * as ActivityApplicationStatus from "../utils/ActivityApplicationsStatuses";
 import {csrfToken} from "../utils";
@@ -31,23 +31,23 @@ class RenewActivityItem extends React.Component {
     }
 
     openAssignationRefusedModal() {
-        this.setState({ isAssignationRefusedModalOpen: true });
+        this.setState({isAssignationRefusedModalOpen: true});
     }
 
     closeAssignationRefusedModal() {
-        this.setState({ isAssignationRefusedModalOpen: false });
+        this.setState({isAssignationRefusedModalOpen: false});
     }
 
     openAssignationAcceptedModal() {
-        this.setState({ isAssignationAcceptedModalOpen: true });
+        this.setState({isAssignationAcceptedModalOpen: true});
     }
 
     closeAssignationAcceptedModal() {
-        this.setState({ isAssignationAcceptedModalOpen: false });
+        this.setState({isAssignationAcceptedModalOpen: false});
     }
 
     updateReasonRefused(event) {
-        this.setState({ reasonOfRefusal: event.target.value });
+        this.setState({reasonOfRefusal: event.target.value});
     }
 
     handleProcessRefusedAssignationActivity() {
@@ -81,7 +81,7 @@ class RenewActivityItem extends React.Component {
 
             return response.json()
         }).then(json => {
-            this.setState({ proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_REFUSED_ID });
+            this.setState({proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_REFUSED_ID});
             swal("Proposition refusée", "Les raisons ont été communiquées", "info")
         });
     }
@@ -116,7 +116,7 @@ class RenewActivityItem extends React.Component {
 
             return response.json()
         }).then(json => {
-            this.setState({ proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID });
+            this.setState({proposalAnswered: json.activity_application_status_id === ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID});
             swal("Réussite", "Proposition acceptée", "success");
         });
     }
@@ -175,7 +175,7 @@ class RenewActivityItem extends React.Component {
         }
 
         /**
-         *  Affichage du jour, créneau, professeur, et salle
+         *  Affichage du créneau
          */
         let activityDetails = "";
         let activityState = _.get(this.props, "pre_application_activity.next_activity");
@@ -186,10 +186,7 @@ class RenewActivityItem extends React.Component {
                 <p className="pb-0">
                     {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
                     {moment(activityState.time_interval.start).format('HH:mm')} à&nbsp;
-                    {moment(activityState.time_interval.end).format('HH:mm')} avec&nbsp;
-                    {activityState.teacher.first_name}
-                    &nbsp;{activityState.teacher.last_name},
-                    en salle : {activityState.room.label}
+                    {moment(activityState.time_interval.end).format('HH:mm')}
                 </p>
             </React.Fragment>;
         }
@@ -197,59 +194,50 @@ class RenewActivityItem extends React.Component {
         let activity_application_status_id = _.get(this.state, "preApplicationActivity.activity_application.activity_application_status_id");
 
         return (
-            <div className="ibox animated fadeInRight">
-                <div className="row">
-                    <div className="col-sm-9">
-                        <div className="ibox-title">
-                            <h4>
-                                {pre_application_activity.activity_application.desired_activities.map(da => da.activity_ref.kind).join(", ")}
-                            </h4>
-                        </div>
-                        <div className="ibox-content text-align-center-sm">
-                            <div className="row">
-                                <div className="col-sm-2 project-status p-xs">
-                                    {renderActivityAction(actionLabel)}
-                                </div>
-                                {this.state.preApplicationActivity.activity_application ? <div className="col-sm-4 p-xs">
-                                    <p className="project-number">
-                                        Demande &nbsp;
-                                        <b>
-                                            {(this.props.current_user || {}).is_admin ?
-                                                <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`#${this.state.preApplicationActivity.activity_application.id}`}</a> :
-                                                `#${this.state.preApplicationActivity.activity_application.id}`}
-                                        </b>
-                                    </p>
-                                    <p className="pb-0">
-                                        {activityState !== undefined ?
-                                            this.state.preApplicationActivity.activity_application.desired_activities.map(da => da.activity_ref.label).join(", ") :
-                                            this.state.preApplicationActivity.activity_application.desired_activities.map(da => da.activity_ref.kind).join(", ")
-                                        }
-                                    </p>
-                                    {activityDetails}
-                                </div> : null}
-                                <div className="col-sm-6 p-xs">
-                                    <AnswerProposal
-                                        activity_application_status_id={activity_application_status_id}
-                                        proposalAnswered={this.state.proposalAnswered}
-                                        openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
-                                        openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
-                                    />
+            <React.Fragment>
+                <tr>
+                    <td>
+                        <b>
+                            {(this.props.current_user || {}).is_admin ?
+                                <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`0${this.state.preApplicationActivity.activity_application.id}`}</a> :
+                                `0${this.state.preApplicationActivity.activity_application.id}`}
+                        </b>
+                    </td>
+                    <td className="font-weight-bold" style={{color: "#00283B"}}>
+                        {this.props.data.activity_ref.label}
+                    </td>
+                    <td>
+                        {this.props.user.first_name} {this.props.user.last_name}
+                    </td>
+                    <td>
+                        {moment(this.props.pre_application_activity.activity_application.created_at).format("DD/MM/YYYY")}
+                    </td>
+                    <td>
+                        {renderActivityAction(actionLabel)}
+                    </td>
+                    <td>
+                        {activityDetails}
+                    </td>
+                    <td className="d-flex justify-content-end">
+                        <AnswerProposal
+                            activity_application_status_id={activity_application_status_id}
+                            proposalAnswered={this.state.proposalAnswered}
+                            openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
+                            openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
+                        />
 
-                                    {activity_application_status_id === this.props.default_activity_status_id &&  <Fragment>
-                                        <CancelApplication
-                                            activityApplicationId={this.state.preApplicationActivity.activity_application_id}
-                                        />
+                        {activity_application_status_id === this.props.default_activity_status_id &&
+                            <Fragment>
+                                <CancelApplication
+                                    activityApplicationId={this.state.preApplicationActivity.activity_application_id}
+                                />
 
-                                        <EditApplication
-                                            handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
-                                        />
-                                    </Fragment>}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+                                <EditApplication
+                                    handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
+                                />
+                            </Fragment>}
+                    </td>
+                </tr>
 
                 <Modal
                     isOpen={this.state.isAssignationRefusedModalOpen}
@@ -298,7 +286,7 @@ class RenewActivityItem extends React.Component {
                     </h2>
                     <div className="content">
                         <div className="form-group">
-                            { this.props.confirm_activity_text ?
+                            {this.props.confirm_activity_text ?
                                 <p className="mt-5 text-justify">{this.props.confirm_activity_text}</p> : ""
                             }
                         </div>
@@ -318,7 +306,8 @@ class RenewActivityItem extends React.Component {
                         Je confirme
                     </button>
                 </Modal>
-            </div>
+
+            </React.Fragment>
         );
     }
 }

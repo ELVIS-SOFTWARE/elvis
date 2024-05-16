@@ -36,7 +36,7 @@ export default function CancelApplication({activityApplicationId}) {
 
     return (
         <div>
-            <button className="btn mr-4"
+            <button className="btn btn-sm mr-4"
                     style={{
                         color: "#00334A",
                         borderRadius: "8px",
