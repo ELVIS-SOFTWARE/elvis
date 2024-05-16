@@ -181,10 +181,7 @@ class NewActivityItem extends React.Component {
                 <p className="pb-0">
                     {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
                     {moment(data.time_interval.start).format('HH:mm')} à&nbsp;
-                    {moment(data.time_interval.end).format('HH:mm')} avec&nbsp;
-                    {data.teacher.first_name}
-                    &nbsp;{data.teacher.last_name},
-                    en salle : {data.room.label}
+                    {moment(data.time_interval.end).format('HH:mm')}
                 </p>
             </React.Fragment>;
         }
@@ -211,7 +208,7 @@ class NewActivityItem extends React.Component {
                     <td>
                         {renderActivityAction(actionLabel)}
                     </td>
-                    <td>/</td>
+                    <td>{activityDetails}</td>
                     <td className="d-flex justify-content-end">
 
                             <AnswerProposal
