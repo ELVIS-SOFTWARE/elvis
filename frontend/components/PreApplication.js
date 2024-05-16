@@ -143,6 +143,7 @@ class PreApplication extends React.Component {
         let openingPeriod = openingDate < 10 ? 'début' : openingDate > 20 ? 'fin' : 'mi';
         let closingPeriod = closingDate < 10 ? 'début' : closingDate > 20 ? 'fin' : 'mi';
 
+
         return (
             <React.Fragment>
                 <div className="padding-page ml-4">

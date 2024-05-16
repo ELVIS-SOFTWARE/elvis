@@ -19,7 +19,7 @@ export default function EditApplication(props) {
 
     return (
         <div>
-            <button className="btn text-white mr-4"
+            <button className="btn text-white"
                     style={{
                         backgroundColor: "#00334A",
                         borderRadius: "8px",
@@ -27,7 +27,7 @@ export default function EditApplication(props) {
                     }}
                     onClick={() => handleCloseEditModal()}
             >
-                Ajouter un commentaire
+               <i className="fas fa-comment"></i>
             </button>
 
             <Modal
@@ -44,10 +44,11 @@ export default function EditApplication(props) {
             >
                 <div className="m-5">
                     <h2 className="modal-header mb-3" style={{color: "#00334A", textAlign: "left"}}>
-                        ajouter un commentaire sur votre demande
+                        Ajouter un commentaire sur votre demande
                     </h2>
                     <div className="content" style={{height: "200px"}}>
-                        <textarea id="editInput" name="editInput" style={{width: "100%", height: "100%"}} wrap="soft" onChange={(e) => setEditInput(e.target.value)}
+                        <textarea id="editInput" name="editInput" style={{width: "100%", height: "100%"}} wrap="soft"
+                                  onChange={(e) => setEditInput(e.target.value)}
                                   placeholder="Indiquer les modifications à nous communiquer (disponibilité, choix professeur)"></textarea>
                     </div>
                     <div className="d-flex justify-content-end mt-5">
@@ -105,7 +106,7 @@ export default function EditApplication(props) {
                                     borderRadius: "8px",
                                     fontWeight: "bold"
                                 }}
-                        onClick={() => handleCloseConfirmationModal()}
+                                onClick={() => handleCloseConfirmationModal()}
                         >
                             Voir mes demandes
                         </button>

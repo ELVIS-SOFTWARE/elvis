@@ -214,16 +214,19 @@ class CurrentActivityItem extends React.Component {
             }
         }
 
+
         return (
             <React.Fragment>
                 <tr>
-                    <td>
+                    <td className="font-weight-bold" style={{color: "#00283B"}}>
                         {data.activity_ref.label}
                     </td>
                     <td>
                         {this.props.user.first_name} {this.props.user.last_name}
                     </td>
-                    <td></td>
+                    <td>
+                        {data.activity_ref.nb_lessons ? data.activity_ref.nb_lessons : "0"}
+                    </td>
                     <td className="text-right">
                         {actionButtons}
                     </td>

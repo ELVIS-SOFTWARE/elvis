@@ -195,7 +195,7 @@ class NewActivityItem extends React.Component {
                     <td>
                         <b>
                             {(this.props.current_user || {}).is_admin ?
-                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`#${this.state.activityApplicationId}`}</a> :
+                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`0${this.state.activityApplicationId}`}</a> :
                                 `0${this.state.activityApplicationId}`}
                         </b>
                     </td>
@@ -211,39 +211,30 @@ class NewActivityItem extends React.Component {
                     <td>
                         {renderActivityAction(actionLabel)}
                     </td>
-                    <div className="col-sm-9">
-                        <div className="ibox animated fadeInRight">
+                    <td>/</td>
+                    <td className="d-flex justify-content-end">
 
-                            <div className="ibox-content text-align-center-sm">
-                                <div className="row d-flex align-items-center">
-                                    <div className="col-sm-2 project-status p-xs">
+                            <AnswerProposal
+                                activity_application_status_id={activity_application_status_id}
+                                proposalAnswered={this.state.proposalAnswered}
+                                openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
+                                openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
+                            />
 
-                                    </div>
+                            {activity_application_status_id === this.props.default_activity_status_id && (
+                                <Fragment>
+                                    <CancelApplication
+                                        activityApplicationId={this.state.activityApplicationId}
+                                    />
 
-                                    <div className="col-sm-6 p-xs d-flex justify-content-end">
-                                        <AnswerProposal
-                                            activity_application_status_id={activity_application_status_id}
-                                            proposalAnswered={this.state.proposalAnswered}
-                                            openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
-                                            openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
-                                        />
+                                    <EditApplication
+                                        handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
+                                    />
+                                </Fragment>
+                            )}
 
-                                        {activity_application_status_id === this.props.default_activity_status_id && (
-                                            <Fragment>
-                                                <CancelApplication
-                                                    activityApplicationId={this.state.activityApplicationId}
-                                                />
+                    </td>
 
-                                                <EditApplication
-                                                    handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
-                                                />
-                                            </Fragment>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </tr>
                 <Modal
                     isOpen={this.state.isAssignationRefusedModalOpen}
