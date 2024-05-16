@@ -14,6 +14,7 @@ function AnswerProposal(props) {
                     <button
                         onClick={() => props.openAssignationRefusedModal()}
                         className="btn btn-danger btn-sm m-xs"
+                        style={{borderRadius: "8px"}}
                         disabled={proposalAnswered}
                     >
                         <i className="fas fa-times mr-2"/>
@@ -22,6 +23,7 @@ function AnswerProposal(props) {
                     <button
                         onClick={() => props.openAssignationAcceptedModal()}
                         className="btn btn-primary btn-sm m-xs"
+                        style={{borderRadius: "8px"}}
                         disabled={proposalAnswered}
                     >
                         <i className="fas fa-check mr-2"/>
