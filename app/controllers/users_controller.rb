@@ -1186,6 +1186,7 @@ class UsersController < ApplicationController
     @hide_navigation = false
     # @type [User]
     user = User.includes(pre_applications: :pre_application_activities).find(params[:id])
+
     @season = Season.current_apps_season || Season.current
 
     # redirect_to "/401" and return if !@season || DateTime.now < @season.opening_date_for_applications
@@ -1354,6 +1355,7 @@ class UsersController < ApplicationController
                  .where(season_id: @season.id)
                  .first
       user_json["pre_application"] = jsonize_pre_application.call(pre_app.id) if pre_app
+      user_json["avatar"] = u.avatar.attached? ? rails_blob_path(u.avatar, only_path: true) : nil
       @family_users << user_json
     end
 

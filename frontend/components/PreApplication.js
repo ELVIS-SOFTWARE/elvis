@@ -336,8 +336,8 @@ function OtherActivityItem({user, season}) {
     return <div className="card col-md-3 mr-4"
                 style={{border: "none", borderRadius: "12px"}}>
         <div className="d-inline-flex align-items-center justify-content-between p-3">
-            {user.avatar_url ? (
-                    <img src={user.avatar_url} alt="avatar" style={{
+            {user.avatar ? (
+                    <img src={user.avatar} alt="avatar" style={{
                         borderRadius: "50%",
                         width: "50px",
                         height: "50px",
