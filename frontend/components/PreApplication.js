@@ -187,10 +187,10 @@ class PreApplication extends React.Component {
                             </div>
                         </div>
                         <div className="row ml-1">
-                            <p className="mb-5" style={{color: "#8AA4B1"}}>
+                            <h4 className="mb-5" style={{color: "#8AA4B1"}}>
                                 Inscription aux activités de la
                                 saison {` ${moment(this.props.season.start).format("YYYY")}/${moment(this.props.season.end).format("YYYY")}`}
-                            </p>
+                            </h4>
                             <div className="col-md-6 d-inline-flex justify-content-between p-0">
                                 <div className="card col mr-4"
                                      style={{border: "none", borderRadius: "12px"}}>
@@ -242,8 +242,10 @@ class PreApplication extends React.Component {
                     </div>
 
                     <div className="col-md-12 mb-4 p-0">
-                        <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>ACTIVITES ACTUELLES
-                            (SAISON {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})</h4>
+                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                            Activités actuelles
+                            (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
+                        </h3>
                         <div className="col-md-6 p-0">
                             <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
                                 <thead>
@@ -271,7 +273,7 @@ class PreApplication extends React.Component {
                     </div>
 
                     <div className="col-md-12 mb-4 p-0">
-                        <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>MES DEMANDES</h4>
+                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Mes demandes</h3>
                         <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
                             <thead>
                             <tr style={{backgroundColor: "#00334A", color: "white"}}>
@@ -293,21 +295,17 @@ class PreApplication extends React.Component {
                     <div className="col-md-12 p-0">
                         {this.props.family_users.length > 0 ?
                             <Fragment>
-                                <h4 style={{color: "#8AA4B1", fontWeight: "bold"}}>AUTRES INSCRIPTIONS DANS LA
-                                    FAMILLE</h4>
+                                <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Autres inscription dans la famille</h3>
                                 {othersActivities}
                             </Fragment> : null}
                     </div>
 
                     <div>
-                        {
-                            <a href={user_path} className="btn btn-primary btn-sm btn-outline m-l-xs"
-                               style={{borderRadius: "8px"}}>
-                                <i className="fas fa-users"/> Retour vers mon profil
-                            </a>
-                        }
+                        <a href={user_path} className="btn btn-primary btn-sm btn-outline mt-5"
+                           style={{borderRadius: "8px"}}>
+                            <i className="fas fa-users"/> Retour vers mon profil
+                        </a>
                     </div>
-
                 </div>
             </React.Fragment>
         );
@@ -327,66 +325,54 @@ function displayDateForSeason(pa, season) {
 }
 
 function OtherActivityItem({user, season}) {
-    let strting_activities = (_.get(user, "pre_application.pre_application_activities") || [])
-        .map(pa => `${_.get(pa, "activity.activity_ref.label")} (${displayDateForSeason(pa, season)})`).join(" - ");
+    // let strting_activities = (_.get(user, "pre_application.pre_application_activities") || [])
+    //     .map(pa => `${_.get(pa, "activity.activity_ref.label")} (${displayDateForSeason(pa, season)})`).join(" - ");
+    //
+    // if (strting_activities.length === 0) {
+    //     strting_activities = (_.get(user, "pre_application.pre_application_desired_activities") || [])
+    //         .map(pa => `${_.get(pa, "desired_activity.activity_ref.label")} (X))`).join(" - ");
+    // }
 
-    if (strting_activities.length === 0) {
-        strting_activities = (_.get(user, "pre_application.pre_application_desired_activities") || [])
-            .map(pa => `${_.get(pa, "desired_activity.activity_ref.label")} (X))`).join(" - ");
-    }
-
-    return <div className="row">
-        <div className="card col-md-3 mr-4"
-             style={{border: "none", borderRadius: "12px"}}>
-            <div className="row d-inline-flex align-items-center p-3">
-                {user.avatar_url ? (
-                        <img src={user.avatar_url} alt="avatar" style={{
-                            borderRadius: "50%",
-                            width: "50px",
-                            height: "50px",
-                            margin: "10px 20px 10px 10px"
-                        }}/>
-                    ) :
-                    <div style={{
-                        backgroundColor: "#fac5c7",
+    return <div className="card col-md-3 mr-4"
+                style={{border: "none", borderRadius: "12px"}}>
+        <div className="d-inline-flex align-items-center justify-content-between p-3">
+            {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="avatar" style={{
                         borderRadius: "50%",
                         width: "50px",
                         height: "50px",
-                        margin: "10px 20px 10px 10px",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        color: "#FF6066",
-                        fontWeight: "bold",
-                        fontSize: "20px"
-                    }}>
-                        {user.full_name.split(' ').map(name => name[0]).join('')}
-                    </div>
-                }
-
-                <div>
-                    <h5 className="text-dark">{user.full_name}</h5>
-                    <p>{strting_activities}</p>
+                        margin: "10px 10px 10px 0"
+                    }}/>
+                ) :
+                <div style={{
+                    backgroundColor: "#fac5c7",
+                    borderRadius: "50%",
+                    width: "50px",
+                    height: "50px",
+                    margin: "10px 20px 10px 0",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: "#FF6066",
+                    fontWeight: "bold",
+                    fontSize: "20px"
+                }}>
+                    {user.full_name.split(' ').map(name => name[0]).join('')}
                 </div>
+            }
+
+            <div>
+                <h5 className="m-0">{user.full_name}</h5>
             </div>
-        </div>
-        <div className="col-sm-9">
-            <div className="ibox">
-                <div className="ibox-content text-align-center-sm">
-                    <div className="row">
-                        <div className="col-sm-6 p-xs">
-
-                        </div>
-
-                        <div className={"col-sm-6 p-xs pt-sm-4 text-rigth"}>
-                            <a href={`/new_application/${user.id}`}
-                               className={"btn btn-primary btn-sm"}>Gérer son inscription</a>
-                        </div>
-                    </div>
-                </div>
+            <div className="text-rigth">
+                <a href={`/new_application/${user.id}`} className="btn btn-primary btn-sm"
+                   style={{borderRadius: "8px"}}>
+                    Gérer son inscription
+                </a>
             </div>
         </div>
     </div>
+
 }
 
 export default PreApplication;
