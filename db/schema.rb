@@ -161,7 +161,8 @@ ActiveRecord::Schema.define(version: 2024_04_16_095839) do
     t.integer "activity_type"
     t.boolean "allows_timeslot_selection", default: false
     t.integer "nb_lessons"
-     t.boolean "substitutable", default: true
+    t.boolean "substitutable", default: true
+    t.integer "duration"
     t.index ["activity_ref_kind_id"], name: "index_activity_refs_on_activity_ref_kind_id"
     t.index ["is_lesson"], name: "index_activity_refs_on_is_lesson"
   end

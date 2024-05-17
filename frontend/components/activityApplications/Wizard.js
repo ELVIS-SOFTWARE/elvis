@@ -28,6 +28,7 @@ import {PRE_APPLICATION_ACTIONS} from "../../tools/constants";
 import Select from "react-select";
 import Swal from 'sweetalert2'
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
+import WizardUserSelectMember from "./WizardUserSelectMember";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
     "already_practiced_instrument";
@@ -403,14 +404,7 @@ class Wizard extends React.Component {
                 .then((result) =>
                 {
                     if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                        let get_params = '';
-                        let redirect_url = `/new_application/${this.state.user.id}${get_params}`;
-
-                        if (data.pack_created) {
-                            redirect_url = `/my_activities/${this.state.user.id}`;
-                        }
-
-                        window.location.href = redirect_url;
+                        window.location.href = `/new_application/${this.state.user.id}`;
                     } else {
                         window.location.href = `/inscriptions/${data.activity_application.id}`;
                     }
@@ -521,7 +515,7 @@ class Wizard extends React.Component {
             .uniq()
             .value();
 
-        this.setState({
+        const state = {
             infos: infosFromUser(user),
             learnedActivities,
             intervals: user.planning !== undefined && user.planning.time_intervals
@@ -530,7 +524,14 @@ class Wizard extends React.Component {
                 )
                 : [],
             user: user,
-        });
+        };
+
+        const family = state.infos.family_links_with_user;
+        const user_infos = state.infos;
+        const familyPayers = family.filter(user => user.is_paying_for).map(user => user.id);
+        state.infos.payers = user_infos.is_paying ? [...familyPayers, user_infos.id] : familyPayers;
+
+        this.setState(state);
 
         this.prepareForActivityChoice();
     }
@@ -609,6 +610,16 @@ class Wizard extends React.Component {
         });
     }
 
+    handleChangePayers(payers) {
+        this.setState({
+            infos: {
+                ...this.state.infos,
+                payers: payers
+            }
+        });
+    }
+
+
     getLabelsFromSelectedActivities() {
         let selectedActivityRefIds = this.state.selectedActivities.slice();
 
@@ -645,6 +656,7 @@ class Wizard extends React.Component {
 
         return moment().isBetween(moment(dateToUse), moment(season.closing_date_for_applications));
     }
+
 
     render() {
 
@@ -687,14 +699,19 @@ class Wizard extends React.Component {
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
         const steps = [
-            this.props.currentUserIsAdmin && !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
+            !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
                 name: "Choisir un utilisateur",
                 component: (
-                    <UserSearch
+                    this.props.currentUserIsAdmin ? <UserSearch
                         user={this.props.user}
                         onSelect={this.handleSelectUser.bind(this)}
                         season={this.state.season}
-                    />
+                    /> :
+                        <WizardUserSelectMember
+                            user={this.props.user}
+                            onSelect={this.handleSelectUser.bind(this)}
+                            season={this.state.season}
+                        />
                 ),
             },
             {
@@ -705,6 +722,7 @@ class Wizard extends React.Component {
                         schoolName={this.props.schoolName}
                         user={this.props.user}
                         shouldCheckGdpr={!this.props.currentUserIsAdmin}
+                        hidePayers={true}
                         initialValues={userFormInitialValues}
                         displayIdentificationNumber={this.props.countryCode==="BE"}
                         onSubmit={values => this.handleUserFormSubmit(values)}
@@ -848,6 +866,9 @@ class Wizard extends React.Component {
                 component: (
                     <WrappedPayerPaymentTerms
                         informationalStepOnly={false}
+                        user={{id: this.state.infos.id, first_name: this.state.infos.first_name, last_name: this.state.infos.last_name, is_paying: this.state.infos.is_paying}}
+                        family={this.state.infos.family_links_with_user}
+                        initialSelectedPayers={this.state.infos.payers}
                         paymentTerms={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         collection={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
@@ -856,6 +877,7 @@ class Wizard extends React.Component {
                         onChangePaymentTerms={this.handleChangePaymentTerms.bind(this)}
                         onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                         onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
+                        onChangePayers={this.handleChangePayers.bind(this)}
                     />
                 )
             },

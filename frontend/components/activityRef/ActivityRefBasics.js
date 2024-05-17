@@ -268,7 +268,8 @@ export default class ActivityRefBasics extends React.Component {
                                 label="Durée (en minutes)"
                                 name="activityRef.duration"
                                 type="number"
-                                validate={composeValidators(mustBeIntegerOrUndefined, minValue(0))}
+                                required
+                                validate={composeValidators(required, mustBeIntegerOrUndefined, minValue(0))}
                                 render={Input}
                             />
                         </div>

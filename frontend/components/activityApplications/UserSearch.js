@@ -154,9 +154,10 @@ class UserSearch extends React.PureComponent {
             })
             .error(msg => {
                 console.log("error creating user : ", msg);
+                let errorMessage = msg.errors && msg.errors.base && msg.errors.base.length > 0 ? msg.errors.base[0] : msg;
                 swal({
                     type: "error",
-                    title: "Une erreur est survenue",
+                    title: errorMessage,
                 });
             })
             .post("/users/createStudent", { user: newUser, confirm: values.confirm });

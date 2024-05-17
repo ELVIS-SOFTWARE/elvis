@@ -49,6 +49,7 @@ export default function TimePreferencesStep({
                 locked={false}
                 kinds={["p"]}
                 forSeason
+                disableLiveReload={true}
                 planningId={planningId}
                 onAdd={onAvailabilityAdd}
                 onDelete={onAvailabilityDelete}
@@ -77,6 +78,7 @@ export default function TimePreferencesStep({
                     locked={false}
                     kinds={["p"]}
                     forSeason
+                    disableLiveReload={true}
                     planningId={planningId}
                     onAdd={onAvailabilityAdd}
                     onDelete={onAvailabilityDelete}
