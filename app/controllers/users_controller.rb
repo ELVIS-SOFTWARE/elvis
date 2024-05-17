@@ -457,15 +457,50 @@ class UsersController < ApplicationController
     }
   end
 
-  # No routes match this action
   def family
     @current_user = current_user
-    @user = if params[:user_id]
+    user = if params[:user_id]
               User.find(params[:user_id])
             else
               @current_user
             end
-    authorize! :read, @user
+    authorize! :read, user
+
+    season = Season.find_by(id: params[:season]) || Season.current_apps_season || Season.current
+
+    whole_family = user.whole_family(season)
+
+    attached_accounts = user.attached_accounts
+
+    members = (whole_family + attached_accounts).uniq(&:id)
+
+    respond_to do |format|
+      format.json {
+        render json: (members.map do |u|
+          user_json = u.as_json(
+            include: {
+              planning: { include: [:time_intervals] },
+              telephones: {},
+              adhesions: {},
+              activity_applications: {
+                include: :desired_activities
+              },
+              addresses: {},
+              instruments: {},
+              consent_document_users: {},
+              payer_payment_terms: {}
+            },
+            methods: %i[full_name]
+          )
+
+          user_json["family_links_with_user"] = u.family_links_with_user(season).as_json
+          user_json["availabilities"] = u.availabilities(season).as_json
+          user_json["avatar"] = u.avatar.attached? ? rails_blob_path(u.avatar, only_path: true) : nil
+
+          user_json
+        end)
+      }
+    end
   end
 
   def adherent_card

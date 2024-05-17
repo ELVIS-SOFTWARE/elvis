@@ -614,16 +614,36 @@ class PlanningController < ApplicationController
     render json: default_intervals
   end
 
-  def update_availabilities
-    # id = params[:id].nil? ? 0 : params[:id]
-    intervals = TimeIntervals::CreateAvailabilities
+  def can_update_availabilities
+    # planning id can be null for checking availabilities
+
+    # @type [TrueClass | FalseClass, Array<TimeInterval>, IntervalError | NilClass]
+    res = TimeIntervals::AvailabilitiesUtils
                   .new(
                     params[:from],
                     params[:to],
                     params[:season_id] || Season.current_apps_season.id,
                     params[:id],
                     params[:comment])
-                  .execute
+                  .can_create?
+
+    raise res[2] unless res[0]
+
+    render json: { intervals: res[1].as_json(include: :comment) }
+  rescue IntervalError => e
+    render json: { errors: [e.message] }, status: :bad_request
+  end
+
+  def update_availabilities
+    # id = params[:id].nil? ? 0 : params[:id]
+    intervals = TimeIntervals::AvailabilitiesUtils
+                  .new(
+                    params[:from],
+                    params[:to],
+                    params[:season_id] || Season.current_apps_season.id,
+                    params[:id],
+                    params[:comment])
+                  .bulk_create
     render json: { intervals: intervals.as_json(include: :comment) }
   rescue IntervalError => e
     render json: { errors: [e.message] }, status: :bad_request

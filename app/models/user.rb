@@ -980,6 +980,14 @@ class User < ApplicationRecord
     end
   end
 
+  def availabilities(season = Season.current_apps_season)
+    planning
+      &.time_intervals
+      &.where(kind: "p")
+      &.where(is_validated: false)
+      &.for_season(season)
+  end
+
   private
 
   def ensure_attached_account_has_no_password
