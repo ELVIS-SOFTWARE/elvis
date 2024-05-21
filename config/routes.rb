@@ -233,6 +233,7 @@ Rails.application.routes.draw do
   post "/users/search_for_admin", to: "users#search_for_admin"
   post "/users/:id/family_links_with_user", to: "users#get_family_links_with_user"
   post "/users/list", to: "users#list"
+  get "/users/:user_id/family", to: "users#family"
    # Utilisé pour peupler un select
   post "/users/simple_list", to: "users#simple_list"
   post "/users/:id/absences_list", to: "users#list_abscences"
@@ -338,6 +339,7 @@ Rails.application.routes.draw do
   get "/plannings/availabilities", to: "planning#show_availabilities", as: :availabilities_portal
   get "/plannings/availabilities/:id(/:date)", to: "planning#show_availabilities_for_date", as: :availabilities_planning
   patch "/plannings/availabilities/:id", to: "planning#update_availabilities"
+  patch "/plannings/availabilities/:id/can_update", to: "planning#can_update_availabilities"
   post "/plannings/availabilities/:id/copy", to: "planning#copy_availabilities", as: :copy_planning
   get "/plannings/conflict/:conflict_id", to: "planning#show_for_conflict"
   get "/plannings/all_rooms", to: "planning#show_all_rooms"

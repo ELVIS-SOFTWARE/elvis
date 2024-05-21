@@ -28,6 +28,7 @@ import {PRE_APPLICATION_ACTIONS} from "../../tools/constants";
 import Select from "react-select";
 import Swal from 'sweetalert2'
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
+import WizardUserSelectMember from "./WizardUserSelectMember";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
     "already_practiced_instrument";
@@ -403,14 +404,7 @@ class Wizard extends React.Component {
                 .then((result) =>
                 {
                     if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                        let get_params = '';
-                        let redirect_url = `/new_application/${this.state.user.id}${get_params}`;
-
-                        if (data.pack_created) {
-                            redirect_url = `/my_activities/${this.state.user.id}`;
-                        }
-
-                        window.location.href = redirect_url;
+                        window.location.href = `/new_application/${this.state.user.id}`;
                     } else {
                         window.location.href = `/inscriptions/${data.activity_application.id}`;
                     }
@@ -705,14 +699,19 @@ class Wizard extends React.Component {
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
         const steps = [
-            this.props.currentUserIsAdmin && !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
+            !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
                 name: "Choisir un utilisateur",
                 component: (
-                    <UserSearch
+                    this.props.currentUserIsAdmin ? <UserSearch
                         user={this.props.user}
                         onSelect={this.handleSelectUser.bind(this)}
                         season={this.state.season}
-                    />
+                    /> :
+                        <WizardUserSelectMember
+                            user={this.props.user}
+                            onSelect={this.handleSelectUser.bind(this)}
+                            season={this.state.season}
+                        />
                 ),
             },
             {

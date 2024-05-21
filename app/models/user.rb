@@ -215,19 +215,19 @@ class User < ApplicationRecord
 
     if matched_user && (matched_user.id != id)
       errors.add(:base,
-                 "un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance.")
+                 "Un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance.")
     end
 
     # pour le moment, seulement pour les new records => compatibilité avec instances existantes
     # todo: remove new_record? condition
     if attached_to.nil? && new_record? && (User.where(email: email).any?)
-      errors.add(:base, "un compte existe déjà avec cet email.")
+      errors.add(:base, "Un compte existe déjà avec cet email.")
     end
   end
 
   def valid_birth_date
     if birthday.present? && birthday > DateTime.now
-      errors.add(:Date_de_naissance, ': votre date de naissance est forcément dans le passé')
+      errors.add(:Date_de_naissance, ': Votre date de naissance est forcément dans le passé')
     end
   end
 
@@ -978,6 +978,14 @@ class User < ApplicationRecord
       self.confirmed_at = Time.now.utc
       save(validate: args[:ensure_valid] == true)
     end
+  end
+
+  def availabilities(season = Season.current_apps_season)
+    planning
+      &.time_intervals
+      &.where(kind: "p")
+      &.where(is_validated: false)
+      &.for_season(season)
   end
 
   private
