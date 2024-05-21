@@ -527,9 +527,10 @@ class Planning extends React.Component {
                                 autoClose: 3000,
                             }
                         );
+                        return;
                     }
-                    if (hasIntervalOwnerChanged) {
 
+                    if (hasIntervalOwnerChanged) {
                         this.setState({
                             isDetailModalOpen: false,
                             ...this.getIntervals(

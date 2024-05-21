@@ -32,9 +32,9 @@ class ActivityInstanceController < ApplicationController
     begin
       old_time_interval = instance.time_interval
       new_time_interval_array = {
-        startTime: params[:startTime]&.split(":").present? ? params[:startTime]&.split(":") : [],
-        endTime: params[:endTime]&.split(":").present? ? params[:endTime]&.split(":") : [],
-        date: params[:startDate]&.split("-").present? ? params[:startDate]&.split("-") : []
+        startTime: params[:startTime]&.split(":") || [],
+        endTime: params[:endTime]&.split(":") || [],
+        date: params[:startDate]&.split("-") || []
       }
 
       new_time_interval = build_new_time_interval(new_time_interval_array, old_time_interval)
@@ -81,7 +81,6 @@ class ActivityInstanceController < ApplicationController
     instance.change_teacher(params[:teacher_id]) if params[:teacher_id].present?
     instance.activity.change_teacher(instance.teacher.id, params[:teacher_id])
     instance.change_cover_teacher(params[:cover_teacher_id])
-
 
     render json: {
       instance: instance,
