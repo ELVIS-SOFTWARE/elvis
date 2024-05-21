@@ -1037,55 +1037,67 @@ class UsersController < ApplicationController
     authorize! :manage, @activities unless @current_user.is_teacher
   end
 
-  def search_for_user
-    includes = {
-      include: {
-        telephones: {},
-        addresses: { only: %i[id street_address country department postcode city] },
-        planning: { include: [:time_intervals] },
-        levels: { include: %i[evaluation_level_ref activity_ref] },
-        consent_document_users: {}
-      },
-      methods: [:family_links_with_user]
-    }
+def search_for_user
+  includes = {
+    include: {
+      telephones: {},
+      addresses: { only: %i[id street_address country department postcode city] },
+      planning: { include: [:time_intervals] },
+      levels: { include: %i[evaluation_level_ref activity_ref] },
+      consent_document_users: {}
+    },
+    methods: [:family_links_with_user]
+  }
 
-    season = params[:season_id].present? ? Season.find(params[:season_id]) : Season.current_apps_season
+  season = params[:season_id].present? ? Season.find(params[:season_id]) : Season.current_apps_season
 
-    birthday = params[:birthday]
+  birthday = params[:birthday]
 
-    result = Users::SearchUser.new(params[:last_name] || "", params[:first_name] || "", birthday, nil, nil, includes,
-                                   !current_user.is_admin).execute
+  result = Users::SearchUser.new(params[:last_name] || "", params[:first_name] || "", birthday, nil, nil, includes,
+                                 !current_user.is_admin).execute
 
-    result.each do |u|
-      if can? :read, u
-        u["family_member_users"] = u["family_links_with_user"].select { |fmu| fmu["season_id"] == season.id }
-      end
+  result.each do |u|
+    if can? :read, u
+      user = User.find(u["id"])
+      u["avatar"] = user.avatar.attached? ? rails_blob_path(user.avatar, only_path: true) : nil
+      u["family_member_users"] = u["family_links_with_user"].select { |fmu| fmu["season_id"] == season.id }
     end
-
-    render json: result
   end
+
+  render json: result
+end
 
   def search_for_admin
-    return render json: {}, status: 403 if current_user.simple?
+  return render json: {}, status: 403 if current_user.simple?
 
-    includes = {
-      include: {
-        planning: { include: [:time_intervals] },
-        telephones: {},
-        adhesions: {},
-        activity_applications: {
-          include: :desired_activities
-        },
-        addresses: {},
-        instruments: {},
-        consent_document_users: {},
-        payer_payment_terms: {}
+  includes = {
+    include: {
+      planning: { include: [:time_intervals] },
+      telephones: {},
+      adhesions: {},
+      activity_applications: {
+        include: :desired_activities
       },
-      methods: :family_links_with_user
-    }
-    render json: Users::SearchUser.new(params[:last_name], params[:first_name], nil, params[:season_id], nil, includes,
-                                       false, params[:hideAttachedAccounts]).execute
+      addresses: {},
+      instruments: {},
+      consent_document_users: {},
+      payer_payment_terms: {}
+    },
+    methods: :family_links_with_user
+  }
+
+  result = Users::SearchUser.new(params[:last_name], params[:first_name], nil, params[:season_id], nil, includes,
+                                 false, params[:hideAttachedAccounts]).execute
+
+  result.each do |u|
+    if can? :read, u
+      user = User.find(u["id"])
+      u["avatar"] = user.avatar.attached? ? rails_blob_path(user.avatar, only_path: true) : nil
+    end
   end
+
+  render json: result
+end
 
   def set_level
     user = User.find(params[:id])

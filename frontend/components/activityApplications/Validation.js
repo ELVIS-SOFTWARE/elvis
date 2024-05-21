@@ -5,7 +5,6 @@ import SelectedActivitiesTable from "./SelectedActivitiesTable";
 import EvaluationChoiceTable from "./EvaluationChoiceTable";
 
 
-
 const moment = require("moment");
 require("moment/locale/fr");
 
@@ -72,7 +71,7 @@ const Validation = ({
 
     // Récupération des contacts et des payeurs -------------------------------------------------------------------------------------------------------------
     const pushPayerToList = (payer, list) => {
-        const { first_name, last_name } = payer;
+        const {first_name, last_name} = payer;
         list.push({
             name: `${first_name} ${last_name}`,
         });
@@ -82,22 +81,22 @@ const Validation = ({
     const legalReferents = [];
     const accompanying = [];
 
-    const { infos } = application;
-    const { is_paying, id, first_name, last_name, family_links_with_user, payers } = infos;
-    is_paying && (!payers || payers.includes(id)) ? pushPayerToList({ first_name, last_name }, payersList) : null;
+    const {infos} = application;
+    const {is_paying, id, first_name, last_name, family_links_with_user, payers} = infos;
+    is_paying && (!payers || payers.includes(id)) ? pushPayerToList({first_name, last_name}, payersList) : null;
 
     // récupération des contacts et des payeurs parmis les membres de la famille
     family_links_with_user && family_links_with_user.forEach(familyMember => {
-        const { id, first_name, last_name, is_paying_for, is_accompanying, is_to_call, is_legal_referent } = familyMember;
-        is_paying_for && (!payers || payers.includes(id)) ? pushPayerToList({ first_name, last_name }, payersList) : null;
-        is_accompanying ? accompanying.push({ name: `${first_name} ${last_name}` }) : null;
-        is_to_call ? emergencyContacts.push({ name: `${first_name} ${last_name}` }) : null;
-        is_legal_referent ? legalReferents.push({ name: `${first_name} ${last_name}` }) : null;
+        const {id, first_name, last_name, is_paying_for, is_accompanying, is_to_call, is_legal_referent} = familyMember;
+        is_paying_for && (!payers || payers.includes(id)) ? pushPayerToList({first_name, last_name}, payersList) : null;
+        is_accompanying ? accompanying.push({name: `${first_name} ${last_name}`}) : null;
+        is_to_call ? emergencyContacts.push({name: `${first_name} ${last_name}`}) : null;
+        is_legal_referent ? legalReferents.push({name: `${first_name} ${last_name}`}) : null;
     });
-    payersList.length === 0 ? payersList.push({ name: "/" }) : null;
-    accompanying.length === 0 ? accompanying.push({ name: "/" }) : null;
-    emergencyContacts.length === 0 ? emergencyContacts.push({ name: "/" }) : null;
-    legalReferents.length === 0 ? legalReferents.push({ name: "/" }) : null;
+    payersList.length === 0 ? payersList.push({name: "/"}) : null;
+    accompanying.length === 0 ? accompanying.push({name: "/"}) : null;
+    emergencyContacts.length === 0 ? emergencyContacts.push({name: "/"}) : null;
+    legalReferents.length === 0 ? legalReferents.push({name: "/"}) : null;
 
 
     // Affichage des disponibilités -------------------------------------------------------------------------------------------------------------
@@ -134,47 +133,62 @@ const Validation = ({
         <div className="row mb-5">
 
             <div className="col-md-7">
-                <p className="small font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
-                    RECAPITULATIF DE LA DEMANDE
-                </p>
+                <h3 className="font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
+                    Récapitulatif de la demande
+                </h3>
 
                 <div className="p-5" style={{backgroundColor: "white", borderRadius: 12}}>
 
                     {/*Elève*/}
                     <div className="d-inline-flex mb-5 pt-3 align-items-center">
-                        <div
-                            className="img-fluid text-center d-block font-bold"
-                            style={{
-                                width: "75px",
-                                height: "75px",
-                                borderRadius: "50%",
-                                backgroundColor: "rgb(253, 214, 217)",
-                                lineHeight: "75px",
-                                fontSize: "30px",
-                                color: "rgb(247, 71, 84)",
-                            }}
-                        >
-                            {application.infos.first_name.charAt(0).toUpperCase()}
-                            {application.infos.last_name.charAt(0).toUpperCase()}
-                        </div>
+                        {
+                            application.user.avatar ? (
+                                <img
+                                    src={application.user.avatar}
+                                    className="img-fluid text-center d-block"
+                                    style={{
+                                        width: "75px",
+                                        height: "75px",
+                                        borderRadius: "50%",
+                                    }}
+                                    alt="User Avatar"
+                                />
+                            ) : (
+                                <div
+                                    className="img-fluid text-center d-block font-bold"
+                                    style={{
+                                        width: "75px",
+                                        height: "75px",
+                                        borderRadius: "50%",
+                                        backgroundColor: "rgb(253, 214, 217)",
+                                        lineHeight: "75px",
+                                        fontSize: "30px",
+                                        color: "rgb(247, 71, 84)",
+                                    }}
+                                >
+                                    {application.user.first_name.charAt(0).toUpperCase()}
+                                    {application.user.last_name.charAt(0).toUpperCase()}
+                                </div>
+                            )
+                        }
                         <div>
                             <h3 className="font-weight-bold ml-3" style={{color: "#00283B"}}>
-                                {application.infos.first_name}{" "}
-                                {application.infos.last_name}
+                                {application.user.first_name}{" "}
+                                {application.user.last_name}
                             </h3>
                         </div>
                     </div>
 
                     {/*Informations personnelles*/}
                     <div className="mb-5">
-                        <p className="small font-weight-bold mb-3" style={{color: "#8AA4B1"}}>
-                            INFORMATIONS PERSONNELLES
-                        </p>
+                        <h3 className="font-weight-bold mb-3" style={{color: "#8AA4B1"}}>
+                            Informations personnelles
+                        </h3>
                         <div className="row">
                             <div className="col-md-6">
                                 <p className="m-0 small">Date de naissance</p>
                                 <p className="font-weight-bold" style={{color: "#00283B"}}>
-                                    {moment(application.infos.birthday).format(
+                                    {moment(application.user.birthday).format(
                                         "DD/MM/YYYY"
                                     )}
                                 </p>
@@ -183,7 +197,7 @@ const Validation = ({
                                 <div className="col">
                                     <p className="m-0 small">Sexe</p>
                                     <p className="font-weight-bold"
-                                       style={{color: "#00283B"}}>{application.infos.sex}</p>
+                                       style={{color: "#00283B"}}>{application.user.sex}</p>
                                 </div>
                                 : ""}
                         </div>
@@ -191,9 +205,9 @@ const Validation = ({
 
                     {/*Coordonnées personnelles*/}
                     <div className="mb-5">
-                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                            COORDONNES PERSONNELLES
-                        </p>
+                        <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                            Coordonnées personnelles
+                        </h3>
 
                         <div className="row">
                             <div className="col-md-6">
@@ -220,9 +234,9 @@ const Validation = ({
 
                     {/*Contacts*/}
                     <div className="mb-5">
-                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                            CONTACTS
-                        </p>
+                        <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                            Contacts
+                        </h3>
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="mb-3">
@@ -249,9 +263,9 @@ const Validation = ({
 
                     {/*Activités sélectionnées*/}
                     <div className="mb-5">
-                        <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                            ACTIVITES SELECTIONNEES
-                        </p>
+                        <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                            Activités sélectionnées
+                        </h3>
                         <div>
                             <SelectedActivitiesTable
                                 duration={application.duration}
@@ -266,9 +280,9 @@ const Validation = ({
                     {/*Disponibilités*/}
                     {showTimePreferences ? (
                         <div className="mb-5">
-                            <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                                DISPONIBILITES
-                            </p>
+                            <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                                Disponibilités
+                            </h3>
                             {preferencesArray.map((pref, index) => (
                                 <TimePreferencesTable
                                     key={index}
@@ -283,9 +297,9 @@ const Validation = ({
                     {/*Evaluations*/}
                     {selectedEvaluations.length > 0 && _.size(application.selectedEvaluationIntervals) > 0 ? (
                         <div className="mb-5">
-                            <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                                EVALUATION DE NIVEAU
-                            </p>
+                            <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                                Evaluation de niveau
+                            </h3>
                             <EvaluationChoiceTable
                                 activityRefs={allActivityRefs}
                                 data={selectedEvaluations}
@@ -297,9 +311,9 @@ const Validation = ({
                     {/*Préférence de paiement*/}
                     {paymentTerms.length > 0 ? (
                         <div className="mb-5">
-                            <p className="small font-weight-bold" style={{color: "#8AA4B1"}}>
-                                PREFERENCE DE PAIEMENT
-                            </p>
+                            <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                                Préférence de paiement
+                            </h3>
                             <div className="row">
                                 <div className="col-md-6">
                                     <div className="mb-3">
@@ -329,9 +343,9 @@ const Validation = ({
 
 
             <div className="col-md-5">
-                <div className=" small font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
-                    COMMENTAIRE
-                </div>
+                <h3 className="font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
+                    Commentaire
+                </h3>
                 <div>
                         <textarea name="comment" className="form-control" style={{borderRadius: 12, border: 0}}
                                   onChange={(e) => handleComment(e.target.value)}/>
