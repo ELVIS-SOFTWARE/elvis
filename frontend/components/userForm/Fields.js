@@ -57,9 +57,9 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
 
             <div className="row d-flex align-items-center">
                 <div className="col-md-6 pr-0">
-                    <label className="small" style={{color: "#003E5C"}}>Téléphone</label><br/>
                     <Field
                         name={`${field}.number`}
+                        label={"Téléphone"}
                         render={Input}
                         validate={!ignoreValidate && composeValidators(required, isPhoneNumber)}
                         required
@@ -70,14 +70,13 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
                 </div>
 
                 <div className="col">
-                    <label className="small" style={{color: "#003E5C"}}>Type</label><br/>
                     <Field
                         name={`${field}.label`}
+                        label={"Type"}
                         render={InputSelect}
                         validate={!ignoreValidate && required}
                         required
                         options={phoneTypes}
-                        className="no inline"
                     />
                 </div>
 
@@ -122,8 +121,8 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
 
                 <div className="row d-flex align-items-center mb-4">
                     <div className="col-md-6 pr-0">
-                        <label className="small" style={{color: "#003E5C"}}>Adresse</label><br/>
                         <Field
+                            label={"Adresse"}
                             name={`${field}.street_address`}
                             render={Input}
                             validate={!ignoreValidate && required}
@@ -131,9 +130,9 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
 
-                    <div className="col-md-1 pr-0">
-                        <label className="small" style={{color: "#003E5C"}}>Code Postal</label><br/>
+                    <div className="col-md-2 pr-0">
                         <Field
+                            label={"Code Postal"}
                             name={`${field}.postcode`}
                             type="text"
                             render={Input}
@@ -143,8 +142,8 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                     </div>
 
                     <div className="col">
-                        <label className="small" style={{color: "#003E5C"}}>Ville</label><br/>
                         <Field
+                            label={"Ville"}
                             name={`${field}.city`}
                             render={Input}
                             validate={!ignoreValidate && required}

@@ -46,7 +46,7 @@ const Input = props => {
 
     return (
         <div className={`form-group ${hasError ? "has-error" : ""}`}>
-            {label && <label htmlFor={name}>
+            {label && <label htmlFor={name} className="small" style={{color: "#003E5C"}}>
                 {label}
                 {required && <span className="text-danger">{" *"}</span>}
             </label>}

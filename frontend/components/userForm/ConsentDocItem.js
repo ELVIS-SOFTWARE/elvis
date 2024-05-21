@@ -22,9 +22,7 @@ export default function ConsentDocItem({docItem, defaultValue, schoolName}) {
                     <span className="font-weight-bold" style={{color: "rgb(0, 51, 74)"}}>{docItem.content}</span> &nbsp;
                     <a href={docItem.attached_file_url} target="_blank">{docItem.title}</a>
                 </Fragment> :
-                <Fragment>
                     <span ref={span} style={{color: "rgb(0, 51, 74)"}} className="font-weight-bold small" ></span>
-                </Fragment>
         }
     </React.Fragment>
 

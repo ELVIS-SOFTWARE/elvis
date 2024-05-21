@@ -4,7 +4,7 @@ import {Field} from "react-final-form";
 const HandicapInfos = () => {
     return (
         <div className="mb-4">
-            <h4 style={{color: "#8AA4B1"}}>INFORMATIONS COMPLEMENTAIRES</h4>
+            <h3 style={{color: "#8AA4B1"}}>Informations complémentaires</h3>
 
             <Field
                 name="handicap_description"

@@ -58,7 +58,7 @@ class ContactInfos extends React.PureComponent {
                     subscription={{ values: true }}
                     onChange={props => this.handleChangeInfos(props)} />
 
-                <h4 className="pb-3" style={{color: "#8AA4B1"}}>COORDONNEES PERSONNELLES DU DEMANDEUR</h4>
+                <h3 className="pb-3" style={{color: "#8AA4B1"}}>Coordonnées personnelles du demandeur</h3>
 
                 <div className="col p-0 mb-5">
                     <FieldArray
@@ -107,9 +107,8 @@ class ContactInfos extends React.PureComponent {
                                 />
                             )}
                     </Fragment>}
-                    <label className="small" style={{color: "#003E5C"}}>Email</label><br/>
                     <Field
-                        label={!displaySameAs && "Email"}
+                        label={"Email"}
                         name="email"
                         type="email"
                         render={Input}

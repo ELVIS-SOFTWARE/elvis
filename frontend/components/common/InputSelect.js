@@ -14,7 +14,7 @@ const InputSelect = ({
                          tooltip,
                          componentAdd,
                          disabled,
-                         className
+                         wizard
                      }) => {
     const hasError = meta && meta.error && meta.touched;
 
@@ -31,8 +31,8 @@ const InputSelect = ({
 
     return (
         <div className={`${inline ? "" : "form-group"} ${hasError ? "has-error" : ""}`}>
-            {!inline && !className && <label htmlFor={input.name}>
-                {label}
+            {!inline && <label htmlFor={input.name} className="small" style={{color: "#003E5C"}}>
+                {label} {required && <span className="text-danger">*</span>}
             </label>}
             <div className={tooltip || componentAdd ? "input-group" : ""}>
                 {tooltip ? renderInputGroupAddon(<i className="fa fa-exclamation-circle"

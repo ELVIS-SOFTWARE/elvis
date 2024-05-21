@@ -286,7 +286,7 @@ class UserForm extends React.PureComponent {
         return (
             <div className="padding-page application-form">
                 <div>
-                    <h4 style={{color: "#8AA4B1"}}>INFORMATIONS PERSONNELLES DE {initialValues.first_name.toUpperCase()}</h4>
+                    <h3 style={{color: "#8AA4B1"}}>Informations personnelles de {initialValues.first_name}</h3>
                     <div>
                         <Form
                             onSubmit={this.submit.bind(this)}
