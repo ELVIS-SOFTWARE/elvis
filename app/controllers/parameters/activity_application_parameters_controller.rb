@@ -21,8 +21,8 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
   end
 
   def get_application_step_parameters
-    @activated = Parameter.get_value('application_step_parameter.activated')
-    @display_text = Parameter.get_value('application_step_parameter.display_text')
+    @activated = Parameter.get_value('activity_choice_step.activated')
+    @display_text = Parameter.get_value('activity_choice_step.display_text')
 
     respond_to do |format|
       format.json { render json: {
@@ -36,12 +36,12 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
   end
 
   def change_activated_param
-    @activated = Parameter.find_by(label: 'application_step_parameter.activated')
+    @activated = Parameter.find_by(label: 'activity_choice_step.activated')
 
     if @activated.present?
       @activated.update!(value: params[:activated].to_s)
     else
-      Parameter.create!(label: 'application_step_parameter.activated', value: params[:activated].to_s, value_type: "boolean")
+      Parameter.create!(label: 'activity_choice_step.activated', value: params[:activated].to_s, value_type: "boolean")
     end
 
     respond_to do |format|
@@ -53,12 +53,12 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
   end
 
   def change_display_text_param
-    @display_text = Parameter.find_by(label: 'application_step_parameter.display_text')
+    @display_text = Parameter.find_by(label: 'activity_choice_step.display_text')
 
     if @display_text.present?
       @display_text.update!(value: params[:display_text])
     else
-      Parameter.create!(label: 'application_step_parameter.display_text', value: params[:display_text], value_type: "string")
+      Parameter.create!(label: 'activity_choice_step.display_text', value: params[:display_text], value_type: "string")
     end
 
   rescue StandardError => e

@@ -4,6 +4,7 @@ import _ from "lodash";
 
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
 import {frenchEnumeration} from "../utils/index.js";
+import { Editor, EditorState, convertFromRaw, ContentState } from "draft-js";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -50,6 +51,7 @@ const ActivityChoice = ({
                             handleRemovePack,
                             handleAddPack,
                             selectedPacks,
+                            infoText,
                         }) => {
     const seasonStart = moment(season.start);
     const isInAgeRange = a => {
@@ -275,151 +277,145 @@ const ActivityChoice = ({
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
 
+    // Display info text ---------------------------------------------------------------------------------------------------------------------------------------------
+    let editorState = EditorState.createEmpty();
+    let savedContentRaw = null;
+    let savedContentState = null;
+    if (infoText) {
+        try {
+            savedContentRaw = JSON.parse(infoText);
+            savedContentState = convertFromRaw(savedContentRaw);
+        } catch (e) {
+            savedContentState = ContentState.createFromText(infoText);
+        }
+        editorState = EditorState.createWithContent(savedContentState);
+    }
 
-    // si une des activités sélectionnée est substituable,
-    // on doit informer l'utilisateur que le tarif affiché est indicatif
-    const showPriceWarning = () => {
-        const selectedAct = allActivityRefs.filter(ar => selectedActivities.includes(ar.id));
-
-        return !!selectedAct.find(ar => ar.substitutable === true);
-    };
 
     return (
         <Fragment>
-
             <div>
-                {showPriceWarning() &&
-                    <div className="alert alert-info col-md-8 d-inline-flex align-items-center m-b-md pl-0"
+                {infoText && (
+                    <div className="alert alert-info col-md-8 d-inline-flex align-items-center p-1"
                          style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
                         <div className="col-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
                         </div>
                         <div className="col p-0">
-                            <small className="m-b-xs">
-                                Les tarifs affichés sont à titre indicatif. Ils
-                                correspondent au coût pour une personne inscrite en
-                                cours collectif payé mensuellement.
-                            </small>
-                            {adhesionEnabled && adhesionPrices.length > 0 && <small className="m-b-xs">
-                                À ce tarif, s'ajoute une adhésion annuelle à{" "}
-                                {schoolName}. Cette dernière est d'un montant de{" "}
-                                {(adhesionPrices.find(a => a.season_id == season.id) || _.maxBy(adhesionPrices, a => a.season_id) || {}).price || 0} euros.
-                            </small>}
-                            <small>
-                                Des réductions sont possibles. Elles seront
-                                précisées lors de votre passage au secrétariat pour
-                                valider votre inscription.
-                            </small>
+                            {<Editor editorState={editorState} readOnly={true}/>}
                         </div>
-                    </div>}
+                    </div>
+                )}
+            </div>
 
-                <div className="row">
-                    <div className="col-md-6">
-                        <div>
-                            <h4 style={{color: "#8AA4B1"}}>Choix de l'activité</h4>
-                            <div className="d-inline-flex justify-content-between mb-2 w-100">
-                                <div>
-                                    <button className="btn btn-xs" style={{
-                                        borderRadius: '40px',
-                                        border: '1px solid #00334A',
-                                        color: '#00334A'
-                                    }} onClick={handleDurationFilterClick}>
-                                        Durée <i
-                                        className={`fas fa-caret-${durationFilter === 'asc' ? 'up' : 'down'}`}></i>
-                                    </button>
-                                </div>
-                                <div>
-                                    <input type="text" placeholder={` Rechercher  \uD83D\uDD0D`}
-                                           style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}
-                                           value={searchTerm}
-                                           onChange={handleSearchChange}
-                                    />
-                                </div>
+            <div className="row">
+                <div className="col-md-6">
+                    <div>
+                        <h4 style={{color: "#8AA4B1"}}>Choix de l'activité</h4>
+                        <div className="d-inline-flex justify-content-between mb-2 w-100">
+                            <div>
+                                <button className="btn btn-xs" style={{
+                                    borderRadius: '40px',
+                                    border: '1px solid #00334A',
+                                    color: '#00334A'
+                                }} onClick={handleDurationFilterClick}>
+                                    Durée <i
+                                    className={`fas fa-caret-${durationFilter === 'asc' ? 'up' : 'down'}`}></i>
+                                </button>
+                            </div>
+                            <div>
+                                <input type="text" placeholder={` Rechercher  \uD83D\uDD0D`}
+                                       style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}
+                                       value={searchTerm}
+                                       onChange={handleSearchChange}
+                                />
                             </div>
                         </div>
-                        <div>
-                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
-                                <thead>
-                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
-                                    <th className="pl-4">Activité</th>
-                                    <th>Durée</th>
-                                    <th>Tarif estimé</th>
-                                    <th></th>
-                                </tr>
-                                </thead>
+                    </div>
+                    <div>
+                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                            <thead>
+                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                <th className="pl-4">Activité</th>
+                                <th>Durée</th>
+                                <th>Tarif estimé</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {availableActivitiesAndPacksDisplay}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+                <div className="col-md-6">
+
+                    <div>
+                        <h4 style={{color: "#8AA4B1"}}>Activités sélectionnées</h4>
+                    </div>
+                    <div>
+                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                            <thead>
+                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                <th className="pl-4">Activité</th>
+                                <th>Durée</th>
+                                <th>Tarif estimé</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+
+                            {selectedActivitiesAndPacksDisplay.length === 0 ? (
                                 <tbody>
-                                {availableActivitiesAndPacksDisplay}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-
-                    <div className="col-md-6">
-
-                        <div>
-                            <h4 style={{color: "#8AA4B1"}}>Activités sélectionnées</h4>
-                        </div>
-                        <div>
-                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
-                                <thead>
-                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
-                                    <th className="pl-4">Activité</th>
-                                    <th>Durée</th>
-                                    <th>Tarif estimé</th>
-                                    <th></th>
+                                <tr>
+                                    <td colSpan="4" className="text-center">aucune activité sélectionnée</td>
                                 </tr>
-                                </thead>
+                                </tbody>
+                            ) : (
+                                <tbody>
+                                {selectedActivitiesAndPacksDisplay}
+                                <tr>
+                                    <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total
+                                        estimé
+                                    </td>
+                                    <td colSpan="3" className="text-center">{totalSelectedPrice} €</td>
+                                </tr>
+                                </tbody>
+                            )}
 
-                                {selectedActivitiesAndPacksDisplay.length === 0 ? (
-                                    <tbody>
-                                    <tr>
-                                        <td colSpan="4" className="text-center">aucune activité sélectionnée</td>
-                                    </tr>
-                                    </tbody>
-                                ) : (
-                                    <tbody>
-                                    {selectedActivitiesAndPacksDisplay}
-                                    <tr>
-                                        <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total
-                                            estimé
-                                        </td>
-                                        <td colSpan="3" className="text-center">{totalSelectedPrice} €</td>
-                                    </tr>
-                                    </tbody>
-                                )}
-
-                            </table>
-                        </div>
+                        </table>
                     </div>
+                </div>
 
-                    {unpopularActivityChosen && (
-                        <div className="alert alert-danger">
-                            <div className="m-b-sm">
-                                Les inscriptions aux activités suivantes sont
-                                soumises à un nombre minimum d'élèves par cours:
-                            </div>
-                            <ul>
-                                {unpopularActivitiesSelected.map(unpopularA => {
-                                    return (
-                                        <li key={unpopularA.id}>
-                                            {unpopularA.label}
-                                        </li>
-                                    );
-                                })}
-                            </ul>
+                {unpopularActivityChosen && (
+                    <div className="alert alert-danger">
+                        <div className="m-b-sm">
+                            Les inscriptions aux activités suivantes sont
+                            soumises à un nombre minimum d'élèves par cours:
                         </div>
-                    )}
-
-
-                    <div className="col-lg-12 text-center">
-                        {renderChildrenAccompaniments()}
+                        <ul>
+                            {unpopularActivitiesSelected.map(unpopularA => {
+                                return (
+                                    <li key={unpopularA.id}>
+                                        {unpopularA.label}
+                                    </li>
+                                );
+                            })}
+                        </ul>
                     </div>
+                )}
+
+
+                <div className="col-lg-12 text-center">
+                    {renderChildrenAccompaniments()}
                 </div>
             </div>
 
+
         </Fragment>
-    );
+    )
+        ;
 };
 
 export default ActivityChoice;
