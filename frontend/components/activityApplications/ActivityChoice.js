@@ -197,7 +197,7 @@ const ActivityChoice = ({
             allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
         ), "id"
     );
-    const availableActivities = [...groupedRefs, ...individualRefs, ...activityRefsCham].map(item => {
+    const availableActivities = _.uniqBy([...groupedRefs, ...individualRefs, ...activityRefsCham].map(item => {
         return {
             id: item.id,
             key: null,
@@ -207,7 +207,7 @@ const ActivityChoice = ({
             isPack: false,
             isSelected: false,
         };
-    });
+    }), a => a.id);
     const availablePacks = Object.entries(packs).flatMap(([key, packArray]) => packArray.map(item => {
         return {
             id: item.id,
@@ -357,7 +357,7 @@ const ActivityChoice = ({
                     </div>
 
 
-                    <div className="col-lg-6">
+                    <div className="col-md-6">
 
                         <div>
                             <h4 style={{color: "#8AA4B1"}}>ACTIVITES SELECTIONNEES </h4>
