@@ -1,5 +1,5 @@
 import React from "react";
-import { Field } from "react-final-form";
+import {Field} from "react-final-form";
 import {
     composeValidators,
     required,
@@ -9,45 +9,45 @@ import {
 import Input from "../common/Input";
 import InputSelect from "../common/InputSelect";
 import SelectSameAs from "./SelectSameAs";
-import { toRawPhoneNumber, prettifyPhoneNumber } from "../../tools/format";
+import {toRawPhoneNumber, prettifyPhoneNumber} from "../../tools/format";
 
 const phoneTypes = [
-    { value: "portable", label: "Portable" },
-    { value: "domicile", label: "Domicile" },
-    { value: "travail", label: "Travail" },
+    {value: "portable", label: "Portable"},
+    {value: "domicile", label: "Domicile"},
+    {value: "travail", label: "Travail"},
 ];
 
-const familyHasPhones = (family) =>{
-    
-    if(Array.isArray(family) && family.length > 0){
+const familyHasPhones = (family) => {
 
-        for(const member of family){
-            for(const tel of member.telephones){
-                if( tel.number !== null)
+    if (Array.isArray(family) && family.length > 0) {
+
+        for (const member of family) {
+            for (const tel of member.telephones) {
+                if (tel.number !== null)
                     return true
             }
         }
     }
 }
 
-export const TelephoneFields = ({ ignoreValidate, fields, setSameAs, family, currentUser}) =>{
+export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, currentUser}) => {
 
-    if(!Array.isArray(family)){
+    if (!Array.isArray(family)) {
         family = Object.values(family)
     }
     return fields.map((field, i) => (
-        <div className="m-b-sm" key={field}>
-            {Array.isArray(family) && family.length > 0 &&(
+        <div key={field}>
+            {Array.isArray(family) && family.length > 0 && (
                 <SelectSameAs
                     family={family}
                     format={obj => {
-                        if( Array.isArray(obj)){
+                        if (Array.isArray(obj)) {
                             const tel = obj.find(tel => tel && tel.label && tel.number)
                             return tel != undefined ? `${tel.label} : ${tel.number}` : undefined
                         }
 
                         return obj && obj.label && obj.number ? `${obj.label} : ${obj.number}` : undefined
-                        
+
                     }}
                     accessor="telephones"
                     setSameAs={value => setSameAs(i, value)}
@@ -55,11 +55,11 @@ export const TelephoneFields = ({ ignoreValidate, fields, setSameAs, family, cur
                 />
             )}
 
-            <div className="row">
-                <div className="col-md-6">
+            <div className="row d-flex align-items-center">
+                <div className="col-md-6 pr-0">
                     <Field
-                        label="Numéro"
                         name={`${field}.number`}
+                        label={"Téléphone"}
                         render={Input}
                         validate={!ignoreValidate && composeValidators(required, isPhoneNumber)}
                         required
@@ -69,47 +69,49 @@ export const TelephoneFields = ({ ignoreValidate, fields, setSameAs, family, cur
                     />
                 </div>
 
-                <div className="col-md-6">
+                <div className="col">
                     <Field
-                        label="Type"
                         name={`${field}.label`}
+                        label={"Type"}
                         render={InputSelect}
                         validate={!ignoreValidate && required}
                         required
                         options={phoneTypes}
                     />
                 </div>
+
+                {fields.length > 1 ? (
+                    <div className="col text-right">
+                        <button
+                            className="btn btn-sm btn-warning"
+                            onClick={() => fields.remove(i)}
+                        >
+                            <i className="fas fa-trash"/>
+                            {"supprimer"}
+                        </button>
+                    </div>
+                ) : null}
             </div>
 
-            {fields.length > 1 ? (
-                <div>
-                    <button
-                        className="btn btn-sm btn-warning"
-                        onClick={() => fields.remove(i)}
-                    >
-                        <i className="fas fa-trash" />
-                        {"supprimer"}
-                    </button>
-                </div>
-            ) : null}
+
         </div>
     ));
 }
 
-export const AddressFields = ({ ignoreValidate, fields, setSameAs, family, currentUser }) =>
+export const AddressFields = ({ignoreValidate, fields, setSameAs, family, currentUser}) =>
     fields.map((field, i) => (
-        <div className="m-b-sm" key={field}>
+        <div key={field}>
             {Array.isArray(family) && family.length > 0 && (
                 <SelectSameAs
                     family={family}
                     format={obj => {
-                        if( Array.isArray(obj)){
+                        if (Array.isArray(obj)) {
                             const address = obj.find(address => address && address.street_address && address.postcode && address.city)
                             return address != undefined ? `${address.street_address}, ${address.postcode} ${address.city}` : undefined
                         }
 
                         return obj && obj.street_address && obj.postcode && obj.city ? `${obj.street_address}, ${obj.postcode} ${obj.city}` : undefined
-                        
+
                     }}
                     accessor="addresses"
                     setSameAs={value => setSameAs(i, value)}
@@ -117,50 +119,49 @@ export const AddressFields = ({ ignoreValidate, fields, setSameAs, family, curre
                 />
             )}
 
-            <div className="row">
-                <div className="col-md-6">
-                    <Field
-                        label="Voie"
-                        name={`${field}.street_address`}
-                        render={Input}
-                        validate={!ignoreValidate && required}
-                        required
-                    />
-                </div>
+                <div className="row d-flex align-items-center mb-4">
+                    <div className="col-md-6 pr-0">
+                        <Field
+                            label={"Adresse"}
+                            name={`${field}.street_address`}
+                            render={Input}
+                            validate={!ignoreValidate && required}
+                            required
+                        />
+                    </div>
 
-                <div className="col-md-3">
-                    <Field
-                        label="Code Postal"
-                        name={`${field}.postcode`}
-                        type="text"
-                        render={Input}
-                        validate={!ignoreValidate && composeValidators(required, isPostalCode)}
-                        required
-                    />
-                </div>
+                    <div className="col-md-2 pr-0">
+                        <Field
+                            label={"Code Postal"}
+                            name={`${field}.postcode`}
+                            type="text"
+                            render={Input}
+                            validate={!ignoreValidate && composeValidators(required, isPostalCode)}
+                            required
+                        />
+                    </div>
 
-                <div className="col-md-3">
-                    <Field
-                        label="Ville"
-                        name={`${field}.city`}
-                        render={Input}
-                        validate={!ignoreValidate && required}
-                        required
-                    />
+                    <div className="col">
+                        <Field
+                            label={"Ville"}
+                            name={`${field}.city`}
+                            render={Input}
+                            validate={!ignoreValidate && required}
+                            required
+                        />
+                    </div>
+                    {fields.length > 1 ? (
+                        <div className="col mt-1 text-right">
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-warning"
+                                onClick={() => fields.remove(i)}
+                            >
+                                <i className="fas fa-trash"/>
+                                {" Supprimer"}
+                            </button>
+                        </div>
+                    ) : null}
                 </div>
-            </div>
-
-            {fields.length > 1 ? (
-                <div>
-                    <button
-                        type="button"
-                        className="btn btn-sm btn-warning"
-                        onClick={() => fields.remove(i)}
-                    >
-                        <i className="fas fa-trash" />
-                        {"supprimer"}
-                    </button>
-                </div>
-            ) : null}
         </div>
     ));

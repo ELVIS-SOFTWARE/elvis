@@ -4,7 +4,6 @@ import Input from "../common/Input";
 
 
 const SelectSameAs = ({ setSameAs, family, accessor, format, currentUser }) => {
-    //console.log(family)
 
     family = family.filter(f => !Array.isArray(f[accessor])  || (Array.isArray(f[accessor]) && format(f[accessor]) != undefined))
 
@@ -39,13 +38,13 @@ const SelectSameAs = ({ setSameAs, family, accessor, format, currentUser }) => {
                         key={`${fIndex}.${index}`}
                         value={JSON.stringify(obj)}
                     >
-                        {`${fullname(f)} ${format(obj)}`}
+                        {`${fullname(f)}, ${format(obj)}`}
                     </option>
                 ))
             ) : (
                 
                 <option value={JSON.stringify(f[accessor])}>
-                    {`${fullname(f)} ${format(f[accessor])}`}
+                    {`${fullname(f)}, ${format(f[accessor])}`}
                 </option>
             )}
         </Fragment>
@@ -53,11 +52,11 @@ const SelectSameAs = ({ setSameAs, family, accessor, format, currentUser }) => {
 
     return (
         <div className="row">
-            <div className="col-sm-2">{"Identique à"}</div>
-            <div className="col-sm-10 form-group">
+            <div className="col-md-6 form-group pr-0 m-0 d-inline-flex align-items-baseline">
+                <label className="small col-2 p-0" style={{color: "rgb(138, 164, 177)"}}>Identique à</label>
                 <select
                     defaultValue={currentValue()}
-                    className="form-control"
+                    className="small col pl-2"
                     onChange={e => setSameAs(e.target.value)}
                     disabled={options.length == 0} 
                 >

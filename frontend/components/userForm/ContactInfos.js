@@ -53,111 +53,14 @@ class ContactInfos extends React.PureComponent {
         const { push, update } = this.props.mutators;
 
         return (
-            <div>
+            <div className="mt-4">
                 <FormSpy
                     subscription={{ values: true }}
                     onChange={props => this.handleChangeInfos(props)} />
 
-                <h3 className="m-b-md">{"Informations de contact"}</h3>
+                <h3 className="pb-3" style={{color: "#8AA4B1"}}>Coordonnées personnelles du demandeur</h3>
 
-                <div className="alert alert-warning">
-                    <p>
-                        Le courriel et le numéro de téléphone renseignés seront
-                        utilisés pour le suivi de la demande. C'est pourquoi,
-                        nous vous recommandons vivement de renseigner ces
-                        informations au maximum afin de faciliter les contacts
-                        entre nous.
-                    </p>
-                </div>
-
-                {canAddContacts ? (
-                    <div className="m-b-md">
-
-                        <FamilyMembers
-                            firstName={values.first_name}
-                            family={values.family}
-                            onEdit={onContactEdit}
-                            onDelete={onContactDelete}
-                        />
-
-                        {/* # display: none */}
-                        <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={onContactAdd}
-                            style={{
-                                display: 'none',
-                            }}
-                        >
-                            <i className="fas fa-plus m-r-xs" />
-                            {"Ajouter un contact"}
-                        </button>
-                    </div>
-                ) : null}
-
-                <div className="m-b-md">
-                    {displaySameAs && <Fragment>
-                        <h4>Email<span className="text-danger">*</span></h4>
-                        {Array.isArray(values.family) &&
-                            values.family.length > 0 && (
-                                <SelectSameAs
-                                    family={values.family}
-                                    format={obj => `${obj}`}
-                                    accessor="email"
-                                    setSameAs={value =>
-                                        form.change(
-                                            "email",
-                                            value ? JSON.parse(value) : ""
-                                        )
-                                    }
-                                    currentUser={currentUser}
-                                />
-                            )}
-                    </Fragment>}
-
-                    <Field
-                        label={!displaySameAs && "Email"}
-                        name="email"
-                        type="email"
-                        render={Input}
-                        validate={!ignoreValidate && required}
-                        required={!currentUser.is_attached && !ignoreValidate}
-                    />
-                </div>
-
-                <div className="m-b-md">
-                    <h4>{"Téléphones"} <span className="text-danger">{" *"}</span></h4>
-
-                    <FieldArray
-                        name="telephones"
-                        render={(props) => <TelephoneFields {...props} ignoreValidate={ignoreValidate} />}
-                        family={displaySameAs ? values.family : undefined}
-                        validate={!ignoreValidate && required}
-                        setSameAs={
-                            displaySameAs
-                                ? (i, value) =>
-                                    update(
-                                        "telephones",
-                                        i,
-                                        value ? JSON.parse(value) : undefined
-                                    )
-                                : undefined
-                        }
-                        currentUser={currentUser}
-                    />
-
-                    <button
-                        type="button"
-                        className="btn btn-primary btn-sm m-b-md"
-                        onClick={() => push("telephones", undefined)}
-                    >
-                        <i className="fas fa-plus" /> {"Ajouter un téléphone"}
-                    </button>
-                </div>
-
-                <div>
-                    <h4>{"Adresses"} <span className="text-danger">{" *"}</span></h4>
-
+                <div className="col p-0 mb-5">
                     <FieldArray
                         name="addresses"
                         render={props => <AddressFields {...props} ignoreValidate={ignoreValidate} />}
@@ -178,12 +81,72 @@ class ContactInfos extends React.PureComponent {
 
                     <button
                         type="button"
-                        className="btn btn-primary btn-sm m-b-md"
+                        className="btn btn-primary btn-sm"
+                        style={{backgroundColor: "#00334A",borderRadius: "12px"}}
                         onClick={() => push("addresses", { isNew: true })}
                     >
                         <i className="fas fa-plus" /> {"Ajouter une adresse"}
                     </button>
                 </div>
+
+                <div>
+                    {displaySameAs && <Fragment>
+                        {Array.isArray(values.family) &&
+                            values.family.length > 0 && (
+                                <SelectSameAs
+                                    family={values.family}
+                                    format={obj => `${obj}`}
+                                    accessor="email"
+                                    setSameAs={value =>
+                                        form.change(
+                                            "email",
+                                            value ? JSON.parse(value) : ""
+                                        )
+                                    }
+                                    currentUser={currentUser}
+                                />
+                            )}
+                    </Fragment>}
+                    <Field
+                        label={"Email"}
+                        name="email"
+                        type="email"
+                        render={Input}
+                        validate={!ignoreValidate && required}
+                        required={!currentUser.is_attached && !ignoreValidate}
+                    />
+                </div>
+
+                <div className="m-b-md">
+                    <FieldArray
+                        name="telephones"
+                        render={(props) => <TelephoneFields {...props} ignoreValidate={ignoreValidate} />}
+                        family={displaySameAs ? values.family : undefined}
+                        validate={!ignoreValidate && required}
+                        setSameAs={
+                            displaySameAs
+                                ? (i, value) =>
+                                    update(
+                                        "telephones",
+                                        i,
+                                        value ? JSON.parse(value) : undefined
+                                    )
+                                : undefined
+                        }
+                        currentUser={currentUser}
+                    />
+
+                    <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        style={{backgroundColor: "#00334A",borderRadius: "12px"}}
+                        onClick={() => push("telephones", undefined)}
+                    >
+                        <i className="fas fa-plus" /> {"Ajouter un téléphone"}
+                    </button>
+                </div>
+
+
             </div>
         );
     }

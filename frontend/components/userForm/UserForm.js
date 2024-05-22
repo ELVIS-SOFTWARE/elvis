@@ -285,9 +285,9 @@ class UserForm extends React.PureComponent {
 
         return (
             <div className="padding-page application-form">
-                <div className="ibox m-b-lg">
-                    <h4 className="ibox-title">{"Coordonnées"}</h4>
-                    <div className="ibox-content">
+                <div>
+                    <h3 style={{color: "#8AA4B1"}}>Informations personnelles de {initialValues.first_name}</h3>
+                    <div>
                         <Form
                             onSubmit={this.submit.bind(this)}
                             mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType }}
@@ -320,19 +320,7 @@ class UserForm extends React.PureComponent {
                                             organizationOptions={this.props.organizationOptions}
                                             userId={this.props.initialValues.id}
                                         />
-                                        <hr />
 
-                                        {
-                                            (this.props.hidePayers !== true) && (
-                                                <Payers
-                                                    values={values}
-                                                    mutators={form.mutators}
-                                                    currentUser={{ ...initialValues }}
-                                                />
-                                            )
-                                        }
-
-                                        <hr />
                                         <ContactInfos
                                             values={values}
                                             form={form}
@@ -358,15 +346,8 @@ class UserForm extends React.PureComponent {
                                         />
                                         <hr />
                                         <HandicapInfos />
-                                        <hr />
 
-                                        {/*<GDPR*/}
-                                        {/*    schoolName={this.props.schoolName}*/}
-                                        {/*    ignoreValidate={user ? user.is_admin : false}*/}
-                                        {/*    shouldCheckGdpr={this.props.shouldCheckGdpr} />*/}
-
-                                        {
-                                            this.props.consent_docs && this.props.consent_docs.map(doc =>
+                                        {this.props.consent_docs && this.props.consent_docs.map(doc =>
                                                 <ConsentDocItem
                                                     key={doc.id}
                                                     docItem={doc}
@@ -374,13 +355,6 @@ class UserForm extends React.PureComponent {
                                                     defaultValue={((initialValues.consent_document_users || []).find(cdu => cdu.consent_document_id === doc.id) || {}).has_consented}
                                                 />)
                                         }
-
-                                        {/*<ImageRight*/}
-                                        {/*    schoolName={this.props.schoolName}*/}
-                                        {/*    ignoreValidate={user ? user.is_admin : false} />*/}
-                                        {/*<NewsLetter*/}
-                                        {/*    schoolName={this.props.schoolName}*/}
-                                        {/*    ignoreValidate={user ? user.is_admin : false} />*/}
 
                                         {this.props.displaySubmit && (
                                             <button
