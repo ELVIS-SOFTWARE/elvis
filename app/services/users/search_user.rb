@@ -27,6 +27,7 @@ module Users
 
       users.map do |u|
         user = u.as_json(@includes)
+        user["avatar"] = u.avatar_url
 
         # filter family links by given season
         if @includes.dig("methods", "family_links_with_user")

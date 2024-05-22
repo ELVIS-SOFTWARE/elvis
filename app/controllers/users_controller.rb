@@ -1058,8 +1058,6 @@ def search_for_user
 
   result.each do |u|
     if can? :read, u
-      user = User.find(u["id"])
-      u["avatar"] = user.avatar.attached? ? rails_blob_path(user.avatar, only_path: true) : nil
       u["family_member_users"] = u["family_links_with_user"].select { |fmu| fmu["season_id"] == season.id }
     end
   end
@@ -1088,13 +1086,6 @@ end
 
   result = Users::SearchUser.new(params[:last_name], params[:first_name], nil, params[:season_id], nil, includes,
                                  false, params[:hideAttachedAccounts]).execute
-
-  result.each do |u|
-    if can? :read, u
-      user = User.find(u["id"])
-      u["avatar"] = user.avatar.attached? ? rails_blob_path(user.avatar, only_path: true) : nil
-    end
-  end
 
   render json: result
 end
