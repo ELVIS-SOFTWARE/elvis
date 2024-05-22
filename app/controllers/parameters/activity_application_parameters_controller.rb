@@ -52,7 +52,7 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
     render json: { error: e.message }, status: :unprocessable_entity
   end
 
-  def change_term_display_text_param
+  def change_display_text_param
     @display_text = Parameter.find_by(label: 'application_step_parameter.display_text')
 
     if @display_text.present?

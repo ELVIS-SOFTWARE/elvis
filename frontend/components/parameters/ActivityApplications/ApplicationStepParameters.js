@@ -13,7 +13,6 @@ export default function ApplicationStepParameters() {
     useEffect(() => {
         api.set()
             .success(res => {
-                console.log(res);
                 setVisibilityActivated(res.activated);
                 setInit(false)
 
@@ -53,16 +52,29 @@ export default function ApplicationStepParameters() {
             .error(res => {
                 swal("Une erreur est survenue lors de la sauvegarde des paramètres du parcours d'inscription", res.error, "error");
             })
-            .post("activity_application_parameters/change_term_display_text_param", {display_text: JSON.stringify(convertToRaw(editorState.getCurrentContent()))});
+            .post("activity_application_parameters/change_display_text_param", {display_text: JSON.stringify(convertToRaw(editorState.getCurrentContent()))});
     }
 
 
     return <div className="m-3">
-        <h3>Choix de l'activité</h3>
+        <div className="mb-5">
+            <h3>Visibilité</h3>
+            <div className="checkbox checkbox-primary">
+                <input
+                    type="checkbox"
+                    id={"paymentScheduleOptionsActivated"}
+                    className=""
+                    checked={visibilityActivated}
+                    onChange={(e) => setVisibilityActivated(e.target.checked)}
+                />
+                <label htmlFor={"paymentScheduleOptionsActivated"}>Afficher le texte dans le parcours d'inscription.</label>
+            </div>
+        </div>
 
-        <form onSubmit={e => {e.preventDefault();onSaveDisplayText()}}>
-            <div>
-                <p className="mb-5">Editer le texte présent sur l'étape 3 dans le parcours d'inscription.</p>
+        <div>
+            <h3>Choix de l'activité</h3>
+            <form onSubmit={e => {e.preventDefault();onSaveDisplayText()}}>
+                <p>Editer le texte présent dans l'étape 3.</p>
 
                 <div className="form-group mb-5">
                     <Editor
@@ -84,25 +96,12 @@ export default function ApplicationStepParameters() {
                         }}
                     />
                 </div>
-            </div>
 
-            <h3>Visibilité</h3>
-            <div>
-                <div className="checkbox checkbox-primary">
-                    <input
-                        type="checkbox"
-                        id={"paymentScheduleOptionsActivated"}
-                        className=""
-                        checked={visibilityActivated}
-                        onChange={(e) => setVisibilityActivated(e.target.checked)}
-                    />
-                    <label htmlFor={"paymentScheduleOptionsActivated"}>Afficher le texte dans le parcours d'inscription.</label>
+                <div className="text-right">
+                    <button className="btn btn-primary" type="submit">Enregistrer</button>
                 </div>
-            </div>
+            </form>
+        </div>
 
-            <div>
-                <button className="btn btn-primary" type="submit" >Enregistrer</button>
-            </div>
-        </form>
     </div>
 }
