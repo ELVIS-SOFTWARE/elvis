@@ -46,6 +46,7 @@ export default function SchoolAvailabilities({planningId, authToken, seasons})
                 planningId={planningId}
                 kinds={["p"]}
                 day={season.start}
+                seasonId={season.id}
                 forSeason
                 onAdd={onAdd}
                 onDelete={onDelete}

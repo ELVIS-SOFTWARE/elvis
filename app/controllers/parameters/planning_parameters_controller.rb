@@ -21,9 +21,9 @@ class Parameters::PlanningParametersController < ApplicationController
     end
 
     current_season = Season.current
+    previous_season = current_season.previous
 
-    if @school.planning.time_intervals.where(start: current_season.start..current_season.end).empty?
-      previous_season = Season.previous
+    if previous_season.present? && @school.planning.time_intervals.where(start: current_season.start..current_season.end).empty?
       school_availabilities = @school.planning.time_intervals.where(start: previous_season.start..previous_season.end).to_a
 
       school_availabilities = school_availabilities.map do |availability|

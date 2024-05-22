@@ -197,7 +197,7 @@ const ActivityChoice = ({
             allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
         ), "id"
     );
-    const availableActivities = [...groupedRefs, ...individualRefs, ...activityRefsCham].map(item => {
+    const availableActivities = _.uniqBy([...groupedRefs, ...individualRefs, ...activityRefsCham].map(item => {
         return {
             id: item.id,
             key: null,
@@ -207,7 +207,7 @@ const ActivityChoice = ({
             isPack: false,
             isSelected: false,
         };
-    });
+    }), a => a.id);
     const availablePacks = Object.entries(packs).flatMap(([key, packArray]) => packArray.map(item => {
         return {
             id: item.id,
@@ -288,7 +288,6 @@ const ActivityChoice = ({
         <Fragment>
 
             <div>
-
                 {showPriceWarning() &&
                     <div className="alert alert-info col-md-8 d-inline-flex align-items-center m-b-md pl-0"
                          style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
@@ -312,13 +311,12 @@ const ActivityChoice = ({
                                 valider votre inscription.
                             </small>
                         </div>
-
                     </div>}
 
                 <div className="row">
                     <div className="col-md-6">
                         <div>
-                            <h3 style={{color: "#8AA4B1"}}>Choix de l'activité</h3>
+                            <h4 style={{color: "#8AA4B1"}}>Choix de l'activité</h4>
                             <div className="d-inline-flex justify-content-between mb-2 w-100">
                                 <div>
                                     <button className="btn btn-xs" style={{
@@ -357,10 +355,10 @@ const ActivityChoice = ({
                     </div>
 
 
-                    <div className="col-lg-6">
+                    <div className="col-md-6">
 
                         <div>
-                            <h3 style={{color: "#8AA4B1"}}>Activités sélectionnées</h3>
+                            <h4 style={{color: "#8AA4B1"}}>Activités sélectionnées</h4>
                         </div>
                         <div>
                             <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>

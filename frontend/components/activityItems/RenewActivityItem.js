@@ -130,7 +130,7 @@ class RenewActivityItem extends React.Component {
                 });
             })
             .post("/comments", {
-                commentable_id: this.state.preApplicationActivity.id,
+                commentable_id: this.state.preApplicationActivity.activity_application_id,
                 commentable_type: "ActivityApplication",
                 user_id: this.props.current_user.id,
                 content: content,
@@ -237,11 +237,11 @@ class RenewActivityItem extends React.Component {
 
                                     {activity_application_status_id === this.props.default_activity_status_id &&  <Fragment>
                                         <CancelApplication
-                                            activityApplicationId={this.state.preApplicationActivity.id}
+                                            activityApplicationId={this.state.preApplicationActivity.activity_application_id}
                                         />
 
                                         <EditApplication
-                                            handleProcessModifyApplication={this.handleProcessModifyApplication}
+                                            handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
                                         />
                                     </Fragment>}
                                 </div>

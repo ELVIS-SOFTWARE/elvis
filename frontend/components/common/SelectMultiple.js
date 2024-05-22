@@ -95,28 +95,39 @@ export default class SelectMultiple extends React.Component
         }
         else if(actionMeta.action === 'clear')
         {
-            swal({
-                title:
-                    "Êtes vous sûr de supprimer toutes les " + this.props.title,
-                type: "warning",
-                confirmButtonText: "Oui !",
-                cancelButtonText: "Non",
-                showCancelButton: true,
-            }).then(willDelete => {
-                if (willDelete.value)
+            const clear = () =>
+            {
+                this.state.features.push(...this.state.selectedFeatures.filter(f => !this.state.features.includes(f)));
+
+                if(this.props.mutators && this.props.name)
                 {
-                    this.state.features.push(...this.state.selectedFeatures.filter(f => !this.state.features.includes(f)));
-
-                    if(this.props.mutators && this.props.name)
-                    {
-                        while(this.props.mutators.pop(this.props.name) !== undefined);
-                    }
-
-                    this.setState({
-                        selectedFeatures: [],
-                    });
+                    while(this.props.mutators.pop(this.props.name) !== undefined);
                 }
-            });
+
+                this.setState({
+                    selectedFeatures: [],
+                });
+            };
+            const confirm = this.props.confirmBeforeClear === undefined ? true : this.props.confirmBeforeClear;
+
+            if(confirm)
+            {
+                swal({
+                    title:
+                        "Êtes vous sûr de supprimer toutes les " + this.props.title,
+                    type: "warning",
+                    confirmButtonText: "Oui !",
+                    cancelButtonText: "Non",
+                    showCancelButton: true,
+                }).then(willDelete => {
+                    if (willDelete.value)
+                        clear();
+                });
+            }
+            else
+            {
+                clear();
+            }
         }
     }
 
@@ -126,7 +137,7 @@ export default class SelectMultiple extends React.Component
             <input
                 type="hidden"
                 name={this.props.name}
-                value={this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : (this.state.selectedFeatures[0] || {}).value}
+                value={this.props.isMulti ? this.state.selectedFeatures.map(f => f.value) : (this.state.selectedFeatures[0] || {}).value || ""}
                 style={{display: "none"}}
                 className={"d-none none"}
             />
@@ -135,6 +146,7 @@ export default class SelectMultiple extends React.Component
 
             <CreatableSelect
                 isMulti={this.props.isMulti}
+                isClearable={this.props.isClearable || this.props.isMulti}
                 options={this.state.features}
                 value={this.state.selectedFeatures}
                 onChange={this.handleChange.bind(this)}/>
@@ -149,4 +161,6 @@ SelectMultiple.propTypes = {
     features: PropTypes.array,
     mutators: PropTypes.object,
     isMulti: PropTypes.bool,
+    isClearable: PropTypes.bool,
+    confirmBeforeClear: PropTypes.bool,
 }

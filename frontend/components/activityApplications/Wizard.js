@@ -27,9 +27,8 @@ import UserSearch from "./UserSearch.js";
 import {PRE_APPLICATION_ACTIONS} from "../../tools/constants";
 import Select from "react-select";
 import Swal from 'sweetalert2'
-import activity from "./summary/Activity";
-import PayerPaymentTerms from "../PayerPaymentTerms";
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
+import WizardUserSelectMember from "./WizardUserSelectMember";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
     "already_practiced_instrument";
@@ -49,9 +48,7 @@ class Wizard extends React.Component {
             possibleMatches: [],
             selectedActivities: [],
             selectedPacks: {},
-            selectedTeachers: {},
             intervals,
-            locations: [],
             additionalStudents: [],
             childhoodTimeAvailabilities: [],
             childhoodPreferences: {},
@@ -73,11 +70,6 @@ class Wizard extends React.Component {
             availPaymentScheduleOptions: this.props.availPaymentScheduleOptions,
             availPaymentMethods: this.props.availPaymentMethods,
         };
-
-        _.map(
-            props.activityRefs,
-            activity => (this.state.selectedTeachers[activity.id] = [])
-        );
 
         this.state.shouldCheckGdpr = !this.state.infos.checked_gdpr;
     }
@@ -372,13 +364,7 @@ class Wizard extends React.Component {
         this.setState({buttonDisabled: true});
 
         const state = {...this.state};
-        const selectedTeachers = _.chain(this.state.selectedTeachers)
-            .reduce((result, value) => {
-                return _.concat(result, value);
-            }, [])
-            .uniq()
-            .value();
-        state.selectedTeachers = selectedTeachers;
+
         const authToken = _.get(this.state, "infos.authentication_token");
 
         api.set()
@@ -418,14 +404,7 @@ class Wizard extends React.Component {
                 .then((result) =>
                 {
                     if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                        let get_params = '';
-                        let redirect_url = `/new_application/${this.state.user.id}${get_params}`;
-
-                        if (data.pack_created) {
-                            redirect_url = `/my_activities/${this.state.user.id}`;
-                        }
-
-                        window.location.href = redirect_url;
+                        window.location.href = `/new_application/${this.state.user.id}`;
                     } else {
                         window.location.href = `/inscriptions/${data.activity_application.id}`;
                     }
@@ -536,7 +515,7 @@ class Wizard extends React.Component {
             .uniq()
             .value();
 
-        this.setState({
+        const state = {
             infos: infosFromUser(user),
             learnedActivities,
             intervals: user.planning !== undefined && user.planning.time_intervals
@@ -545,7 +524,14 @@ class Wizard extends React.Component {
                 )
                 : [],
             user: user,
-        });
+        };
+
+        const family = state.infos.family_links_with_user;
+        const user_infos = state.infos;
+        const familyPayers = family.filter(user => user.is_paying_for).map(user => user.id);
+        state.infos.payers = user_infos.is_paying ? [...familyPayers, user_infos.id] : familyPayers;
+
+        this.setState(state);
 
         this.prepareForActivityChoice();
     }
@@ -624,35 +610,58 @@ class Wizard extends React.Component {
         });
     }
 
-    getLabelsFromSelectedActivities() {
-        let selectedArray = this.state.selectedActivities.slice();
+    handleChangePayers(payers) {
+        this.setState({
+            infos: {
+                ...this.state.infos,
+                payers: payers
+            }
+        });
+    }
 
-        let activitiesThatRequirePreferencesSelection = this.props.allActivityRefs
+
+    getLabelsFromSelectedActivities() {
+        let selectedActivityRefIds = this.state.selectedActivities.slice();
+
+        // Lister les activités qui nécessitent une sélection de préférences
+        const prefsReqActivityRefIds = this.props.allActivityRefs
             .filter(ref => ref.allows_timeslot_selection)
             .map(ref => ref.id);
 
-        if (activitiesThatRequirePreferencesSelection) {
-            activitiesThatRequirePreferencesSelection.map(ref => {
-                let index = selectedArray.indexOf(ref);
-                index !== -1 ? selectedArray.splice(index, 1) : "";
-            });
-        }
+        // Filtrer notre sélection pour ne conserver que les activités qui ne nécessitent pas de préférences
+        selectedActivityRefIds = selectedActivityRefIds.filter(activity => !prefsReqActivityRefIds.includes(activity));
 
-        let selectionLabels = [];
-        this.props.allActivityRefs.map(element => {
-            selectedArray.map(id => {
-                if (element.id === id && element.id) {
-                    selectionLabels.push(element.display_name);
-                }
-            });
-        });
+        // Retourner un tableau avec les noms des activités sélectionnées
+        return selectedActivityRefIds.reduce((labels, id) => {
+            const element = this.props.allActivityRefs.find(activityRef => activityRef.id === id);
+            if (element) {
+                labels.push(element.display_name);
+            }
+            return labels;
+        }, []);
 
-        return selectionLabels;
     }
+
+    isApplicationAuthorized(season_id)
+    {
+        if(this.props.currentUserIsAdmin)
+            return true;
+
+        const season = this.props.seasons.find(s => s.id === season_id);
+
+        if(!season)
+            return false;
+
+        const dateToUse = this.props.preApplicationActivity ? season.opening_date_for_applications : season.opening_date_for_new_applications;
+
+        return moment().isBetween(moment(dateToUse), moment(season.closing_date_for_applications));
+    }
+
 
     render() {
 
-        if (!this.state.season_id) {
+        if (!this.isApplicationAuthorized(this.state.season_id))
+        {
             return <Fragment>
                 <div
                     className={`m-t m-b-sm h-auto img-rounded p-sm text-dark ${this.state.user.is_admin ? "bg-warning" : "bg-danger"}`}>
@@ -690,14 +699,19 @@ class Wizard extends React.Component {
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
         const steps = [
-            this.props.currentUserIsAdmin && !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
+            !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
                 name: "Choisir un utilisateur",
                 component: (
-                    <UserSearch
+                    this.props.currentUserIsAdmin ? <UserSearch
                         user={this.props.user}
                         onSelect={this.handleSelectUser.bind(this)}
                         season={this.state.season}
-                    />
+                    /> :
+                        <WizardUserSelectMember
+                            user={this.props.user}
+                            onSelect={this.handleSelectUser.bind(this)}
+                            season={this.state.season}
+                        />
                 ),
             },
             {
@@ -708,6 +722,7 @@ class Wizard extends React.Component {
                         schoolName={this.props.schoolName}
                         user={this.props.user}
                         shouldCheckGdpr={!this.props.currentUserIsAdmin}
+                        hidePayers={true}
                         initialValues={userFormInitialValues}
                         displayIdentificationNumber={this.props.countryCode==="BE"}
                         onSubmit={values => this.handleUserFormSubmit(values)}
@@ -851,6 +866,9 @@ class Wizard extends React.Component {
                 component: (
                     <WrappedPayerPaymentTerms
                         informationalStepOnly={false}
+                        user={{id: this.state.infos.id, first_name: this.state.infos.first_name, last_name: this.state.infos.last_name, is_paying: this.state.infos.is_paying}}
+                        family={this.state.infos.family_links_with_user}
+                        initialSelectedPayers={this.state.infos.payers}
                         paymentTerms={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         collection={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
@@ -859,6 +877,7 @@ class Wizard extends React.Component {
                         onChangePaymentTerms={this.handleChangePaymentTerms.bind(this)}
                         onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                         onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
+                        onChangePayers={this.handleChangePayers.bind(this)}
                     />
                 )
             },
@@ -871,7 +890,6 @@ class Wizard extends React.Component {
                         application={this.state}
                         buttonDisabled={this.state.buttonDisabled}
                         teachers={this.props.teachers}
-                        locations={this.props.locations}
                         activityRefs={this.props.activityRefs}
                         activityRefsChildhood={this.props.activityRefsChildhood}
                         allActivityRefs={this.props.allActivityRefs}

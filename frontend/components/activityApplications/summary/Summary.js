@@ -2,18 +2,20 @@ import _ from "lodash";
 import React from "react";
 import CommentSection from "./../../CommentSection";
 import Activity from "./Activity";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import swal from "sweetalert2";
-import {csrfToken, findAndGet, ISO_DATE_FORMAT, optionMapper} from "../../utils";
-import {getAnswersObject} from "../../evaluation/Evaluation";
+import { csrfToken, findAndGet, ISO_DATE_FORMAT, optionMapper } from "../../utils";
+import { getAnswersObject } from "../../evaluation/Evaluation";
 import EvaluationForm from "../../evaluation/EvaluationForm";
-import {patch} from "../../../tools/api";
-import {PRE_APPLICATION_ACTION_LABELS} from "../../../tools/constants";
+import { patch } from "../../../tools/api";
+import { PRE_APPLICATION_ACTION_LABELS } from "../../../tools/constants";
 import EvaluationChoice from "../EvaluationChoice";
 import ButtonModal from "../../common/ButtonModal";
 import UserWithInfos from "../../common/UserWithInfos";
-import * as ActivityApplicationStatus from '../../utils/ActivityApplicationsStatuses'
-import {isValidDate} from "@fullcalendar/react";
+import * as ActivityApplicationStatus from "../../utils/ActivityApplicationsStatuses";
+import { isValidDate } from "@fullcalendar/react";
+import TimePreferencesStep from "../TimePreferencesStep";
+import { PLANNING_MODE } from "../TimePreferencesStep";
 
 const moment = require("moment");
 require("moment/locale/fr");
@@ -29,7 +31,7 @@ class Summary extends React.Component {
                 .forms
                 .map(e => e.form)
                 .find(e => e.season_id === this.props.application.season_id),
-            "id"
+            "id",
         ) || "";
 
         const defaultAppChangeQuestionnaireId = _.get(
@@ -38,7 +40,7 @@ class Summary extends React.Component {
                 .map(e => e.form)
                 .find(e => e.season_id === this.props.application.season_id &&
                     this.props.application.desired_activities.find(d => d.activity_ref_id === e.activity.activity_ref_id)),
-            "id"
+            "id",
         ) || "";
 
         this.state = {
@@ -62,11 +64,15 @@ class Summary extends React.Component {
             studentEvaluationId: defaultEvaluationId,
             applicationChangeQuestionnaireId: defaultAppChangeQuestionnaireId,
             newStudentLevelQuestionnaireId: "",
-            alertProposal: ""
+            alertProposal: "",
         };
     }
 
     componentDidMount() {
+        this.loadData();
+    }
+
+    loadData() {
         fetch(`/inscriptions/${this.props.application.id}.json`, {
             method: "GET",
             credentials: "same-origin",
@@ -93,13 +99,13 @@ class Summary extends React.Component {
             .filter(act =>
                 _.includes(
                     _.map(act.users, u => u.id),
-                    this.state.application.user_id
-                )
+                    this.state.application.user_id,
+                ),
             )
             .map(act => act.time_interval)
             .filter(
                 ti =>
-                    ti.start == timeInterval.start || ti.end == timeInterval.end
+                    ti.start == timeInterval.start || ti.end == timeInterval.end,
             )
             .some()
             .value();
@@ -108,19 +114,19 @@ class Summary extends React.Component {
     handleChangeStatus(evt) {
         const statusId = evt.target.value;
 
-        this.setState({status_id: statusId});
+        this.setState({ status_id: statusId });
     }
 
     handleSaveStatus() {
         const isStopping = findAndGet(
             this.props.statuses,
             (s) => parseInt(s.id, 10) === parseInt(this.state.status_id, 10),
-            "is_stopping"
+            "is_stopping",
         );
 
         const stoppedAt = isStopping && this.stopDateInput
             ? this.stopDateInput.current.value
-            : null
+            : null;
 
         // Make the stop date required is is stopping status selected
         if (isStopping && !stoppedAt) {
@@ -129,7 +135,7 @@ class Summary extends React.Component {
                 {
                     autoClose: 3000,
                     type: "error",
-                }
+                },
             );
             return Promise.resolve(false);
         }
@@ -156,32 +162,32 @@ class Summary extends React.Component {
                 allowOutsideClick: true,
                 showCancelButton: true,
                 confirmButtonText: confirmtext,
-                cancelButtonText: '<i class="fas fa-ban"></i> annuler',
+                cancelButtonText: "<i class=\"fas fa-ban\"></i> annuler",
             }).then((res) => {
                 if (res.value) {
-                    this.updateApplication({begin_at});
+                    this.updateApplication({ begin_at });
                 } else {
-                    this.setState({begin_at: this.state.old_begin_at || this.state.begin_at});
+                    this.setState({ begin_at: this.state.old_begin_at || this.state.begin_at });
                 }
-            })
+            });
 
             // Si l'inscription n'est pas validée, on peut librement modifier la date de début
         } else {
-            this.updateApplication({begin_at});
+            this.updateApplication({ begin_at });
         }
     }
 
     updateApplication(updateObject) {
         this.handleAlertProposal();
-        patch(`/inscriptions/${this.state.application.id}`, {application: updateObject})
-            .then(({data: app}) => this.setState({
+        patch(`/inscriptions/${this.state.application.id}`, { application: updateObject })
+            .then(({ data: app }) => this.setState({
                 begin_at: app.begin_at,
                 status: app.activity_application_status,
                 status_updated_at: app.status_updated_at,
                 referent: app.referent,
                 referent_id: app.referent_id,
                 stopped_at: app.stopped_at,
-                old_begin_at: undefined
+                old_begin_at: undefined,
             }));
     }
 
@@ -207,7 +213,7 @@ class Summary extends React.Component {
         return new Promise(res => {
             const suggs = this.state.suggestions;
             suggs[id] = suggestions;
-            this.setState({suggestions: suggs}, res);
+            this.setState({ suggestions: suggs }, res);
         });
     }
 
@@ -218,7 +224,7 @@ class Summary extends React.Component {
         const desiredActivity = {
             ..._.find(
                 desiredActivities,
-                da => da.id == desiredActivityId
+                da => da.id == desiredActivityId,
             ),
         };
 
@@ -230,17 +236,17 @@ class Summary extends React.Component {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
-        })
+        });
 
-        const {activity, error} = await response.json();
+        const { activity, error } = await response.json();
 
         const index = _.findIndex(
             suggestions,
-            s => s.id == activity.id
+            s => s.id == activity.id,
         );
         const indexDesired = _.findKey(
             desiredActivities,
-            da => da.id == desiredActivity.id
+            da => da.id == desiredActivity.id,
         );
 
         suggestions[index] = activity;
@@ -256,10 +262,10 @@ class Summary extends React.Component {
             });
         }
 
-        desiredActivity.options = []
+        desiredActivity.options = [];
         suggestions.forEach(s => {
-            s.options = []
-        })
+            s.options = [];
+        });
 
         this.setState({
             suggestions: {
@@ -289,7 +295,7 @@ class Summary extends React.Component {
             .then(desiredActivity => {
                 const indexDesired = _.findKey(
                     desiredActivities,
-                    da => da.id == desiredActivity.id
+                    da => da.id == desiredActivity.id,
                 );
 
                 const suggestions = this.state.suggestions[
@@ -300,7 +306,7 @@ class Summary extends React.Component {
                 _.forEach(desiredActivity.options, o => {
                     const index = _.findIndex(
                         suggestions,
-                        s => s.id == o.activity_id
+                        s => s.id == o.activity_id,
                     );
 
                     // Check if option is not already here
@@ -328,7 +334,7 @@ class Summary extends React.Component {
         const desiredActivities = this.state.desiredActivities;
         const suggestion = _.find(
             this.state.suggestions[desiredActivity.activity_ref_id],
-            s => s.id == suggestionId
+            s => s.id == suggestionId,
         );
 
         fetch(
@@ -341,13 +347,13 @@ class Summary extends React.Component {
                     "Content-Type": "application/json",
                     Accept: "application/json",
                 },
-            }
+            },
         )
             .then(response => response.json())
             .then(desiredActivity => {
                 const indexDesired = _.findKey(
                     desiredActivities,
-                    da => da.id == desiredActivity.id
+                    da => da.id == desiredActivity.id,
                 );
 
                 const actSuggestions = this.state.suggestions[
@@ -355,7 +361,7 @@ class Summary extends React.Component {
                     ];
                 const suggIndex = _.findIndex(
                     actSuggestions,
-                    s => s.id == suggestion.id
+                    s => s.id == suggestion.id,
                 );
 
                 // Remove option from this suggestion
@@ -382,7 +388,7 @@ class Summary extends React.Component {
 
         const desiredActivity = _.find(
             desiredActivities,
-            da => da.id == desiredActivityId
+            da => da.id == desiredActivityId,
         );
         const response = await fetch(`/activity/${activityId}/desired/${desiredActivityId}`, {
             method: "DELETE",
@@ -397,11 +403,11 @@ class Summary extends React.Component {
 
         const index = _.findIndex(
             suggestions,
-            s => s.id == activity.id
+            s => s.id == activity.id,
         );
         const indexDesired = _.findKey(
             desiredActivities,
-            da => da.id == desiredActivity.id
+            da => da.id == desiredActivity.id,
         );
 
         suggestions[index] = activity;
@@ -507,7 +513,7 @@ class Summary extends React.Component {
 
         additionalStudents[ind] = [additionalStudents[ind][0], value];
 
-        this.setState({additionalStudents});
+        this.setState({ additionalStudents });
     }
 
     handleRemoveDesiredActivity(id) {
@@ -522,13 +528,13 @@ class Summary extends React.Component {
         })
             .then(response => response.json())
             .then(desired_activities => {
-                this.setState({desiredActivities: desired_activities});
+                this.setState({ desiredActivities: desired_activities });
             });
     }
 
     handleRemoveActivityApplication(e) {
         const isOneDesiredActivityValidated = Object.values(
-            this.state.desiredActivities
+            this.state.desiredActivities,
         ).reduce((acc, d) => acc || d.is_validated, false);
 
         if (isOneDesiredActivityValidated) {
@@ -537,20 +543,20 @@ class Summary extends React.Component {
                 {
                     autoClose: 3000,
                     type: "warning",
-                }
+                },
             );
         } else {
 
             let title = "<h5>Voulez-vous supprimer cette demande d'inscription ?</h5>";
             let htmltext = "<p>La demande de " + this.props.application.user.first_name + " " + this.props.application.user.last_name + " sera définitivement supprimé</p>";
-            let confirmtext = '<i class="fas fa-trash"></i> Supprimer la demande';
+            let confirmtext = "<i class=\"fas fa-trash\"></i> Supprimer la demande";
             swal.fire({
                 title: title,
                 html: htmltext,
                 allowOutsideClick: true,
                 showCancelButton: true,
                 confirmButtonText: confirmtext,
-                cancelButtonText: '<i class="fas fa-ban"></i> annuler',
+                cancelButtonText: "<i class=\"fas fa-ban\"></i> annuler",
             }).then((res) => {
                 if (res.value) {
                     fetch(`/destroy/activity_application/${this.state.application.id}`, {
@@ -573,7 +579,7 @@ class Summary extends React.Component {
                         }
                     });
                 }
-            })
+            });
 
         }
     }
@@ -586,7 +592,7 @@ class Summary extends React.Component {
             showCancelButton: true,
         }).then(v => {
             if (v.value) {
-                this.setState({sendingMail: true});
+                this.setState({ sendingMail: true });
 
                 fetch(
                     `/inscriptions/${this.state.application.id
@@ -602,9 +608,9 @@ class Summary extends React.Component {
                         body: JSON.stringify({
                             application_status: parseInt(this.state.status_id),
                         }),
-                    }
+                    },
                 ).then(() => {
-                    this.setState({mail_sent: true, sendingMail: false});
+                    this.setState({ mail_sent: true, sendingMail: false });
                 });
             }
         });
@@ -613,11 +619,11 @@ class Summary extends React.Component {
     // COMMENT HANDLERS
     handleCommentEdition(comment_id) {
         const comment = _.find(this.state.comments, c => c.id == comment_id);
-        this.setState({editedComment: comment});
+        this.setState({ editedComment: comment });
     }
 
     handleUpdateNewCommentContent(e) {
-        this.setState({newComment: e.target.value});
+        this.setState({ newComment: e.target.value });
     }
 
     handleUpdateEditedCommentContent(e) {
@@ -653,7 +659,7 @@ class Summary extends React.Component {
                 this.setState({
                     comments,
                     newComment: "",
-                })
+                }),
             );
     }
 
@@ -673,7 +679,7 @@ class Summary extends React.Component {
         })
             .then(response => response.json())
             .then(comments => {
-                this.setState({comments, editedComment: null});
+                this.setState({ comments, editedComment: null });
             });
     }
 
@@ -714,9 +720,9 @@ class Summary extends React.Component {
                             this.setState({
                                 desiredActivities: newDesiredActivities,
                             });
-                        })
+                        });
                 }
-            })
+            });
 
     }
 
@@ -730,7 +736,7 @@ class Summary extends React.Component {
                 ],
             },
         };
-        const {user: {levels}} = newApplication;
+        const { user: { levels } } = newApplication;
 
         const levelIndex = levels.findIndex(l => l.activity_ref_id === level.activity_ref_id && l.season_id === level.season_id);
 
@@ -741,7 +747,7 @@ class Summary extends React.Component {
 
         newApplication.user.levels = levels;
 
-        this.setState({application: newApplication});
+        this.setState({ application: newApplication });
     }
 
     handleDeleteStudentLevel(seasonId, activityRefId) {
@@ -756,27 +762,27 @@ class Summary extends React.Component {
                     .levels
                     .filter(l =>
                         l.season_id !== seasonId &&
-                        l.activity_ref_id !== activityRefId
+                        l.activity_ref_id !== activityRefId,
                     ),
             },
         };
 
-        this.setState({application});
+        this.setState({ application });
     }
 
     handleUpdateSuggestion(suggestion) {
         const desiredActivities = [...this.state.desiredActivities];
 
         const desiredIdx = desiredActivities.findIndex(da => da.activity_ref.activity_ref_kind_id === suggestion.activity_ref.activity_ref_kind_id);
-        const desiredActivity = {...desiredActivities[desiredIdx]};
+        const desiredActivity = { ...desiredActivities[desiredIdx] };
 
         const suggestions = _.mapValues(
             this.state.suggestions,
-            s => s.map(a => a.id === suggestion.id ? suggestion : a)
+            s => s.map(a => a.id === suggestion.id ? suggestion : a),
         );
 
         const isUserInSuggestion = _.some(suggestion.users, u => u.id === this.state.application.user_id);
-        const isUserAssignedToSuggestion = desiredActivity.activity_id === suggestion.id
+        const isUserAssignedToSuggestion = desiredActivity.activity_id === suggestion.id;
 
         // Validate desired_activity if current user is in activity
         if (isUserInSuggestion) {
@@ -794,7 +800,7 @@ class Summary extends React.Component {
         if (isUserInSuggestionOptions)
             !optionAlreadyRegistered && desiredActivity.options.push({
                 desired_activity_id: desiredActivity.id,
-                activity_id: suggestion.id
+                activity_id: suggestion.id,
             });
         // Remove it otherwise
         else
@@ -815,13 +821,13 @@ class Summary extends React.Component {
     handleAlertProposal() {
         if (this.state.status_id == ActivityApplicationStatus.PROPOSAL_REFUSED_ID) {
             this.state.alertProposal = <div className={"alert alert-danger"}>
-                <h4><i className="fa fa-exclamation-triangle" aria-hidden="true"/><strong className={"ml-2"}>Proposition
+                <h4><i className="fa fa-exclamation-triangle" aria-hidden="true" /><strong className={"ml-2"}>Proposition
                     refusée</strong></h4>
                 <strong>Raison du refus : </strong><span>{this.props.application.reason_of_refusal}</span>
             </div>;
         } else if (this.state.status_id == ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID) {
             this.state.alertProposal = <div className={"alert alert-success"}>
-                <p><i className="fa fa-check" aria-hidden="true"/><strong className={"ml-2"}>Proposition
+                <p><i className="fa fa-check" aria-hidden="true" /><strong className={"ml-2"}>Proposition
                     Acceptée</strong></p>
             </div>;
         } else {
@@ -837,7 +843,7 @@ class Summary extends React.Component {
             levels,
         } = this.props;
 
-        const {application} = this.state;
+        const { application } = this.state;
 
         // Pourquoi je fais ça comme ça ?
         let activity_refs_idx = {};
@@ -853,8 +859,8 @@ class Summary extends React.Component {
                         da.id !== daId &&
                         da.is_validated &&
                         s.activity_ref_id === da.activity_ref_id &&
-                        s.id === da.activity_id
-                ).length === 0
+                        s.id === da.activity_id,
+                ).length === 0,
             );
 
         const suggestions = _.reduce(
@@ -864,18 +870,18 @@ class Summary extends React.Component {
                     _.uniq(
                         _.map(
                             self.state.desiredActivities,
-                            da => da.activity_ref_id
-                        )
+                            da => da.activity_ref_id,
+                        ),
                     ).length !== _.size(self.state.desiredActivities)
                         ? getNonValidatedSuggestions(
                             da.id,
-                            self.state.suggestions[da.activity_ref_id]
+                            self.state.suggestions[da.activity_ref_id],
                         )
                         : self.state.suggestions[da.activity_ref_id];
 
-                return {...acc, [da.id]: val};
+                return { ...acc, [da.id]: val };
             },
-            {}
+            {},
         );
 
         const evaluationAppointments = application
@@ -883,7 +889,7 @@ class Summary extends React.Component {
             .map(app => ({
                 refId: app.activity_ref_id,
                 teacher: app.teacher,
-                timeInterval: app.time_interval
+                timeInterval: app.time_interval,
             }));
 
         const activitiesDisplay = _.chain(this.state.desiredActivities)
@@ -906,7 +912,11 @@ class Summary extends React.Component {
                         evaluationLevelRefs={this.props.evaluation_level_refs}
                         //Let child component keep track of begin_at changes
                         //To reload suggestions
-                        application={{...application, begin_at: this.state.begin_at, stopped_at: this.state.stopped_at}}
+                        application={{
+                            ...application,
+                            begin_at: this.state.begin_at,
+                            stopped_at: this.state.stopped_at,
+                        }}
                         suggestions={suggestions[da.id]}
                         desiredActivities={this.state.desiredActivities}
                         isAdmin={isAdmin}
@@ -922,7 +932,7 @@ class Summary extends React.Component {
                         handleSelectSuggestion={(
                             activityId,
                             desiredActivityId,
-                            activityRefId
+                            activityRefId,
                         ) =>
                             this.handleSelectSuggestion(
                                 activityId,
@@ -935,12 +945,12 @@ class Summary extends React.Component {
                         handleRemoveStudent={(
                             activity_id,
                             desired_activity_id,
-                            activityRefId
+                            activityRefId,
                         ) =>
                             this.handleRemoveStudent(
                                 activity_id,
                                 desired_activity_id,
-                                activityRefId
+                                activityRefId,
                             )
                         }
                         handleRemoveDesiredActivity={id =>
@@ -949,20 +959,20 @@ class Summary extends React.Component {
                         isAlreadyBusy={ti => this.isAlreadyBusy(ti)}
                         handleSelectSuggestionOption={(
                             activityId,
-                            desiredActivityId
+                            desiredActivityId,
                         ) =>
                             this.handleSelectSuggestionOption(
                                 activityId,
-                                desiredActivityId
+                                desiredActivityId,
                             )
                         }
                         handleRemoveSuggestionOption={(
                             activityId,
-                            desiredActivityId
+                            desiredActivityId,
                         ) =>
                             this.handleRemoveSuggestionOption(
                                 activityId,
-                                desiredActivityId
+                                desiredActivityId,
                             )
                         }
                         handleChangeDesiredActivity={
@@ -985,7 +995,7 @@ class Summary extends React.Component {
                             value={s.id}
                             disabled={(s.id === ActivityApplicationStatus.ACTIVITY_PROPOSED_ID ||
                                     s.id === ActivityApplicationStatus.ACTIVITY_ATTRIBUTED_ID) &&
-                                !_.reduce(this.state.desiredActivities, (acc, d) => acc && d.is_validated, true
+                                !_.reduce(this.state.desiredActivities, (acc, d) => acc && d.is_validated, true,
                                 )}
                             checked={this.state.status_id == s.id}
                             onChange={e => {
@@ -1004,7 +1014,7 @@ class Summary extends React.Component {
         const isStopping = findAndGet(
             this.props.statuses,
             (s) => parseInt(s.id, 10) === parseInt(this.state.status_id, 10),
-            "is_stopping"
+            "is_stopping",
         );
 
 
@@ -1012,7 +1022,7 @@ class Summary extends React.Component {
 
         const desiredActivitiesValidatedCount = _.filter(
             this.state.desiredActivities,
-            da => da.is_validated
+            da => da.is_validated,
         ).length;
 
         const paymentLink = this.props.payer
@@ -1024,25 +1034,18 @@ class Summary extends React.Component {
                 ? application.user.adherent_number
                 : "";
 
-        const availabilities = _.chain(application.user.planning.time_intervals)
-            .filter(ti => {
-                    return ti.kind === 'p' &&
-                        moment(ti.start).isBetween(
-                            moment(application.season.start),
-                            moment(application.season.end)
-                        )
-                }
-            )
-            .orderBy(ti => ti.start)
-            .map(
-                int =>
-                    `${moment(int.start).format("dddd")} : ${moment(
-                        int.start
-                    ).format("HH:mm")} - ${moment(int.end).format("HH:mm")}`
-            )
-            .uniq()
-            .map((tag, i) => <p key={i}>{tag}</p>)
-            .value();
+        const availabilities =
+            Summary.filterTimeIntervals(application.user.planning.time_intervals, application.season)
+                .orderBy(ti => ti.start)
+                .map(
+                    int =>
+                        `${moment(int.start).format("dddd")} : ${moment(
+                            int.start,
+                        ).format("HH:mm")} - ${moment(int.end).format("HH:mm")}`,
+                )
+                .uniq()
+                .map((tag, i) => <p key={i}>{tag}</p>)
+                .value();
 
         let otherApplications = (
             <p className="m-b-xl">
@@ -1055,7 +1058,7 @@ class Summary extends React.Component {
                 this.state.application.user.activity_applications,
                 aa =>
                     aa.season_id === this.state.application.season_id &&
-                    aa.id !== this.state.application.id
+                    aa.id !== this.state.application.id,
             );
 
             otherApplications = _.map(applications, (a, i) => {
@@ -1100,16 +1103,16 @@ class Summary extends React.Component {
                                 <UserWithInfos userId={application.user.id}>
                                     {application.user.first_name}{" "}
                                     <b>{application.user.last_name}</b>
-                                    <i className="fas fa-info-circle m-l-sm"/>
+                                    <i className="fas fa-info-circle m-l-sm" />
                                 </UserWithInfos>
                                 , {moment().diff(application.user.birthday, "years")} ans
                                 <small> - Adhérent n°{adhesionNumber}</small>
                             </h2>
 
-                            <div className="vertical-hr md"/>
+                            <div className="vertical-hr md" />
 
                             <ButtonModal
-                                modalProps={{style: {content: {position: "static"}}}}
+                                modalProps={{ style: { content: { position: "static" } } }}
                                 count={otherApplications.length}
                                 label="Autres demandes"
                                 className="btn btn-primary count-button">
@@ -1125,15 +1128,15 @@ class Summary extends React.Component {
 
                         <div className="flex flex-center-aligned">
                             <div className="flex m-r-sm flex-center-aligned">
-                                <label className="m-r-xs" style={{flex: "1"}}>Référent.e</label>
+                                <label className="m-r-xs" style={{ flex: "1" }}>Référent.e</label>
                                 <select
-                                    style={{flex: "3"}}
+                                    style={{ flex: "3" }}
                                     className="custom-select"
                                     value={this.state.referent_id || ""}
-                                    onChange={e => this.updateApplication({referent_id: parseInt(e.target.value)})}>
+                                    onChange={e => this.updateApplication({ referent_id: parseInt(e.target.value) })}>
                                     <option value="">SELECTIONNER UN REFERENT</option>
                                     {_.sortBy(this.props.admins, "first_name").map(optionMapper({
-                                        label: u => `${u.first_name} ${u.last_name}`
+                                        label: u => `${u.first_name} ${u.last_name}`,
                                     }))}
                                 </select>
                             </div>
@@ -1141,7 +1144,7 @@ class Summary extends React.Component {
                                 <div className="flex flex-center-aligned">
                                     <label className="m-r-xs">Statut</label>
                                     <button
-                                        style={{flex: "none"}}
+                                        style={{ flex: "none" }}
                                         className="custom-select flex flex-space-between-justified"
                                         data-toggle="modal"
                                         data-target="#statusModal">
@@ -1170,21 +1173,21 @@ class Summary extends React.Component {
                                 href={"/users/" + application.user.id}
                                 data-tippy-content="Voir la fiche"
                                 className="btn btn-primary m-r-sm">
-                                <i className="fas fa-user"/>
+                                <i className="fas fa-user" />
                             </a>
                             {Boolean(this.props.payer) &&
                                 <a
                                     href={paymentLink}
                                     data-tippy-content="Règlements"
                                     className="btn btn-primary m-r-sm">
-                                    <i className="fas fa-euro-sign"/>{" "}
+                                    <i className="fas fa-euro-sign" />{" "}
                                 </a>}
                             <button
                                 onClick={() => this.sendConfirmationMail()}
                                 className="btn btn-primary"
                                 data-tippy-content="Envoyer mail confirmation"
                                 disabled={this.state.sendingMail || !_.reduce(this.state.desiredActivities, (acc, des) => acc || des.is_validated, false)}>
-                                <i className="fas fa-envelope"/>
+                                <i className="fas fa-envelope" />
 
                             </button>
                             <small className="m-l-sm m-r">
@@ -1194,7 +1197,7 @@ class Summary extends React.Component {
                                         : "Pas envoyé"}
                                 </i>
                             </small>
-                            <div style={{minWidth: "175px"}} className="flex-column m-r-md">
+                            <div style={{ minWidth: "175px" }} className="flex-column m-r-md">
                                 <div className="form-group">
                                     <label htmlFor="begin_at">
                                         {"Début le"}
@@ -1205,7 +1208,7 @@ class Summary extends React.Component {
                                         name="begin_at"
                                         value={moment(this.state.begin_at).format(ISO_DATE_FORMAT)}
                                         onKeyDown={(e) => {
-                                            this.useDateChangedTimeout = true
+                                            this.useDateChangedTimeout = true;
                                         }}
                                         onChange={(e) => {
                                             if (this.changeDateTimeout) {
@@ -1220,16 +1223,16 @@ class Summary extends React.Component {
 
                                             this.setState({
                                                 begin_at: value,
-                                                old_begin_at: (this.state.old_begin_at || this.state.begin_at)
+                                                old_begin_at: (this.state.old_begin_at || this.state.begin_at),
                                             });
                                         }}
                                         min={moment(this.state.application.season.start).format(ISO_DATE_FORMAT)}
-                                        max={moment(this.state.stopped_at || this.state.application.season.end).format(ISO_DATE_FORMAT)}/>
+                                        max={moment(this.state.stopped_at || this.state.application.season.end).format(ISO_DATE_FORMAT)} />
                                 </div>
                             </div>
 
                             {this.state.stopped_at && this.stopped_at !== "" ?
-                                <div style={{minWidth: "175px"}} className="flex-column">
+                                <div style={{ minWidth: "175px" }} className="flex-column">
                                     <div className="form-group">
                                         <label htmlFor="stop_date">{"Arrêt le"}</label>
                                         <input
@@ -1246,10 +1249,10 @@ class Summary extends React.Component {
                         <div className="flex flex-center-aligned">
                             {/* CHANGE QUESTIONNAIRE */}
                             <ButtonModal
-                                modalProps={{style: {content: {position: "static"}}}}
+                                modalProps={{ style: { content: { position: "static" } } }}
                                 className="btn btn-primary m-r-sm count-button"
                                 tooltip="Questionnaire changement"
-                                label={<i className="fas fa-question-circle"/>}
+                                label={<i className="fas fa-question-circle" />}
                                 count={this.props.application_change_questionnaires.forms.length}
                                 disabled={this.props.application_change_questionnaires.forms.length === 0}>
                                 <div className="ibox">
@@ -1266,7 +1269,7 @@ class Summary extends React.Component {
                                                     .forms
                                                     .map(e => e.form)
                                                     .map(optionMapper({
-                                                        label: e => `Cours ${findAndGet(this.props.activityRefs, r => r.id === e.activity.activity_reéf_id, "label")} dans ${e.activity.group_name} avec ${e.activity.teacher.first_name} ${e.activity.teacher.last_name}`
+                                                        label: e => `Cours ${findAndGet(this.props.activityRefs, r => r.id === e.activity.activity_reéf_id, "label")} dans ${e.activity.group_name} avec ${e.activity.teacher.first_name} ${e.activity.teacher.last_name}`,
                                                     }))
                                             }
                                         </select>
@@ -1286,12 +1289,12 @@ class Summary extends React.Component {
 
                             {/* AUTO-EVALUATIONS */}
                             <ButtonModal
-                                modalProps={{style: {content: {position: "static"}}}}
+                                modalProps={{ style: { content: { position: "static" } } }}
                                 disabled={this.props.new_student_level_questionnaires.length === 0}
                                 count={this.props.new_student_level_questionnaires.length}
                                 className="btn btn-primary count-button m-r-sm"
                                 tooltip="Auto-évaluation de niveau"
-                                label={<i className="fas fa-user-check"/>}>
+                                label={<i className="fas fa-user-check" />}>
                                 <div className="ibox">
                                     <div className="ibox-title">
                                         <h4>Auto-évaluation de niveau</h4>
@@ -1318,12 +1321,12 @@ class Summary extends React.Component {
                                                     getAnswersObject(
                                                         findAndGet(
                                                             this.props.new_student_level_questionnaires,
-                                                            {id: this.state.newStudentLevelQuestionnaireId},
-                                                            "answers"
-                                                        )
+                                                            { id: this.state.newStudentLevelQuestionnaireId },
+                                                            "answers",
+                                                        ),
                                                     )
                                                 }
-                                                readOnly/>
+                                                readOnly />
                                         </div>
                                     }
                                 </div>
@@ -1335,10 +1338,10 @@ class Summary extends React.Component {
                                 className="btn count-button btn-primary"
                                 count={this.props.student_evaluations.forms.length}
                                 disabled={this.props.student_evaluations.forms.length === 0}
-                                modalProps={{style: {content: {position: "static"}}}}
+                                modalProps={{ style: { content: { position: "static" } } }}
                                 label={<span className="fa-layers">
-                                    <i className="fas fa-chalkboard-teacher"/>
-                                    <i className="fas fa-check" data-fa-transform="shrink-9 right-4.5 up-2.5"/>
+                                    <i className="fas fa-chalkboard-teacher" />
+                                    <i className="fas fa-check" data-fa-transform="shrink-9 right-4.5 up-2.5" />
                                 </span>}>
                                 <div className="ibox">
                                     <div className="ibox-title">
@@ -1354,7 +1357,7 @@ class Summary extends React.Component {
                                                     .forms
                                                     .map(e => e.form)
                                                     .map(optionMapper({
-                                                        label: e => `Pour ${e.season.label}, cours ${findAndGet(this.props.activityRefs, r => r.id === e.activity.activity_ref_id, "label")} dans ${e.activity.group_name} avec ${e.teacher.first_name} ${e.teacher.last_name}`
+                                                        label: e => `Pour ${e.season.label}, cours ${findAndGet(this.props.activityRefs, r => r.id === e.activity.activity_ref_id, "label")} dans ${e.activity.group_name} avec ${e.teacher.first_name} ${e.teacher.last_name}`,
                                                     }))
                                             }
                                         </select>
@@ -1365,19 +1368,19 @@ class Summary extends React.Component {
                                             {renderEvaluationForm(
                                                 this.props.student_evaluations,
                                                 this.props.student_evaluation_questions,
-                                                this.state.studentEvaluationId
+                                                this.state.studentEvaluationId,
                                             )}
                                         </div>
                                     }
                                 </div>
                             </ButtonModal>
 
-                            <div className="vertical-hr"/>
+                            <div className="vertical-hr" />
 
                             {/* CRENEAUX EVAL */}
                             <ButtonModal
-                                modalProps={{style: {content: {position: "static"}}}}
-                                label={<i className="fas fa-calendar-check"/>}
+                                modalProps={{ style: { content: { position: "static" } } }}
+                                label={<i className="fas fa-calendar-check" />}
                                 className="btn btn-primary count-button m-r-sm"
                                 tooltip="Créneau d'évaluation"
                                 disabled={_.size(application.evaluation_appointments) === 0}>
@@ -1385,14 +1388,14 @@ class Summary extends React.Component {
                                     noIntervalMessage="Pas de créneau"
                                     showChoiceNumber={false}
                                     activityRefs={this.props.activityRefs}
-                                    data={evaluationAppointments}/>
+                                    data={evaluationAppointments} />
                             </ButtonModal>
 
                             {/* DISPOS. */}
                             <ButtonModal
-                                modalProps={{style: {content: {position: "static"}}}}
+                                modalProps={{ style: { content: { position: "static" } } }}
                                 count={availabilities.length}
-                                label={<i className="fas fa-clock"/>}
+                                label={<i className="fas fa-clock" />}
                                 className="btn btn-primary count-button m-r-sm"
                                 tooltip="Disponibilités horaires">
                                 <div className="ibox">
@@ -1400,15 +1403,30 @@ class Summary extends React.Component {
                                         <h4>Disponibilités horaires</h4>
                                     </div>
                                     <div className="ibox-content">
-                                        {availabilities}
+                                        {this.props.canEditAvailabilities ?
+                                            <TimePreferencesStep
+                                                selectionLabels={[_.head(this.state.application.activity_refs).display_name]}
+                                                mode={PLANNING_MODE}
+                                                planningId={this.props.application.user.planning.id}
+                                                intervals={this.props.application.user.planning.time_intervals}
+                                                season={this.state.application.season}
+                                                seasons={this.props.seasons}
+                                                childhoodPreferences={null}
+                                                activityRefs={this.state.application.activity_refs}
+                                                authToken={null}
+                                                handleUpdateChildhoodPreferences={null}
+                                            />
+                                            :
+                                            availabilities
+                                        }
                                     </div>
                                 </div>
                             </ButtonModal>
 
                             {/* INFOS SUPP. */}
                             <ButtonModal
-                                modalProps={{style: {content: {position: "static"}}}}
-                                label={<i className="fas fa-info-circle"/>}
+                                modalProps={{ style: { content: { position: "static" } } }}
+                                label={<i className="fas fa-info-circle" />}
                                 count={application.user
                                     .handicap_description ? 1 : 0}
                                 className="btn btn-primary count-button m-r-sm"
@@ -1422,7 +1440,7 @@ class Summary extends React.Component {
                                             .handicap_description.length > 0
                                             ? <div><p><b>Infos:</b> {application.user
                                                 .handicap_description}</p>
-                                                <hr/>
+                                                <hr />
                                             </div>
                                             : ""}
                                     </div>
@@ -1431,9 +1449,9 @@ class Summary extends React.Component {
 
                             {/* COMMENTAIRES */}
                             <ButtonModal
-                                modalProps={{style: {content: {position: "static"}}}}
+                                modalProps={{ style: { content: { position: "static" } } }}
                                 count={this.state.comments.length}
-                                label={<i className="fas fa-comment"/>}
+                                label={<i className="fas fa-comment" />}
                                 className="btn btn-primary count-button m-r-sm"
                                 tooltip="Commentaires">
                                 <CommentSection
@@ -1447,7 +1465,7 @@ class Summary extends React.Component {
                                     handleSaveComment={() => this.handleSaveComment()}
                                     handleUpdateEditedCommentContent={e => this.handleUpdateEditedCommentContent(e)}
                                     handleSaveCommentEdition={() => this.handleSaveCommentEdition()}
-                                    handleCommentEdition={id => this.handleCommentEdition(id)}/>
+                                    handleCommentEdition={id => this.handleCommentEdition(id)} />
                             </ButtonModal>
 
                             {/* SUPPRESSION */}
@@ -1458,7 +1476,7 @@ class Summary extends React.Component {
                                 onClick={e =>
                                     this.handleRemoveActivityApplication(e)
                                 }>
-                                <i className="fas fa-trash"/>
+                                <i className="fas fa-trash" />
                             </button>
                         </div>
 
@@ -1496,9 +1514,9 @@ class Summary extends React.Component {
                                                 : null}
                                         </div>
                                         <div className="modal-footer flex flex-space-between-justified">
-                                            <button className="btn" style={{marginRight: "auto"}} type="button"
+                                            <button className="btn" style={{ marginRight: "auto" }} type="button"
                                                     data-dismiss="modal">
-                                                <i className="fas fa-times m-r-sm"/>
+                                                <i className="fas fa-times m-r-sm" />
                                                 Annuler
                                             </button>
 
@@ -1508,7 +1526,7 @@ class Summary extends React.Component {
                                                 onClick={() =>
                                                     this.handleSaveStatus()
                                                 }>
-                                                <i className="fas fa-check m-r-sm"/>
+                                                <i className="fas fa-check m-r-sm" />
                                                 Valider
                                             </button>
                                         </div>
@@ -1522,6 +1540,18 @@ class Summary extends React.Component {
                 </div>
             </React.Fragment>
         );
+    }
+
+    static filterTimeIntervals(time_intervals, season) {
+        return _.chain(time_intervals)
+            .filter(ti => {
+                    return ti.kind === "p" &&
+                        moment(ti.start).isBetween(
+                            moment(season.start).startOf("week"),
+                            moment(season.end),
+                        );
+                },
+            );
     }
 }
 
@@ -1540,7 +1570,7 @@ function renderEvaluationForm(forms, questions, formId) {
                 ...forms.common_reference_data,
                 ...form.contextual_reference_data,
             }}
-            answers={answers}/>;
+            answers={answers} />;
     } else
         return <h4>Echec du rendu : cette évaluation n'existe pas</h4>;
 }

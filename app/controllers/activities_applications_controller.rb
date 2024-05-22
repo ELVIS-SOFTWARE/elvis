@@ -71,8 +71,6 @@ class ActivitiesApplicationsController < ApplicationController
     activity_application = ActivityApplication.includes(
       { user: [{ planning: [:time_intervals] }] },
       activity_refs: { activity_ref_kind: {} },
-      users: {},
-      locations: {},
       activity_application_status: {},
       evaluation_appointments: %i[time_interval teacher],
       comments: [:user],
@@ -127,8 +125,6 @@ class ActivitiesApplicationsController < ApplicationController
                                                                },
                                                              },
                                                              activity_refs: { include: [:activity_ref_kind] },
-                                                             users: {},
-                                                             locations: {},
                                                              activity_application_status: {},
                                                              pre_application_activity: {
                                                                include: {
@@ -247,6 +243,7 @@ class ActivitiesApplicationsController < ApplicationController
       end,
     }
 
+    @can_edit_availabilities = Parameter.get_value("activity_applications.can_edit_availabilities") == true
     respond_to do |format|
       format.html
       format.json { render json: @activity_application }
@@ -289,9 +286,14 @@ class ActivitiesApplicationsController < ApplicationController
 
     # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
-                              .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and !ar["allows_timeslot_selection"] }
+                              .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and ar["substitutable"] }
                               .group_by { |ar| ar["kind"] }
-                              .transform_values { |values| values.max_by { |ar| ar["display_price"] } }
+                              .transform_values do |values|
+      default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
+      default_activity = values.find { |ar| ar["id"] == default_activity_id }
+
+      default_activity || values.max_by { |ar| ar["display_price"] }
+    end
                               .values
 
     @activity_refs = display_activity_refs
@@ -498,7 +500,7 @@ class ActivitiesApplicationsController < ApplicationController
         else
           # @type [User] new user
           @user = if (params[:application][:infos][:id]).zero?
-                    User.new
+                    User.new(attached_to_id: params[:application][:infos][:attached_to_id])
                   else
                     User.find(params[:application][:infos][:id])
                   end
@@ -542,22 +544,24 @@ class ActivitiesApplicationsController < ApplicationController
           @user.update_addresses params[:application][:infos][:addresses]
         end
 
+        # cette ligne de code est à supprimer
+        # dans le cadre du décommissionnement de
+        # la fonctionnalité "accompagnant / additional_student"
         additional_students = params[:application][:additionalStudents]
 
-        selectedTeachers = []
-        params[:application][:selectedTeachers].each do |teacherId|
-          teacher = User.find(teacherId)
-          selectedTeachers << teacher
-        end
-
-        selectedLocations = []
-        params[:application][:locations].each do |locationId|
-          location = Location.find(locationId)
-          selectedLocations << location
-        end
-
+        # enregistrement des disponibilités de l'élève
         @user.planning.update_intervals(params[:application][:intervals], season.id)
 
+        # mise à jour de l'indicateur de paiement
+        payers = params.dig(:application, :infos, :payers)
+        if payers
+          @user.is_paying = payers.any? { |p| p == @user.id }
+        end
+
+        # @user.skip_confirmation_notification!
+        @user.save!
+
+        # enregistrement des consentements de l'élève
         params.dig(:application, :infos, :consent_docs)&.each do |doc|
 
           consentement = @user.consent_document_users.find_or_create_by(consent_document_id: "#{doc[0]}".gsub("id_", ""))
@@ -566,14 +570,34 @@ class ActivitiesApplicationsController < ApplicationController
           consentement.save!
         end
 
-        payers = params.dig(:application, :infos, :payers)
+        family_links_with_user = params.dig(:application, :infos, :family_links_with_user)
 
-        if payers
-          @user.is_paying = payers.any? { |p| p == @user.id }
+        family_links_with_user&.each do |family_link|
+          family_link_member = User.find_by(id: family_link[:id])&.as_json(include: {
+            telephones: {},
+            addresses: {}
+          })
+
+          next if family_link_member.nil?
+
+          family_link.merge!(family_link_member: family_link_member)
+
+          # force values to boolean (possible values are true, false, nil)
+          family_link[:is_to_call] = !!family_link[:is_to_call]
+          family_link[:is_accompanying] = !!family_link[:is_accompanying]
+          family_link[:is_legal_referent] = !!family_link[:is_legal_referent]
+
+          is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
+            [family_link],
+            @user,
+            season,
+            send_confirmation: false
+          )
+
+          unless is_created
+            raise "Erreur lors de la création ou mise à jour d'un lien familial (#{current_user.id} -> #{used_user.id})"
+          end
         end
-
-        # @user.skip_confirmation_notification!
-        @user.save!
 
         # il faut que le user soit sauvegardé pour pouvoir lui associer des membres de la famille
         @user.update_is_paying_of_family_links(payers, season, false)
@@ -601,9 +625,8 @@ class ActivitiesApplicationsController < ApplicationController
           end
         end
 
-        set_status = Parameter.find_by(label: "activityApplication.default_status")
-
-        status = ActivityApplicationStatus.find(set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID)
+        default_aa_status = Parameter.find_by(label: "activityApplication.default_status")
+        initial_aa_status = ActivityApplicationStatus.find(default_aa_status&.parse&.positive? ? default_aa_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID)
 
         if params[:preApplicationActivityId].present? && params[:preApplicationActivityId] != "0" #  == "Change"
           pre_application_activity = PreApplicationActivity.find(params[:preApplicationActivityId])
@@ -621,18 +644,19 @@ class ActivitiesApplicationsController < ApplicationController
         end
 
         params[:application][:selectedActivities].each do |act|
+          # Création de l'inscription
           @activity_application = ActivityApplication.create!(
             user: @user,
-            users: selectedTeachers,
-            locations: selectedLocations,
-            activity_application_status: status,
+            activity_application_status: initial_aa_status,
             season: season,
             begin_at: params[:application][:begin_at] || season.start,
           )
 
+          # Ajout, à l'inscription, des activités souhaitées
           #  Here, additionalStudenst are indexed incrementaly by their position in family, because they may not be already created
           @activity_application.add_activities([act], additional_students, @user.family)
 
+          # Ajout des commentaires à l'inscription
           unless params[:application][:comment].blank?
             content = params[:application][:comment].strip
             @activity_application.comments << Comment.new(user_id: params[:application][:user][:id], content: content)
@@ -665,7 +689,7 @@ class ActivitiesApplicationsController < ApplicationController
 
             pre_application_activity.save
           else
-            pre_application_desired_activity = PreApplicationDesiredActivity.create(
+            pre_application_desired_activity = PreApplicationDesiredActivity.create!(
               desired_activity: @activity_application.desired_activities.last,
               pre_application: pre_application,
               activity_application: @activity_application,
@@ -764,6 +788,23 @@ class ActivitiesApplicationsController < ApplicationController
         errors: ["Une erreur est survenue lors de la création de votre demande d'inscription, veuillez-contactez l'administration."],
       }
     end
+  end
+
+  def create_import_csv
+    importer_name = Parameter.get_value('activity_applications.importer_name')
+    importer = case importer_name
+               when 'tes_importer'
+                 ActivityApplications::TesImporter.new params[:file]
+               else
+                 nil
+               end
+
+    render json: { error: "L'import de fichiers CSV est désactivé" }, status: :unprocessable_entity and return if importer.nil?
+
+    result = importer.call
+
+    status = result.delete(:status)
+    render json: result, status: status
   end
 
   def bulk_update

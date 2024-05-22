@@ -50,14 +50,6 @@ class ActivityRefController < ApplicationController
     @activity_refs = ActivityRef.all.group_by(&:kind).transform_values { |arr| arr.map { |a| { label: a.label, id: a.id } } }.to_a
     @next_cycles = []
 
-    @activity_ref_application_options = []
-    @activity_ref_application_options.push("") if @activity_ref.has_additional_student
-    @activity_ref_application_options.push("is_lesson") if @activity_ref.is_lesson
-    @activity_ref_application_options.push("is_visible_to_admin") if @activity_ref.is_visible_to_admin
-    @activity_ref_application_options.push("is_unpopular") if @activity_ref.is_unpopular
-    @activity_ref_application_options.push("is_evaluable") if @activity_ref.is_evaluable
-    @activity_ref_application_options.push("allows_timeslot_selection") if @activity_ref.allows_timeslot_selection
-
     @teachers = @activity_ref.users.map { |u| { first_name: u.first_name, last_name: u.last_name, id: u.id } }
 
   end
@@ -95,13 +87,6 @@ class ActivityRefController < ApplicationController
   def edit
 
     @activity_ref = ActivityRef.find(params[:id])
-    @activity_ref_application_options = []
-    @activity_ref_application_options.push("") if @activity_ref.has_additional_student
-    @activity_ref_application_options.push("is_lesson") if @activity_ref.is_lesson
-    @activity_ref_application_options.push("is_visible_to_admin") if @activity_ref.is_visible_to_admin
-    @activity_ref_application_options.push("is_unpopular") if @activity_ref.is_unpopular
-    @activity_ref_application_options.push("is_evaluable") if @activity_ref.is_evaluable
-    @activity_ref_application_options.push("allows_timeslot_selection") if @activity_ref.allows_timeslot_selection
 
     @activity_kinds = ActivityRefKind.all.map { |ar| [ar.name, ar.id] }
     @seasons = Season.order(:start)
@@ -291,11 +276,13 @@ class ActivityRefController < ApplicationController
       :is_unpopular,
       :is_evaluable,
       :allows_timeslot_selection,
+      :substitutable,
       :next_cycles,
       :is_work_group,
       :activity_type,
       :users,
-      :nb_lessons
+      :nb_lessons,
+      :duration,
     )
   end
 end

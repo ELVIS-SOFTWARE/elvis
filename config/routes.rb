@@ -98,6 +98,8 @@ Rails.application.routes.draw do
   # mount Sidekiq::Web => "/sidekiq"
 
   resources :activities_applications, path: "inscriptions"
+  post "/inscriptions/create_import_csv", to: "activities_applications#create_import_csv"
+  
   get "/get_default_and_list_activity_application_statuses", to: "activities_applications#get_default_and_list_activity_application_statuses"
   post "/set_default_activity_application_status", to: "activities_applications#set_default_activity_application_status"
 
@@ -209,6 +211,7 @@ Rails.application.routes.draw do
   put "/users/:id/update_family", to: "users#update_family"
 
   post "/users/resend_confirmation", to: "users#resend_confirmation"
+  post "/users/reset_password", to: "users#reset_password"
 
   get "/u/first_login", to: "users#first_login", as: "welcome"
   patch "/u/update_email", to: "users#update_email", as: "update_email"
@@ -230,6 +233,7 @@ Rails.application.routes.draw do
   post "/users/search_for_admin", to: "users#search_for_admin"
   post "/users/:id/family_links_with_user", to: "users#get_family_links_with_user"
   post "/users/list", to: "users#list"
+  get "/users/:user_id/family", to: "users#family"
    # Utilisé pour peupler un select
   post "/users/simple_list", to: "users#simple_list"
   post "/users/:id/absences_list", to: "users#list_abscences"
@@ -244,7 +248,6 @@ Rails.application.routes.draw do
   get "/update_family_members_unsafe", to: "family_members#update_all"
 
   # (pour élèves/admin) page de demande d'inscription pour la saison prochaine (renouveler/arrêter les activités actuelles + nouvelles activités)
-  get "/new_application_v1/:id", to: "users#new_application_v1", as: "new_application_v1"
   get "/new_application/:id", to: "users#new_application", as: "new_application"
   get "/create_account/:id", to: "users#create_account"
   patch "/save_new_account/:id", to: "users#save_new_account"
@@ -336,6 +339,7 @@ Rails.application.routes.draw do
   get "/plannings/availabilities", to: "planning#show_availabilities", as: :availabilities_portal
   get "/plannings/availabilities/:id(/:date)", to: "planning#show_availabilities_for_date", as: :availabilities_planning
   patch "/plannings/availabilities/:id", to: "planning#update_availabilities"
+  patch "/plannings/availabilities/:id/can_update", to: "planning#can_update_availabilities"
   post "/plannings/availabilities/:id/copy", to: "planning#copy_availabilities", as: :copy_planning
   get "/plannings/conflict/:conflict_id", to: "planning#show_for_conflict"
   get "/plannings/all_rooms", to: "planning#show_all_rooms"

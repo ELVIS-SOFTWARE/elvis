@@ -118,7 +118,7 @@
                     <p style="font-size: 14px; line-height: 180%; text-align: center;">
                         <span style="font-family: Montserrat, sans-serif; font-size: 16px; line-height: 28.8px;">
                             <%@school_informations = School.includes(:address).first%>
-                          Votre compte a bien été créé sur la plateforme de <strong><%= @school_informations.name%>.</strong><br />
+                          Votre compte a bien été créé sur la plateforme de <strong><%= Parameter.get_value("app.name") || @school_informations&.name || "Elvis" %>.</strong><br />
                         </span>
                       <br/>
                     </p>

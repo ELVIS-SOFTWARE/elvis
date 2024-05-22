@@ -3,12 +3,12 @@
 class FamiliesCsvExporter
   def initialize
     @season = Season.current
-    @activities = Activity.for_season(@season)
+    @activities =  Activity.includes(:time_interval).where(time_intervals: {start: @season.start..@season.end})
     @activities_ids = @activities.map { |activity| activity.id }
   end
 
   def call
-    #pass1
+    pass1
     pass2
   end
 

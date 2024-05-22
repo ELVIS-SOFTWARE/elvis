@@ -457,15 +457,50 @@ class UsersController < ApplicationController
     }
   end
 
-  # No routes match this action
   def family
     @current_user = current_user
-    @user = if params[:user_id]
+    user = if params[:user_id]
               User.find(params[:user_id])
             else
               @current_user
             end
-    authorize! :read, @user
+    authorize! :read, user
+
+    season = Season.find_by(id: params[:season]) || Season.current_apps_season || Season.current
+
+    whole_family = user.whole_family(season)
+
+    attached_accounts = user.attached_accounts
+
+    members = (whole_family + attached_accounts).uniq(&:id)
+
+    respond_to do |format|
+      format.json {
+        render json: (members.map do |u|
+          user_json = u.as_json(
+            include: {
+              planning: { include: [:time_intervals] },
+              telephones: {},
+              adhesions: {},
+              activity_applications: {
+                include: :desired_activities
+              },
+              addresses: {},
+              instruments: {},
+              consent_document_users: {},
+              payer_payment_terms: {}
+            },
+            methods: %i[full_name]
+          )
+
+          user_json["family_links_with_user"] = u.family_links_with_user(season).as_json
+          user_json["availabilities"] = u.availabilities(season).as_json
+          user_json["avatar"] = u.avatar.attached? ? rails_blob_path(u.avatar, only_path: true) : nil
+
+          user_json
+        end)
+      }
+    end
   end
 
   def adherent_card
@@ -1146,202 +1181,6 @@ class UsersController < ApplicationController
                    })
   end
 
-  # à déplacer dans un nouveau contrôleur lors de la refacto
-  # (pour élèves/admin) page de demande d'inscription pour la saison prochaine (renouveler/arrêter les activités actuelles + nouvelles activités)
-  def new_application_v1
-    @hide_navigation = false
-    # @type [User]
-    user = User.includes(pre_applications: :pre_application_activities).find(params[:id])
-    @season = Season.current_apps_season || Season.current
-
-    # redirect_to "/401" and return if !@season || DateTime.now < @season.opening_date_for_applications
-    pre_application_id = user.pre_applications.where(season: @season).pick(:id)
-
-    unless pre_application_id
-      pre_application_id = user.pre_applications.create!(
-        user: user,
-        season: @season
-      ).id
-
-      statuses = ActivityApplicationStatus.where(is_stopping: false).pluck(:id)
-      activity_ids = Activity
-                       .joins([
-                                :activity_ref,
-                                { desired_activities: :activity_application }
-                              ])
-                       .includes([
-                                   :activity_ref,
-                                   { desired_activities: :activity_application }
-                                 ])
-                       .where({
-                                activity_application: {
-                                  activity_application_status_id: statuses,
-                                  season_id: @season.previous.id,
-                                  user_id: user.id
-                                }
-                              })
-                       .where({
-                                activity_ref: {
-                                  activity_type: ActivityRef.activity_types
-                                                            .except(:cham)
-                                                            .keys
-                                                            .append(nil)
-                                }
-                              })
-                       .pluck(:id)
-
-      activity_ids.each do |activity_id|
-        PreApplicationActivity.create!(
-          activity_id: activity_id,
-          pre_application_id: pre_application_id
-        )
-      end
-
-      # comment for now, we don't want to copy the availabilities to use default school availabilities
-      # TimeIntervals::CopyAvailabilities.new(user.planning_id, @season.previous, @season, ["p"]).execute
-    end
-
-    #  We need to update the desired_activities if they change
-    # (the activities don't change, they are from the previous season)
-    # desired_activities = [] << user.pre_application.desired_activities.to_a
-
-    # # We only take desired activities which are not assigned, no activity, because otherwise,
-    ## they are in the activities above, and this would create duplicates
-    # desired_activities << user.get_desired_activities.select {|da| da.activity.nil?}
-    # desired_activities.flatten!.uniq!
-
-    # user.pre_application.desired_activities = desired_activities
-    # user.pre_application.save
-
-    authorize! :manage, user
-    # @type [User]
-    @current_user = current_user
-
-    jsonize_pre_application = lambda { |pre_app_id|
-      PreApplication.find(pre_app_id).as_json(include: {
-        pre_application_desired_activities: {
-          include: {
-            activity_application: {
-              include: [:activity_application_status]
-            },
-            desired_activity: {
-              include: [:activity_ref]
-            }
-          }
-        },
-        pre_application_activities: {
-          include: {
-            activity_application: {
-              include: {
-                activity_application_status: {},
-                desired_activities: {
-                  include: {
-                    activity_ref: {
-                      include: {
-                        next_cycles: {
-                          include: :to
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            activity: {
-              include: {
-                activity_ref: {
-                  include: {
-                    next_cycles: {
-                      include: :to
-                    }
-                  }
-                },
-                teacher: {},
-                room: {},
-                time_interval: {}
-              }
-            }
-          }
-        },
-        user: { methods: %i[full_name] }
-      })
-    }
-
-    # pour un admin connecté, l'utilisateur de référence (point d'entrée) est le user qui est passé en paramètre
-    # lorsque l'utilisateur connecté n'est pas admin, l'utilisateur de référence est lui-même
-    reference_user = @current_user.is_admin? ? user : current_user
-    family_users =
-      reference_user
-        .get_users_self_is_paying_for(@season)
-        .select do |u|
-        # on ne garde que les élèves qui ont une inscription validée au cours de la saison précédente
-        u.id != user.id &&
-          ActivityApplication.where(
-            user_id: u.id,
-            season: @season.previous.id,
-            activity_application_status_id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID,
-                                             ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID]
-          ).any?
-      end
-
-    family_users ||= []
-    users_paying_for = user.get_users_paying_for_self.reject { |u| u.id == user.id }
-    if @current_user.is_admin
-      family_users += users_paying_for
-    elsif users_paying_for&.include?(current_user)
-      family_users << current_user
-    end
-
-    @pre_application = jsonize_pre_application.call(pre_application_id)
-
-    @family_users = []
-    family_users.uniq.each do |u|
-      user_json = User.find(u.id).as_json(methods: :full_name)
-      pre_app = u.pre_applications
-                 .includes(:pre_application_activities, :user)
-                 .where(season_id: @season.id)
-                 .first
-      user_json["pre_application"] = jsonize_pre_application.call(pre_app.id) if pre_app
-      @family_users << user_json
-    end
-
-    @user = user
-    # if @pre_application['pre_application_activities'][0]['activity_application']
-    #   @next_activity = Activity.find(@pre_application['pre_application_activities'][0]['activity_application']['desired_activities'][0]['activity_id'])
-    #                            .as_json(include: {
-    #                                       teacher: {},
-    #                                       room: {},
-    #                                       time_interval: {},
-    #                                     })
-    # end
-
-    @pre_application["pre_application_activities"]&.each do |pa|
-      if pa["activity_application"]
-        pa["activity_application"]["desired_activities"].each do |da|
-          next if da["activity_id"].nil?
-
-          pa["next_activity"] = Activity.find(da["activity_id"]).as_json(include: {
-            teacher: {},
-            room: {},
-            time_interval: {}
-          })
-        end
-      end
-    end
-
-    @pre_application["pre_application_desired_activities"]&.each do |pa|
-      unless pa["desired_activity"]["activity_id"].nil?
-
-        pa["activity_infos"] = Activity.find(pa["desired_activity"]["activity_id"]).as_json(include: {
-          teacher: {},
-          room: {},
-          time_interval: {}
-        })
-      end
-    end
-    @confirm_activity_text = Parameter.find_by(label: "confirm_activity_text")
-  end
-
   # (pour élèves/admin) page de gestion des inscriptions, affiche les inscriptions actuelles, les réinscription et les demandes d'inscription
   def new_application
     @hide_navigation = false
@@ -1420,7 +1259,11 @@ class UsersController < ApplicationController
               include: [:activity_application_status]
             },
             desired_activity: {
-              include: [:activity_ref]
+              include: {
+                activity_ref: {
+                  methods: %i[is_default_in_kind?]
+                }
+              }
             }
           }
         },
@@ -1434,9 +1277,14 @@ class UsersController < ApplicationController
                     activity_ref: {
                       include: {
                         next_cycles: {
-                          include: :to
+                          include: {
+                            to: {
+                              methods: %i[is_default_in_kind?]
+                            }
+                          }
                         }
-                      }
+                      },
+                      methods: %i[is_default_in_kind?]
                     }
                   }
                 }
@@ -1447,9 +1295,14 @@ class UsersController < ApplicationController
                 activity_ref: {
                   include: {
                     next_cycles: {
-                      include: :to
+                      include: {
+                        to: {
+                          methods: %i[is_default_in_kind?]
+                        }
+                      }
                     }
-                  }
+                  },
+                  methods: %i[is_default_in_kind?]
                 },
                 teacher: {},
                 room: {},
@@ -1534,13 +1387,20 @@ class UsersController < ApplicationController
                                                                                                                           activity_ref: {
                                                                                                                             include: {
                                                                                                                               next_cycles: {
-                                                                                                                                include: :to
+                                                                                                                                include: {
+                                                                                                                                  to: {
+                                                                                                                                    methods: %i[is_default_in_kind?]
+                                                                                                                                  }
+                                                                                                                                }
                                                                                                                               }
-                                                                                                                            }
+                                                                                                                            },
+                                                                                                                            methods: %i[is_default_in_kind?]
                                                                                                                           },
                                                                                                                           activity: {
                                                                                                                             include: {
-                                                                                                                              activity_ref: {},
+                                                                                                                              activity_ref: {
+                                                                                                                                methods: %i[is_default_in_kind?]
+                                                                                                                              },
                                                                                                                               teacher: {},
                                                                                                                               room: {},
                                                                                                                               time_interval: {}
@@ -1564,10 +1424,14 @@ class UsersController < ApplicationController
     @user_activities_applications = user.activity_applications.where(season_id: @season).as_json(include: { activity_application_status: {},
                                                                                                             desired_activities: {
                                                                                                               include: {
-                                                                                                                activity_ref: {},
+                                                                                                                activity_ref: {
+                                                                                                                  methods: %i[is_default_in_kind?]
+                                                                                                                },
                                                                                                                 activity: {
                                                                                                                   include: {
-                                                                                                                    activity_ref: {},
+                                                                                                                    activity_ref: {
+                                                                                                                      methods: %i[is_default_in_kind?]
+                                                                                                                    },
                                                                                                                     teacher: {},
                                                                                                                     room: {},
                                                                                                                     time_interval: {}
@@ -1616,6 +1480,16 @@ class UsersController < ApplicationController
     end
 
     render json: user_sended, status: :ok
+  end
+
+  def reset_password
+    user = User.find(params[:user_id])
+
+    return render json: {}, status: :unauthorized if !current_user.is_admin || user.id == current_user.id
+
+    Devise::Mailer.reset_password_instructions(user, user.set_reset_password_token).deliver_later
+
+    render json: {}, status: :ok
   end
 
   def all_doc_consented

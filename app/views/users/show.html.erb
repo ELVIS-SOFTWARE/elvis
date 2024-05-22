@@ -158,8 +158,8 @@
         <% end %>
 
         <div class="">
-          <% if @current_user == @user || !@current_user.teacher? %>
-            <%= link_to("/inscriptions/new?user_id=#{current_user.id}", class: "btn btn-primary btn-block m-t-sm") do %>
+          <% if (@current_user == @user || !@current_user.teacher?) && Season.registration_opened %>
+            <%= link_to("/inscriptions/new?user_id=#{@current_user.id}", class: "btn btn-primary btn-block m-t-sm") do %>
               <i class="fas fa-plus"></i> S'inscrire
             <% end %>
         <% end %>
@@ -250,15 +250,26 @@
 
       <% if current_user.is_admin || @current_user.is_paying_for?(@user) || @user.attached_to_id == @current_user.id %>
         <div class="ibox-content">
-          <% if @user.has_no_password? && !@user.attached? %>
-            <%= react_component("userForm/BtnResendEmail", {
-              user_id: @user.id
-            }) %>
+          <% unless @user.attached? %>
+            <% if @user.has_no_password? %>
+              <%= react_component("userForm/BtnResendEmail", {
+                user_id: @user.id
+              }) %>
+            <% elsif @current_user.is_admin %>
+              <%= react_component("utils/BtnApiElement", {
+                sendRequest: {
+                  type: "post",
+                  data: { user_id: @user.id },
+                  url: "/users/reset_password",
+                },
+                text: "Réinitialiser le mot de passe",
+                className: "btn btn-warning btn-block m-t-sm",
+                textError: "Le mot de passe n'a pas pu être réinitialisé. Veuillez réessayer.",
+                textSuccess: "Un email a été envoyé à l'utilisateur pour réinitialiser son mot de passe.",
+                textNoData: nil
+              }) %>
+            <% end %>
           <% end %>
-
-          <%#= link_to "/users/#{@user.id}", class: "btn btn-danger btn-block m-t-sm", method: :delete, data: { confirm: "Cela supprimera l'utilisateur, ses liens familiaux ainsi que son adhésion. Êtes-vous sûr ?" } do %>
-<!--            <i class="fas fa-trash m-r-sm"></i> Supprimer cet utilisateur-->
-          <%# end %>
 
           <%= react_component("RemoveComponent", {
             classname: "User",

@@ -263,16 +263,16 @@ export default class ActivityRefBasics extends React.Component {
                                 options={this.activityTypes}
                             />
                         </div>
-                        {/*<div className="col-sm-6">*/}
-                        {/*    <Field*/}
-                        {/*        label="Nombre de séances"*/}
-                        {/*        name="activityRef.nb_lessons"*/}
-                        {/*        type="number"*/}
-                        {/*        input={{placeholder: "(comme défini dans la saison)"}}*/}
-                        {/*        validate={composeValidators(mustBeIntegerOrUndefined, minValue(0))}*/}
-                        {/*        render={Input}*/}
-                        {/*    />*/}
-                        {/*</div>*/}
+                        <div className="col-sm-6">
+                            <Field
+                                label="Durée (en minutes)"
+                                name="activityRef.duration"
+                                type="number"
+                                required
+                                validate={composeValidators(required, mustBeIntegerOrUndefined, minValue(0))}
+                                render={Input}
+                            />
+                        </div>
                     </div>
 
                     <hr/>

@@ -37,12 +37,6 @@ class ActivityApplication < ApplicationRecord
   has_many :desired_activities_csv, -> { select(:id, :activity_application_id, :activity_ref_id) }, class_name: "DesiredActivity"
   has_many :activity_refs, through: :desired_activities
 
-  has_many :desired_teachers
-  has_many :users, through: :desired_teachers
-
-  has_many :desired_locations
-  has_many :locations, through: :desired_locations
-
   has_many :comments, as: :commentable
   has_many :comments_csv, -> { select(:id, :content, :commentable_id, :user_id) }, class_name: "Comment", as: :commentable
 
@@ -113,7 +107,6 @@ class ActivityApplication < ApplicationRecord
   # * les disponibilités renseignées, sinon
   # @return [Array<TimeInterval>] les disponibilités correspondantes
   def availabilities(include_validated: false)
-    # if childhood application, return selected preferences
     if self.desired_activities.joins(:activity_ref).where(activity_refs: { allows_timeslot_selection: true }).any?
       self
         .time_interval_preferences
@@ -122,7 +115,6 @@ class ActivityApplication < ApplicationRecord
         .map(&:time_interval)
         .compact
 
-      # else return non validated intervals in season's bounds
     else
       query = self
         .user
@@ -173,7 +165,11 @@ class ActivityApplication < ApplicationRecord
   end
 
   def pre_destroy
-    unless @current_user.is_admin
+    # get current_user if destroy job called from a controller
+    current_user = RequestStore.read(:request)&.controller_instance&.current_user
+
+    # if user is not admin or destroy request not coming from a controller
+    unless current_user&.is_admin
       set_status = Parameter.find_by(label: "activityApplication.default_status")
 
       default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID

@@ -20,6 +20,20 @@
     <%= f.check_box :is_for_child, id:"is_for_child",  required: false %> 
   </div>-->
 
+  <% if @activity_refs&.any? %>
+    <div class="form-group">
+      <%= react_component("common/SelectMultiple", {
+        all_features: @activity_refs.collect { |l| [l.label, l.id] },
+        features: [@activity_ref_kind.default_activity_ref_id],
+        isMulti: false,
+        isClearable: true,
+        confirmBeforeClear: false,
+        title: "Activité par défaut",
+        name: "activity_ref_kind[default_activity_ref_id]"
+      }) %>
+    </div>
+  <% end %>
+
   <div class="form-group">
     <%= f.submit "Sauvegarder", class: "btn btn-primary block full-width m-b" %>
   </div>

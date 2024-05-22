@@ -331,7 +331,7 @@ class MyActivitiesController < ApplicationController
         },
         args: {
           user: attendance.user,
-          activity: attendance.activity_instance.activity,
+          activity_instance: attendance.activity_instance,
         }
       )
 

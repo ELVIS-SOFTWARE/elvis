@@ -1,19 +1,33 @@
 module TimeIntervals
-    class CreateAvailabilities
-        def initialize(from, to, kind, planning_id, day, comment)
+
+
+  # Permet de créer un intervalle de temps de type "disponibilité" dans un planning.
+  # Si des conflits sont détectés, l'intervalle ne sera pas créé.
+  # Si le paramètre INTERVAL_STEPS est défini, l'intervalle sera segmenté en plusieurs intervalles de taille égale
+  # Paramètres :
+  # - from : Date de début de l'intervalle
+  # - to : Date de fin de l'intervalle
+  # - season_id : ID de la saison (pour la vérification des conflits)
+  # - planning_id : ID du planning dans lequel créer l'intervalle (planning d'un utilisateur)
+  # - comment : Commentaire à ajouter à l'intervalle
+  # Retourne : Tableau du (ou des) intervalle(s) créés())
+  class AvailabilitiesUtils
+        def initialize(from, to, season_id, planning_id, comment)
             @from = from
             @to = to
-            @kind = kind
-            @planning = Planning.includes(:time_intervals).find(planning_id)
-            day_start = day.to_date
+            @kind = 'p'
+            @planning = Planning.includes(:time_intervals).find_by(id: planning_id)
+            season = Season.find(season_id)
+            day_start = season.start
             day_end = day_start + 7.day
             @potential_conflicts = @planning
-                .time_intervals
-                .where({ start: (day_start..day_end) })
+                                     &.time_intervals
+                                     &.where({ start: (day_start..day_end) }) || []
             @comment = comment
         end
 
-        def execute
+        # if save_in_database is false, the comment will not be created
+        private def create_objects!(save_in_database: true)
             # If specified interval is invalid, raise error
             # From time >= to time
             # OR From date != to date (inteval not on the same day)
@@ -29,6 +43,9 @@ module TimeIntervals
             new_intervals = []
             TimeInterval.transaction do
                 new_intervals = segment_interval(@from, @to, step).map{ |int|
+                    existing_interval = TimeInterval.find_by(start: int[:start], end: int[:end], kind: @kind, is_validated: false)
+                    next if existing_interval
+
                     interval = TimeInterval.new
                     interval.start = int[:start]
                     interval.end = int[:end]
@@ -39,17 +56,28 @@ module TimeIntervals
                         has_conflicts = true
                         nil
                     else
-                        interval.save!
-                        interval.create_comment!(content: @comment.strip, user: @planning.user) unless @comment.blank?
+                        if save_in_database
+                            interval.save!
+                            interval.create_comment!(content: @comment.strip, user: @planning.user) unless @comment.blank?
+                        else
+                            interval.build_comment(content: @comment.strip, user: @planning.user) unless @comment.blank?
+                        end
+
                         interval
                     end
                 }
-                .compact
+                                                                  .compact
 
                 if new_intervals.length == 0 || has_conflicts
                     raise IntervalError, "err_interval_creation_failed"
                 end
             end
+
+            new_intervals
+        end
+
+        def bulk_create
+            new_intervals = create_objects!
 
             @planning.time_intervals << new_intervals
             @planning.save!
@@ -57,7 +85,17 @@ module TimeIntervals
             new_intervals
         end
 
+        # Check if the interval can be created
+        # Returns [true, [created_intervals], nil] if the interval can be created
+        # Returns [false, [], IntervalError] if the interval cannot be created
+        def can_create?
+            [true, create_objects!(save_in_database: false), nil]
+        rescue IntervalError => e
+            [false, [], e]
+        end
+
         private
+
 
         def segment_interval(from, to, step)
             intervals = []

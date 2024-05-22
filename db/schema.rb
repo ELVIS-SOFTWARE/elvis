@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_03_07_132834) do
+ActiveRecord::Schema.define(version: 2024_04_16_095839) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -119,6 +119,8 @@ ActiveRecord::Schema.define(version: 2024_03_07_132834) do
     t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_for_child", default: false
     t.datetime "deleted_at"
+    t.bigint "default_activity_ref_id"
+    t.index ["default_activity_ref_id"], name: "index_activity_ref_kinds_on_default_activity_ref_id"
   end
 
   create_table "activity_ref_pricings", force: :cascade do |t|
@@ -159,6 +161,8 @@ ActiveRecord::Schema.define(version: 2024_03_07_132834) do
     t.integer "activity_type"
     t.boolean "allows_timeslot_selection", default: false
     t.integer "nb_lessons"
+    t.boolean "substitutable", default: true
+    t.integer "duration"
     t.index ["activity_ref_kind_id"], name: "index_activity_refs_on_activity_ref_kind_id"
     t.index ["is_lesson"], name: "index_activity_refs_on_is_lesson"
   end
@@ -238,7 +242,7 @@ ActiveRecord::Schema.define(version: 2024_03_07_132834) do
 
   create_table "application_urls", force: :cascade do |t|
     t.string "url"
-    t.boolean "is_main"
+    t.boolean "is_main", default: false, null: false
     t.datetime "last_used_at"
   end
 
@@ -341,24 +345,6 @@ ActiveRecord::Schema.define(version: 2024_03_07_132834) do
     t.index ["activity_id"], name: "index_desired_activities_on_activity_id"
     t.index ["activity_ref_id"], name: "index_desired_activities_on_activity_ref_id"
     t.index ["deleted_at"], name: "index_desired_activities_on_deleted_at"
-  end
-
-  create_table "desired_locations", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "activity_application_id"
-    t.bigint "location_id"
-    t.index ["activity_application_id"], name: "index_desired_locations_on_activity_application_id"
-    t.index ["location_id"], name: "index_desired_locations_on_location_id"
-  end
-
-  create_table "desired_teachers", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "activity_application_id"
-    t.bigint "user_id"
-    t.index ["activity_application_id"], name: "index_desired_teachers_on_activity_application_id"
-    t.index ["user_id"], name: "index_desired_teachers_on_user_id"
   end
 
   create_table "desired_time_intervals", force: :cascade do |t|
@@ -915,6 +901,7 @@ ActiveRecord::Schema.define(version: 2024_03_07_132834) do
     t.string "partial"
     t.string "image"
     t.string "logo"
+    t.integer "price"
   end
 
   create_table "practice_room_parameters", force: :cascade do |t|
@@ -1087,7 +1074,7 @@ ActiveRecord::Schema.define(version: 2024_03_07_132834) do
   end
 
   create_table "settings", id: :serial, force: :cascade do |t|
-    t.string "name", limit: 100, default: "", null: false
+    t.string "name", limit: 100, null: false
     t.text "value"
   end
 
@@ -1266,6 +1253,7 @@ ActiveRecord::Schema.define(version: 2024_03_07_132834) do
   add_foreign_key "activity_instances", "locations"
   add_foreign_key "activity_instances", "rooms"
   add_foreign_key "activity_instances", "time_intervals"
+  add_foreign_key "activity_ref_kinds", "activity_refs", column: "default_activity_ref_id", on_delete: :nullify
   add_foreign_key "activity_ref_pricings", "activity_refs"
   add_foreign_key "activity_ref_pricings", "pricing_categories"
   add_foreign_key "activity_ref_pricings", "seasons", column: "from_season_id"

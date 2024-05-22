@@ -62,9 +62,9 @@ class AvailabilityManager extends PureComponent {
                 });
             })
             .error(errors => this.setState({ errors, isFetching: false }))
-            .patch(addToken(`/plannings/availabilities/${this.props.planningId}`, this.props.authToken), {
+            .patch(addToken(`/plannings/availabilities/${this.props.planningId}${this.props.disableLiveReload ? "/can_update" : ""}`, this.props.authToken), {
                 ...interval,
-                day: this.props.day,
+                season_id: this.props.seasonId,
             });
     }
 
@@ -73,36 +73,53 @@ class AvailabilityManager extends PureComponent {
 
         const intervalIds = Array.isArray(ids) ? ids : [ids];
 
-        Promise.all(
-            intervalIds.map(id => api.del(addToken(`/time_intervals/${id}`, this.props.authToken)))
-        ).then(responses => {
-            // Error handling
-            const errors = [];
+        if(this.props.disableLiveReload)
+        {
             const list = [...this.state.list];
 
-            responses.forEach(resp => {
-                if (resp.error) {
-                    errors.push(resp.error);
-                } else if (resp.data) {
-                    list.splice(
-                        list.findIndex(
-                            interval => interval.id === resp.data.id
-                        ),
-                        1
-                    );
-                }
+            intervalIds.forEach(id => {
+                list.splice(
+                    list.findIndex(interval => interval.id === id),
+                    1
+                );
             });
 
-            if (errors.length) {
-                this.setState({ errors, list, isFetching: false });
-            } else {
-                if (this.props.onDelete) {
-                    this.props.onDelete(list);
-                }
+            this.props.onDelete(list);
+            this.setState({ list, isFetching: false });
+        }
+        else
+        {
+            Promise.all(
+                intervalIds.map(id => api.del(addToken(`/time_intervals/${id}`, this.props.authToken)))
+            ).then(responses => {
+                // Error handling
+                const errors = [];
+                const list = [...this.state.list];
 
-                this.setState({ list, isFetching: false });
-            }
-        });
+                responses.forEach(resp => {
+                    if (resp.error) {
+                        errors.push(resp.error);
+                    } else if (resp.data) {
+                        list.splice(
+                            list.findIndex(
+                                interval => interval.id === resp.data.id
+                            ),
+                            1
+                        );
+                    }
+                });
+
+                if (errors.length) {
+                    this.setState({ errors, list, isFetching: false });
+                } else {
+                    if (this.props.onDelete) {
+                        this.props.onDelete(list);
+                    }
+
+                    this.setState({ list, isFetching: false });
+                }
+            });
+        }
     }
 
     updateCommentIntervalId(selectedIntervalIdForComment) {
@@ -124,6 +141,7 @@ class AvailabilityManager extends PureComponent {
     render() {
         const {
             day,
+            seasonId,
             user,
             locked,
             isTeacher,
@@ -134,7 +152,7 @@ class AvailabilityManager extends PureComponent {
 
         const { list, errors, isFetching, selectedIntervalIdForComment } = this.state;
 
-        const selectedIntervalForComment = this.state.list.find(i => i.id === selectedIntervalIdForComment);
+        const selectedIntervalForComment = selectedIntervalIdForComment && this.state.list.find(i => i.id === selectedIntervalIdForComment);
         
         return (
             <Fragment>

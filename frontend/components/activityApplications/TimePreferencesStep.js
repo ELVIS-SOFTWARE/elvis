@@ -49,6 +49,7 @@ export default function TimePreferencesStep({
                 locked={false}
                 kinds={["p"]}
                 forSeason
+                disableLiveReload={true}
                 planningId={planningId}
                 onAdd={onAvailabilityAdd}
                 onDelete={onAvailabilityDelete}
@@ -70,12 +71,14 @@ export default function TimePreferencesStep({
                     selectionLabels={selectionLabels}
                     ref={availabilityRef}
                     day={season.start}
+                    seasonId={season.id}
                     intervals={intervals}
                     authToken={authToken}
                     isTeacher={false}
                     locked={false}
                     kinds={["p"]}
                     forSeason
+                    disableLiveReload={true}
                     planningId={planningId}
                     onAdd={onAvailabilityAdd}
                     onDelete={onAvailabilityDelete}

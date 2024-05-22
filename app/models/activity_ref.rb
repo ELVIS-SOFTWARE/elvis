@@ -75,7 +75,10 @@ class ActivityRef < ApplicationRecord
 
   validate :check_ages_are_corrects, :check_occupation_limits_are_corrects
 
+  validates :duration, numericality: { only_integer: true, greater_than: 0, less_than: 1440 }, allow_nil: true
+
   attribute :kind
+  attribute :display_name
 
   update_index("activities") { self }
 
@@ -94,6 +97,7 @@ class ActivityRef < ApplicationRecord
 
   has_one_attached :picture
 
+  has_many :activity_refs_instruments, dependent: :destroy
   has_many :activity_refs_instruments, dependent: :destroy
   has_many :instruments, through: :activity_refs_instruments
 
@@ -121,28 +125,13 @@ class ActivityRef < ApplicationRecord
     return :F
   end
 
-  # Indique si l'activité est *substituable* au sein d'une famille d'activités.
-  # Une activité *substituable* est une activité qui, dans le processus d'inscription, peut être remplacée indifféremment
-  # par une autre activité de la même famille.
-  #
-  # Toutes les activités sont considérées substituables sauf
-  # * les activités enfance,
-  # * les activités CHAM
-  # * et les activités qui autorisent le choix d'un créneau
-  def substitutable?
-    !(
-      allows_timeslot_selection ||
-        activity_type == "child" ||
-        activity_type == "cham"
-    )
-  end
 
   # Retourne le nom à afficher pour une activité
   # Renvoie le nom de la famille d'activités ou le nom de l'activité pour les activités enfance, CHAM
   # et celles qui autorisent le choix d'un créneau
   def display_name
-    if substitutable?
-      activity_ref_kind.name
+    if substitutable
+      activity_ref_kind&.name || label
     else
       label
     end
@@ -153,7 +142,7 @@ class ActivityRef < ApplicationRecord
       ActivityRefs::MaxPricesCalculator.new.call
     end
 
-    if substitutable?
+    if substitutable
       Rails.cache.read("activity_ref_kind_id:#{activity_ref_kind_id}:#{season.id}:price")
     else
       Rails.cache.read("activity_ref_id:#{id}:#{season.id}:price")
@@ -180,6 +169,10 @@ class ActivityRef < ApplicationRecord
     if occupation_limit.present? && occupation_hard_limit.present? && occupation_limit > occupation_hard_limit
       errors.add(:occupation_hard_limit, "doit être supérieur à occupation_limit")
     end
+  end
+
+  def is_default_in_kind?
+    activity_ref_kind&.default_activity_ref_id == id
   end
 
   def self.destroy_params

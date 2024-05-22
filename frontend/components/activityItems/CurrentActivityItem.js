@@ -150,12 +150,14 @@ class CurrentActivityItem extends React.Component {
         let ActivityStatus = _.get(this.props, "current_activity_application.activity_application_status");
         if (ActivityStatus) {
             if ( ActivityStatus.id === ActivityApplicationStatus.STOPPED_ID ||
-                ActivityStatus.id === ActivityApplicationStatus.STOPPED ||
-                ActivityStatus.id === ActivityApplicationStatus.CANCELED_ID ||
-                ActivityStatus.id === ActivityApplicationStatus.CANCELED)
+                ActivityStatus.id === ActivityApplicationStatus.CANCELED_ID   )
             {
 
                 actionLabel = "Arrêt";
+            }
+            else if (ActivityStatus.id === ActivityApplicationStatus.TREATMENT_IMPOSSIBLE_ID)
+            {
+                actionLabel = "Unsatisfied";
             }
         }
 
@@ -175,7 +177,17 @@ class CurrentActivityItem extends React.Component {
             if (this.isChildPreApplicationActivity() && this.state.preApplicationActivity.activity_application === undefined) {
                 this.nextCycles = this.getChildActivityNextCycles();
 
-                let nextActivityRefKinds = _.uniqBy(this.nextCycles, "to.activity_ref_kind_id");
+                const groupedNextActivityRefKinds = _.groupBy(this.nextCycles, "to.activity_ref_kind_id");
+
+                let nextActivityRefKinds = _.map(groupedNextActivityRefKinds, (nextCycles) =>
+                {
+                    // find default in kind or first
+                    return _.find(nextCycles, (nextCycle) =>
+                    {
+                        return nextCycle.to["is_default_in_kind?"];
+                    }) || nextCycles[0];
+                });
+
                 let timeslotActivities = this.nextCycles.filter(a => a.to.allows_timeslot_selection === true);
                 nextActivityRefKinds = nextActivityRefKinds.concat(timeslotActivities);
                 nextActivityRefKinds = _.uniqBy(nextActivityRefKinds, "id");
@@ -189,7 +201,7 @@ class CurrentActivityItem extends React.Component {
                                 className="btn btn-info m-sm">
                                 <i className="fas fa-edit"/>
                                 S'inscrire à l'activité&nbsp;
-                                {activity.to.allows_timeslot_selection ? activity.to.label : activity.to.kind }
+                                {activity.to.display_name }
                             </a>
                         )}
                         {StopButton}
@@ -250,7 +262,7 @@ class CurrentActivityItem extends React.Component {
                                 <div className="col-sm-4 p-xs">
                                     <p className="pb-0"> {data.activity_ref.label} </p>
                                     {activityState !== undefined ?
-                                        <p className="pb-0"> {activityDetails} </p>
+                                        <div className="pb-0"> {activityDetails} </div>
                                         : ""
                                     }
                                 </div>

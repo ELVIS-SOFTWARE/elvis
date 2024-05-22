@@ -56,7 +56,7 @@
             </div>
             <% @users_to_show_in_family_list.each do |data| %>
                 <div class="contact-thumb">
-                    <div class="col-sm-2 py-1" style="flex:1">
+                    <div class="col-sm py-1" style="flex:1">
                         <div class="contact-info">
                             <h3><%= data[:user].first_name %> <b><%= data[:user].last_name %></b></h3>
                             <% if data[:fml].present? %>
@@ -90,7 +90,7 @@
                         </div>
                     </div>
 
-                    <% if @current_user.is_admin or (@user.id == @current_user.id) or (m.id == @current_user.id) %>
+                    <% if @current_user.is_admin or (@user.id == @current_user.id) or (data[:user].id == @current_user.id) %>
                         <% if @current_user.is_admin %>
                           <div class="col-sm-2 lienFamilial border-right py-1" style="flex:1">
                             <% if data[:attached_to].present? %>

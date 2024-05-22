@@ -91,8 +91,6 @@ export default function SchoolParameters(props) {
         const countryCode = getValues("countryCode")
         const zone_set_by_user = getValues("zone_set_by_user")
 
-        console.log('test')
-
         if ((zone_set_by_user === "false" || zone_set_by_user === false) && address && postalCode && city && countryCode) {
             if (addressChangeTimeout !== null) {
                 clearTimeout(addressChangeTimeout);

@@ -1526,13 +1526,14 @@ const ActivitySelection = ({
                 <option value={0} disabled>
                     Choisir une activité
                 </option>
-                {_.map(activities, (activity, i) => {
+                {_.map(activities.sort((a, b) => a.label.localeCompare(b.label)), (activity, i) => {
                     return (
                         <option key={i} value={activity.id}>
                             {activity.label} ({activity.kind})
                         </option>
                     );
                 })}
+
             </select>
         </form>
     );
