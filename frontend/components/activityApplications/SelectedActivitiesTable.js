@@ -30,7 +30,7 @@ function createDisplayItems(groupedItems) {
     return Object.values(groupedItems).map(group => {
         return {
             display_name: group[0].display_name,
-            duration: group[0].duration,
+            duration: group[0].duration, // all items have the same duration
             display_price: group.reduce((total, item) => total + item.display_price, 0),
             amount: group.length
         };

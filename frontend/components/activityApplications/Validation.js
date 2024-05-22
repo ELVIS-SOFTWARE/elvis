@@ -86,17 +86,48 @@ const Validation = ({
     is_paying && (!payers || payers.includes(id)) ? pushPayerToList({first_name, last_name}, payersList) : null;
 
     // récupération des contacts et des payeurs parmis les membres de la famille
-    family_links_with_user && family_links_with_user.forEach(familyMember => {
-        const {id, first_name, last_name, is_paying_for, is_accompanying, is_to_call, is_legal_referent} = familyMember;
-        is_paying_for && (!payers || payers.includes(id)) ? pushPayerToList({first_name, last_name}, payersList) : null;
-        is_accompanying ? accompanying.push({name: `${first_name} ${last_name}`}) : null;
-        is_to_call ? emergencyContacts.push({name: `${first_name} ${last_name}`}) : null;
-        is_legal_referent ? legalReferents.push({name: `${first_name} ${last_name}`}) : null;
-    });
-    payersList.length === 0 ? payersList.push({name: "/"}) : null;
-    accompanying.length === 0 ? accompanying.push({name: "/"}) : null;
-    emergencyContacts.length === 0 ? emergencyContacts.push({name: "/"}) : null;
-    legalReferents.length === 0 ? legalReferents.push({name: "/"}) : null;
+    if (family_links_with_user) {
+        family_links_with_user.forEach(familyMember => {
+            const {
+                id,
+                first_name,
+                last_name,
+                is_paying_for,
+                is_accompanying,
+                is_to_call,
+                is_legal_referent
+            } = familyMember;
+
+            if (is_paying_for && (!payers || payers.includes(id))) {
+                pushPayerToList({first_name, last_name}, payersList);
+            }
+
+            if (is_accompanying) {
+                accompanying.push({name: `${first_name} ${last_name}`});
+            }
+
+            if (is_to_call) {
+                emergencyContacts.push({name: `${first_name} ${last_name}`});
+            }
+
+            if (is_legal_referent) {
+                legalReferents.push({name: `${first_name} ${last_name}`});
+            }
+        });
+    }
+
+    if (payersList.length === 0) {
+        payersList.push({name: "/"});
+    }
+    if (accompanying.length === 0) {
+        accompanying.push({name: "/"});
+    }
+    if (emergencyContacts.length === 0) {
+        emergencyContacts.push({name: "/"});
+    }
+    if (legalReferents.length === 0) {
+        legalReferents.push({name: "/"});
+    }
 
 
     // Affichage des disponibilités -------------------------------------------------------------------------------------------------------------

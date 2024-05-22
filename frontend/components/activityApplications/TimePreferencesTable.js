@@ -3,7 +3,7 @@ import {toDate, toHourMin} from "../../tools/format";
 import {WEEKDAYS} from "../../tools/constants";
 import _ from 'lodash';
 
-function createTimeTable(item, i) {
+function createTimeRow(item, i) {
     const start = toDate(item.start);
     const end = toDate(item.end);
 
@@ -24,7 +24,7 @@ function createTimeTable(item, i) {
     );
 }
 
-function createIntervalTable(intervals) {
+function createIntervalRow(intervals) {
     return _.chain(intervals)
         .orderBy(i => i.start)
         .map((int, i) => (
@@ -41,8 +41,8 @@ function createIntervalTable(intervals) {
 }
 
 export default function TimePreferencesTable({ preferences = [], intervals = [], activityRef = {} }) {
-    const timeTable = useMemo(() => preferences.length > 0 ? preferences.map(createTimeTable) : null, [preferences]);
-    const intervalTable = useMemo(() => createIntervalTable(intervals), [intervals]);
+    const timeRow = useMemo(() => preferences.length > 0 ? preferences.map(createTimeRow) : null, [preferences]);
+    const intervalRow = useMemo(() => createIntervalRow(intervals), [intervals]);
 
     return (
         <table className="table m-0">
@@ -54,8 +54,8 @@ export default function TimePreferencesTable({ preferences = [], intervals = [],
                 </thead>
             )}
             <tbody>
-            {intervalTable}
-            {timeTable}
+            {intervalRow}
+            {timeRow}
             </tbody>
         </table>
     );
