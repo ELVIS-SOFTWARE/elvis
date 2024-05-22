@@ -288,7 +288,6 @@ const ActivityChoice = ({
         <Fragment>
 
             <div>
-
                 {showPriceWarning() &&
                     <div className="alert alert-info col-md-8 d-inline-flex align-items-center m-b-md pl-0"
                          style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
@@ -312,7 +311,6 @@ const ActivityChoice = ({
                                 valider votre inscription.
                             </small>
                         </div>
-
                     </div>}
 
                 <div className="row">

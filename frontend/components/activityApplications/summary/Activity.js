@@ -149,6 +149,17 @@ class Activity extends React.Component {
         return _.some(this.props.suggestions, s => this.isDesiredActivityInActivity(s));
     }
 
+    displayDuration(duration) {
+        if (!duration) {
+            return null;
+        }
+
+        const hours = Math.floor(duration / 60);
+        const minutes = (duration % 60).toString().padStart(2, '0');
+
+        return duration < 60 ? `- ${minutes} min` : `- ${hours}h${minutes}`;
+    }
+
     handleOptionButton(suggestion) {
         // Checks if user is already on option for this activity, act accordingly
         if (this.isSuggestionInDesiredActivityOptions(suggestion)) {
@@ -627,7 +638,7 @@ class Activity extends React.Component {
             .map(r => <option
                 key={r.id}
                 value={r.id}>
-                {r.label}
+                {r.label}  {self.displayDuration(r.duration)}
             </option>)
             .value();
 
