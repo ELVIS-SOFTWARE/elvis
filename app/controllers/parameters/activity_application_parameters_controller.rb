@@ -20,6 +20,51 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
     end
   end
 
+  def get_application_step_parameters
+    @activated = Parameter.get_value('application_step_parameter.activated')
+    @display_text = Parameter.get_value('application_step_parameter.display_text')
+
+    respond_to do |format|
+      format.json { render json: {
+        activated: @activated.present?,
+        display_text: @display_text
+      }, status: :ok }
+    end
+
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
+  def change_activated_param
+    @activated = Parameter.find_by(label: 'application_step_parameter.activated')
+
+    if @activated.present?
+      @activated.update!(value: params[:activated].to_s)
+    else
+      Parameter.create!(label: 'application_step_parameter.activated', value: params[:activated].to_s, value_type: "boolean")
+    end
+
+    respond_to do |format|
+      format.json { render json: { activated: params[:activated] }, status: :ok }
+    end
+
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
+  def change_term_display_text_param
+    @display_text = Parameter.find_by(label: 'application_step_parameter.display_text')
+
+    if @display_text.present?
+      @display_text.update!(value: params[:display_text])
+    else
+      Parameter.create!(label: 'application_step_parameter.display_text', value: params[:display_text], value_type: "string")
+    end
+
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
+
   private
 
   def status_list_json(query, params)

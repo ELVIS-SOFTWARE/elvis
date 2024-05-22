@@ -3,7 +3,7 @@ import React from "react";
 import ApplicationStatusTable from "./ApplicationStatusTable";
 import ConsentDocumentsList from "./ConsentDocumentsList";
 import ApplicationParameters from "./ApplicationParameters";
-import ApplicationProcess from "./ApplicationProcess";
+import ApplicationStepParameters from "./ApplicationStepParameters";
 
 export default function ActivityApplicationsParameters() {
 
@@ -13,7 +13,7 @@ export default function ActivityApplicationsParameters() {
             <ApplicationStatusTable />,
             <ConsentDocumentsList />,
             <ApplicationParameters />,
-            <ApplicationProcess />
+            <ApplicationStepParameters />
         ]}
     />
 }

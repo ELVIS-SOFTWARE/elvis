@@ -24,6 +24,10 @@ Rails.application.routes.draw do
     get "activity_application_parameters", to: "activity_application_parameters#index"
     post "activity_application_parameters/list_status", to: "activity_application_parameters#list_status"
 
+    get "activity_application_parameters/get_application_step_parameters", to: "activity_application_parameters#get_application_step_parameters"
+    post "activity_application_parameters/change_activated_param", to: "activity_application_parameters#change_activated_param"
+    post "activity_application_parameters/change_term_display_text_param", to: "activity_application_parameters#change_term_display_text_param"
+
     get "community_parameters", to: "community_parameters#index"
 
     get "payment_parameters", to: "payments_parameters#index"
