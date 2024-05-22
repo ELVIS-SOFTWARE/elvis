@@ -316,7 +316,7 @@ const ActivityChoice = ({
                 <div className="row">
                     <div className="col-md-6">
                         <div>
-                            <h4 style={{color: "#8AA4B1"}}>CHOIX DE L'ACTIVITE</h4>
+                            <h4 style={{color: "#8AA4B1"}}>Choix de l'activité</h4>
                             <div className="d-inline-flex justify-content-between mb-2 w-100">
                                 <div>
                                     <button className="btn btn-xs" style={{
@@ -358,7 +358,7 @@ const ActivityChoice = ({
                     <div className="col-md-6">
 
                         <div>
-                            <h4 style={{color: "#8AA4B1"}}>ACTIVITES SELECTIONNEES </h4>
+                            <h4 style={{color: "#8AA4B1"}}>Activités sélectionnées</h4>
                         </div>
                         <div>
                             <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
