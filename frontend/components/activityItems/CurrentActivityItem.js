@@ -90,7 +90,7 @@ class CurrentActivityItem extends React.Component {
         ];
         if (action === "renew") {
             actions.push(
-                fetch(`/pre_application/${this.props.user_id}/renew?auth_token=${csrfToken}`, {
+                fetch(`/pre_application/${this.props.user.id}/renew?auth_token=${csrfToken}`, {
                     method: "POST",
                     credentials: "same-origin",
                     headers: {
@@ -133,10 +133,9 @@ class CurrentActivityItem extends React.Component {
             data,
             pre_application_activity,
             openStopModal,
-            user_id,
+            user,
             authToken,
         } = this.props;
-
 
         let isPreapplicationEnabled = false;
         if (this.state.preApplicationActivity !== undefined) {
@@ -191,7 +190,7 @@ class CurrentActivityItem extends React.Component {
                     <Fragment>
                         {nextActivityRefKinds.map(activity =>
                             <a
-                                href={`/inscriptions/new/${user_id}/${this.state.preApplicationActivity.id
+                                href={`/inscriptions/new/${user.id}/${this.state.preApplicationActivity.id
                                 }/${activity.to.id}/${PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD}?auth_token=${csrfToken}`}
                                 className="btn btn-info btn-sm m-sm">
                                 S'inscrire à l'activité&nbsp;
@@ -203,7 +202,7 @@ class CurrentActivityItem extends React.Component {
             } else {
                 actionButtons =
                     <React.Fragment>
-                        <a href={`/inscriptions/new/${user_id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
+                        <a href={`/inscriptions/new/${user.id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
                             className="btn btn-info btn-sm mr-2 font-weight-bold"
                             style={{borderRadius: "8px"}}
                         >
