@@ -3,6 +3,7 @@ import _ from "lodash";
 import CurrentActivityItem from "./activityItems/CurrentActivityItem";
 import NewActivityItem from "./activityItems/NewActivityItem";
 import RenewActivityItem from "./activityItems/RenewActivityItem";
+import UserAvatar from "./UserAvatar";
 
 const moment = require("moment");
 require("moment/locale/fr");
@@ -306,18 +307,6 @@ class PreApplication extends React.Component {
     }
 }
 
-function displayDateForSeason(pa, season) {
-    const paDate = new Date(_.get(pa, "activity.time_interval.start"));
-
-    // valeur arbitraire fonctionnant seuelement pour les écoles qui ont des saison correspondant à l'année scolaire
-    // devrait, nan doit disparaitre avec le refacto de la page
-    if (paDate.getMonth() < 8) {
-        return `${paDate.getFullYear() - 1}-${paDate.getFullYear()}`;
-    } else {
-        return `${paDate.getFullYear()}-${paDate.getFullYear() + 1}`;
-    }
-}
-
 function OtherActivityItem({user, season}) {
     // let strting_activities = (_.get(user, "pre_application.pre_application_activities") || [])
     //     .map(pa => `${_.get(pa, "activity.activity_ref.label")} (${displayDateForSeason(pa, season)})`).join(" - ");
@@ -330,31 +319,7 @@ function OtherActivityItem({user, season}) {
     return <div className="card col-md-3 mr-4"
                 style={{border: "none", borderRadius: "12px"}}>
         <div className="d-inline-flex align-items-center justify-content-between p-3">
-            {user.avatar ? (
-                    <img src={user.avatar} alt="avatar" style={{
-                        borderRadius: "50%",
-                        width: "50px",
-                        height: "50px",
-                        margin: "10px 10px 10px 0"
-                    }}/>
-                ) :
-                <div style={{
-                    backgroundColor: "#fac5c7",
-                    borderRadius: "50%",
-                    width: "50px",
-                    height: "50px",
-                    margin: "10px 20px 10px 0",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    color: "#FF6066",
-                    fontWeight: "bold",
-                    fontSize: "20px"
-                }}>
-                    {user.full_name.split(' ').map(name => name[0]).join('')}
-                </div>
-            }
-
+            <UserAvatar avatar={user.avatar} full_name={user.full_name}/>
             <div>
                 <h5 className="m-0">{user.full_name}</h5>
             </div>
