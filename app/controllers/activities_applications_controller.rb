@@ -799,7 +799,7 @@ class ActivitiesApplicationsController < ApplicationController
                  nil
                end
 
-    render json: { error: "L'import de fichiers CSV est désactivé" }, status: :unprocessable_entity and return if importer.nil?
+    render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if importer.nil?
 
     result = importer.call
 

@@ -161,7 +161,7 @@ class ActivitiesApplicationsList extends React.Component {
                     this.fetchData(this.state.filter);
 
                     let message = `<p>${data.message}</p>`;
-                    if(data.errors.length>0){
+                    if (data.errors.length > 0) {
                         message += `<ul>Erreurs rencontrées</ul>`;
                         data.errors.forEach(e => {
                             message += `<li>à la ligne ${e.line} : ${e.message}</li>`;
@@ -711,6 +711,7 @@ class ActivitiesApplicationsList extends React.Component {
                                         ref={this.fileInput}
                                         style={{ display: "none" }}
                                         onChange={this.handleFileSelect.bind(this)}
+                                        accept=".csv"
                                     />
                                     <button
                                         className="btn btn-primary m-r-sm"
