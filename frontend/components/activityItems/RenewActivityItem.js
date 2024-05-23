@@ -141,8 +141,7 @@ class RenewActivityItem extends React.Component {
         const {
             data,
             pre_application_activity,
-            user_id,
-            authToken,
+            user,
         } = this.props;
 
         let actionLabel = "";
@@ -204,13 +203,13 @@ class RenewActivityItem extends React.Component {
                         </b>
                     </td>
                     <td className="font-weight-bold" style={{color: "#00283B"}}>
-                        {this.props.data.activity_ref.label}
+                        {data.activity_ref.label}
                     </td>
                     <td>
-                        {this.props.user.first_name} {this.props.user.last_name}
+                        {user.first_name} {user.last_name}
                     </td>
                     <td>
-                        {moment(this.props.pre_application_activity.activity_application.created_at).format("DD/MM/YYYY")}
+                        {moment(pre_application_activity.activity_application.created_at).format("DD/MM/YYYY")}
                     </td>
                     <td>
                         {renderActivityAction(actionLabel)}

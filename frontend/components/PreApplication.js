@@ -69,7 +69,6 @@ class PreApplication extends React.Component {
                     authToken={this.props.user.authentication_token}
                     data={pre_application_activity.activity}
                     pre_application_activity={pre_application_activity}
-                    user_id={this.props.user.id}
                     user={this.props.user}
                     allowPreApplication={allowPreApplication}
                     confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
@@ -137,10 +136,6 @@ class PreApplication extends React.Component {
 
         let openingApplication = moment(this.props.season.opening_date_for_new_applications);
         let closingApplication = moment(this.props.season.closing_date_for_applications);
-        let openingDate = openingApplication.date();
-        let closingDate = closingApplication.date();
-        let openingPeriod = openingDate < 10 ? 'début' : openingDate > 20 ? 'fin' : 'mi';
-        let closingPeriod = closingDate < 10 ? 'début' : closingDate > 20 ? 'fin' : 'mi';
 
         function displayActivityList(renewActivityList, newActivityList, emptyMessage) {
             let result = [];
@@ -205,7 +200,7 @@ class PreApplication extends React.Component {
                                         <div>
                                             <h5 className="card-title" style={{color: "#00283B"}}>Période de
                                                 ré-inscription <i className="fas fa-info-circle"></i></h5>
-                                            <h6 className="card-subtitle mb-2 text-muted">Ferme {closingPeriod} {closingApplication.format("MMMM YYYY")}</h6>
+                                            <h6 className="card-subtitle mb-2 text-muted">Ferme le {closingApplication.format("DD MMMM YYYY")}</h6>
                                             <div>{isPreApplicationOpened ?
                                                 <span className="badge badge-success">ouverte</span> :
                                                 <span className="badge badge-danger">fermée</span>}
@@ -228,7 +223,7 @@ class PreApplication extends React.Component {
                                         <div>
                                             <h5 className="card-title" style={{color: "#00283B"}}>Période
                                                 d'inscription <i className="fas fa-info-circle"></i></h5>
-                                            <h6 className="card-subtitle mb-2 text-muted">Ouvre {openingPeriod} {openingApplication.format("MMMM YYYY")}</h6>
+                                            <h6 className="card-subtitle mb-2 text-muted">Ouvre le {openingApplication.format("DD MMMM YYYY")}</h6>
                                             <div>{isNewApplicationOpened ?
                                                 <span className="badge badge-success">ouverte</span> :
                                                 <span className="badge badge-danger">fermée</span>}
