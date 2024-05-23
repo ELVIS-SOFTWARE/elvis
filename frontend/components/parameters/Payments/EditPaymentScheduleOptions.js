@@ -206,13 +206,19 @@ export default function EditPaymentScheduleOptions()
                         wrapperClassName="wrapperClassName"
                         editorClassName="editorClassName"
                         toolbar={{
-                            options: ['inline', 'blockType', 'emoji', 'list',],
+                            options: ['inline', 'blockType', 'emoji', 'list', 'link'],
                             inline: {
                                 options: ['bold', 'italic', 'underline', 'strikethrough'],
                             },
                             blockType: {
                                 inDropdown: true,
                                 options: ['Normal', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'Blockquote'],
+                            },
+                            link: {
+                                inDropdown: false,
+                                showOpenOptionOnHover: true,
+                                defaultTargetOption: '_self',
+                                options: ['link', 'unlink'],
                             },
                         }}
                     />
