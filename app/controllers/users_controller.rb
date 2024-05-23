@@ -1053,9 +1053,6 @@ def search_for_user
 
   birthday = params[:birthday]
 
-  puts 'test'
-  puts includes
-
   result = Users::SearchUser.new(params[:last_name] || "", params[:first_name] || "", birthday, nil, nil, includes,
                                  !current_user.is_admin).execute
 
