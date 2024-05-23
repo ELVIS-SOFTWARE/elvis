@@ -327,6 +327,9 @@ class ActivitiesApplicationsController < ApplicationController
 
     @adhesion_prices = AdhesionPrice.all.as_json
 
+    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
+    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
+
     @packs = ActivityRefPricing
                .where('("activity_ref_pricings"."from_season_id" <= ? AND ("activity_ref_pricings"."to_season_id" IS NULL OR "activity_ref_pricings"."to_season_id" >= ?))', Season.current.id, Season.current.id)
                .as_json(include: {
@@ -486,6 +489,9 @@ class ActivitiesApplicationsController < ApplicationController
     @avail_payment_methods = show_payment_schedule_options ? PaymentMethod.displayable.as_json(only: [:id, :label]) : []
     @payment_step_display_text = show_payment_schedule_options ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
     @adhesion_prices = Adhesion.all.as_json
+
+    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
+    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
   end
 
   def create

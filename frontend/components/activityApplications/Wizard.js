@@ -777,6 +777,7 @@ class Wizard extends React.Component {
                         handleRemovePack={(key, id) => this.handleRemovePack(key, id)}
                         selectedPacks={this.state.selectedPacks}
                         validation={null}
+                        infoText={this.props.activityChoiceDisplayText}
                     />
                 ),
             },
