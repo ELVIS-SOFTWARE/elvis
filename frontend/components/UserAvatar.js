@@ -1,21 +1,21 @@
 import React from 'react';
 
-export default function UserAvatar({ user }) {
+export default function UserAvatar({ user, size }) {
     const userInitials = user.full_name.split(' ').map(name => name[0]).join('');
     return (
         user.avatar ? (
                 <img src={user.avatar} alt="avatar" style={{
                     borderRadius: "50%",
-                    width: "50px",
-                    height: "50px",
+                    width: `${size}px`,
+                    height: `${size}px`,
                     margin: "10px 10px 10px 0"
                 }}/>
             ) :
             <div style={{
                 backgroundColor: "#fac5c7",
                 borderRadius: "50%",
-                width: "50px",
-                height: "50px",
+                width: `${size}px`,
+                height: `${size}px`,
                 margin: "10px 20px 10px 0",
                 display: "flex",
                 justifyContent: "center",

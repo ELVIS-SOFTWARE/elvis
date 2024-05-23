@@ -319,7 +319,7 @@ function OtherActivityItem({user, season}) {
     return <div className="card col-md-3 mr-4"
                 style={{border: "none", borderRadius: "12px"}}>
         <div className="d-inline-flex align-items-center justify-content-between p-3">
-            <UserAvatar user={user}/>
+            <UserAvatar user={user} size={50} />
             <div>
                 <h5 className="m-0">{user.full_name}</h5>
             </div>
