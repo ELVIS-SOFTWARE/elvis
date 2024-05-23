@@ -186,14 +186,17 @@ class NewActivityItem extends React.Component {
             </React.Fragment>;
         }
 
+        let activityApplicationId = this.state.activityApplicationId.toString();
+        let paddedActivityApplicationId = activityApplicationId.padStart(3, '0');
+
         return (
             <React.Fragment>
                 <tr>
                     <td>
                         <b>
                             {(this.props.current_user || {}).is_admin ?
-                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`0${this.state.activityApplicationId}`}</a> :
-                                `0${this.state.activityApplicationId}`}
+                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`${paddedActivityApplicationId}`}</a> :
+                                `${paddedActivityApplicationId}`}
                         </b>
                     </td>
                     <td className="font-weight-bold" style={{color: "#00283B"}}>
@@ -211,24 +214,24 @@ class NewActivityItem extends React.Component {
                     <td>{activityDetails}</td>
                     <td className="d-flex justify-content-end">
 
-                            <AnswerProposal
-                                activity_application_status_id={activity_application_status_id}
-                                proposalAnswered={this.state.proposalAnswered}
-                                openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
-                                openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
-                            />
+                        <AnswerProposal
+                            activity_application_status_id={activity_application_status_id}
+                            proposalAnswered={this.state.proposalAnswered}
+                            openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
+                            openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
+                        />
 
-                            {activity_application_status_id === this.props.default_activity_status_id && (
-                                <Fragment>
-                                    <CancelApplication
-                                        activityApplicationId={this.state.activityApplicationId}
-                                    />
+                        {activity_application_status_id === this.props.default_activity_status_id && (
+                            <Fragment>
+                                <CancelApplication
+                                    activityApplicationId={this.state.activityApplicationId}
+                                />
 
-                                    <EditApplication
-                                        handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
-                                    />
-                                </Fragment>
-                            )}
+                                <EditApplication
+                                    handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
+                                />
+                            </Fragment>
+                        )}
 
                     </td>
 

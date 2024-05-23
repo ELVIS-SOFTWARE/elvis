@@ -192,14 +192,17 @@ class RenewActivityItem extends React.Component {
 
         let activity_application_status_id = _.get(this.state, "preApplicationActivity.activity_application.activity_application_status_id");
 
+        let activityApplicationId = this.state.preApplicationActivity.activity_application.id.toString();
+        let paddedActivityApplicationId = activityApplicationId.padStart(3, '0');
+
         return (
             <React.Fragment>
                 <tr>
                     <td>
                         <b>
                             {(this.props.current_user || {}).is_admin ?
-                                <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`0${this.state.preApplicationActivity.activity_application.id}`}</a> :
-                                `0${this.state.preApplicationActivity.activity_application.id}`}
+                                <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`${paddedActivityApplicationId}`}</a> :
+                                `${paddedActivityApplicationId}`}
                         </b>
                     </td>
                     <td className="font-weight-bold" style={{color: "#00283B"}}>
