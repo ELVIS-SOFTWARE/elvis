@@ -12,7 +12,7 @@ module Users
     end
 
     def execute
-      users = User.includes(:telephones, :planning, :payer_payment_terms, :adhesions, :activity_applications, family_member_users: {member: [:telephones]}, inverse_family_members: {user: [:telephones]})
+      users = User.includes(:telephones, :planning, :payer_payment_terms, :adhesions, :activity_applications, family_member_users: { member: [:telephones] }, inverse_family_members: { user: [:telephones] })
 
       users = if @exact_search
                 users.ci_find(:first_name, @first_name).ci_find(:last_name, @last_name)
@@ -24,15 +24,14 @@ module Users
       users = users.where(adherent_number: @adherent_number) unless @adherent_number.nil?
       users = users.where(attached_to_id: nil) if @hide_attached_accounts
 
-
       users.map do |u|
         user = u.as_json(@includes)
-        user["avatar"] = u.avatar_url
 
         # filter family links by given season
-        if @includes.dig("methods", "family_links_with_user")
+        if @includes.dig(:methods)&.include?(:family_links_with_user)
           u["family_links_with_user"] = u.family_links_with_user(@season)
         end
+
 
         unless @season.nil? || u.planning.nil?
           user["availabilities"] = u.planning

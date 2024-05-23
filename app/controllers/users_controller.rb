@@ -1044,14 +1044,17 @@ def search_for_user
       addresses: { only: %i[id street_address country department postcode city] },
       planning: { include: [:time_intervals] },
       levels: { include: %i[evaluation_level_ref activity_ref] },
-      consent_document_users: {}
+      consent_document_users: {},
     },
-    methods: [:family_links_with_user]
+    methods: [:family_links_with_user, :avatar_url]
   }
 
   season = params[:season_id].present? ? Season.find(params[:season_id]) : Season.current_apps_season
 
   birthday = params[:birthday]
+
+  puts 'test'
+  puts includes
 
   result = Users::SearchUser.new(params[:last_name] || "", params[:first_name] || "", birthday, nil, nil, includes,
                                  !current_user.is_admin).execute
@@ -1081,7 +1084,7 @@ end
       consent_document_users: {},
       payer_payment_terms: {}
     },
-    methods: :family_links_with_user
+    methods: [:family_links_with_user, :avatar_url]
   }
 
   result = Users::SearchUser.new(params[:last_name], params[:first_name], nil, params[:season_id], nil, includes,
