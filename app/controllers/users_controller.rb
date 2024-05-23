@@ -1355,7 +1355,7 @@ class UsersController < ApplicationController
                  .where(season_id: @season.id)
                  .first
       user_json["pre_application"] = jsonize_pre_application.call(pre_app.id) if pre_app
-      user_json["avatar"] = u.avatar.attached? ? rails_blob_path(u.avatar, only_path: true) : nil
+      user_json["avatar"] = u.avatar_url
       @family_users << user_json
     end
 

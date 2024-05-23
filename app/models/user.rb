@@ -988,6 +988,10 @@ class User < ApplicationRecord
       &.for_season(season)
   end
 
+  def avatar_url
+    avatar.attached? ? Rails.application.routes.url_helpers.rails_blob_path(avatar, only_path: true) : nil
+  end
+
   private
 
   def ensure_attached_account_has_no_password
