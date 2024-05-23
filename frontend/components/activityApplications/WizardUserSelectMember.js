@@ -442,6 +442,12 @@ const FamilyLinkSelector = ({ isMulti, familyLinks, fieldForSelection, onChange 
         isClearable={false}
         value={options.filter(fl => fl[fieldForSelection])}
         onChange={eventValues => onChange(eventValues, fieldForSelection) }
+        styles={{
+            menu: (provided) => ({
+                ...provided,
+                zIndex: "4",
+            }),
+        }}
     />
 
 };
