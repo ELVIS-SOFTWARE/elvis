@@ -36,13 +36,8 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
   end
 
   def change_activated_param
-    @activated = Parameter.find_by(label: 'activity_choice_step.activated')
-
-    if @activated.present?
-      @activated.update!(value: params[:activated].to_s)
-    else
-      Parameter.create!(label: 'activity_choice_step.activated', value: params[:activated].to_s, value_type: "boolean")
-    end
+    @activated = Parameter.find_or_create_by(label: 'activity_choice_step.activated')
+    @activated.update!(value: params[:activated].to_s)
 
     respond_to do |format|
       format.json { render json: { activated: params[:activated] }, status: :ok }
@@ -53,13 +48,8 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
   end
 
   def change_display_text_param
-    @display_text = Parameter.find_by(label: 'activity_choice_step.display_text')
-
-    if @display_text.present?
-      @display_text.update!(value: params[:display_text])
-    else
-      Parameter.create!(label: 'activity_choice_step.display_text', value: params[:display_text], value_type: "string")
-    end
+    @display_text = Parameter.find_or_create_by(label: 'activity_choice_step.display_text')
+    @display_text.update!(value: params[:display_text])
 
   rescue StandardError => e
     render json: { error: e.message }, status: :unprocessable_entity
