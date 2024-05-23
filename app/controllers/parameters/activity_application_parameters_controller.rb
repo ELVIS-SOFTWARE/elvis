@@ -36,7 +36,7 @@ class Parameters::ActivityApplicationParametersController < ApplicationControlle
   end
 
   def change_activated_param
-    @activated = Parameter.find_or_create_by(label: 'activity_choice_step.activated')
+    @activated = Parameter.find_or_create_by(label: 'activity_choice_step.activated', value_type: "boolean")
     @activated.update!(value: params[:activated].to_s)
 
     respond_to do |format|
