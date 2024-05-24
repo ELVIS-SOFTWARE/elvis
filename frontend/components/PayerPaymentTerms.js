@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import Checkbox from "./common/Checkbox";
@@ -120,41 +120,37 @@ export default function PayerPaymentTerms({
     );
 
     return (
-        <div className="ibox">
-            <div className="ibox-title">
-                <h3>Modalités de paiement</h3>
-            </div>
-            <div className="ibox-content">
+        <div className="row">
 
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // échéancier
-                }
+            {//////////////////////////////////////////////////////////////////////////////////
+                // échéancier
+            }
+            <div className="row mb-4">
                 <div className="form-group m-t-md">
-                    <label htmlFor="payment_schedule_options_id">Sélectionner votre échéancier</label>
+                    <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Type de paiement</h3>
                     <select
-                        className="form-control"
+                        className="form-control col-md-6"
                         name="payment_schedule_options_id"
                         onChange={handleScheduleOptionChange}
                         value={selectedPaymentTermsId}
+                        style={{borderRadius: "8px", border: "0"}}
                     >
-                        <option key={-1} value="0">(choisissez une option)</option>
+                        <option key={-1} value="0">Choisissez une option</option>
                         {availPaymentScheduleOptions.map(apt =>
                             <option key={apt.id} value={apt.id}>{apt.label}</option>,
                         )}
                     </select>
                 </div>
+            </div>
 
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // date de paiement
-                }
-                {selectedPaymentTerms &&
-                    <Fragment>
 
-                        <div className="form-group m-t-lg">
-                            <label htmlFor="payment_schedule_options_id">Règlement</label>
-                            <p>Sélectionner la date de règlement mensuel</p>
-                        </div>
-
+            {//////////////////////////////////////////////////////////////////////////////////
+                // date de paiement
+            }
+            {selectedPaymentTerms &&
+                <div className="row mb-4">
+                    <div className="form-group m-t-lg">
+                        <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Date de règlement</h3>
                         <ToggleButtonGroup
                             multiSelect={false}
                             selected={selectedDaysForCollection}
@@ -164,33 +160,39 @@ export default function PayerPaymentTerms({
                                 })
                             }
                             onChange={handleDayChange}
+                            buttonClasses="p-0"
                         />
-                    </Fragment>
-                }
+                    </div>
+                </div>
+            }
 
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // moyen de paiement
-                }
+            {//////////////////////////////////////////////////////////////////////////////////
+                // moyen de paiement
+            }
+            <div className="row mb-4">
                 <div className="form-group m-t-md">
-                    <label htmlFor="payment_method_id">Sélectionner votre moyen de paiement</label>
+                    <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Modalité de paiement</h3>
                     <select
-                        className="form-control"
+                        className="form-control col-md-6"
                         name="payment_method_id"
                         onChange={handleSelectMethodChange}
                         value={selectedPaymentMethodId}
+                        style={{borderRadius: "8px", border: "0"}}
                     >
-                        <option key={-1} value="0">(choisissez une option)</option>
+                        <option key={-1} value="0">Choisissez une option</option>
                         {availPaymentMethods.map(apm =>
                             <option key={apm.id} value={apm.id}>{apm.label}</option>,
                         )}
                     </select>
                 </div>
+            </div>
 
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // payeurs
-                }
+            {//////////////////////////////////////////////////////////////////////////////////
+                // payeurs
+            }
+            <div className="row">
                 <div className="form-group m-t-md">
-                    <label htmlFor="payer_id">Sélectionner les payeurs</label>
+                    <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Payeur(s)</h3>
                     <PayersListEditor
                         user={user}
                         selectedPayers={selectedPayers}
@@ -199,8 +201,9 @@ export default function PayerPaymentTerms({
                         onRemovePayer={handleRemovePayer}
                     />
                 </div>
-
             </div>
+
+
         </div>
     );
 }

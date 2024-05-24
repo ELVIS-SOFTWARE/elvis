@@ -97,7 +97,7 @@ class WrappedPayerPaymentTerms extends React.Component {
 
             <div className="row">
                 {this.props.paymentStepDisplayText &&
-                    <div className="alert alert-info d-inline-flex align-items-center p-1"
+                    <div className="alert alert-info d-inline-flex align-items-center p-1 pr-3"
                          style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
                         <div className="col-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
