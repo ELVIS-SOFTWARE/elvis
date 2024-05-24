@@ -852,14 +852,25 @@ class ActivitiesApplicationsController < ApplicationController
 
   def send_all_confirmation_mail
     filter = params[:filter]
-    season = params[:season].nil? ? Season.current_apps_season : Season.find(params[:season]&.[](:id))
+
+    filtered_season_id = filter&.dig(:filtered)&.find { |f| f[:id] == "season_id" }&.dig(:value)
+
+    season = filtered_season_id.nil? ? Season.current_apps_season : Season.find(filtered_season_id)
 
     if params[:targets].length == 0
       render json: { success: false, message: "Vous n'avez pas selectionné d'utilisateurs" }, status: 400 and return
     end
 
-    mails_to_send = ActivityApplication.where(
-      id: params[:targets],
+    # get same query from user view
+    query = get_query_from_params filter
+
+    # if we have selected some users, add them to the query filter
+    if params[:targets] != "all"
+      query = query.where(id: params[:targets])
+    end
+
+    # force filter to only send email to user with good status AND in the current season if no season is selected
+    mails_to_send = query.where(
       activity_application_status_id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::ACTIVITY_PROPOSED_ID],
       season_id: season.id
     )
