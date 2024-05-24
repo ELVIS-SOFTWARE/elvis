@@ -8,7 +8,8 @@ export default function UserAvatar({ user, size }) {
                     borderRadius: "50%",
                     width: `${size}px`,
                     height: `${size}px`,
-                    margin: "10px 10px 10px 0"
+                    margin: "10px 10px 10px 0",
+                    objectFit: "cover"
                 }}/>
             ) :
             <div style={{
