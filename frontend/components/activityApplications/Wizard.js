@@ -903,6 +903,9 @@ class Wizard extends React.Component {
                         errors={this.state.errors}
                         selectedPacks={this.state.selectedPacks}
                         packs={this.props.packs}
+                        paymentTerms={(this.state.infos.payer_payment_terms || [])}
+                        availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
+                        availPaymentMethods={this.state.availPaymentMethods}
                     />
                 ),
             },
