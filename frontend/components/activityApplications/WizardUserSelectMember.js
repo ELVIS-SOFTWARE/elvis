@@ -226,7 +226,8 @@ export default class WizardUserSelectMember extends React.Component {
                 </div>
 
                 <div className="row mb-3">
-                    <div className="alert alert-info d-inline-flex align-items-center pt-4 pb-4" style={{border: "1px solid #0079BF", borderRadius: "12px", color: "#0079BF"}}>
+                    <div className="alert alert-info d-inline-flex align-items-center pt-4 pb-4"
+                         style={{border: "1px solid #0079BF", borderRadius: "12px", color: "#0079BF"}}>
                         <div className="col-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
                         </div>
@@ -239,14 +240,11 @@ export default class WizardUserSelectMember extends React.Component {
                     </div>
                 </div>
 
-
                 {this.state.showError && this.state.error.members && <div className="row">
-                    <div className="col-sm-12">
                         <p className="text-danger">{this.state.error.members}</p>
-                    </div>
                 </div>}
 
-                <div className="row">
+                <div className="row d-md-inline-flex align-items-center text-center mb-4">
                     <ToggleButtonGroup
                         maxSelected={1}
                         childrenContent={members.map((member, i) => renderUserItem(user.id, member, i, selected === i))}
@@ -258,63 +256,53 @@ export default class WizardUserSelectMember extends React.Component {
                             backgroundColor: "white",
                             padding: "15px",
                             borderRadius: "12px",
-                            margin: "0"
+                            margin: "0 20px 10px 0",
+                            whiteSpace: "nowrap",
+                            overflowX: "auto",
                         }}
                     />
                 </div>
 
                 {members.length > 0 && members[selected].id !== user.id && <Fragment>
-                    <div className="row mt-4">
-                        <div className="col-sm-6">
-                            <h4>Représentant légal</h4>
-                            <FamilyLinkSelector
-                                familyLinks={virtualFamilyLinks}
-                                isMulti
-                                fieldForSelection="is_legal_referent"
-                                onChange={this.onFamilyLinkSelectorChange}
-                            />
+                    <div className="row">
+                        <div className="col-md-6 p-0">
 
-                            {this.state.showError && this.state.error.legal_referent && <div className="row">
-                                <div className="col-sm-12">
+                            <div className="mb-4">
+                                <label style={{color: "#003E5C"}}>Représentant légal</label>
+                                <FamilyLinkSelector
+                                    familyLinks={virtualFamilyLinks}
+                                    isMulti
+                                    fieldForSelection="is_legal_referent"
+                                    onChange={this.onFamilyLinkSelectorChange}
+                                />
+                                {this.state.showError && this.state.error.legal_referent && <div className="row">
                                     <p className="text-danger">{this.state.error.legal_referent}</p>
-                                </div>
-                            </div>}
-                        </div>
-                    </div>
+                                </div>}
+                            </div>
 
-                    <div className="row">
-                        <div className="col-sm-6">
-                            <label>Personne à contacter</label>
+                            <div className="mb-4">
+                                <label style={{color: "#003E5C"}}>Personne à contacter</label>
+                                <FamilyLinkSelector
+                                    familyLinks={virtualFamilyLinks}
+                                    fieldForSelection="is_to_call"
+                                    onChange={this.onFamilyLinkSelectorChange}
+                                />
+                                {this.state.showError && this.state.error.to_call && <div className="row">
+                                        <p className="text-danger">{this.state.error.to_call}</p>
+                                </div>}
+                            </div>
 
-                            <FamilyLinkSelector
-                                familyLinks={virtualFamilyLinks}
-                                fieldForSelection="is_to_call"
-                                onChange={this.onFamilyLinkSelectorChange}
-                            />
-
-                            {this.state.showError && this.state.error.to_call && <div className="row">
-                                <div className="col-sm-12">
-                                    <p className="text-danger">{this.state.error.to_call}</p>
-                                </div>
-                            </div>}
-                        </div>
-                    </div>
-
-                    <div className="row">
-                        <div className="col-sm-6">
-                            <label>Accompagnant</label>
-
-                            <FamilyLinkSelector
-                                familyLinks={virtualFamilyLinks}
-                                fieldForSelection="is_accompanying"
-                                onChange={this.onFamilyLinkSelectorChange}
-                            />
-
-                            {this.state.showError && this.state.error.accompanying && <div className="row">
-                                <div className="col-sm-12">
-                                    <p className="text-danger">{this.state.error.accompanying}</p>
-                                </div>
-                            </div>}
+                            <div className="mb-5">
+                                <label style={{color: "#003E5C"}}>Accompagnant</label>
+                                <FamilyLinkSelector
+                                    familyLinks={virtualFamilyLinks}
+                                    fieldForSelection="is_accompanying"
+                                    onChange={this.onFamilyLinkSelectorChange}
+                                />
+                                {this.state.showError && this.state.error.accompanying && <div className="row">
+                                        <p className="text-danger">{this.state.error.accompanying}</p>
+                                </div>}
+                            </div>
                         </div>
                     </div>
                 </Fragment>}
@@ -387,7 +375,12 @@ const FamilyLinkSelector = ({isMulti, familyLinks, fieldForSelection, onChange})
         styles={{
             menu: (provided) => ({
                 ...provided,
-                zIndex: "4",
+                zIndex: 4,
+            }),
+            control: (base, state) => ({
+                ...base,
+                border: "0",
+                borderRadius: "8px",
             }),
         }}
     />

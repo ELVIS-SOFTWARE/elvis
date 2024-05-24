@@ -28,7 +28,7 @@ module Users
         user = u.as_json(@includes)
 
         # filter family links by given season
-        if @includes.dig(:methods)&.include?(:family_links_with_user)
+        if @includes.dig("methods", "family_links_with_user")
           u["family_links_with_user"] = u.family_links_with_user(@season)
         end
 
