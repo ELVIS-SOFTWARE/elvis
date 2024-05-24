@@ -855,7 +855,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     filtered_season_id = filter&.dig(:filtered)&.find { |f| f[:id] == "season_id" }&.dig(:value)
 
-    season = filtered_season_id.nil? ? Season.current_apps_season : Season.find(filtered_season_id)
+    season = filtered_season_id.nil? || filtered_season_id == "all" ? Season.current_apps_season : Season.find(filtered_season_id)
 
     if params[:targets].length == 0
       render json: { success: false, message: "Vous n'avez pas selectionné d'utilisateurs" }, status: 400 and return
@@ -884,28 +884,7 @@ class ActivitiesApplicationsController < ApplicationController
       render json: { success: false, message: "Les utilisateurs selectionnés ont déjà reçu le mail ou ne sont pas en cours attribué / cours proposé" }, status: 400 and return
     end
 
-    ActivityApplication.transaction do
-      mails_to_send.each do |application|
-
-        user = application.user
-        activity = application.desired_activities.first.activity
-
-        # mail
-        case application.activity_application_status_id
-        when ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID
-          ActivityAssignedMailer.activity_assigned(user, user.confirmation_token, application, activity).deliver_later
-        when ActivityApplicationStatus::ACTIVITY_PROPOSED_ID
-          ActivityProposedMailer.activity_proposed(user, user.confirmation_token, application, activity).deliver_later
-        when ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID
-          ActivityAcceptedMailer.activity_accepted(user, user.confirmation_token, application).deliver_later
-        else
-          next # skip if not in the right status
-        end
-
-        application.mail_sent = true
-        application.save
-      end
-    end
+    NotifyUsersOfApplicationStateJob.perform_later(applications_ids: mails_to_send.ids, current_user_id: current_user.id)
 
     render json: { success: true }, status: 200
   end
