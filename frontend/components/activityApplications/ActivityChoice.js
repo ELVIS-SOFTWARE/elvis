@@ -4,7 +4,7 @@ import _ from "lodash";
 
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
 import {frenchEnumeration} from "../utils/index.js";
-import { Editor, EditorState, convertFromRaw, ContentState } from "draft-js";
+import {Editor, EditorState, convertFromRaw, ContentState} from "draft-js";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -311,24 +311,36 @@ const ActivityChoice = ({
             <div className="row">
                 <div className="col-md-6">
                     <div>
-                        <h4 style={{color: "#8AA4B1"}}>Choix de l'activité</h4>
-                        <div className="d-inline-flex justify-content-between mb-2 w-100">
+                        <h3 className="mb-4" style={{color: "#8AA4B1"}}>Choix de l'activité</h3>
+                        <div className="d-inline-flex justify-content-between mt-1 mb-2 w-100">
                             <div>
                                 <button className="btn btn-xs" style={{
                                     borderRadius: '40px',
                                     border: '1px solid #00334A',
-                                    color: '#00334A'
+                                    color: '#00334A',
+                                    padding: '4px 10px'
                                 }} onClick={handleDurationFilterClick}>
                                     Durée <i
                                     className={`fas fa-caret-${durationFilter === 'asc' ? 'up' : 'down'}`}></i>
                                 </button>
                             </div>
-                            <div>
-                                <input type="text" placeholder={` Rechercher  \uD83D\uDD0D`}
-                                       style={{borderRadius: '40px', border: '0', color: "#8AA4B1"}}
-                                       value={searchTerm}
-                                       onChange={handleSearchChange}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                borderRadius: '40px',
+                                border: '0',
+                                color: "#8AA4B1",
+                                padding: '4px 10px',
+                                backgroundColor: 'white'
+                            }}>
+                                <input
+                                    type="text"
+                                    placeholder="Rechercher"
+                                    style={{border: 'none', backgroundColor: 'transparent'}}
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
                                 />
+                                <i className="fas fa-search"></i>
                             </div>
                         </div>
                     </div>
@@ -353,7 +365,7 @@ const ActivityChoice = ({
                 <div className="col-md-6">
 
                     <div>
-                        <h4 style={{color: "#8AA4B1"}}>Activités sélectionnées</h4>
+                        <h3 style={{color: "#8AA4B1"}}>Activités sélectionnées</h3>
                     </div>
                     <div>
                         <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
