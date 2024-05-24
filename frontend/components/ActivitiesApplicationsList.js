@@ -18,6 +18,11 @@ import StopList from "./StopList";
 import UserWithInfos from "./common/UserWithInfos";
 import ButtonModal from "./common/ButtonModal";
 import ActivitiesApplicationsDashboard from "./ActivitiesApplicationsDashboard";
+import {
+    ACTIVITY_ATTRIBUTED_ID,
+    ACTIVITY_PROPOSED_ID,
+    PROPOSAL_ACCEPTED_ID,
+} from "./utils/ActivityApplicationsStatuses";
 
 const FILTER_STORAGE_KEY = "activities_application_list_filters";
 const PREFERENCES_STORAGE_KEY = "activities_applications_list_preferences";
@@ -79,6 +84,8 @@ class ActivitiesApplicationsList extends React.Component {
         };
 
         this.fileInput = React.createRef();
+
+        this.statusFilterContainsTerminalStatus = this.statusFilterContainsTerminalStatus.bind(this);
     }
 
     componentDidMount() {
@@ -273,6 +280,17 @@ class ActivitiesApplicationsList extends React.Component {
                 }
                 </div>
                 <div id="targets-actions">
+                    {
+                        this.statusFilterContainsTerminalStatus() && <button
+                            onClick={() => this.sendGroupConfirmationMail()}
+                            className="btn btn-primary m-r-sm"
+                            data-tippy-content="Envoi groupé mail confirmation"
+                            disabled={false}>
+                            <i className="fas fa-envelope" />
+
+                        </button>
+                    }
+
                     <a
                         href="#"
                         data-toggle="modal"
@@ -338,8 +356,8 @@ class ActivitiesApplicationsList extends React.Component {
 
     sendGroupConfirmationMail() {
         swal({
-            title: "Envoi mail confirmation",
-            html: "<p>Un mail de confirmation va être envoyé pour <strong>chaque demande d'inscription sélectionnée dont le cours est attribué ou proposition accepté.</strong></p>",
+            title: "Notifier l'élève",
+            html: "<p>Un mail de confirmation va être envoyé pour <strong>chaque demande d'inscription sélectionnée</strong></p>",
             type: "question",
             showCancelButton: true,
             cancelButtonText: "Annuler",
@@ -374,6 +392,19 @@ class ActivitiesApplicationsList extends React.Component {
                     });
             }
         });
+    }
+
+    statusFilterContainsTerminalStatus()
+    {
+        const statusFilter = ([...this.state.filter.filtered].find(f => f.id === "activity_application_status_id") || {}).value || [];
+
+        console.log(statusFilter)
+
+        const value = statusFilter.some(s => [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s));
+
+        console.log(value)
+
+        return value;
     }
 
     render() {
@@ -746,14 +777,6 @@ class ActivitiesApplicationsList extends React.Component {
                                         data-tippy-content="Afficher les élèves sans disponibilités renseignées"
                                         className={`btn m-r-sm btn-${withoutAvailabilityMode ? "primary" : "muted"}`}>
                                         <strong><i className="fas fa-calendar-times"></i></strong>
-                                    </button>
-                                    <button
-                                        onClick={() => this.sendGroupConfirmationMail()}
-                                        className="btn btn-primary"
-                                        data-tippy-content="Envoi groupé mail confirmation"
-                                        disabled={false}>
-                                        <i className="fas fa-envelope" />
-
                                     </button>
                                 </div>
                                 <div className="flex">
