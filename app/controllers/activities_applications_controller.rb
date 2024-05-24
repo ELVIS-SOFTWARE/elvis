@@ -871,7 +871,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     # force filter to only send email to user with good status AND in the current season if no season is selected
     mails_to_send = query.where(
-      activity_application_status_id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::ACTIVITY_PROPOSED_ID],
+      activity_application_status_id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::ACTIVITY_PROPOSED_ID, ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID],
       season_id: season.id
     )
 
@@ -891,7 +891,16 @@ class ActivitiesApplicationsController < ApplicationController
         activity = application.desired_activities.first.activity
 
         # mail
-        ActivityAssignedMailer.activity_assigned(user, user.confirmation_token, application, activity).deliver_later
+        case application.activity_application_status_id
+        when ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID
+          ActivityAssignedMailer.activity_assigned(user, user.confirmation_token, application, activity).deliver_later
+        when ActivityApplicationStatus::ACTIVITY_PROPOSED_ID
+          ActivityProposedMailer.activity_proposed(user, user.confirmation_token, application, activity).deliver_later
+        when ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID
+          ActivityAcceptedMailer.activity_accepted(user, user.confirmation_token, application).deliver_later
+        else
+          next # skip if not in the right status
+        end
 
         application.mail_sent = true
         application.save
