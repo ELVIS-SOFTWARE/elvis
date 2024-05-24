@@ -15,14 +15,13 @@ module ActivityApplications
       begin
         headers = CSV.open(csv_file.path, "r:bom|UTF-8", col_sep: ";", &:readline).map(&:strip)
       rescue StandardError => e
-        return { status: :unprocessable_entity, error: "Le fichier CSV n'a pas un format correct. Veuillez utiliser
-      le modèle fourni et réessayer." }
+        return { status: :unprocessable_entity, error: "Le format du fichier ne convient pas. Veuillez importer
+      un fichier au format CSV." }
       end
 
       # vérifier que les en-têtes sont corrects par rapport à AA_CSV_HEADERS
       if headers != AA_CSV_HEADERS
-        return { status: :unprocessable_entity, error: "Le fichier CSV n'a pas les en-têtes attendus. Veuillez utiliser
-      le modèle fourni et réessayer." }
+        return { status: :unprocessable_entity, error: "Le fichier CSV n'a pas les en-têtes attendus." }
 
       end
 

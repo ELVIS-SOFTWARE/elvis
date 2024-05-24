@@ -58,7 +58,7 @@ export const generateUserInfos = () => ({ // corrigé ?
     handicap_description: "",
     family: [],
     addresses: [{ isNew: true }],
-    availabilities: null
+    availabilities: null,
 });
 
 export const retrieveUserLevel = (user, activityRefId, seasonId) => findAndGet(

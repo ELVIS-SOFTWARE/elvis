@@ -22,11 +22,11 @@ class CurrentActivityItem extends React.Component {
     }
 
     closeStopModal() {
-        this.setState({ isStopModalOpen: false });
+        this.setState({isStopModalOpen: false});
     }
 
     openStopModal() {
-        this.setState({ isStopModalOpen: true });
+        this.setState({isStopModalOpen: true});
     }
 
     handleChangeStopReason(event) {
@@ -90,7 +90,7 @@ class CurrentActivityItem extends React.Component {
         ];
         if (action === "renew") {
             actions.push(
-                fetch(`/pre_application/${this.props.user_id}/renew?auth_token=${csrfToken}`, {
+                fetch(`/pre_application/${this.props.user.id}/renew?auth_token=${csrfToken}`, {
                     method: "POST",
                     credentials: "same-origin",
                     headers: {
@@ -133,10 +133,9 @@ class CurrentActivityItem extends React.Component {
             data,
             pre_application_activity,
             openStopModal,
-            user_id,
+            user,
             authToken,
         } = this.props;
-
 
         let isPreapplicationEnabled = false;
         if (this.state.preApplicationActivity !== undefined) {
@@ -149,14 +148,11 @@ class CurrentActivityItem extends React.Component {
 
         let ActivityStatus = _.get(this.props, "current_activity_application.activity_application_status");
         if (ActivityStatus) {
-            if ( ActivityStatus.id === ActivityApplicationStatus.STOPPED_ID ||
-                ActivityStatus.id === ActivityApplicationStatus.CANCELED_ID   )
-            {
+            if (ActivityStatus.id === ActivityApplicationStatus.STOPPED_ID ||
+                ActivityStatus.id === ActivityApplicationStatus.CANCELED_ID) {
 
                 actionLabel = "Arrêt";
-            }
-            else if (ActivityStatus.id === ActivityApplicationStatus.TREATMENT_IMPOSSIBLE_ID)
-            {
+            } else if (ActivityStatus.id === ActivityApplicationStatus.TREATMENT_IMPOSSIBLE_ID) {
                 actionLabel = "Unsatisfied";
             }
         }
@@ -167,10 +163,10 @@ class CurrentActivityItem extends React.Component {
         let StopButton =
             <button
                 onClick={() => this.openStopModal()}
-                className="btn btn-primary m-sm"
+                className="btn btn-danger btn-sm"
+                style={ {borderRadius: "8px"} }
             >
-                <i className="fas fa-times mr-1"/>
-                Arrêter
+                <i className="fas fa-times"/>
             </button>
 
         if (isPreapplicationEnabled) {
@@ -179,11 +175,9 @@ class CurrentActivityItem extends React.Component {
 
                 const groupedNextActivityRefKinds = _.groupBy(this.nextCycles, "to.activity_ref_kind_id");
 
-                let nextActivityRefKinds = _.map(groupedNextActivityRefKinds, (nextCycles) =>
-                {
+                let nextActivityRefKinds = _.map(groupedNextActivityRefKinds, (nextCycles) => {
                     // find default in kind or first
-                    return _.find(nextCycles, (nextCycle) =>
-                    {
+                    return _.find(nextCycles, (nextCycle) => {
                         return nextCycle.to["is_default_in_kind?"];
                     }) || nextCycles[0];
                 });
@@ -196,12 +190,11 @@ class CurrentActivityItem extends React.Component {
                     <Fragment>
                         {nextActivityRefKinds.map(activity =>
                             <a
-                                href={`/inscriptions/new/${user_id}/${this.state.preApplicationActivity.id
+                                href={`/inscriptions/new/${user.id}/${this.state.preApplicationActivity.id
                                 }/${activity.to.id}/${PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD}?auth_token=${csrfToken}`}
-                                className="btn btn-info m-sm">
-                                <i className="fas fa-edit"/>
+                                className="btn btn-info btn-sm m-sm">
                                 S'inscrire à l'activité&nbsp;
-                                {activity.to.display_name }
+                                {activity.to.display_name}
                             </a>
                         )}
                         {StopButton}
@@ -209,12 +202,10 @@ class CurrentActivityItem extends React.Component {
             } else {
                 actionButtons =
                     <React.Fragment>
-                        <a
-                            href={`/inscriptions/new/${user_id}/${pre_application_activity.id
-                            }/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
-                            className="btn btn-info m-sm"
+                        <a href={`/inscriptions/new/${user.id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
+                            className="btn btn-info btn-sm mr-2 font-weight-bold"
+                            style={{borderRadius: "8px"}}
                         >
-                            <i className="fas fa-edit mr-1" />
                             Se réinscrire
                         </a>
                         {StopButton}
@@ -222,58 +213,23 @@ class CurrentActivityItem extends React.Component {
             }
         }
 
-        /**
-         *  Affichage du jour, créneau, professeur, et salle
-         */
-        let activityDetails = "";
-        let activityState = _.get(this.props, "current_activity_application.desired_activities[0].activity");
-
-        if (activityState !== undefined && activityState !== null) {
-            let dayLabel = moment(activityState.time_interval.start).format('dddd')
-            activityDetails = <React.Fragment>
-                <p className="pb-0">
-                    {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
-                    {moment(activityState.time_interval.start).format('HH:mm')} à&nbsp;
-                    {moment(activityState.time_interval.end).format('HH:mm')} avec&nbsp;
-                    {activityState.teacher.first_name}
-                    &nbsp;{activityState.teacher.last_name},
-                    en salle : {activityState.room.label}
-                </p>
-            </React.Fragment>;
-        }
 
         return (
-            <div className="row">
-                <div className="col-sm-9">
-                    <div className="ibox animated fadeInRight">
-                        <div className="ibox-title">
-                            <h4>
-                                {data.activity_ref.activity_type === "child"
-                                    ? data.activity_ref.label
-                                    : data.activity_ref.kind}
-                            </h4>
-                        </div>
-                        <div className="ibox-content text-align-center-sm">
-                            <div className="row">
-                                <div className="col-sm-2 project-status p-xs">
-                                    {renderActivityAction(actionLabel)}
-                                </div>
-
-                                <div className="col-sm-4 p-xs">
-                                    <p className="pb-0"> {data.activity_ref.label} </p>
-                                    {activityState !== undefined ?
-                                        <div className="pb-0"> {activityDetails} </div>
-                                        : ""
-                                    }
-                                </div>
-
-                                <div className="col-sm-6 p-xs">
-                                    {actionButtons}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <React.Fragment>
+                <tr>
+                    <td className="font-weight-bold" style={{color: "#00283B"}}>
+                        {data.activity_ref.label}
+                    </td>
+                    <td>
+                        {this.props.user.first_name} {this.props.user.last_name}
+                    </td>
+                    <td>
+                        {data.activity_ref.nb_lessons ? data.activity_ref.nb_lessons : "0"}
+                    </td>
+                    <td className="text-right">
+                        {actionButtons}
+                    </td>
+                </tr>
 
                 <Modal
                     isOpen={this.state.isStopModalOpen}
@@ -295,12 +251,12 @@ class CurrentActivityItem extends React.Component {
                         </p>
                         {data.time_interval !== undefined ?
                             <p className="activity-date">
-                            {data.time_interval && _.capitalize(
-                                moment(data.time_interval.start).format("dddd")
-                            ) || "??"}{" "}
-                            |{data.time_interval && moment(data.time_interval.start).format("HH:mm") || "??"}{" "}
-                            -{data.time_interval && moment(data.time_interval.end).format("HH:mm") || "??"}
-                        </p> : "" }
+                                {data.time_interval && _.capitalize(
+                                    moment(data.time_interval.start).format("dddd")
+                                ) || "??"}{" "}
+                                |{data.time_interval && moment(data.time_interval.start).format("HH:mm") || "??"}{" "}
+                                -{data.time_interval && moment(data.time_interval.end).format("HH:mm") || "??"}
+                            </p> : ""}
 
                         {data.teacher !== undefined ?
                             <p className="activity-professor-name">
@@ -349,7 +305,7 @@ class CurrentActivityItem extends React.Component {
                     </div>
                     <button
                         onClick={() => this.closeStopModal()}
-                        className="btn btn-white btn-lg"
+                        className="btn btn-white btn-sm"
                     >
                         Retour
                     </button>
@@ -360,12 +316,12 @@ class CurrentActivityItem extends React.Component {
                                 "test comment"
                             )
                         }
-                        className="btn btn-primary btn-lg pull-right"
+                        className="btn btn-primary btn-sm pull-right"
                     >
                         Je confirme
                     </button>
                 </Modal>
-            </div>
+            </React.Fragment>
         );
     }
 }

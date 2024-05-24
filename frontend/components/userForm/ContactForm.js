@@ -95,6 +95,15 @@ class ContactForm extends React.PureComponent {
                 isUserSearchOver: true,
                 is_attached: true
             });
+
+            this.mutators.changeUser({
+                ...this.props.initialValues,
+                first_name: this.state.first_name,
+                last_name: this.state.last_name,
+                birthday: this.state.birthday,
+                is_attached: true, //this.state.is_attached, // 12/03/24 ==> attached by default if no user match
+            });
+
             return;
         }
 

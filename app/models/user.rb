@@ -992,117 +992,116 @@ class User < ApplicationRecord
     avatar.attached? ? Rails.application.routes.url_helpers.rails_blob_path(avatar, only_path: true) : nil
   end
 
+  private
 
-private
-
-def ensure_attached_account_has_no_password
-  if attached_to.present?
-    self.encrypted_password = ""
-    self.password = nil
-    self.password_confirmation = nil
+  def ensure_attached_account_has_no_password
+    if attached_to.present?
+      self.encrypted_password = ""
+      self.password = nil
+      self.password_confirmation = nil
+    end
   end
-end
 
-def clear_dupl_email_if_attached
-  self.email = nil if attached_to.present? && attached_to.email == email
-end
-
-def strip_names
-  last_name.strip!
-  first_name.strip!
-  email&.strip!
-end
-
-def create_planning
-  self.planning = Planning.create if planning.nil?
-end
-
-def pending_any_confirmation
-  if !confirmed? || pending_reconfirmation?
-    yield
-  else
-    errors.add(:email, :already_confirmed)
-    false
+  def clear_dupl_email_if_attached
+    self.email = nil if attached_to.present? && attached_to.email == email
   end
-end
 
-MAX_DEPTH = 4
-
-private
-
-def visit_user_links(current_user_id, visit_ascendants, season_id, depth = 0)
-  return if depth > 1
-
-  @visited_users << current_user_id
-
-  process_family_member_users(current_user_id, visit_ascendants, season_id, depth)
-  process_inverse_family_member_users(current_user_id, visit_ascendants, season_id, depth)
-end
-
-def process_family_member_users(current_user_id, visit_ascendants, season_id, depth)
-  FamilyMemberUser
-    .for_season_id(season_id)
-    .and!(FamilyMemberUser.where(user_id: current_user_id))
-    .pluck(:id, :member_id, :link, :is_paying_for)
-    .each do |link_id, member_id, link, is_paying_for|
-
-    next if @seen_links.include?(link_id) || @visited_users.include?(member_id)
-
-    @seen_links << link_id
-
-    is_ascending_link = (link == "mère" || link == "père" || is_paying_for == true)
-    is_ascending_link = (is_paying_for == true)
-    next if is_ascending_link && !visit_ascendants
-
-    @family_users << member_id
-    visit_user_links(member_id, visit_ascendants && is_ascending_link, season_id, depth + 1)
+  def strip_names
+    last_name.strip!
+    first_name.strip!
+    email&.strip!
   end
-end
 
-def process_inverse_family_member_users(current_user_id, visit_ascendants, season_id, depth)
-  FamilyMemberUser
-    .for_season_id(season_id)
-    .and!(FamilyMemberUser.where(member_id: current_user_id))
-    .pluck(:id, :user_id, :link, :is_paying_for)
-    .each do |link_id, user_id, link, is_paying_for|
-
-    next if @seen_links.include?(link_id) || @visited_users.include?(user_id)
-
-    @seen_links << link_id
-
-    is_ascending_link = (link == "enfant")
-    next if is_ascending_link && !visit_ascendants
-
-    @family_users << user_id
-    visit_user_links(user_id, true, season_id, depth + 1)
+  def create_planning
+    self.planning = Planning.create if planning.nil?
   end
-end
 
-def recursive_explore_fmu(season_id, current_user_id, student_id = id, deep = 0)
-  @users_id_visited << current_user_id
+  def pending_any_confirmation
+    if !confirmed? || pending_reconfirmation?
+      yield
+    else
+      errors.add(:email, :already_confirmed)
+      false
+    end
+  end
 
-  @users_id_keep << current_user_id unless @users_id_keep.include?(current_user_id)
+  MAX_DEPTH = 4
 
-  is_student = Student.where(user_id: student_id).any?
+  private
 
-  FamilyMemberUser
-    .for_season_id(season_id)
-    .and!(FamilyMemberUser.where(user_id: current_user_id))
-    .or(FamilyMemberUser.where(member_id: current_user_id))
-    .pluck(:user_id, :member_id)
-    .each do |user_id, member_id|
+  def visit_user_links(current_user_id, visit_ascendants, season_id, depth = 0)
+    return if depth > 1
 
-    students = Student.where(user_id: user_id).or(Student.where(user_id: member_id)).pluck(:user_id).uniq
+    @visited_users << current_user_id
 
-    [user_id, member_id].each do |id|
-      next if @users_id_visited.include?(id) || id == current_user_id
+    process_family_member_users(current_user_id, visit_ascendants, season_id, depth)
+    process_inverse_family_member_users(current_user_id, visit_ascendants, season_id, depth)
+  end
 
-      if !is_student && students.include?(id)
-        recursive_explore_fmu(season_id, id, student_id, deep + 1)
-      else
-        @users_id_keep << id unless @users_id_keep.include?(id)
+  def process_family_member_users(current_user_id, visit_ascendants, season_id, depth)
+    FamilyMemberUser
+      .for_season_id(season_id)
+      .and!(FamilyMemberUser.where(user_id: current_user_id))
+      .pluck(:id, :member_id, :link, :is_paying_for)
+      .each do |link_id, member_id, link, is_paying_for|
+
+      next if @seen_links.include?(link_id) || @visited_users.include?(member_id)
+
+      @seen_links << link_id
+
+      is_ascending_link = (link == "mère" || link == "père" || is_paying_for == true)
+      is_ascending_link = (is_paying_for == true)
+      next if is_ascending_link && !visit_ascendants
+
+      @family_users << member_id
+      visit_user_links(member_id, visit_ascendants && is_ascending_link, season_id, depth + 1)
+    end
+  end
+
+  def process_inverse_family_member_users(current_user_id, visit_ascendants, season_id, depth)
+    FamilyMemberUser
+      .for_season_id(season_id)
+      .and!(FamilyMemberUser.where(member_id: current_user_id))
+      .pluck(:id, :user_id, :link, :is_paying_for)
+      .each do |link_id, user_id, link, is_paying_for|
+
+      next if @seen_links.include?(link_id) || @visited_users.include?(user_id)
+
+      @seen_links << link_id
+
+      is_ascending_link = (link == "enfant")
+      next if is_ascending_link && !visit_ascendants
+
+      @family_users << user_id
+      visit_user_links(user_id, true, season_id, depth + 1)
+    end
+  end
+
+  def recursive_explore_fmu(season_id, current_user_id, student_id = id, deep = 0)
+    @users_id_visited << current_user_id
+
+    @users_id_keep << current_user_id unless @users_id_keep.include?(current_user_id)
+
+    is_student = Student.where(user_id: student_id).any?
+
+    FamilyMemberUser
+      .for_season_id(season_id)
+      .and!(FamilyMemberUser.where(user_id: current_user_id))
+      .or(FamilyMemberUser.where(member_id: current_user_id))
+      .pluck(:user_id, :member_id)
+      .each do |user_id, member_id|
+
+      students = Student.where(user_id: user_id).or(Student.where(user_id: member_id)).pluck(:user_id).uniq
+
+      [user_id, member_id].each do |id|
+        next if @users_id_visited.include?(id) || id == current_user_id
+
+        if !is_student && students.include?(id)
+          recursive_explore_fmu(season_id, id, student_id, deep + 1)
+        else
+          @users_id_keep << id unless @users_id_keep.include?(id)
+        end
       end
     end
   end
-end
 end

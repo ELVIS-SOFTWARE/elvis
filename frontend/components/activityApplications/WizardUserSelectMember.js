@@ -253,7 +253,7 @@ export default class WizardUserSelectMember extends React.Component
                                 </div>
 
                                 <div className="col-sm-11 pl-0">
-                                    Si le payeur n'est pas renseigné ce-dessous, ajoutez le en tant que
+                                    Si le payeur n'est pas renseigné ci-dessous, ajoutez le en tant que
                                     membre. Vous
                                     pourrez ensuite
                                     l'indiquer comme payeur dans l'étape du paiement.
@@ -442,6 +442,12 @@ const FamilyLinkSelector = ({ isMulti, familyLinks, fieldForSelection, onChange 
         isClearable={false}
         value={options.filter(fl => fl[fieldForSelection])}
         onChange={eventValues => onChange(eventValues, fieldForSelection) }
+        styles={{
+            menu: (provided) => ({
+                ...provided,
+                zIndex: "4",
+            }),
+        }}
     />
 
 };

@@ -1,9 +1,9 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import PropTypes from "prop-types";
 import _ from "lodash";
 import fetch from "isomorphic-unfetch";
 
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 import * as api from "../../tools/api";
 
 const moment = require("moment-timezone");
@@ -20,12 +20,12 @@ import Select from "react-select";
 
 import * as TimeIntervalHelpers from "./TimeIntervalHelpers.js";
 import MultiViewModal from "./MultiViewModal.js";
-import { csrfToken } from "../utils";
+import {csrfToken} from "../utils";
 import EvaluationModal from "./EvaluationModal";
 import CreateIntervalModal from "./CreateActivityModal.js";
 import RoomActivitiesListModal from "./RoomActivitiesListModal";
 
-const idGenerator = (function*() {
+const idGenerator = (function* () {
     let i = 1;
     while (true) yield i++;
 })();
@@ -104,7 +104,7 @@ class Planning extends React.Component {
         this.abortController = new AbortController();
         this.fetchOngoing = true;
 
-        this.setState({ loading: true });
+        this.setState({loading: true});
 
         const intervalsPromises = this.state.selectedPlannings.map((id) => {
             return TimeIntervalHelpers.fetchIntervals(
@@ -116,7 +116,7 @@ class Planning extends React.Component {
                 this.abortController.signal
             ).then(data => {
                 const intervals = this.props.planningOwners
-                    ? data.intervals.map(int => ({ ...int, owner_id: this.props.planningOwners[id] }))
+                    ? data.intervals.map(int => ({...int, owner_id: this.props.planningOwners[id]}))
                     : data.intervals;
 
                 if (!this.props.generic) {
@@ -157,7 +157,7 @@ class Planning extends React.Component {
     }
 
     updateIntervals(day, view) {
-        this.setState({ day, view }, () => this.fetchIntervals());
+        this.setState({day, view}, () => this.fetchIntervals());
     }
 
     updateTargets(targets) {
@@ -209,7 +209,7 @@ class Planning extends React.Component {
         })
             .then(response => response.json())
             .then(results => {
-                let { intervals } = results;
+                let {intervals} = results;
 
                 const intervalStore = TimeIntervalHelpers.indexById(
                     intervals,
@@ -255,14 +255,14 @@ class Planning extends React.Component {
                 // let [int] = TimeIntervalHelpers.momentify([interval]);
                 int.activity = activity;
 
-                const { selectedIntervals } = this.state;
+                const {selectedIntervals} = this.state;
                 const index = this.state.selectedIntervals.findIndex(i => {
                     return i.id === interval.id;
                 });
 
                 if (index > -1) {
                     selectedIntervals[index] = int;
-                    this.setState({ selectedIntervals });
+                    this.setState({selectedIntervals});
                 }
             });
     }
@@ -285,14 +285,14 @@ class Planning extends React.Component {
                 // let [int] = TimeIntervalHelpers.momentify([interval]);
                 int.activity = activity;
 
-                const { selectedIntervals } = this.state;
+                const {selectedIntervals} = this.state;
                 const index = this.state.selectedIntervals.findIndex(i => {
                     return i.id === interval.id;
                 });
 
                 if (index > -1) {
                     selectedIntervals[index] = int;
-                    this.setState({ selectedIntervals });
+                    this.setState({selectedIntervals});
                 }
             });
     }
@@ -344,10 +344,8 @@ class Planning extends React.Component {
                 intervalStore,
             });
         } else {
-            this.commitIntervals(intervals, seasonId).then(results =>
-            {
-                if(results.intervals.length === 1 && this.props.isTeacher)
-                {
+            this.commitIntervals(intervals, seasonId).then(results => {
+                if (results.intervals.length === 1 && this.props.isTeacher) {
                     this.handleOpenDetail(results.intervals[0]);
                 }
             })
@@ -360,7 +358,7 @@ class Planning extends React.Component {
         activityInstances,
     ) {
         // Reinit errors before fetching
-        this.setState({ errors: [], savingActivityInstances: true });
+        this.setState({errors: [], savingActivityInstances: true});
 
         // NOTE This should be refactored to be clearer
         let teachers = {
@@ -383,21 +381,21 @@ class Planning extends React.Component {
             endTime: moment(activity.endTime.toDate()),
         };
 
-        api.patch(`/time_interval/${availabilityIntervalId}/validate`,{
+        api.patch(`/time_interval/${availabilityIntervalId}/validate`, {
             activity: newActivity,
             activityInstances,
-        }).then(({ data, error }) => {
+        }).then(({data, error}) => {
             if (error) {
-                this.setState({ errors: error, savingActivityInstances: false });
+                this.setState({errors: error, savingActivityInstances: false});
             } else if (data) {
-                this.setState({ savingActivityInstances: false });
+                this.setState({savingActivityInstances: false});
                 this.closeDetailModal();
 
                 toast.success(
                     <div>
                         <p>{"Les cours pour l'activité sont créés"}</p>
                     </div>,
-                    { position: toast.POSITION.BOTTOM_CENTER, autoClose: 3000 }
+                    {position: toast.POSITION.BOTTOM_CENTER, autoClose: 3000}
                 );
 
                 this.updateIntervals(this.state.day, this.state.view);
@@ -405,8 +403,7 @@ class Planning extends React.Component {
         });
     }
 
-    async handleUpdateActivityInstances(activityInstances)
-    {
+    async handleUpdateActivityInstances(activityInstances) {
         const res = await fetch(
             `/activity/${this.state.intervalStore[this.state.intervalDetail].activity_instance.activity_id}/activity_instances`,
             {
@@ -439,7 +436,7 @@ class Planning extends React.Component {
             <div>
                 <p>Les cours pour l'activité sont créés</p>
             </div>,
-            { position: toast.POSITION.BOTTOM_CENTER, autoClose: 3000 }
+            {position: toast.POSITION.BOTTOM_CENTER, autoClose: 3000}
         );
 
         this.setState({
@@ -450,8 +447,7 @@ class Planning extends React.Component {
         });
     }
 
-    handleUpdateActivityInstance(changes)
-    {
+    handleUpdateActivityInstance(changes) {
         let instance = _.get(
             this.state.intervalStore[this.state.intervalDetail],
             "activity_instance"
@@ -459,14 +455,14 @@ class Planning extends React.Component {
 
         const BASIC_CHANGES_FILTER = [
             "room_id",
-            "room_mode",
+            "instances_update_scope",
             "location_id",
             "cover_teacher_id",
         ];
 
         const propertiesFilter = (object, filter) =>
             filter.reduce(
-                (acc, filter) => ({ ...acc, [filter]: object[filter] }),
+                (acc, filter) => ({...acc, [filter]: object[filter]}),
                 {}
             );
 
@@ -522,9 +518,19 @@ class Planning extends React.Component {
                 body: JSON.stringify(changes),
             })
                 .then(response => response.json())
-                .then(() => {
-                    if (hasIntervalOwnerChanged) {
+                .then((data) => {
+                    if (data.error_message) {
+                        toast.error(
+                            `${data.error_message}`,
+                            {
+                                position: toast.POSITION.BOTTOM_CENTER,
+                                autoClose: 3000,
+                            }
+                        );
+                        return;
+                    }
 
+                    if (hasIntervalOwnerChanged) {
                         this.setState({
                             isDetailModalOpen: false,
                             ...this.getIntervals(
@@ -533,8 +539,7 @@ class Planning extends React.Component {
                                 )
                             ),
                         });
-                    }
-                    else {
+                    } else {
                         if (changes.teacher_id)
                             _.set(
                                 instance,
@@ -551,21 +556,17 @@ class Planning extends React.Component {
                         let newState = this.getIntervals(
                             this.state.selectedIntervals.map(i => {
 
-                                if (i.id === this.state.intervalDetail)
-                                {
+                                if (i.id === this.state.intervalDetail) {
                                     return {
                                         ...i,
                                         activity_instance: instance,
                                     };
                                 }
-
-
                                 return i;
                             })
                         );
 
-                        TimeIntervalHelpers.fetchInterval(csrfToken, instance.time_interval_id).then(i =>
-                        {
+                        TimeIntervalHelpers.fetchInterval(csrfToken, instance.time_interval_id).then(i => {
                             newState.selectedIntervals = [...newState.selectedIntervals.filter(inter => inter.id !== i.id), i]
 
                             this.setState({
@@ -573,9 +574,25 @@ class Planning extends React.Component {
                             });
                         });
                     }
-
                     this.closeDetailModal();
-                });
+                    if (data.result) {
+                        toast.success(
+                            ` Mise à jour de ${data.result.success} cours et création de ${data.result.conflicts.length} conflits`,
+                            {
+                                position: toast.POSITION.BOTTOM_CENTER,
+                                autoClose: 3000,
+                            }
+                        );
+                    } else {
+                        toast.success(
+                            `Le cours est mis à jour !`,
+                            {
+                                position: toast.POSITION.BOTTOM_CENTER,
+                                autoClose: 3000,
+                            }
+                        );
+                    }
+                })
         }
     }
 
@@ -648,14 +665,14 @@ class Planning extends React.Component {
         );
         const checkResults = await res.json();
 
-        const confirmationToast = ({ closeToast }) => (
+        const confirmationToast = ({closeToast}) => (
             <div>
                 <p>
                     Mise à jour de {checkResults.success} cours et création de{" "}
                     {checkResults.conflicts.length} conflits
                 </p>
                 <button className="btn btn-primary m-r" onClick={closeToast}>
-                    <i className="fas fa-times m-r-sm" /> Annuler
+                    <i className="fas fa-times m-r-sm"/> Annuler
                 </button>
                 <button
                     className="btn btn-primary"
@@ -663,7 +680,7 @@ class Planning extends React.Component {
                         this.handleUpdateAllActivityInstances(event.schedule)
                     }
                 >
-                    <i className="fas fa-check m-r-sm" /> Confirmer
+                    <i className="fas fa-check m-r-sm"/> Confirmer
                 </button>
             </div>
         );
@@ -693,7 +710,7 @@ class Planning extends React.Component {
             this.props.updateTimePreferences(intervals);
         } else {
             // Update specific interval
-            const { intervalStore } = this.state;
+            const {intervalStore} = this.state;
 
             const interval = intervalStore[event.schedule.id];
             interval.start = moment(interval.start)
@@ -776,13 +793,13 @@ class Planning extends React.Component {
                 }
             }
 
-            this.setState({ selectedIntervals: intervals, intervalStore });
+            this.setState({selectedIntervals: intervals, intervalStore});
         }
     }
 
     handleDeleteInterval(id) {
         // Delete specific interval
-        const { intervalStore } = this.state;
+        const {intervalStore} = this.state;
 
         // the distinction is between teacher planning and ActivityApplication
         if (this.props.updateTimePreferences) {
@@ -801,8 +818,7 @@ class Planning extends React.Component {
                 },
             }).then((res) => {
 
-                if(res.ok)
-                {
+                if (res.ok) {
                     _.unset(intervalStore, id);
 
                     this.setState({
@@ -880,7 +896,7 @@ class Planning extends React.Component {
                 toast.success(toastDelete, {
                     position: toast.POSITION.BOTTOM_CENTER,
                 });
-                const intervalStore = { ...this.state.intervalStore };
+                const intervalStore = {...this.state.intervalStore};
                 // TODO Fix backend so it returns a good interval
                 // ensure data consistency with back end
                 // (strangely the server doesn't respond right, so quick fix)
@@ -892,7 +908,7 @@ class Planning extends React.Component {
                     activity_instance: null,
                 };
                 const selectedIntervals = _.values(intervalStore);
-                this.setState({ selectedIntervals, intervalStore });
+                this.setState({selectedIntervals, intervalStore});
             });
     }
 
@@ -952,7 +968,7 @@ class Planning extends React.Component {
             }),
         })
             .then(res => res.json())
-            .then(({ attendances }) => {
+            .then(({attendances}) => {
                 const interval = {
                     ...this.state.intervalStore[intervalId],
                 };
@@ -981,22 +997,22 @@ class Planning extends React.Component {
     // MULTIVIEW MODAL
     // =============================
     handleOpenMultiViewModal(schedule) {
-        this.setState({ isMultiViewModalOpen: true, selectedSchedule: schedule });
+        this.setState({isMultiViewModalOpen: true, selectedSchedule: schedule});
     }
 
     closeMultiViewModal() {
-        this.setState({ isMultiViewModalOpen: false, selectedSchedule: undefined });
+        this.setState({isMultiViewModalOpen: false, selectedSchedule: undefined});
     }
 
-        // =============================
+    // =============================
     // MULTIVIEW MODAL
     // =============================
     handleOpenEvaluationModal(schedule) {
-        this.setState({ isEvaluationModalOpen: true, selectedSchedule: schedule });
+        this.setState({isEvaluationModalOpen: true, selectedSchedule: schedule});
     }
 
     closeEvaluationModal(refresh = false) {
-        this.setState({ isEvaluationModalOpen: false, selectedSchedule: undefined });
+        this.setState({isEvaluationModalOpen: false, selectedSchedule: undefined});
 
         if (refresh) {
             this.fetchIntervals();
@@ -1016,8 +1032,9 @@ class Planning extends React.Component {
     afterOpenCreationModal() {
         // We can now access modal children references
     }
+
     closeCreationModal() {
-        this.setState({ isCreationModalOpen: false, newInterval: {} });
+        this.setState({isCreationModalOpen: false, newInterval: {}});
     }
 
     // =============================
@@ -1146,12 +1163,13 @@ class Planning extends React.Component {
     afterOpenDetailModal() {
         // We can now access modal children references
     }
+
     closeDetailModal() {
-        this.setState({ isDetailModalOpen: false, intervalDetail: {} });
+        this.setState({isDetailModalOpen: false, intervalDetail: {}});
     }
 
     handleUpdateActivityInInstances(activity) {
-        const intervalStore = { ...this.state.intervalStore };
+        const intervalStore = {...this.state.intervalStore};
 
         _.forEach(_.values(intervalStore), ti => {
             if (ti.activity_instance && ti.activity_instance.activity_id === activity.id) {
@@ -1163,11 +1181,11 @@ class Planning extends React.Component {
         });
 
         const selectedIntervals = _.values(intervalStore);
-        this.setState({ selectedIntervals, intervalStore });
+        this.setState({selectedIntervals, intervalStore});
     }
 
     closeAlert = () => {
-        this.setState({ showAlert: false });
+        this.setState({showAlert: false});
     };
 
     // =============================
@@ -1236,7 +1254,7 @@ class Planning extends React.Component {
                 case "planning":
                     selectValues = this.state.selectedPlannings.map(id => {
                         const u = _.find(this.props.teachers, {
-                            planning: { id },
+                            planning: {id},
                         });
                         return (
                             u && {
@@ -1254,7 +1272,7 @@ class Planning extends React.Component {
                     break;
                 case "room":
                     selectValues = this.state.selectedPlannings.map(id => {
-                        const r = _.find(this.props.rooms, { id });
+                        const r = _.find(this.props.rooms, {id});
                         return (
                             r && {
                                 value: r.id,
@@ -1278,7 +1296,7 @@ class Planning extends React.Component {
                 backgroundColor: state.data.bgColor || base.backgroundColor,
                 color: "white",
             }),
-            multiValueRemove: (base, state) => state.data.isFixed ? ({ ...base, display: 'none' }) : base,
+            multiValueRemove: (base, state) => state.data.isFixed ? ({...base, display: 'none'}) : base,
             multiValueLabel: base => ({
                 ...base,
                 color: "white",

@@ -149,6 +149,17 @@ class Activity extends React.Component {
         return _.some(this.props.suggestions, s => this.isDesiredActivityInActivity(s));
     }
 
+    displayDuration(duration) {
+        if (!duration) {
+            return null;
+        }
+
+        const hours = Math.floor(duration / 60);
+        const minutes = (duration % 60).toString().padStart(2, '0');
+
+        return duration < 60 ? `- ${minutes} min` : `- ${hours}h${minutes}`;
+    }
+
     handleOptionButton(suggestion) {
         // Checks if user is already on option for this activity, act accordingly
         if (this.isSuggestionInDesiredActivityOptions(suggestion)) {
@@ -426,20 +437,20 @@ class Activity extends React.Component {
                         return (
                             <button
                                 className="btn btn-xs btn-primary"
-                                disabled={this.state.submitting}
+                                disabled={!!this.state.submittingId}
                                 onClick={() => {
-                                    this.setState({submitting: true});
+                                    this.setState({submittingId: act.id});
                                     self.props.handleRemoveStudent(
                                         act.id,
                                         self.props.desiredActivity.id,
                                         self.props.activityRef.id
                                     ).then(() =>
-                                        this.setState({submitting: false})
+                                        this.setState({submittingId: 0})
                                     )
                                 }}>
                                 Retirer de ce créneau
                                 &nbsp;
-                                {this.state.submitting ?
+                                {this.state.submittingId === act.id ?
                                     <i className="fas fa-circle-notch fa-spin"></i>
                                     :
                                     ""}
@@ -457,23 +468,23 @@ class Activity extends React.Component {
                                 disabled={
                                     self.props.isAlreadyBusy(props.original.time_interval) ||
                                     act.users.length >= act.activity_ref.occupation_hard_limit ||
-                                    this.state.submitting
+                                    !!this.state.submittingId
                                 }
                                 className="btn btn-xs btn-primary m-r-sm"
                                 onClick={() => {
-                                    this.setState({submitting: true})
+                                    this.setState({submittingId: act.id})
                                     self.props.handleSelectSuggestion(
                                         act.id,
                                         self.props.desiredActivity.id,
                                         self.props.activityRef.id
                                     ).then(() =>
-                                        this.setState({submitting: false})
+                                        this.setState({submittingId: 0})
                                     )
                                 }}
                             >
                                 Sélectionner
                                 &nbsp;
-                                {this.state.submitting ?
+                                {this.state.submittingId === act.id ?
                                     <i className="fas fa-circle-notch fa-spin"></i>
                                     :
                                     ""}
@@ -627,7 +638,7 @@ class Activity extends React.Component {
             .map(r => <option
                 key={r.id}
                 value={r.id}>
-                {r.label}
+                {r.label}  {self.displayDuration(r.duration)}
             </option>)
             .value();
 

@@ -327,6 +327,9 @@ class ActivitiesApplicationsController < ApplicationController
 
     @adhesion_prices = AdhesionPrice.all.as_json
 
+    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
+    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
+
     @packs = ActivityRefPricing
                .where('("activity_ref_pricings"."from_season_id" <= ? AND ("activity_ref_pricings"."to_season_id" IS NULL OR "activity_ref_pricings"."to_season_id" >= ?))', Season.current.id, Season.current.id)
                .as_json(include: {
@@ -486,6 +489,9 @@ class ActivitiesApplicationsController < ApplicationController
     @avail_payment_methods = show_payment_schedule_options ? PaymentMethod.displayable.as_json(only: [:id, :label]) : []
     @payment_step_display_text = show_payment_schedule_options ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
     @adhesion_prices = Adhesion.all.as_json
+
+    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
+    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
   end
 
   def create
@@ -799,7 +805,7 @@ class ActivitiesApplicationsController < ApplicationController
                  nil
                end
 
-    render json: { error: "L'import de fichiers CSV est désactivé" }, status: :unprocessable_entity and return if importer.nil?
+    render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if importer.nil?
 
     result = importer.call
 
@@ -846,14 +852,25 @@ class ActivitiesApplicationsController < ApplicationController
 
   def send_all_confirmation_mail
     filter = params[:filter]
-    season = params[:season].nil? ? Season.current_apps_season : Season.find(params[:season]&.[](:id))
+
+    filtered_season_id = filter&.dig(:filtered)&.find { |f| f[:id] == "season_id" }&.dig(:value)
+
+    season = filtered_season_id.nil? ? Season.current_apps_season : Season.find(filtered_season_id)
 
     if params[:targets].length == 0
       render json: { success: false, message: "Vous n'avez pas selectionné d'utilisateurs" }, status: 400 and return
     end
 
-    mails_to_send = ActivityApplication.where(
-      id: params[:targets],
+    # get same query from user view
+    query = get_query_from_params filter
+
+    # if we have selected some users, add them to the query filter
+    if params[:targets] != "all"
+      query = query.where(id: params[:targets])
+    end
+
+    # force filter to only send email to user with good status AND in the current season if no season is selected
+    mails_to_send = query.where(
       activity_application_status_id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::ACTIVITY_PROPOSED_ID],
       season_id: season.id
     )
