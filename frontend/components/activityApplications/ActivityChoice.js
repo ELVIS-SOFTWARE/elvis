@@ -5,6 +5,7 @@ import _ from "lodash";
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
 import {frenchEnumeration} from "../utils/index.js";
 import {Editor, EditorState, convertFromRaw, ContentState} from "draft-js";
+import WysiwygViewer from "../utils/WysiwygViewer";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -277,33 +278,19 @@ const ActivityChoice = ({
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
 
-    // Display info text ---------------------------------------------------------------------------------------------------------------------------------------------
-    let editorState = EditorState.createEmpty();
-    let savedContentRaw = null;
-    let savedContentState = null;
-    if (infoText) {
-        try {
-            savedContentRaw = JSON.parse(infoText);
-            savedContentState = convertFromRaw(savedContentRaw);
-        } catch (e) {
-            savedContentState = ContentState.createFromText(infoText);
-        }
-        editorState = EditorState.createWithContent(savedContentState);
-    }
-
-
     return (
         <Fragment>
             <div>
                 {infoText && (
                     <div className="alert alert-info col-md-8 d-inline-flex align-items-center p-1"
                          style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
-                        <div className="col-1 p-0 text-center">
+                        <div className="col-sm-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
                         </div>
-                        <div className="col p-0">
-                            {<Editor editorState={editorState} readOnly={true}/>}
-                        </div>
+                        <WysiwygViewer
+                            className="col-sm p-0"
+                            wysiwygStrData={infoText}
+                        />
                     </div>
                 )}
             </div>
