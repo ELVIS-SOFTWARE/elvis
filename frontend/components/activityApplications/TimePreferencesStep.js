@@ -18,7 +18,8 @@ export default function TimePreferencesStep({
                                                 season,
                                                 activityRefs,
                                                 childhoodPreferences,
-                                                selectionLabels
+                                                selectionLabels,
+                                                disableLiveReload = true
                                             })
 {
     const availabilityRef = useRef();
@@ -48,8 +49,9 @@ export default function TimePreferencesStep({
                 isTeacher={false}
                 locked={false}
                 kinds={["p"]}
+                seasonId={season.id}
                 forSeason
-                disableLiveReload={true}
+                disableLiveReload={disableLiveReload}
                 planningId={planningId}
                 onAdd={onAvailabilityAdd}
                 onDelete={onAvailabilityDelete}
@@ -78,7 +80,7 @@ export default function TimePreferencesStep({
                     locked={false}
                     kinds={["p"]}
                     forSeason
-                    disableLiveReload={true}
+                    disableLiveReload={disableLiveReload}
                     planningId={planningId}
                     onAdd={onAvailabilityAdd}
                     onDelete={onAvailabilityDelete}
