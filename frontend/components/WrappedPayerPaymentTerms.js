@@ -2,9 +2,9 @@ import React, { Fragment } from "react";
 import PayerPaymentTerms from "./PayerPaymentTerms";
 import PropTypes from "prop-types";
 import PayerPaymentTermsInfo from "./PayerPaymentTermsInfo";
-import { Editor, EditorState, convertFromRaw, ContentState } from "draft-js";
 import { toast } from "react-toastify";
 import { MESSAGES } from "../tools/constants";
+import WysiwygViewer from "./utils/WysiwygViewer";
 
 class WrappedPayerPaymentTerms extends React.Component {
     constructor(props) {
@@ -78,26 +78,14 @@ class WrappedPayerPaymentTerms extends React.Component {
         this.props.onChangePayers && this.props.onChangePayers(payers);
     }
 
-    render() {
-
-        let editorState = EditorState.createEmpty();
-        let savedContentRaw = null;
-        let savedContentState = null;
-        if (this.props.paymentStepDisplayText != null) {
-            try {
-                savedContentRaw = JSON.parse(this.props.paymentStepDisplayText);
-                savedContentState = convertFromRaw(savedContentRaw);
-            } catch (e) {
-                savedContentState = ContentState.createFromText(this.props.paymentStepDisplayText);
-            }
-            editorState = EditorState.createWithContent(savedContentState);
-        }
-
+    render()
+    {
         return <Fragment>
 
-            {this.props.paymentStepDisplayText && <div className="alert alert-info w-100 pre-wrap">
-                {<Editor editorState={editorState} readOnly={true} />}
-            </div>}
+            {this.props.paymentStepDisplayText && <WysiwygViewer
+                className="alert alert-info w-100 pre-wrap"
+                wysiwygStrData={this.props.paymentStepDisplayText}
+            />}
 
             {this.props.informationalStepOnly ? (
                 this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 &&
