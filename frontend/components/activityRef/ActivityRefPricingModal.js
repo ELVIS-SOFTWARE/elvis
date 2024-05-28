@@ -94,6 +94,7 @@ export default class ActivityRefPricingModal extends React.Component {
                         component={this.ReactSelectAdapter}
                         options={seasons}
                         required
+                        isDisabled={this.props.isUpdate}
                         defaultValue={selectedFrom}
                         maxMenuHeight={100}
                         placeholder="sélectionner une saison"

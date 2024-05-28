@@ -59,7 +59,9 @@ class ActivityRefPricingController < ApplicationController
       end
     end
 
-    if @activity_ref_pricing.from_season_id != params[:fromSeason][:value].to_i
+    @activity_ref_pricing.to_season = to_season
+
+    if @activity_ref_pricing.from_season_id != from_season.id || @activity_ref_pricing.to_season_id != to_season_value
       activity_ref.activity_ref_pricing.where(pricing_category_id: params[:name][:value]).each do |activity_ref_pricing|
         if activity_ref_pricing.overlaps?(@activity_ref_pricing)
           render json: { errors: ["Les périodes se chevauchent"] }, status: :unprocessable_entity
