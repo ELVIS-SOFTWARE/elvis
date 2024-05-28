@@ -206,6 +206,14 @@ class UserForm extends React.PureComponent {
         if (user ? user.is_admin : false)
             return this.errors;
 
+        // Check payer
+        if (
+            this.props.hidePayers === false &&
+            (values.payers || []).length === 0
+        ) {
+            this.errors.payers = "err_must_have_payer";
+        }
+
         // check if rules of procedures checkbox is checked
         if (this.props.isRulesSpecified)
             if (!values.checked_rules)
@@ -313,6 +321,16 @@ class UserForm extends React.PureComponent {
                                             organizationOptions={this.props.organizationOptions}
                                             userId={this.props.initialValues.id}
                                         />
+
+                                        {
+                                            (this.props.hidePayers !== true) && (
+                                                <Payers
+                                                    values={values}
+                                                    mutators={form.mutators}
+                                                    currentUser={{ ...initialValues }}
+                                                />
+                                            )
+                                        }
 
                                         <ContactInfos
                                             values={values}
