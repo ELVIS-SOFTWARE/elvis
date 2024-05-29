@@ -23,6 +23,11 @@ class WrappedPayerPaymentTerms extends React.Component {
         if (this.props.informationalStepOnly)
             return true;
 
+        if(this.props.availPaymentMethods.length === 0 || this.props.availPaymentScheduleOptions.length === 0)
+        {
+            return true; // ignore this step if no payment methods or payment schedule options
+        }
+
         if (this.state.paymentTerms.day_for_collection != null &&
             !!this.state.paymentTerms.payment_schedule_options_id &&
             !!this.state.paymentTerms.payment_method_id)

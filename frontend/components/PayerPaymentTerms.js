@@ -129,62 +129,69 @@ export default function PayerPaymentTerms({
                 {//////////////////////////////////////////////////////////////////////////////////
                     // échéancier
                 }
-                <div className="form-group m-t-md">
-                    <label htmlFor="payment_schedule_options_id">Sélectionner votre échéancier</label>
-                    <select
-                        className="form-control"
-                        name="payment_schedule_options_id"
-                        onChange={handleScheduleOptionChange}
-                        value={selectedPaymentTermsId}
-                    >
-                        <option key={-1} value="0">(choisissez une option)</option>
-                        {availPaymentScheduleOptions.map(apt =>
-                            <option key={apt.id} value={apt.id}>{apt.label}</option>,
-                        )}
-                    </select>
-                </div>
 
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // date de paiement
-                }
-                {selectedPaymentTerms &&
-                    <Fragment>
+                {
+                    availPaymentMethods.length > 0 && availPaymentScheduleOptions.length > 0 ?
+                        <Fragment>
+                            <div className="form-group m-t-md">
+                                <label htmlFor="payment_schedule_options_id">Sélectionner votre échéancier</label>
+                                <select
+                                    className="form-control"
+                                    name="payment_schedule_options_id"
+                                    onChange={handleScheduleOptionChange}
+                                    value={selectedPaymentTermsId}
+                                >
+                                    <option key={-1} value="0">(choisissez une option)</option>
+                                    {availPaymentScheduleOptions.map(apt =>
+                                        <option key={apt.id} value={apt.id}>{apt.label}</option>,
+                                    )}
+                                </select>
+                            </div>
 
-                        <div className="form-group m-t-lg">
-                            <label htmlFor="payment_schedule_options_id">Règlement</label>
-                            <p>Sélectionner la date de règlement mensuel</p>
-                        </div>
-
-                        <ToggleButtonGroup
-                            multiSelect={false}
-                            selected={selectedDaysForCollection}
-                            childrenContent={
-                                selectedPaymentTerms.available_payments_days.map((day, i) => {
-                                    return <span> {day} </span>;
-                                })
+                            {//////////////////////////////////////////////////////////////////////////////////
+                                // date de paiement
                             }
-                            onChange={handleDayChange}
-                        />
-                    </Fragment>
-                }
+                            {selectedPaymentTerms &&
+                                <Fragment>
 
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // moyen de paiement
+                                    <div className="form-group m-t-lg">
+                                        <label htmlFor="payment_schedule_options_id">Règlement</label>
+                                        <p>Sélectionner la date de règlement mensuel</p>
+                                    </div>
+
+                                    <ToggleButtonGroup
+                                        multiSelect={false}
+                                        selected={selectedDaysForCollection}
+                                        childrenContent={
+                                            selectedPaymentTerms.available_payments_days.map((day, i) =>
+                                            {
+                                                return <span> {day} </span>;
+                                            })
+                                        }
+                                        onChange={handleDayChange}
+                                    />
+                                </Fragment>
+                            }
+
+                            {//////////////////////////////////////////////////////////////////////////////////
+                                // moyen de paiement
+                            }
+                            <div className="form-group m-t-md">
+                                <label htmlFor="payment_method_id">Sélectionner votre moyen de paiement</label>
+                                <select
+                                    className="form-control"
+                                    name="payment_method_id"
+                                    onChange={handleSelectMethodChange}
+                                    value={selectedPaymentMethodId}
+                                >
+                                    <option key={-1} value="0">(choisissez une option)</option>
+                                    {availPaymentMethods.map(apm =>
+                                        <option key={apm.id} value={apm.id}>{apm.label}</option>,
+                                    )}
+                                </select>
+                            </div>
+                        </Fragment> : ""
                 }
-                <div className="form-group m-t-md">
-                    <label htmlFor="payment_method_id">Sélectionner votre moyen de paiement</label>
-                    <select
-                        className="form-control"
-                        name="payment_method_id"
-                        onChange={handleSelectMethodChange}
-                        value={selectedPaymentMethodId}
-                    >
-                        <option key={-1} value="0">(choisissez une option)</option>
-                        {availPaymentMethods.map(apm =>
-                            <option key={apm.id} value={apm.id}>{apm.label}</option>,
-                        )}
-                    </select>
-                </div>
 
                 {//////////////////////////////////////////////////////////////////////////////////
                     // payeurs
