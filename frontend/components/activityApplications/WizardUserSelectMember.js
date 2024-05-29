@@ -114,12 +114,6 @@ export default class WizardUserSelectMember extends React.Component {
         if (familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
             error.legal_referent = "Veuillez sélectionner un représentant légal";
 
-        if (familyMemberUserOptionForSelection.filter(fl => fl.is_to_call).length === 0)
-            error.to_call = "Veuillez sélectionner une personne à contacter";
-
-        if (familyMemberUserOptionForSelection.filter(fl => fl.is_accompanying).length === 0)
-            error.accompanying = "Veuillez sélectionner un accompagnant";
-
         return error;
     }
 
@@ -268,7 +262,7 @@ export default class WizardUserSelectMember extends React.Component {
                         <div className="col-md-6 p-0">
 
                             <div className="mb-4">
-                                <label style={{color: "#003E5C"}}>Représentant légal</label>
+                                <label style={{ color: "#003E5C" }}>Représentant légal <span className="text-danger">*</span></label>
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}
                                     isMulti
