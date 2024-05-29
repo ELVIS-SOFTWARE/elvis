@@ -128,7 +128,8 @@ const ActivityChoice = ({
     };
 
     // Display the Activities and Packs ---------------------------------------------------------------------------------------------------------------------------------------------
-    function generateActivityRow(item, key, isPack = false, isSelected = false) {
+    function generateActivityRow(item, key, isPack = false, isSelected = false)
+    {
         const label = item.label;
         const duration = item.duration;
         const price = item.price;
@@ -200,11 +201,12 @@ const ActivityChoice = ({
             allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
         ), "id"
     );
-    const availableActivities = _.uniqBy([...groupedRefs, ...individualRefs, ...activityRefsCham].map(item => {
+
+    const availableActivities = _.uniqBy([...Object.values(groupedRefs).flat(1), ...individualRefs, ...activityRefsCham].map(item => {
         return {
             id: item.id,
             key: null,
-            label: item.label || item.kind,
+            label: item.display_name,
             duration: getDisplayDuration(item),
             price: `${getDisplayPrice(item, season)} €`,
             isPack: false,
@@ -216,7 +218,7 @@ const ActivityChoice = ({
             id: item.id,
             pricing_category_id: item.pricing_category.id,
             key: key,
-            label: `${item.activity_ref.label} - ${item.pricing_category.name}`,
+            label: `${item.activity_ref.display_name} - ${item.pricing_category.name}`,
             duration: getDisplayDuration(item.activity_ref),
             price: `${item.price} €`,
             isPack: true,
@@ -236,8 +238,9 @@ const ActivityChoice = ({
         });
     }
     if (searchTerm) {
-        availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item => {
-            return item.label.toLowerCase().includes(searchTerm.toLowerCase());
+        availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item =>
+        {
+            return item.display_name.toLowerCase().includes(searchTerm.toLowerCase());
         });
     }
 
@@ -246,7 +249,7 @@ const ActivityChoice = ({
         return {
             id: selectedActivity.id,
             key: null,
-            label: selectedActivity.label || selectedActivity.kind,
+            label: selectedActivity.display_name,
             duration: getDisplayDuration(selectedActivity),
             price: `${getDisplayPrice(selectedActivity, season)} €`,
             isPack: false,
@@ -259,7 +262,7 @@ const ActivityChoice = ({
             id: item.id,
             pricing_category_id: item.pricing_category.id,
             key: key,
-            label: `${item.activity_ref.label} - ${item.pricing_category.name}`,
+            label: `${item.activity_ref.display_name} - ${item.pricing_category.name}`,
             duration: getDisplayDuration(item.activity_ref),
             price: `${item.price} €`,
             isPack: true,
@@ -378,7 +381,7 @@ const ActivityChoice = ({
                                     <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total
                                         estimé
                                     </td>
-                                    <td colSpan="3" className="text-center">{totalSelectedPrice} €</td>
+                                    <td colSpan="3" className="text-center">{isNaN(totalSelectedPrice) ? "--" : totalSelectedPrice} €</td>
                                 </tr>
                                 </tbody>
                             )}
@@ -397,7 +400,7 @@ const ActivityChoice = ({
                             {unpopularActivitiesSelected.map(unpopularA => {
                                 return (
                                     <li key={unpopularA.id}>
-                                        {unpopularA.label}
+                                        {unpopularA.display_name}
                                     </li>
                                 );
                             })}

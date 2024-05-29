@@ -14,6 +14,10 @@ module LiquidDrops
       @activity["activity_ref"]["label"]
     end
 
+    def display_name
+      @activity["activity_ref"]["display_name"]
+    end
+
     def refKind
       @activity["activity_ref"]["kind"]
     end
