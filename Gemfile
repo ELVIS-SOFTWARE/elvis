@@ -20,10 +20,10 @@ gem "react-rails", "~> 3.2.1"
 gem "webpack"
 gem "webpacker", "~> 5.4.4"
 
-gem "irb", "<= 1.7.4"
+gem "irb"
 
 # forcer < 1.9 pour éviter le bug https://github.com/ruby-i18n/i18n/issues/603
-gem "i18n", "< 1.9.0"
+gem "i18n"
 
 gem "foreman"
 
@@ -44,7 +44,7 @@ gem "wicked_pdf"
 gem "wkhtmltopdf-binary"
 gem 'rubyzip'
 
-gem "kaminari", '~> 1.2.1'
+gem "kaminari", '~> 1.2.2'
 
 gem "deep_cloneable"
 
