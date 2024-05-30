@@ -66,20 +66,23 @@ export default class WizardUserSelectMember extends React.Component {
             this.updateMembersData();
     }
 
-    onAddMember(values) {
-        console.log(values);
-
+    onAddMember(values)
+    {
         const newMembers = _.cloneDeep(this.state.members);
 
-        newMembers.push({
+        const userToAdd = {
             ...values,
             full_name: `${values.first_name} ${values.last_name}`,
             family_links_with_user: [],
             availabilities: [],
             addresses: [],
             telephones: [],
-            attached_to_id: this.props.user.id
-        });
+            attached_to_id: values.id ? undefined : this.props.user.id, // do not attach if user already exists
+        };
+
+        // add the new member if it doesn't exist
+        if(newMembers.filter(m => m.id === userToAdd.id || (m.first_name === userToAdd.first_name && m.last_name === userToAdd.last_name && m.birthday === userToAdd.birthday)).length === 0)
+            newMembers.push(userToAdd);
 
         this.setState({
             members: newMembers,
