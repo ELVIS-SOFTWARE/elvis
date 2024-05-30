@@ -15,7 +15,7 @@ import PropTypes from "prop-types";
  * @returns {JSX.Element}
  * @constructor
  */
-export default function RemoveComponent({ classname, id, validationText, text, btnProps, onSuccess, onFailed, children })
+export default function RemoveComponent({ classname, id, validationText, text, btnProps, onSuccess, onFailed, children, additionalMessage })
 {
     const localOnSuccess = (data) =>
     {
@@ -71,6 +71,7 @@ export default function RemoveComponent({ classname, id, validationText, text, b
         swal({
             type: "warning",
             title: validationText || "Etes-vous sûr de vouloir supprimer cet élément ?",
+            text: additionalMessage,
             showCancelButton: true,
             confirmButtonText: "Oui",
             cancelButtonText: "Non",
