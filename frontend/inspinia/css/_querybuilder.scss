@@ -245,7 +245,7 @@ $ticks-group-color: #fff !default;
         }
 
         input[type="radio"] {
-            @extend input[type="checkbox"];
+            @extend input, [type="checkbox"];
 
             + span::before {
                 border-radius: 50%;

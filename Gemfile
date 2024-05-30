@@ -18,7 +18,7 @@ gem "bootsnap"
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
 gem "react-rails", "<3"
 gem "webpack"
-gem "webpacker", "4.0.7"
+gem "webpacker", "5.4.4"
 
 gem "irb", "<= 1.7.4"
 
