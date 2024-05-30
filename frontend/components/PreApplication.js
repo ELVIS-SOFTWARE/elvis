@@ -272,8 +272,8 @@ class PreApplication extends React.Component {
                         <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
                             <thead>
                             <tr style={{backgroundColor: "#00334A", color: "white"}}>
-                                <th>Réf.</th>
-                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                <th style={{borderRadius: "12px 0 0 0"}}>Réf.</th>
+                                <th>Activité</th>
                                 <th>Membre</th>
                                 <th>Date</th>
                                 <th>Statut</th>
