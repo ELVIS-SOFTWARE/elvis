@@ -87,7 +87,8 @@
     "tui-calendar": "https://github.com/SIXMON/tui.calendar.git",
     "tui-calendar-react": "^0.1.0",
     "tui-code-snippet": "^1.5.0",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "ipaddr.js": "^2.2.0"
   },
   "devDependencies": {
     "node-sass": "^9.0.0",

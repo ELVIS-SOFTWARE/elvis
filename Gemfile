@@ -15,6 +15,7 @@ gem "pg"
 # Use Puma as the app server
 gem "puma"
 gem "bootsnap"
+gem "mutex_m"
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
 gem "react-rails", "~> 3.2.1"
 gem "webpack"
