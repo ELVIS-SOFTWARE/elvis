@@ -5,6 +5,10 @@
     "start": "react-scripts --max_old_space_size=2048 start",
     "build": "react-scripts --max_old_space_size=2048 build"
   },
+  "engines": {
+    "node": "^20.9.0",
+    "yarn": "^1.22.21"
+  },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "@babel/preset-react": "^7.24.6",
