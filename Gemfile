@@ -57,7 +57,7 @@ gem "sentry-ruby"
 
 gem "acts_as_paranoid"
 gem "chewy", "< 7.4"
-gem "sidekiq", "< 7" # breaking change in 7.0
+gem "sidekiq"
 
 gem "rqrcode"
 
