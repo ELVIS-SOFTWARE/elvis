@@ -160,15 +160,15 @@ const Validation = ({
         }
     }
 
-    return (
+    return <Fragment>
         <div className="row mb-5">
 
-            <div className="col-md-7">
-                <h3 className="font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
+            <div className="col-xl-7 col-md-12">
+                <h3 className="font-weight-bold mb-2" style={{ color: "#8AA4B1" }}>
                     Récapitulatif de la demande
                 </h3>
 
-                <div className="p-5" style={{backgroundColor: "white", borderRadius: 12}}>
+                <div className="p-5" style={{ backgroundColor: "white", borderRadius: 12 }}>
 
                     {/*Elève*/}
                     <div className="d-inline-flex mb-5 pt-3 align-items-center">
@@ -203,7 +203,7 @@ const Validation = ({
                             )
                         }
                         <div>
-                            <h3 className="font-weight-bold ml-3" style={{color: "#00283B"}}>
+                            <h3 className="font-weight-bold ml-3" style={{ color: "#00283B" }}>
                                 {application.user.first_name}{" "}
                                 {application.user.last_name}
                             </h3>
@@ -212,13 +212,13 @@ const Validation = ({
 
                     {/*Informations personnelles*/}
                     <div className="mb-5">
-                        <h3 className="font-weight-bold mb-3" style={{color: "#8AA4B1"}}>
+                        <h3 className="font-weight-bold mb-3" style={{ color: "#8AA4B1" }}>
                             Informations personnelles
                         </h3>
                         <div className="row">
                             <div className="col-md-6">
                                 <p className="m-0 small">Date de naissance</p>
-                                <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                <p className="font-weight-bold" style={{ color: "#00283B" }}>
                                     {moment(application.user.birthday).format(
                                         "DD/MM/YYYY"
                                     )}
@@ -228,7 +228,7 @@ const Validation = ({
                                 <div className="col">
                                     <p className="m-0 small">Sexe</p>
                                     <p className="font-weight-bold"
-                                       style={{color: "#00283B"}}>{application.user.sex}</p>
+                                       style={{ color: "#00283B" }}>{application.user.sex}</p>
                                 </div>
                                 : ""}
                         </div>
@@ -236,7 +236,7 @@ const Validation = ({
 
                     {/*Coordonnées personnelles*/}
                     <div className="mb-5">
-                        <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                        <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
                             Coordonnées personnelles
                         </h3>
 
@@ -245,9 +245,9 @@ const Validation = ({
                                 <p className="m-0 small">Adresse(s)</p>
                                 {_.map(application.infos.addresses, (address, i) => (
                                     <div key={i}>
-                                        <p className="font-weight-bold" style={{color: "#00283B"}}>
-                                            {address.street_address}<br/>
-                                            {address.postcode} {address.city}<br/>
+                                        <p className="font-weight-bold" style={{ color: "#00283B" }}>
+                                            {address.street_address}<br />
+                                            {address.postcode} {address.city}<br />
                                         </p>
                                     </div>
                                 ))}
@@ -256,7 +256,7 @@ const Validation = ({
                                 {_.map(_.filter(application.infos.telephones, p => p.label && p.number), (p, i) => (
                                     <div key={i}>
                                         <p className="m-0 small">Télephone {p.label}:</p>
-                                        <p className="font-weight-bold" style={{color: "#00283B"}}>{p.number}</p>
+                                        <p className="font-weight-bold" style={{ color: "#00283B" }}>{p.number}</p>
                                     </div>
                                 ))}
                             </div>
@@ -265,27 +265,27 @@ const Validation = ({
 
                     {/*Contacts*/}
                     <div className="mb-5">
-                        <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                        <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
                             Contacts
                         </h3>
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="mb-3">
                                     <p className="m-0 small">Représentant légal</p>
-                                    <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                    <p className="font-weight-bold" style={{ color: "#00283B" }}>
                                         {legalReferents.map(p => p.name).join(", ")}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="m-0 small">Accompagnant</p>
-                                    <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                    <p className="font-weight-bold" style={{ color: "#00283B" }}>
                                         {accompanying.map(p => p.name).join(", ")}
                                     </p>
                                 </div>
                             </div>
                             <div className="col">
                                 <p className="m-0 small">Contact d'urgence</p>
-                                <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                <p className="font-weight-bold" style={{ color: "#00283B" }}>
                                     {emergencyContacts.map(p => p.name).join(", ")}
                                 </p>
                             </div>
@@ -294,7 +294,7 @@ const Validation = ({
 
                     {/*Activités sélectionnées*/}
                     <div className="mb-5">
-                        <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                        <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
                             Activités sélectionnées
                         </h3>
                         <div>
@@ -311,7 +311,7 @@ const Validation = ({
                     {/*Disponibilités*/}
                     {showTimePreferences ? (
                         <div className="mb-5">
-                            <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                            <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
                                 Disponibilités
                             </h3>
                             {preferencesArray.map((pref, index) => (
@@ -328,13 +328,13 @@ const Validation = ({
                     {/*Evaluations*/}
                     {selectedEvaluations.length > 0 && _.size(application.selectedEvaluationIntervals) > 0 ? (
                         <div className="mb-5">
-                            <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                            <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
                                 Evaluation de niveau
                             </h3>
                             <EvaluationChoiceTable
                                 activityRefs={allActivityRefs}
                                 data={selectedEvaluations}
-                                showChoiceNumber={false}/>
+                                showChoiceNumber={false} />
                         </div>
 
                     ) : null}
@@ -342,7 +342,7 @@ const Validation = ({
                     {/*Préférence de paiement*/}
                     {paymentTerms.length > 0 ? (
                         <div className="mb-5">
-                            <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
+                            <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
                                 Préférence de paiement
                             </h3>
                             <div className="row">
@@ -350,17 +350,17 @@ const Validation = ({
                                     <div className="mb-3">
                                         <p className="m-0 small">Echéancier</p>
                                         <p className="font-weight-bold"
-                                           style={{color: "#00283B"}}>{selectedPaymentScheduleOption}</p>
+                                           style={{ color: "#00283B" }}>{selectedPaymentScheduleOption}</p>
                                     </div>
                                     <div>
                                         <p className="m-0 small">Moyen de paiement</p>
                                         <p className="font-weight-bold"
-                                           style={{color: "#00283B"}}>{selectedPaymentMethod}</p>
+                                           style={{ color: "#00283B" }}>{selectedPaymentMethod}</p>
                                     </div>
                                 </div>
                                 <div className="col">
                                     <p className="m-0 small">Payeur(s)</p>
-                                    <p className="font-weight-bold" style={{color: "#00283B"}}>
+                                    <p className="font-weight-bold" style={{ color: "#00283B" }}>
                                         {payersList.map(p => p.name).join(", ")}
                                     </p>
                                 </div>
@@ -373,28 +373,28 @@ const Validation = ({
             </div>
 
 
-            <div className="col-md-5">
-                <h3 className="font-weight-bold mb-2" style={{color: "#8AA4B1"}}>
+            <div className="col-md-5 col-xl-5">
+                <h3 className="font-weight-bold mb-2" style={{ color: "#8AA4B1" }}>
                     Commentaire
                 </h3>
                 <div>
-                        <textarea name="comment" className="form-control" style={{borderRadius: 12, border: 0}}
-                                  onChange={(e) => handleComment(e.target.value)}/>
+                        <textarea name="comment" className="form-control" style={{ borderRadius: 12, border: 0 }}
+                                  onChange={(e) => handleComment(e.target.value)} />
                 </div>
             </div>
-            <button
-                onClick={handleSubmit}
-                disabled={buttonDisabled}
-                className="btn btn-primary btn-md submit-activity mt-5"
-            >
-                {buttonDisabled ? (
-                    <Fragment><i className="fa fa-spinner fa-spin"/> &nbsp;</Fragment>
-                ) : ""}
-                {"Envoyer la demande"}
-            </button>
         </div>
-    )
-        ;
+
+        <button
+            onClick={handleSubmit}
+            disabled={buttonDisabled}
+            className="btn btn-primary btn-md submit-activity mt-5"
+        >
+            {buttonDisabled ? (
+                <Fragment><i className="fa fa-spinner fa-spin" /> &nbsp;</Fragment>
+            ) : ""}
+            {"Envoyer la demande"}
+        </button>
+    </Fragment>
 };
 
 export default Validation;
