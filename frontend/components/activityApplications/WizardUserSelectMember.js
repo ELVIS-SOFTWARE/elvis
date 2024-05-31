@@ -81,7 +81,7 @@ export default class WizardUserSelectMember extends React.Component {
         };
 
         // add the new member if it doesn't exist
-        if(newMembers.filter(m => m.id === userToAdd.id || (m.first_name === userToAdd.first_name && m.last_name === userToAdd.last_name && m.birthday === userToAdd.birthday)).length === 0)
+        if(newMembers.filter(m => (m.id != undefined && m.id === userToAdd.id) || (m.first_name === userToAdd.first_name && m.last_name === userToAdd.last_name && m.birthday === userToAdd.birthday)).length === 0)
             newMembers.push(userToAdd);
 
         this.setState({
