@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {useState} from "react";
 import Modal from "react-modal";
 import * as api from "../../tools/api";
@@ -18,8 +18,8 @@ export default function EditApplication(props) {
     }
 
     return (
-        <div>
-            <button className="btn text-white btn-sm"
+        <Fragment>
+            <button className="btn text-white btn-sm m-xs"
                     style={{
                         backgroundColor: "#00334A",
                         borderRadius: "8px",
@@ -113,6 +113,6 @@ export default function EditApplication(props) {
                     </div>
                 </div>
             </Modal>
-        </div>
+        </Fragment>
     )
 }

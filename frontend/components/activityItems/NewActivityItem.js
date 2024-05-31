@@ -189,31 +189,40 @@ class NewActivityItem extends React.Component {
         let activityApplicationId = this.state.activityApplicationId.toString();
         let paddedActivityApplicationId = activityApplicationId.padStart(3, '0');
 
+        const dayLabel = data ? moment(data.time_interval.start).format('dddd') : undefined;
+
         return (
             <React.Fragment>
-                <tr>
-                    <td>
-                        <b>
+                <div className="card p-0 col-sm-12 col-md-5 mr-4 mb-4 text-dark"
+                     style={{ border: "none", borderRadius: "12px" }}>
+                    <div className={`d-inline-flex align-items-center p-3 row ${data && "pb-sm-0"}`}>
+                        <div className="col-sm-6">
                             {(this.props.current_user || {}).is_admin ?
-                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`${paddedActivityApplicationId}`}</a> :
-                                `${paddedActivityApplicationId}`}
-                        </b>
-                    </td>
-                    <td className="font-weight-bold" style={{color: "#00283B"}}>
-                        {desiredActivity.activity_ref.label}
-                    </td>
-                    <td>
-                        {this.props.user.first_name} {this.props.user.last_name}
-                    </td>
-                    <td>
-                        {moment(this.props.new_activity_application.created_at).format('DD/MM/YYYY')}
-                    </td>
-                    <td>
-                        {renderActivityAction(actionLabel)}
-                    </td>
-                    <td>{activityDetails}</td>
-                    <td className="d-flex justify-content-end">
+                                <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`#${paddedActivityApplicationId}`}</a> :
+                                `#${paddedActivityApplicationId}`}
+                            <h3>{desiredActivity.activity_ref.label}</h3>
+                        </div>
 
+                        <div className="col-sm-6 text-right">
+                            {renderActivityAction(actionLabel)}
+                        </div>
+                    </div>
+
+                    <div className="col-sm-12">
+                        {
+                            data && <React.Fragment>
+                                <p className="mb-sm-2">
+                                    {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
+                                    {moment(data.time_interval.start).format('HH:mm')} à&nbsp;
+                                    {moment(data.time_interval.end).format('HH:mm')}
+                                    {data.room && data.room.label && <Fragment>, en salle : {data.room.label}</Fragment>}
+                                </p>
+                                <p style={{color: "gray"}}>Avec {data.teacher.first_name} {data.teacher.last_name}</p>
+                            </React.Fragment>
+                        }
+                    </div>
+
+                    <div className="col-sm-12 text-right">
                         <AnswerProposal
                             activity_application_status_id={activity_application_status_id}
                             proposalAnswered={this.state.proposalAnswered}
@@ -232,10 +241,9 @@ class NewActivityItem extends React.Component {
                                 />
                             </Fragment>
                         )}
+                    </div>
+                </div>
 
-                    </td>
-
-                </tr>
                 <Modal
                     isOpen={this.state.isAssignationRefusedModalOpen}
                     onRequestClose={() => this.closeAssignationRefusedModal()}
