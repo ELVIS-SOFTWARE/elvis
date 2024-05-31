@@ -1,12 +1,10 @@
+require "active_support/core_ext/integer/time"
+
 ##########################################################
 # Ce fichier est dédié à l'environnement de prod d'ELVIS
 ##########################################################
 
 Rails.application.configure do
-  # Settings specified here will take precedence over those in config/application.rb.
-  #
-  config.webpacker.check_yarn_integrity = false
-
   # Code is not reloaded between requests.
   config.cache_classes = true
 
@@ -15,6 +13,9 @@ Rails.application.configure do
   # and those relying on copy on write to perform better.
   # Rake tasks automatically ignore this option for performance.
   config.eager_load = true
+
+  # Do not fallback to assets pipeline if a precompiled asset is missed.
+  config.assets.compile = false
 
   # Full error reports are disabled and caching is turned on.
   config.consider_all_requests_local       = false

@@ -8,10 +8,10 @@ require "active_record/railtie"
 require "active_storage/engine"
 require "action_controller/railtie"
 require "action_mailer/railtie"
+# require "action_mailbox/engine"
+# require "action_text/engine"
 require "action_view/railtie"
 require "action_cable/engine"
-require "sprockets/railtie"
-require 'active_support/core_ext'
 require_relative "../lib/elvis/version"
 # require "rails/test_unit/railtie"
 
@@ -30,19 +30,16 @@ module RailsStarter
 
     config.autoload_paths += [Rails.root.join("lib")]
 
-    # Settings in config/environments/* take precedence over those specified here.
-    # Application configuration should go into files in config/initializers
-    # -- all .rb files in that directory are automatically loaded.
+    # Configuration for the application, engines, and railties goes here.
+    #
+    # These settings can be overridden in specific environments using the files
+    # in config/environments, which are processed later.
+    #
+    # config.time_zone = "Central Time (US & Canada)"
+    # config.eager_load_paths << Rails.root.join("extras")
 
     # Don't generate system test files.
     config.generators.system_tests = nil
-    config.generators do |g|
-        g.test_framework false
-        g.stylesheets    false
-        g.javascripts    false
-        g.helper         false
-        g.channel        assets: false
-    end
 
     config.middleware.use Rack::Deflater
 
