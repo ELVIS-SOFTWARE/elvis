@@ -7,7 +7,7 @@
           <% if @user.avatar.attached? %>
             <img alt="profile" class="img-circle" src="<%= url_for(@user.avatar) %>"/>
           <% else %>
-            <img alt="profile" class="img-circle" src="<%= asset_pack_path 'images/default_avatar.png' %>"/>
+            <img alt="profile" class="img-circle" src="<%= asset_pack_path 'media/images/default_avatar.png' %>"/>
           <% end %>
 
           <%if @current_user.is_admin || @current_user == @user %>
@@ -375,7 +375,7 @@
                                     <% if a.teacher.avatar.attached? %>
                                       <span> <img alt="image" class="img-circle" src="<%= url_for(a.teacher.avatar) %>" width="50" height="50"/> </span>
                                     <% else %>
-                                      <span> <img alt="image" class="img-circle" src="<%= asset_pack_path 'images/default_avatar.png' %>" width="50" height="50"/> </span>
+                                      <span> <img alt="image" class="img-circle" src="<%= asset_pack_path 'media/images/default_avatar.png' %>" width="50" height="50"/> </span>
                                     <% end %>
                                     <div class="file-name">
                                       <p class="activity-professor-name"><%= a.teacher.full_name %></p>

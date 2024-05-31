@@ -73,7 +73,7 @@ COPY app/assets /Elvis/app/assets
 COPY babel.config.js postcss.config.js /Elvis/
 
 # ignore error when precompiling assets
-RUN NODE_ENV=production NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile || (cat /Elvis/log/development.log && sleep 10 && exit 1)
+RUN NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile
 ENV RAILS_ENV=kubernetes
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
 
@@ -82,7 +82,7 @@ COPY config/routes.rb /Elvis/config/routes.rb
 COPY app /Elvis/app
 COPY config/initializers /Elvis/config/initializers
 
-RUN bundle exec bootsnap precompile --gemfile app/ lib/ || (true && cat /Elvis/log/development.log && sleep 10 && exit 1)
+RUN bundle exec bootsnap precompile --gemfile app/ lib/
 
 RUN rm -rf log/*
 RUN rm -rf tmp/cache
