@@ -89,35 +89,37 @@ class ContactInfos extends React.PureComponent {
                     </button>
                 </div>
 
-                <div>
-                    {displaySameAs && <Fragment>
-                        {Array.isArray(values.family) &&
-                            values.family.length > 0 && (
-                                <SelectSameAs
-                                    family={values.family}
-                                    format={obj => `${obj}`}
-                                    accessor="email"
-                                    setSameAs={value =>
-                                        form.change(
-                                            "email",
-                                            value ? JSON.parse(value) : ""
-                                        )
-                                    }
-                                    currentUser={currentUser}
-                                />
-                            )}
-                    </Fragment>}
-                    <Field
-                        label={"Email"}
-                        name="email"
-                        type="email"
-                        render={Input}
-                        validate={!ignoreValidate && required}
-                        required={!currentUser.is_attached && !ignoreValidate}
-                    />
+                <div className="row">
+                    <div className="col-xs-12 col-md-8 col-lg-6 col-xl-4">
+                        {displaySameAs && <Fragment>
+                            {Array.isArray(values.family) &&
+                                values.family.length > 0 && (
+                                    <SelectSameAs
+                                        family={values.family}
+                                        format={obj => `${obj}`}
+                                        accessor="email"
+                                        setSameAs={value =>
+                                            form.change(
+                                                "email",
+                                                value ? JSON.parse(value) : "",
+                                            )
+                                        }
+                                        currentUser={currentUser}
+                                    />
+                                )}
+                        </Fragment>}
+                        <Field
+                            label={"Email"}
+                            name="email"
+                            type="email"
+                            render={Input}
+                            validate={!ignoreValidate && required}
+                            required={!currentUser.is_attached && !ignoreValidate}
+                        />
+                    </div>
                 </div>
 
-                <div className="m-b-md">
+                <div className="m-b-md" style={{maxWidth: "600px"}}>
                     <FieldArray
                         name="telephones"
                         render={(props) => <TelephoneFields {...props} ignoreValidate={ignoreValidate} />}
@@ -129,7 +131,7 @@ class ContactInfos extends React.PureComponent {
                                     update(
                                         "telephones",
                                         i,
-                                        value ? JSON.parse(value) : undefined
+                                        value ? JSON.parse(value) : undefined,
                                     )
                                 : undefined
                         }
@@ -139,14 +141,12 @@ class ContactInfos extends React.PureComponent {
                     <button
                         type="button"
                         className="btn btn-primary btn-sm"
-                        style={{backgroundColor: "#00334A",borderRadius: "12px"}}
+                        style={{ backgroundColor: "#00334A", borderRadius: "12px" }}
                         onClick={() => push("telephones", undefined)}
                     >
                         <i className="fas fa-plus" /> {"Ajouter un téléphone"}
                     </button>
                 </div>
-
-
             </div>
         );
     }
