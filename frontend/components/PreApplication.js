@@ -246,7 +246,6 @@ class PreApplication extends React.Component {
                                 <tr style={{backgroundColor: "#00334A", color: "white"}}>
                                     <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
                                     <th>Membre</th>
-                                    <th>Séances restantes</th>
                                     <th style={{borderRadius: "0 12px 0 0"}}></th>
                                 </tr>
                                 </thead>
