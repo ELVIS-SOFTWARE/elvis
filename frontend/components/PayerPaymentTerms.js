@@ -119,59 +119,58 @@ export default function PayerPaymentTerms({
         [selectedPaymentTermsId, availableChoices],
     );
 
+
+
     return (
-        <div className="row">
-
+        <div className="row mt-4">
             {//////////////////////////////////////////////////////////////////////////////////
-                // échéancier
+                // Modalités de paiement & date de paiement
             }
-            <div className="row mb-4">
-                <div className="form-group m-t-md">
-                    <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Type de paiement</h3>
-                    <select
-                        className="form-control col-md-6"
-                        name="payment_schedule_options_id"
-                        onChange={handleScheduleOptionChange}
-                        value={selectedPaymentTermsId}
-                        style={{borderRadius: "8px", border: "0"}}
-                    >
-                        <option key={-1} value="0">Choisissez une option</option>
-                        {availPaymentScheduleOptions.map(apt =>
-                            <option key={apt.id} value={apt.id}>{apt.label}</option>,
-                        )}
-                    </select>
-                </div>
-            </div>
-
-
-            {//////////////////////////////////////////////////////////////////////////////////
-                // date de paiement
-            }
-            {selectedPaymentTerms &&
-                <div className="row mb-4">
-                    <div className="form-group m-t-lg">
-                        <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Date de règlement</h3>
-                        <ToggleButtonGroup
-                            multiSelect={false}
-                            selected={selectedDaysForCollection}
-                            childrenContent={
-                                selectedPaymentTerms.available_payments_days.map((day, i) => {
-                                    return <span> {day} </span>;
-                                })
-                            }
-                            onChange={handleDayChange}
-                            buttonClasses="p-0"
-                        />
+            <div className="d-sm-inline-flex justify-content-between w-100">
+                <div className="col-md-6 p-0">
+                    <div className="form-group">
+                        <h3 className='font-weight-bold mb-4' style={{color: "#8AA4B1"}}>Modalités de paiement</h3>
+                        <select
+                            className="form-control"
+                            name="payment_schedule_options_id"
+                            onChange={handleScheduleOptionChange}
+                            value={selectedPaymentTermsId}
+                            style={{borderRadius: "8px", border: "0"}}
+                        >
+                            <option key={-1} value="0">Choisissez une option</option>
+                            {availPaymentScheduleOptions.map(apt =>
+                                <option key={apt.id} value={apt.id}>{apt.label}</option>,
+                            )}
+                        </select>
                     </div>
                 </div>
-            }
+                {selectedPaymentTerms &&
+                    <div className="col-md-5 p-0">
+                        <div className="form-group">
+                            <h3 className='font-weight-bold m-2' style={{color: "#8AA4B1"}}>Date de règlement</h3>
+                            <ToggleButtonGroup
+                                multiSelect={false}
+                                selected={selectedDaysForCollection}
+                                childrenContent={
+                                    selectedPaymentTerms.available_payments_days.map((day, i) => {
+                                        return <span> {day} </span>;
+                                    })
+                                }
+                                onChange={handleDayChange}
+                                buttonClasses="p-0"
+                                buttonStyles={{height: "35px", width: "35px", borderRadius: "8px"}}
+                            />
+                        </div>
+                    </div>
+                }
+            </div>
 
             {//////////////////////////////////////////////////////////////////////////////////
                 // moyen de paiement
             }
-            <div className="row mb-4">
-                <div className="form-group m-t-md">
-                    <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Modalité de paiement</h3>
+            <div className="row ml-1 mb-4">
+                <div className="form-group">
+                    <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Moyens de paiement</h3>
                     <select
                         className="form-control col-md-6"
                         name="payment_method_id"
@@ -190,7 +189,7 @@ export default function PayerPaymentTerms({
             {//////////////////////////////////////////////////////////////////////////////////
                 // payeurs
             }
-            <div className="row">
+            <div className="row ml-1">
                 <div className="form-group m-t-md">
                     <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Payeur(s)</h3>
                     <PayersListEditor
