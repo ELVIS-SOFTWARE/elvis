@@ -27,6 +27,10 @@ module LiquidDrops
       @activity_instance["activity"]["activity_ref"]["label"]
     end
 
+    def display_name
+      @activity_instance["activity"]["activity_ref"]["display_name"]
+    end
+
     def teacher_last_name
       @activity_instance["activity"]["teacher"]["last_name"]
     end

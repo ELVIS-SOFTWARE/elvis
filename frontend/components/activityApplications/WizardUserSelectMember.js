@@ -66,20 +66,23 @@ export default class WizardUserSelectMember extends React.Component {
             this.updateMembersData();
     }
 
-    onAddMember(values) {
-        console.log(values);
-
+    onAddMember(values)
+    {
         const newMembers = _.cloneDeep(this.state.members);
 
-        newMembers.push({
+        const userToAdd = {
             ...values,
             full_name: `${values.first_name} ${values.last_name}`,
             family_links_with_user: [],
             availabilities: [],
             addresses: [],
             telephones: [],
-            attached_to_id: this.props.user.id
-        });
+            attached_to_id: values.id ? undefined : this.props.user.id, // do not attach if user already exists
+        };
+
+        // add the new member if it doesn't exist
+        if(newMembers.filter(m => (m.id != undefined && m.id === userToAdd.id) || (m.first_name === userToAdd.first_name && m.last_name === userToAdd.last_name && m.birthday === userToAdd.birthday)).length === 0)
+            newMembers.push(userToAdd);
 
         this.setState({
             members: newMembers,
@@ -113,12 +116,6 @@ export default class WizardUserSelectMember extends React.Component {
 
         if (familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
             error.legal_referent = "Veuillez sélectionner un représentant légal";
-
-        if (familyMemberUserOptionForSelection.filter(fl => fl.is_to_call).length === 0)
-            error.to_call = "Veuillez sélectionner une personne à contacter";
-
-        if (familyMemberUserOptionForSelection.filter(fl => fl.is_accompanying).length === 0)
-            error.accompanying = "Veuillez sélectionner un accompagnant";
 
         return error;
     }
@@ -209,7 +206,7 @@ export default class WizardUserSelectMember extends React.Component {
                 <div className="row">
                     <div className="d-inline-flex justify-content-between align-items-center w-100 mb-5">
                         <div>
-                            <h3 className="font-weight-bold mb-0" style={{color: "#8AA4B1"}}>Membre concerné</h3>
+                            <p className="font-weight-bold mb-0" style={{color: "#8AA4B1"}}>Membre concerné</p>
                         </div>
 
                         <div className="text-right">
@@ -244,14 +241,15 @@ export default class WizardUserSelectMember extends React.Component {
                         <p className="text-danger">{this.state.error.members}</p>
                 </div>}
 
-                <div className="row d-md-inline-flex align-items-center text-center mb-4">
+                <div className="row align-items-center text-center mb-4">
                     <ToggleButtonGroup
                         maxSelected={1}
                         childrenContent={members.map((member, i) => renderUserItem(user.id, member, i, selected === i))}
                         selected={[selected]}
                         onChange={selecteds => selecteds.length > 0 ? this.setState({selected: selecteds[0]}) : 0}
                         buttonStyles={{
-                            width: "200px",
+                            maxWidth: "200px", // max width unset by toggle-button-w-100-sm css class in small screens
+                            width: "100%",
                             height: "200px",
                             backgroundColor: "white",
                             padding: "15px",
@@ -259,7 +257,11 @@ export default class WizardUserSelectMember extends React.Component {
                             margin: "0 20px 10px 0",
                             whiteSpace: "nowrap",
                             overflowX: "auto",
+                            boxShadow: "none",
+                            "-webkit-box-shadow": "none",
+                            "-moz-box-shadow": "none",
                         }}
+                        buttonClasses={"col-sm-auto toggle-button-w-100-sm"}
                     />
                 </div>
 
@@ -268,7 +270,7 @@ export default class WizardUserSelectMember extends React.Component {
                         <div className="col-md-6 p-0">
 
                             <div className="mb-4">
-                                <label style={{color: "#003E5C"}}>Représentant légal</label>
+                                <label style={{ color: "#003E5C" }}>Représentant légal <span className="text-danger">*</span></label>
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}
                                     isMulti

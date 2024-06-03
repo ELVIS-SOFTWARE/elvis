@@ -56,7 +56,7 @@ const GeneralInfos = ({
             )}
 
             <div className="col mt-4">
-                <div className="col-md-6 p-0">
+                <div className="col-xs-12 col-md-6 p-0">
                     <label className="small" style={{color: "#003E5C"}}>Nom</label><br/>
                     <Field
                         name="last_name"
@@ -67,7 +67,7 @@ const GeneralInfos = ({
                     />
                 </div>
 
-                <div className="col-md-6 pr-0">
+                <div className="col-xs-12 col-md-6 pl-0 pl-md-5 pr-0">
                     <label className="small" style={{color: "#003E5C"}}>Prénom</label><br/>
                     <Field
                         name="first_name"

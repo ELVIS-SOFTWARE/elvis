@@ -1319,13 +1319,14 @@ class Summary extends React.Component {
                                                 selectionLabels={[_.head(this.state.application.activity_refs).display_name]}
                                                 mode={PLANNING_MODE}
                                                 planningId={this.props.application.user.planning.id}
-                                                intervals={this.props.application.user.planning.time_intervals}
+                                                intervals={Summary.filterTimeIntervals(application.user.planning.time_intervals, application.season).value()}
                                                 season={this.state.application.season}
                                                 seasons={this.props.seasons}
                                                 childhoodPreferences={null}
                                                 activityRefs={this.state.application.activity_refs}
                                                 authToken={null}
                                                 handleUpdateChildhoodPreferences={null}
+                                                disableLiveReload={false}
                                             />
                                             :
                                             availabilities

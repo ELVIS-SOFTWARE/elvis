@@ -5,6 +5,7 @@ import _ from "lodash";
 import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
 import {frenchEnumeration} from "../utils/index.js";
 import {Editor, EditorState, convertFromRaw, ContentState} from "draft-js";
+import WysiwygViewer from "../utils/WysiwygViewer";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -127,7 +128,8 @@ const ActivityChoice = ({
     };
 
     // Display the Activities and Packs ---------------------------------------------------------------------------------------------------------------------------------------------
-    function generateActivityRow(item, key, isPack = false, isSelected = false) {
+    function generateActivityRow(item, key, isPack = false, isSelected = false)
+    {
         const label = item.label;
         const duration = item.duration;
         const price = item.price;
@@ -199,11 +201,12 @@ const ActivityChoice = ({
             allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
         ), "id"
     );
-    const availableActivities = _.uniqBy([...groupedRefs, ...individualRefs, ...activityRefsCham].map(item => {
+
+    const availableActivities = _.uniqBy([...Object.values(groupedRefs).flat(1), ...individualRefs, ...activityRefsCham].map(item => {
         return {
             id: item.id,
             key: null,
-            label: item.label || item.kind,
+            label: item.display_name,
             duration: getDisplayDuration(item),
             price: `${getDisplayPrice(item, season)} €`,
             isPack: false,
@@ -215,7 +218,7 @@ const ActivityChoice = ({
             id: item.id,
             pricing_category_id: item.pricing_category.id,
             key: key,
-            label: `${item.activity_ref.label} - ${item.pricing_category.name}`,
+            label: `${item.activity_ref.display_name} - ${item.pricing_category.name}`,
             duration: getDisplayDuration(item.activity_ref),
             price: `${item.price} €`,
             isPack: true,
@@ -235,8 +238,9 @@ const ActivityChoice = ({
         });
     }
     if (searchTerm) {
-        availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item => {
-            return item.label.toLowerCase().includes(searchTerm.toLowerCase());
+        availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item =>
+        {
+            return item.display_name.toLowerCase().includes(searchTerm.toLowerCase());
         });
     }
 
@@ -245,7 +249,7 @@ const ActivityChoice = ({
         return {
             id: selectedActivity.id,
             key: null,
-            label: selectedActivity.label || selectedActivity.kind,
+            label: selectedActivity.display_name,
             duration: getDisplayDuration(selectedActivity),
             price: `${getDisplayPrice(selectedActivity, season)} €`,
             isPack: false,
@@ -258,7 +262,7 @@ const ActivityChoice = ({
             id: item.id,
             pricing_category_id: item.pricing_category.id,
             key: key,
-            label: `${item.activity_ref.label} - ${item.pricing_category.name}`,
+            label: `${item.activity_ref.display_name} - ${item.pricing_category.name}`,
             duration: getDisplayDuration(item.activity_ref),
             price: `${item.price} €`,
             isPack: true,
@@ -277,39 +281,25 @@ const ActivityChoice = ({
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
 
-    // Display info text ---------------------------------------------------------------------------------------------------------------------------------------------
-    let editorState = EditorState.createEmpty();
-    let savedContentRaw = null;
-    let savedContentState = null;
-    if (infoText) {
-        try {
-            savedContentRaw = JSON.parse(infoText);
-            savedContentState = convertFromRaw(savedContentRaw);
-        } catch (e) {
-            savedContentState = ContentState.createFromText(infoText);
-        }
-        editorState = EditorState.createWithContent(savedContentState);
-    }
-
-
     return (
         <Fragment>
             <div>
                 {infoText && (
                     <div className="alert alert-info col-md-8 d-inline-flex align-items-center p-1"
                          style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
-                        <div className="col-1 p-0 text-center">
+                        <div className="col-sm-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
                         </div>
-                        <div className="col p-0">
-                            {<Editor editorState={editorState} readOnly={true}/>}
-                        </div>
+                        <WysiwygViewer
+                            className="col-sm p-0"
+                            wysiwygStrData={infoText}
+                        />
                     </div>
                 )}
             </div>
 
             <div className="row">
-                <div className="col-md-6">
+                <div className="col-xs-12 col-lg-6">
                     <div>
                         <h3 className="mb-4" style={{color: "#8AA4B1"}}>Choix de l'activité</h3>
                         <div className="d-inline-flex justify-content-between mt-1 mb-2 w-100">
@@ -362,7 +352,7 @@ const ActivityChoice = ({
                 </div>
 
 
-                <div className="col-md-6">
+                <div className="col-xs-12 col-lg-6">
 
                     <div>
                         <h3 style={{color: "#8AA4B1"}}>Activités sélectionnées</h3>
@@ -391,7 +381,7 @@ const ActivityChoice = ({
                                     <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total
                                         estimé
                                     </td>
-                                    <td colSpan="3" className="text-center">{totalSelectedPrice} €</td>
+                                    <td colSpan="3" className="text-center">{isNaN(totalSelectedPrice) ? "--" : totalSelectedPrice} €</td>
                                 </tr>
                                 </tbody>
                             )}
@@ -410,7 +400,7 @@ const ActivityChoice = ({
                             {unpopularActivitiesSelected.map(unpopularA => {
                                 return (
                                     <li key={unpopularA.id}>
-                                        {unpopularA.label}
+                                        {unpopularA.display_name}
                                     </li>
                                 );
                             })}

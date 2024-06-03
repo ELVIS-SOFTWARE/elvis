@@ -55,8 +55,8 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
                 />
             )}
 
-            <div className="row d-flex align-items-center">
-                <div className="col-md-6 pr-0">
+            <div className="row">
+                <div className="col-xs-12 col-md-8 pr-0">
                     <Field
                         name={`${field}.number`}
                         label={"Téléphone"}
@@ -69,7 +69,7 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
                     />
                 </div>
 
-                <div className="col">
+                <div className="col-xs-12 col-md-4">
                     <Field
                         name={`${field}.label`}
                         label={"Type"}
@@ -119,8 +119,8 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                 />
             )}
 
-                <div className="row d-flex align-items-center mb-4">
-                    <div className="col-md-6 pr-0">
+                <div className="row  mb-4">
+                    <div className="col-xs-12 col-md-5 col-xl-6 pr-0">
                         <Field
                             label={"Adresse"}
                             name={`${field}.street_address`}
@@ -130,7 +130,7 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
 
-                    <div className="col-md-2 pr-0">
+                    <div className="col-xs-12 col-md-2 col-sm-3 pr-0">
                         <Field
                             label={"Code Postal"}
                             name={`${field}.postcode`}
@@ -141,7 +141,7 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
 
-                    <div className="col">
+                    <div className="col-xs-12 col-sm-4 col-md-3 col-xl-2">
                         <Field
                             label={"Ville"}
                             name={`${field}.city`}
@@ -151,7 +151,7 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
                     {fields.length > 1 ? (
-                        <div className="col mt-1 text-right">
+                        <div className="col-sm-12 col-lg-2 text-right" style={{marginTop: "2rem!important"}}>
                             <button
                                 type="button"
                                 className="btn btn-sm btn-warning"

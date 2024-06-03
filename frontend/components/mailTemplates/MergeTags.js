@@ -57,7 +57,7 @@ export const ACTIVITY_TAGS = {
 
     activity_label: {
         name: "Nom de l'activité",
-        value: "{{activity.label}}",
+        value: "{{activity.display_name}}",
         sample: "Nom de l'activité"
     },
 

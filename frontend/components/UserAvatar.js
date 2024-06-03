@@ -17,13 +17,14 @@ export default function UserAvatar({ user, size }) {
                 borderRadius: "50%",
                 width: `${size}px`,
                 height: `${size}px`,
-                margin: "10px 20px 10px 0",
+                margin: "10px 10px 10px 0",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 color: "#FF6066",
                 fontWeight: "bold",
-                fontSize: "20px"
+                fontSize: "20px",
+                objectFit: "cover"
             }}>
                 {userInitials}
             </div>

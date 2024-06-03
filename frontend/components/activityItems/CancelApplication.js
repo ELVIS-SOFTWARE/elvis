@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {useState} from "react";
 import swal from "sweetalert2";
 import Modal from "react-modal";
@@ -35,7 +35,7 @@ export default function CancelApplication({activityApplicationId}) {
     }
 
     return (
-        <div>
+        <Fragment>
             <button className="btn btn-sm mr-2"
                     style={{
                         color: "#00334A",
@@ -141,7 +141,7 @@ export default function CancelApplication({activityApplicationId}) {
 
             </Modal>
 
-        </div>
+        </Fragment>
 
     )
 }

@@ -200,12 +200,12 @@ class RenewActivityItem extends React.Component {
                 <tr>
                     <td>
                         <b>
-                            {(this.props.current_user || {}).is_admin ?
+                        {(this.props.current_user || {}).is_admin ?
                                 <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`${paddedActivityApplicationId}`}</a> :
                                 `${paddedActivityApplicationId}`}
                         </b>
                     </td>
-                    <td className="font-weight-bold" style={{color: "#00283B"}}>
+                    <td className="font-weight-bold" style={{ color: "#00283B" }}>
                         {data.activity_ref.label}
                     </td>
                     <td>

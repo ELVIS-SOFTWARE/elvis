@@ -404,7 +404,7 @@ class Wizard extends React.Component {
                 .then((result) =>
                 {
                     if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                        window.location.href = `/new_application/${this.state.user.id}`;
+                        window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
                     } else {
                         window.location.href = `/inscriptions/${data.activity_application.id}`;
                     }

@@ -207,6 +207,24 @@ class User < ApplicationRecord
                       })
   end
 
+  def pre_destroy
+    if self.attached_to_id.present? # not use attached? to not query database
+      self.attached_accounts.each do |attached_user|
+        user_have_personal_email = attached_user.email != self.email
+
+        attached_user.attached_to = nil
+
+        if attached_user.save
+          if user_have_personal_email
+            DeviseMailer.confirmation_instructions(attached_user, attached_user.confirmation_token).deliver_later
+          end
+        else
+          raise "Impossible de détacher l'utilisateur #{attached_user.full_name}. Veuillez le faire manuellement ou contacter un administrateur."
+        end
+      end
+    end
+  end
+
   # for validation, check if an user exist with given args (birthday, first_name & last_name)
   def unique_entry
     matched_user = User.where(

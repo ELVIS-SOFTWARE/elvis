@@ -16,6 +16,9 @@
 #  is_main                         :boolean          not null
 #  last_used_at                    :datetime         not null
 class ApplicationUrl < ApplicationRecord
+  if Rails.env.kubernetes?
+    skip_callback :commit, :after, :commit_callback
+  end
 
   def self.main_root_url
     ApplicationUrl.where(is_main: true).first&.url

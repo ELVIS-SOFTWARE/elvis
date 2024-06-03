@@ -50,6 +50,7 @@ export default function PayerPaymentTerms({
                                               onChangePaymentMethod,
                                               onChangePayers,
                                           }) {
+
     const [scheduleOptionChanged, setScheduleOptionChanged] = useState(paymentTerms.day_for_collection === undefined);
     const [selectedPaymentTermsId, setSelectedPaymentTermsId] = useState(paymentTerms.payment_schedule_options_id || 0);
     const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(paymentTerms.payment_method_id || 0);
@@ -58,6 +59,7 @@ export default function PayerPaymentTerms({
 
     const selectedPaymentTerms = getSelectedPaymentTerms();
     const availableChoices = selectedPaymentTerms ? selectedPaymentTerms.available_payments_days.length : 0;
+
 
     function getSelectedPaymentTerms(id = selectedPaymentTermsId) {
         return availPaymentScheduleOptions.find(
@@ -184,10 +186,12 @@ export default function PayerPaymentTerms({
                         }}
                     />
                 </div>
+
             </div>
         </div>
     );
 }
+
 
 PayerPaymentTerms.propTypes = {
     user: PropTypes.shape({
