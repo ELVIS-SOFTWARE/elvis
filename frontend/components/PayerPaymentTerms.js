@@ -12,7 +12,7 @@ function PayersListEditor({
                           }) {
 
     const family_with_user = [...family, user];
-    return <div>
+    return <div className="d-md-inline-flex">
         {family_with_user.map(user => {
                 const isSelected = selectedPayers.includes(user.id);
 
@@ -50,7 +50,6 @@ export default function PayerPaymentTerms({
                                               onChangePaymentMethod,
                                               onChangePayers,
                                           }) {
-
     const [scheduleOptionChanged, setScheduleOptionChanged] = useState(paymentTerms.day_for_collection === undefined);
     const [selectedPaymentTermsId, setSelectedPaymentTermsId] = useState(paymentTerms.payment_schedule_options_id || 0);
     const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(paymentTerms.payment_method_id || 0);
@@ -59,7 +58,6 @@ export default function PayerPaymentTerms({
 
     const selectedPaymentTerms = getSelectedPaymentTerms();
     const availableChoices = selectedPaymentTerms ? selectedPaymentTerms.available_payments_days.length : 0;
-
 
     function getSelectedPaymentTerms(id = selectedPaymentTermsId) {
         return availPaymentScheduleOptions.find(
@@ -85,41 +83,26 @@ export default function PayerPaymentTerms({
         onChangeDayForCollection && onChangeDayForCollection(paymentTerms.day_for_collection);
     }
 
-
-    function handleAddPayer(user_id) {
-        const newSelectedPayers = [...selectedPayers, user_id];
+    function handleAddPayer(newSelectedPayers) {
         setSelectedPayers(newSelectedPayers);
-
-        onChangePayers && onChangePayers(newSelectedPayers);
-
-    }
-
-    function handleRemovePayer(user_id) {
-        const newSelectedPayers = selectedPayers.filter(id => id !== user_id);
-        setSelectedPayers(newSelectedPayers);
-
         onChangePayers && onChangePayers(newSelectedPayers);
     }
 
     useEffect(() => {
-            if (!scheduleOptionChanged)
-                return;
+        if (!scheduleOptionChanged)
+            return;
 
-            if (selectedPaymentTerms) {
-                if (availableChoices === 1) {
-                    setSelectedDaysForCollection([0]);
-                    handleDayChange([0]);
-                } else {
-                    setSelectedDaysForCollection([]);
-                    handleDayChange([]);
-                }
+        if (selectedPaymentTerms) {
+            if (availableChoices === 1) {
+                setSelectedDaysForCollection([0]);
+                handleDayChange([0]);
+            } else {
+                setSelectedDaysForCollection([]);
+                handleDayChange([]);
             }
-            setScheduleOptionChanged(false);
-        },
-        [selectedPaymentTermsId, availableChoices],
-    );
-
-
+        }
+        setScheduleOptionChanged(false);
+    }, [selectedPaymentTermsId, availableChoices]);
 
     return (
         <div className="row mt-4">
@@ -169,20 +152,20 @@ export default function PayerPaymentTerms({
                 // moyen de paiement
             }
             <div className="row ml-1 mb-4">
-                <div className="form-group">
-                    <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Moyens de paiement</h3>
-                    <select
-                        className="form-control col-md-6"
-                        name="payment_method_id"
-                        onChange={handleSelectMethodChange}
-                        value={selectedPaymentMethodId}
-                        style={{borderRadius: "8px", border: "0"}}
-                    >
-                        <option key={-1} value="0">Choisissez une option</option>
-                        {availPaymentMethods.map(apm =>
-                            <option key={apm.id} value={apm.id}>{apm.label}</option>,
-                        )}
-                    </select>
+                <div className="col-md-6 p-0 pr-3">
+                        <h3 className='font-weight-bold' style={{color: "#8AA4B1"}}>Moyens de paiement</h3>
+                        <select
+                            className="form-control"
+                            name="payment_method_id"
+                            onChange={handleSelectMethodChange}
+                            value={selectedPaymentMethodId}
+                            style={{borderRadius: "8px", border: "0"}}
+                        >
+                            <option key={-1} value="0">Choisissez une option</option>
+                            {availPaymentMethods.map(apm =>
+                                <option key={apm.id} value={apm.id}>{apm.label}</option>,
+                            )}
+                        </select>
                 </div>
             </div>
 
@@ -197,16 +180,14 @@ export default function PayerPaymentTerms({
                         selectedPayers={selectedPayers}
                         family={family}
                         onAddPayer={handleAddPayer}
-                        onRemovePayer={handleRemovePayer}
+                        onRemovePayer={() => {
+                        }}
                     />
                 </div>
             </div>
-
-
         </div>
     );
 }
-
 
 PayerPaymentTerms.propTypes = {
     user: PropTypes.shape({
