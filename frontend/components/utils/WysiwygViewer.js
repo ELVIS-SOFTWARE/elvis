@@ -33,7 +33,7 @@ export default function WysiwygViewer({wysiwygStrData, className, style})
 
     return (
         <div
-            className={className}
+            className={`wysiwyg-viewer ${className}`}
             style={style}
             dangerouslySetInnerHTML={{__html: wysiwygContent}}>
         </div>

@@ -299,7 +299,7 @@ const ActivityChoice = ({
             </div>
 
             <div className="row">
-                <div className="col-md-6">
+                <div className="col-xs-12 col-lg-6">
                     <div>
                         <h3 className="mb-4" style={{color: "#8AA4B1"}}>Choix de l'activité</h3>
                         <div className="d-inline-flex justify-content-between mt-1 mb-2 w-100">
@@ -352,7 +352,7 @@ const ActivityChoice = ({
                 </div>
 
 
-                <div className="col-md-6">
+                <div className="col-xs-12 col-lg-6">
 
                     <div>
                         <h3 style={{color: "#8AA4B1"}}>Activités sélectionnées</h3>
