@@ -3340,6 +3340,13 @@ body {
     -ms-user-select: none; /* IE 10 and IE 11 */
 }
 
+@media(max-width: 576px) {
+    .toggle-button-w-100-sm {
+        max-width: unset!important;
+        width: 100%;
+    }
+}
+
 .border-hover {
     border-color: transparent!important;
 }

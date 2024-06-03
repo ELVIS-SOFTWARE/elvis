@@ -206,7 +206,7 @@ export default class WizardUserSelectMember extends React.Component {
                 <div className="row">
                     <div className="d-inline-flex justify-content-between align-items-center w-100 mb-5">
                         <div>
-                            <h3 className="font-weight-bold mb-0" style={{color: "#8AA4B1"}}>Membre concerné</h3>
+                            <p className="font-weight-bold mb-0" style={{color: "#8AA4B1"}}>Membre concerné</p>
                         </div>
 
                         <div className="text-right">
@@ -241,14 +241,15 @@ export default class WizardUserSelectMember extends React.Component {
                         <p className="text-danger">{this.state.error.members}</p>
                 </div>}
 
-                <div className="row d-md-inline-flex align-items-center text-center mb-4">
+                <div className="row align-items-center text-center mb-4">
                     <ToggleButtonGroup
                         maxSelected={1}
                         childrenContent={members.map((member, i) => renderUserItem(user.id, member, i, selected === i))}
                         selected={[selected]}
                         onChange={selecteds => selecteds.length > 0 ? this.setState({selected: selecteds[0]}) : 0}
                         buttonStyles={{
-                            width: "200px",
+                            maxWidth: "200px", // max width unset by toggle-button-w-100-sm css class in small screens
+                            width: "100%",
                             height: "200px",
                             backgroundColor: "white",
                             padding: "15px",
@@ -256,7 +257,11 @@ export default class WizardUserSelectMember extends React.Component {
                             margin: "0 20px 10px 0",
                             whiteSpace: "nowrap",
                             overflowX: "auto",
+                            boxShadow: "none",
+                            "-webkit-box-shadow": "none",
+                            "-moz-box-shadow": "none",
                         }}
+                        buttonClasses={"col-sm-auto toggle-button-w-100-sm"}
                     />
                 </div>
 
