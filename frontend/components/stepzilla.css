@@ -55,7 +55,7 @@ ol.progtrckr li:before {
   position: relative;
   bottom: -25px;
   float: left;
-  left: 50%;
+
 }
 
 ol.progtrckr li.progtrckr-todo:before {
