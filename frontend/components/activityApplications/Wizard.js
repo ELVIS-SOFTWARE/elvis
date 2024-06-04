@@ -869,7 +869,7 @@ class Wizard extends React.Component {
                         informationalStepOnly={false}
                         user={{id: this.state.infos.id, first_name: this.state.infos.first_name, last_name: this.state.infos.last_name, is_paying: this.state.infos.is_paying}}
                         family={this.state.infos.family_links_with_user}
-                        initialSelectedPayers={this.state.infos.payers}
+                        initialSelectedPayers={this.state.infos.payers || []}
                         paymentTerms={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         collection={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
                         availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
