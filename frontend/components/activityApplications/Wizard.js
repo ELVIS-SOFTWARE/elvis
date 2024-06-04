@@ -700,7 +700,7 @@ class Wizard extends React.Component {
 
         const steps = [
             !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
-                name: "Membre concerné",
+                name: "Membre Concerné",
                 component: (
                     this.props.currentUserIsAdmin ? <UserSearch
                         user={this.props.user}
@@ -913,11 +913,10 @@ class Wizard extends React.Component {
 
         return (
             <div className="padding-page application-form" style={{ width: "85%" }}>
-                <div className="d-inline-flex justify-content-between w-100">
+                <div className="d-md-inline-flex justify-content-between w-100">
                     {this.props.currentUserIsAdmin ? (
                         <div className="flex flex-center-justified m-t-md m-b-sm">
                             <div className="form-group">
-                                <label className="m-r-sm">Saison</label>
                                 <select
                                     className="custom-select"
                                     value={this.state.season.id}
@@ -944,6 +943,7 @@ class Wizard extends React.Component {
                                 <input
                                     type="date"
                                     className="w-150 form-control"
+                                    style={{border: "none", borderRadius: "8px"}}
                                     min={moment(
                                         findAndGet(
                                             this.props.seasons,
@@ -988,7 +988,7 @@ class Wizard extends React.Component {
                             <a
                                 href={this.props.user_path}
                                 className="btn btn-primary btn-outline m-l-xs"
-                                style={{borderRadius: "8px", color: "#00334A"}}>
+                                style={{borderRadius: "8px", color: "#00334A", borderColor: "#00334A"}}>
                                 <i className="fas fa-user"/> Voir le profil
                             </a>
                         }
@@ -997,25 +997,25 @@ class Wizard extends React.Component {
                 </div>
                 <div style={{marginBottom: "50px"}}>
                     <h1 style={{color: "#00334A"}}>Nouvelle demande d’inscription</h1>
-                    <h4 style={{color: "#8AA4B1"}}>Demande d'inscription
+                    <h3 style={{color: "#8AA4B1"}}>Demande d'inscription
                         {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
                             " aux activités"
                             : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
                         } pour la {this.state.season.label}
-                    </h4>
+                    </h3>
                 </div>
                 <div className="step-progress">
                     <StepZilla
                         steps={steps}
                         showSteps={true}
                         stepsNavigation={true}
-                        nextButtonText={"Étape suivante"}
-                        backButtonText={"Étape précédente"}
+                        nextButtonText={"Suivant"}
+                        backButtonText={"Précédent"}
                         nextButtonCls={
-                            "btn btn-prev btn-primary btn-md pull-right"
+                            "btn btn-prev btn-primary btn-md pull-right font-weight-bold"
                         }
                         backButtonCls={
-                            "btn btn-prev btn-primary btn-md pull-left"
+                            "btn btn-prev btn-primary btn-md pull-left font-weight-bold"
                         }
                     />
                 </div>

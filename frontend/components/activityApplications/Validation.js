@@ -387,7 +387,7 @@ const Validation = ({
         <button
             onClick={handleSubmit}
             disabled={buttonDisabled}
-            className="btn btn-primary btn-md submit-activity mt-5"
+            className="btn btn-success font-weight-bold btn-md submit-activity mt-5"
         >
             {buttonDisabled ? (
                 <Fragment><i className="fa fa-spinner fa-spin" /> &nbsp;</Fragment>
