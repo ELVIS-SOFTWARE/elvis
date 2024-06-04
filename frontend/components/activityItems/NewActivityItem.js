@@ -193,7 +193,7 @@ class NewActivityItem extends React.Component {
 
         return (
             <React.Fragment>
-                <div className="card p-4 pt-0 col-sm-12 col-md-6 mr-4 mb-4 text-dark"
+                <div className="card p-4 pt-0 col-md-12 col-lg-6 mr-4 mb-4 text-dark"
                      style={{border: "none", borderRadius: "12px", color: "#00283B"}}>
                     <div className={`d-inline-flex align-items-top pt-0 row ${data && "pb-sm-0"}`}>
                         <div className="col-sm-6">

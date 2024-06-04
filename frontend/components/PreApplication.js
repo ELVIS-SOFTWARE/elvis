@@ -180,13 +180,13 @@ class PreApplication extends React.Component {
                                 </button>
                             )}
                         </div>
-                        <div className="row ml-1">
+                        <div className="row m-2">
                             <h4 className="mb-5" style={{color: "#8AA4B1"}}>
                                 Inscription aux activités de la
                                 saison {` ${moment(this.props.season.start).format("YYYY")}/${moment(this.props.season.end).format("YYYY")}`}
                             </h4>
-                            <div className="col-xl-6 justify-content-between p-0 pr-md-5 pr-xl-0">
-                                <div className="card col-sm-12 col-md-5 mr-md-4"
+                            <div className="col-xl-6 d-md-inline-flex justify-content-between p-0 pr-md-5 pr-xl-0">
+                                <div className="card col mr-3 mb-3"
                                      style={{border: "none", borderRadius: "12px"}}>
                                     <div className="row d-inline-flex align-items-center p-3">
                                         <div style={{
@@ -209,7 +209,7 @@ class PreApplication extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="card col-sm-12 col-md-5"
+                                <div className="card col mb-3"
                                      style={{border: "none", borderRadius: "12px"}}>
                                     <div className="row d-inline-flex align-items-center p-3">
                                         <div style={{
@@ -235,7 +235,7 @@ class PreApplication extends React.Component {
                         </div>
                     </div>
 
-                    <div className="row col-sm-12 mb-4 p-0">
+                    <div className="row col-md-12 mb-4 p-0">
                         <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
                             Activités actuelles
                             (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})

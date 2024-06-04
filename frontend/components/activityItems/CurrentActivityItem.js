@@ -163,10 +163,10 @@ class CurrentActivityItem extends React.Component {
         let StopButton =
             <button
                 onClick={() => this.openStopModal()}
-                className="btn btn-danger btn-sm"
+                className="btn btn-danger btn-sm font-weight-bold"
                 style={ {borderRadius: "8px"} }
             >
-                <i className="fas fa-times"/>
+                S'arrêter
             </button>
 
         if (isPreapplicationEnabled) {
