@@ -266,7 +266,7 @@ class PreApplication extends React.Component {
                     </div>
 
                     <div className="row col-md-12 mb-4 p-0">
-                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Mes demandes</h3>
+                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Mes demandes pour {this.props.user.first_name} {this.props.user.last_name}</h3>
 
                         {displayActivityList(renewActivityList, newActivityList, `${this.props.user.first_name} ${this.props.user.last_name} n'a aucune demande d'inscription en cours`)}
                     </div>
