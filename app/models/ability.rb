@@ -51,6 +51,7 @@ class Ability
     can :create, Payment, payable_id: user.id
     can :manage, ActivityApplication, user_id: family_ids
     can :manage, ActivityApplication, user_id: attached_account_ids
+    can :create, ActivityApplication, user_id: 0
     can :read, Planning, user: user
   end
 end
