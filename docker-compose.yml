@@ -9,6 +9,7 @@ x-base_elvis: &base_elvis
     dockerfile: Dockerfile
     args:
       - GITHUB_TOKEN=${GITHUB_TOKEN:?GITHUB_TOKEN is required}
+      - PLUGINS_LIST_DOWNLOAD_URL=${PLUGINS_LIST_DOWNLOAD_URL}
   environment:
     - Rails_ENV=kubernetes
     - STORAGE_ACCOUNT=${STORAGE_ACCOUNT:-local}
