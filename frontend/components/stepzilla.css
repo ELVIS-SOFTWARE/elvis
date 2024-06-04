@@ -9,10 +9,10 @@ ol.progtrckr {
 ol.progtrckr li {
   line-height: 4.8rem;
   cursor: pointer;
-  width: 180px;
   white-space: nowrap;
   text-overflow: ellipsis;
   flex: 1;
+
 }
 
 ol.progtrckr li span {
@@ -27,7 +27,7 @@ ol.progtrckr li span {
   left: -9%;
 }
 
-@media (max-width: 950px) {
+@media (max-width: 1000px) {
   .progtrckr li span {
     display: none;
   }
@@ -36,9 +36,12 @@ ol.progtrckr li span {
   display: none;
   font-weight: 700;
   font-size: 1.5rem;
+  position: relative;
+  top: -24%;
+  left: -7%;
 }
 
-@media (max-width: 950px) {
+@media (max-width: 1000px) {
   .progtrckr em {
     display: inline;
   }
@@ -51,7 +54,7 @@ ol.progtrckr li.progtrckr-todo {
 
 ol.progtrckr li.progtrckr-doing {
   color: #00334A;
-  border-bottom: 6px dotted #00334A;
+  border-bottom: 6px dotted #015277;
 }
 
 ol.progtrckr li.progtrckr-done {
