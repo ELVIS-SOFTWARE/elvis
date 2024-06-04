@@ -1,4 +1,4 @@
-FROM ruby:3.3.1-slim AS build
+FROM ruby:3.3.2-slim AS build
 
 # Sets the path where the app is going to be installed
 ENV RAILS_ROOT /Elvis
@@ -37,7 +37,7 @@ RUN npm install -g yarn
 
 RUN apt-get install -y --no-install-recommends libjemalloc2
 
-#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 RUN gem install bundler
 
@@ -111,7 +111,7 @@ COPY config.ru /Elvis/
 
 
 
-FROM ruby:3.3.1-slim AS release
+FROM ruby:3.3.2-slim AS release
 
 ENV RAILS_ROOT /Elvis
 ENV RAILS_ENV=kubernetes

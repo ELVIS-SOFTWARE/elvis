@@ -24,8 +24,6 @@ gem "webpack"
 gem "webpacker", "~> 5.4.4"
 
 gem "irb"
-
-# forcer < 1.9 pour éviter le bug https://github.com/ruby-i18n/i18n/issues/603
 gem "i18n"
 
 gem "foreman"

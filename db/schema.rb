@@ -112,11 +112,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "to_activity_ref_id"
   end
 
-  create_table "activity_ref_dolibarr_links", id: false, force: :cascade do |t|
-    t.bigint "dolibarr_id"
-    t.bigint "activity_ref_pricing_id", null: false
-  end
-
   create_table "activity_ref_kinds", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -379,16 +374,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.index ["discountable_type", "discountable_id"], name: "index_discounts_on_discountable_type_and_discountable_id", unique: true
   end
 
-  create_table "dolibarr_proposals", primary_key: "dolibarr_proposal_id", id: :bigint, default: nil, force: :cascade do |t|
-    t.bigint "payer_id", null: false
-    t.bigint "season_id", null: false
-  end
-
-  create_table "dolibarr_users", primary_key: ["user_id", "dolibarr_user_id"], force: :cascade do |t|
-    t.bigint "user_id", null: false
-    t.bigint "dolibarr_user_id", null: false
-  end
-
   create_table "due_payment_statuses", force: :cascade do |t|
     t.string "label"
     t.string "color"
@@ -592,24 +577,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.index ["evaluation_level_ref_id"], name: "index_levels_on_evaluation_level_ref_id"
     t.index ["season_id"], name: "index_levels_on_season_id"
     t.index ["user_id"], name: "index_levels_on_user_id"
-  end
-
-  create_table "licenses", force: :cascade do |t|
-    t.string "issuer"
-    t.string "user"
-    t.string "description"
-    t.string "instanceName"
-    t.string "object"
-    t.datetime "issueDate", precision: nil
-    t.string "featuresString"
-    t.interval "validityPeriod"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "signature"
-    t.datetime "dateOfEffect", precision: nil
-    t.string "subscription_id"
-    t.boolean "isDev", default: false
-    t.datetime "revokedAt", precision: nil
   end
 
   create_table "locations", force: :cascade do |t|
@@ -1092,15 +1059,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "zone"
     t.string "siret_rna"
     t.string "legal_entity"
-    t.string "billing_contact_id"
-    t.string "instance_size"
-    t.string "stripe_price_id"
-    t.string "dev_billing_contact_id"
-    t.string "dev_stripe_price_id"
-    t.string "stripe_current_subscription_id"
-    t.string "stripe_current_subscription_status"
-    t.string "dev_stripe_current_subscription_id"
-    t.string "dev_stripe_current_subscription_status"
     t.bigint "planning_id"
     t.boolean "entity_subject_to_vat", default: false
     t.boolean "activities_not_subject_to_vat", default: false
@@ -1266,7 +1224,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "solfege"
     t.boolean "handicap", default: false
     t.string "handicap_description"
-    t.integer "adherent_number", default: -> { "nextval('adherent_number_seq'::regclass)" }
+    t.serial "adherent_number"
     t.bigint "evaluation_level_ref_id"
     t.boolean "is_paying"
     t.boolean "is_accompanying"
@@ -1279,8 +1237,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "checked_gdpr", default: false
     t.boolean "checked_image_right"
     t.boolean "checked_newsletter"
-    t.boolean "is_creator", default: false
     t.bigint "organization_id"
+    t.boolean "is_creator", default: false
     t.string "identification_number"
     t.bigint "attached_to_id"
     t.index ["address_id"], name: "index_users_on_address_id"
@@ -1306,7 +1264,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   add_foreign_key "activity_instances", "locations"
   add_foreign_key "activity_instances", "rooms"
   add_foreign_key "activity_instances", "time_intervals"
-  add_foreign_key "activity_ref_dolibarr_links", "activity_ref_pricings"
   add_foreign_key "activity_ref_kinds", "activity_refs", column: "default_activity_ref_id", on_delete: :nullify
   add_foreign_key "activity_ref_pricings", "activity_refs"
   add_foreign_key "activity_ref_pricings", "pricing_categories"
@@ -1321,9 +1278,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   add_foreign_key "consent_document_users", "users"
   add_foreign_key "desired_activities", "pricing_categories", on_delete: :restrict
   add_foreign_key "discounts", "coupons"
-  add_foreign_key "dolibarr_proposals", "seasons"
-  add_foreign_key "dolibarr_proposals", "users", column: "payer_id"
-  add_foreign_key "dolibarr_users", "users"
   add_foreign_key "due_payments", "payment_schedules"
   add_foreign_key "error_histories", "error_codes"
   add_foreign_key "evaluation_appointments", "activity_applications"
