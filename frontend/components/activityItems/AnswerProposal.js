@@ -13,7 +13,7 @@ function AnswerProposal(props) {
                 <React.Fragment>
                     <button
                         onClick={() => props.openAssignationRefusedModal()}
-                        className="btn btn-danger btn-sm m-xs"
+                        className="btn btn-danger btn-sm m-xs font-weight-bold"
                         style={{borderRadius: "8px"}}
                         disabled={proposalAnswered}
                     >
@@ -22,7 +22,7 @@ function AnswerProposal(props) {
                     </button>
                     <button
                         onClick={() => props.openAssignationAcceptedModal()}
-                        className="btn btn-primary btn-sm m-xs"
+                        className="btn btn-primary btn-sm m-xs font-weight-bold"
                         style={{borderRadius: "8px"}}
                         disabled={proposalAnswered}
                     >

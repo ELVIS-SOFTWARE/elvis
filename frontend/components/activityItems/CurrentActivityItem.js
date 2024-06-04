@@ -188,27 +188,28 @@ class CurrentActivityItem extends React.Component {
 
                 actionButtons =
                     <Fragment>
+                        {StopButton}
                         {nextActivityRefKinds.map(activity =>
                             <a
                                 href={`/inscriptions/new/${user.id}/${this.state.preApplicationActivity.id
                                 }/${activity.to.id}/${PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD}?auth_token=${csrfToken}`}
-                                className="btn btn-info btn-sm m-sm">
+                                className="btn btn-info ml-2 font-weight-bold">
                                 S'inscrire à l'activité&nbsp;
                                 {activity.to.display_name}
                             </a>
                         )}
-                        {StopButton}
+
                     </Fragment>;
             } else {
                 actionButtons =
                     <React.Fragment>
+                        {StopButton}
                         <a href={`/inscriptions/new/${user.id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
-                            className="btn btn-info btn-sm mr-2 font-weight-bold"
+                            className="btn btn-info btn-sm ml-2 font-weight-bold"
                             style={{borderRadius: "8px"}}
                         >
                             Se réinscrire
                         </a>
-                        {StopButton}
                     </React.Fragment>
             }
         }
@@ -222,9 +223,6 @@ class CurrentActivityItem extends React.Component {
                     </td>
                     <td>
                         {this.props.user.first_name} {this.props.user.last_name}
-                    </td>
-                    <td>
-                        {data.activity_ref.nb_lessons ? data.activity_ref.nb_lessons : "0"}
                     </td>
                     <td className="text-right">
                         {actionButtons}

@@ -182,11 +182,12 @@ class RenewActivityItem extends React.Component {
         if (activityState !== undefined && activityState !== null) {
             let dayLabel = moment(activityState.time_interval.start).format('dddd')
             activityDetails = <React.Fragment>
-                <p className="pb-0">
+                <p style={{color: "#00283B"}}>
                     {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
                     {moment(activityState.time_interval.start).format('HH:mm')} à&nbsp;
                     {moment(activityState.time_interval.end).format('HH:mm')}
                 </p>
+                <p style={{color: "#8AA4B1"}}>Avec {activityState.teacher.firstname} {activityState.teacher.lastname}</p>
             </React.Fragment>;
         }
 
@@ -197,48 +198,42 @@ class RenewActivityItem extends React.Component {
 
         return (
             <React.Fragment>
-                <tr>
-                    <td>
-                        <b>
-                        {(this.props.current_user || {}).is_admin ?
-                                <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`${paddedActivityApplicationId}`}</a> :
-                                `${paddedActivityApplicationId}`}
-                        </b>
-                    </td>
-                    <td className="font-weight-bold" style={{ color: "#00283B" }}>
-                        {data.activity_ref.label}
-                    </td>
-                    <td>
-                        {user.first_name} {user.last_name}
-                    </td>
-                    <td>
-                        {moment(pre_application_activity.activity_application.created_at).format("DD/MM/YYYY")}
-                    </td>
-                    <td>
-                        {renderActivityAction(actionLabel)}
-                    </td>
-                    <td>
-                        {activityDetails}
-                    </td>
-                    <td className="d-flex justify-content-end">
-                        <AnswerProposal
-                            activity_application_status_id={activity_application_status_id}
-                            proposalAnswered={this.state.proposalAnswered}
-                            openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
-                            openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
-                        />
+                <div className="card p-4 pt-0 col-sm-12 col-md-6 mr-4 mb-4"
+                     style={{border: "none", borderRadius: "12px", color: "#00283B"}}>
+                    <div className='d-inline-flex align-items-top pt-0 row'>
+                        <div className="col-sm-6">
+                            {(this.props.current_user || {}).is_admin ? <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`#${paddedActivityApplicationId}`}</a> : null}
+                            <h3 className="font-weight-bold">{data.activity_ref.label}</h3>
+                            <div>{activityDetails}</div>
+                        </div>
+                        <div className="col-sm-6 text-right">
+                            {renderActivityAction(actionLabel)}
+                        </div>
+                    </div>
+
+
+                    <div className="col-sm-12 d-inline-flex justify-content-between p-0">
+                        <div>
+                            <AnswerProposal
+                                activity_application_status_id={activity_application_status_id}
+                                proposalAnswered={this.state.proposalAnswered}
+                                openAssignationRefusedModal={() => this.openAssignationRefusedModal()}
+                                openAssignationAcceptedModal={() => this.openAssignationAcceptedModal()}
+                            />
+                        </div>
+
 
                         {activity_application_status_id === this.props.default_activity_status_id &&
-                            <Fragment>
+                            <div>
                                 <CancelApplication
                                     activityApplicationId={this.state.preApplicationActivity.activity_application_id}
                                 />
                                 <EditApplication
                                     handleProcessModifyApplication={this.handleProcessModifyApplication.bind(this)}
                                 />
-                            </Fragment>}
-                    </td>
-                </tr>
+                            </div>}
+                    </div>
+                </div>
 
                 <Modal
                     isOpen={this.state.isAssignationRefusedModalOpen}
