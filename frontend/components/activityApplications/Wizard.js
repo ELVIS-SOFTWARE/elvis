@@ -700,7 +700,7 @@ class Wizard extends React.Component {
 
         const steps = [
             !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
-                name: "Choisir un utilisateur",
+                name: "Membre concerné",
                 component: (
                     this.props.currentUserIsAdmin ? <UserSearch
                         user={this.props.user}
@@ -797,7 +797,7 @@ class Wizard extends React.Component {
             //this.props.actionType !== PRE_APPLICATION_ACTIONS.RENEW &&
             this.state.selectedActivities.length > 0 &&
             {
-                name: "Préférences horaires",
+                name: "Disponibilités",
                 component: (
                     <TimePreferencesStep
                         selectionLabels={this.getLabelsFromSelectedActivities()}
@@ -863,7 +863,7 @@ class Wizard extends React.Component {
             },
 
             (this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 || this.props.paymentStepDisplayText) && {
-                name: "Modalités de paiement",
+                name: "Paiement",
                 component: (
                     <WrappedPayerPaymentTerms
                         informationalStepOnly={false}

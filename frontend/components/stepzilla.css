@@ -2,20 +2,32 @@ ol.progtrckr {
   list-style-type: none;
   padding: 0;
   text-align: center;
+  display: flex;
+  flex-direction: row;
 }
 
 ol.progtrckr li {
-  display: inline-block;
-  text-align: center;
-  line-height: 4.5rem;
+  line-height: 4.8rem;
   cursor: pointer;
+  width: 180px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
 }
 
 ol.progtrckr li span {
-  padding: 0 1.5rem;
+  font-size-adjust: inherit;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  position: relative;
+  bottom: 29%;
+  left: -9%;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 950px) {
   .progtrckr li span {
     display: none;
   }
@@ -23,10 +35,10 @@ ol.progtrckr li span {
 .progtrckr em {
   display: none;
   font-weight: 700;
-  padding-left: 1rem;
+  font-size: 1.5rem;
 }
 
-@media (max-width: 650px) {
+@media (max-width: 950px) {
   .progtrckr em {
     display: inline;
   }
@@ -53,13 +65,13 @@ ol.progtrckr li:after {
 
 ol.progtrckr li:before {
   position: relative;
-  bottom: -25px;
+  bottom: -28px;
   float: left;
-
+  left: 41%;
 }
 
 ol.progtrckr li.progtrckr-todo:before {
-  content: "\039f";
+  content: "";
   color: silver;
   background-color: silver;
   width: 50px;
@@ -69,15 +81,21 @@ ol.progtrckr li.progtrckr-todo:before {
 
 ol.progtrckr li.progtrckr-todo:hover:before {
   color: #0079BF;
+  content: "";
+  background-color: #0079BF;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
 }
 
 ol.progtrckr li.progtrckr-doing:before {
-  content: "\2022";
+  content: "";
   color: white;
   background-color: #0079BF;
   width: 50px;
   height: 50px;
   border-radius: 50%;
+  font-size: 22px;
 }
 
 ol.progtrckr li.progtrckr-doing:hover:before {
@@ -91,6 +109,7 @@ ol.progtrckr li.progtrckr-done:before {
   width: 50px;
   height: 50px;
   border-radius: 50%;
+  font-size: 22px;
 }
 
 ol.progtrckr li.progtrckr-done:hover:before {
