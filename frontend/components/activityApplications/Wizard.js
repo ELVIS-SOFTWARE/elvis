@@ -913,32 +913,7 @@ class Wizard extends React.Component {
 
         return (
             <div className="padding-page application-form" style={{ width: "85%" }}>
-                <div>
-                    <h1 className="text-center">
-                        Demande d’inscription
-                        {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
-                            " aux activités"
-                              : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
-                        }
-                    </h1>
-                    <div className="col d-flex justify-content-center">
-                        {
-                            this.props.inscription_path &&
-                            <a
-                                href={this.props.inscription_path}
-                                className="btn btn-primary">
-                                <i className="fas fa-table"/> Retours aux demandes d'inscription
-                            </a>
-                        }
-                        {
-                            this.props.user_path &&
-                            <a
-                                href={this.props.user_path}
-                                className="btn btn-primary btn-outline m-l-xs">
-                                <i className="fas fa-user"/> Voir le profil
-                            </a>
-                        }
-                    </div>
+                <div className="d-inline-flex justify-content-between w-100">
                     {this.props.currentUserIsAdmin ? (
                         <div className="flex flex-center-justified m-t-md m-b-sm">
                             <div className="form-group">
@@ -997,6 +972,37 @@ class Wizard extends React.Component {
                             </div>
                         </div>
                     ) : null}
+                    <div className="flex flex-center-justified m-t-md m-b-sm">
+                        <div className="form-group">
+                        {
+                            this.props.inscription_path &&
+                            <a
+                                href={this.props.inscription_path}
+                                className="btn btn-primary"
+                                style={{borderRadius: "8px"}}>
+                                <i className="fas fa-table"/> Retours aux demandes d'inscription
+                            </a>
+                        }
+                        {
+                            this.props.user_path &&
+                            <a
+                                href={this.props.user_path}
+                                className="btn btn-primary btn-outline m-l-xs"
+                                style={{borderRadius: "8px", color: "#00334A"}}>
+                                <i className="fas fa-user"/> Voir le profil
+                            </a>
+                        }
+                        </div>
+                    </div>
+                </div>
+                <div style={{marginBottom: "50px"}}>
+                    <h1 style={{color: "#00334A"}}>Nouvelle demande d’inscription</h1>
+                    <h4 style={{color: "#8AA4B1"}}>Demande d'inscription
+                        {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
+                            " aux activités"
+                            : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
+                        } pour la {this.state.season.label}
+                    </h4>
                 </div>
                 <div className="step-progress">
                     <StepZilla
