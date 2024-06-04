@@ -10,7 +10,8 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
+ActiveRecord::Schema.define(version: 2024_04_16_095839) do
+
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -19,7 +20,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "record_type", null: false
     t.bigint "record_id", null: false
     t.bigint "blob_id", null: false
-    t.datetime "created_at", precision: nil, null: false
+    t.datetime "created_at", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
     t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
   end
@@ -30,8 +31,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "content_type"
     t.text "metadata"
     t.bigint "byte_size", null: false
-    t.string "checksum"
-    t.datetime "created_at", precision: nil, null: false
+    t.string "checksum", null: false
+    t.datetime "created_at", null: false
     t.string "service_name", null: false
     t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
   end
@@ -43,8 +44,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   end
 
   create_table "activities", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "time_interval_id"
     t.bigint "activity_ref_id"
     t.bigint "room_id"
@@ -63,29 +64,29 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "instrument_id"
     t.bigint "user_id"
     t.boolean "is_validated", default: false
-    t.datetime "attempt_date", precision: nil
+    t.datetime "attempt_date"
   end
 
   create_table "activity_application_statuses", force: :cascade do |t|
     t.string "label"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "is_stopping", default: false
     t.boolean "is_active", default: true
   end
 
   create_table "activity_applications", force: :cascade do |t|
     t.bigint "user_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "activity_application_status_id"
-    t.datetime "deleted_at", precision: nil
+    t.datetime "deleted_at"
     t.bigint "season_id"
     t.boolean "mail_sent", default: false
-    t.datetime "status_updated_at", precision: nil
+    t.datetime "status_updated_at"
     t.bigint "referent_id"
-    t.datetime "stopped_at", precision: nil
-    t.datetime "begin_at", precision: nil
+    t.datetime "stopped_at"
+    t.datetime "begin_at"
     t.string "reason_of_refusal"
     t.index ["activity_application_status_id"], name: "index_activity_applications_on_activity_application_status_id"
     t.index ["deleted_at"], name: "index_activity_applications_on_deleted_at"
@@ -97,8 +98,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "room_id"
     t.bigint "location_id"
     t.bigint "activity_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "cover_teacher_id"
     t.boolean "are_hours_counted", default: true
     t.index ["activity_id"], name: "index_activity_instances_on_activity_id"
@@ -114,10 +115,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
 
   create_table "activity_ref_kinds", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.boolean "is_for_child", default: false
-    t.datetime "deleted_at", precision: nil
+    t.datetime "deleted_at"
     t.bigint "default_activity_ref_id"
     t.index ["default_activity_ref_id"], name: "index_activity_ref_kinds_on_default_activity_ref_id"
   end
@@ -126,28 +127,20 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "activity_ref_id", null: false
     t.float "price", null: false
     t.bigint "pricing_category_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.bigint "from_season_id"
     t.bigint "to_season_id"
-    t.datetime "deleted_at", precision: nil
+    t.datetime "deleted_at"
     t.index ["activity_ref_id"], name: "index_activity_ref_pricings_on_activity_ref_id"
     t.index ["deleted_at"], name: "index_activity_ref_pricings_on_deleted_at"
     t.index ["pricing_category_id"], name: "index_activity_ref_pricings_on_pricing_category_id"
   end
 
-  create_table "activity_ref_season_pricings", force: :cascade do |t|
-    t.bigint "activity_ref_id", null: false
-    t.bigint "season_id", null: false
-    t.bigint "pricing_id"
-    t.float "price", default: 0.0
-    t.index ["activity_ref_id", "season_id", "pricing_id"], name: "activity_ref_season_pricing_index_on_associations"
-  end
-
   create_table "activity_refs", force: :cascade do |t|
     t.string "label", null: false
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "image"
     t.integer "occupation_limit"
     t.integer "occupation_hard_limit"
@@ -158,7 +151,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "has_additional_student", default: false
     t.boolean "is_lesson", default: true
     t.boolean "is_visible_to_admin", default: false
-    t.datetime "deleted_at", precision: nil
+    t.datetime "deleted_at"
     t.integer "from_age", null: false
     t.integer "to_age", null: false
     t.boolean "is_evaluable", default: false
@@ -190,8 +183,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "additional_students", force: :cascade do |t|
     t.bigint "desired_activity_id"
     t.bigint "user_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["desired_activity_id"], name: "index_additional_students_on_desired_activity_id"
     t.index ["user_id"], name: "index_additional_students_on_user_id"
   end
@@ -202,16 +195,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "city"
     t.string "department"
     t.string "country"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "kind"
   end
 
   create_table "adhesion_prices", force: :cascade do |t|
     t.string "label"
     t.float "price"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.bigint "season_id"
     t.index ["season_id"], name: "index_adhesion_prices_on_season_id"
   end
@@ -221,10 +214,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.date "validity_start_date"
     t.date "validity_end_date"
     t.boolean "is_active"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
-    t.datetime "deleted_at", precision: nil
-    t.datetime "last_reminder", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.datetime "last_reminder"
     t.bigint "season_id"
     t.integer "adhesion_price_id"
     t.index ["deleted_at"], name: "index_adhesions_on_deleted_at"
@@ -243,20 +236,20 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "activity_id"
     t.bigint "user_id"
     t.bigint "season_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "application_urls", force: :cascade do |t|
     t.string "url"
     t.boolean "is_main", default: false, null: false
-    t.datetime "last_used_at", precision: nil
+    t.datetime "last_used_at"
   end
 
   create_table "band_types", force: :cascade do |t|
     t.string "name", null: false
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "bands", force: :cascade do |t|
@@ -264,8 +257,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "blacklisted", default: false, null: false
     t.bigint "music_genre_id"
     t.bigint "band_type_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["band_type_id"], name: "index_bands_on_band_type_id"
     t.index ["music_genre_id"], name: "index_bands_on_music_genre_id"
   end
@@ -276,8 +269,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "instrument_id"
     t.date "joined_at"
     t.date "left_at"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "first_name"
     t.string "last_name"
     t.string "email"
@@ -291,17 +284,17 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "user_id"
     t.bigint "commentable_id"
     t.string "commentable_type"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
   create_table "conflicts", force: :cascade do |t|
-    t.datetime "ts", precision: nil
+    t.datetime "ts"
     t.string "kind"
     t.boolean "is_resolved"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "activity_instance_id"
     t.index ["activity_instance_id"], name: "index_conflicts_on_activity_instance_id"
   end
@@ -310,8 +303,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "consent_document_id", null: false
     t.bigint "user_id", null: false
     t.boolean "has_consented"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.index ["consent_document_id"], name: "index_consent_document_users_on_consent_document_id"
     t.index ["user_id"], name: "index_consent_document_users_on_user_id"
   end
@@ -321,8 +314,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "content"
     t.string "attached_file"
     t.boolean "expected_answer"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.integer "index"
   end
 
@@ -330,15 +323,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "label"
     t.float "percent_off"
     t.boolean "enabled", default: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at", precision: nil
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
     t.index ["deleted_at"], name: "index_coupons_on_deleted_at"
   end
 
   create_table "desired_activities", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "activity_ref_id"
     t.bigint "activity_application_id"
     t.boolean "is_validated", default: false
@@ -346,7 +339,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.integer "payment_frequency"
     t.integer "prorata"
     t.decimal "prorata_amount"
-    t.datetime "deleted_at", precision: nil
+    t.datetime "deleted_at"
     t.bigint "pricing_category_id"
     t.index ["activity_application_id"], name: "index_desired_activities_on_activity_application_id"
     t.index ["activity_id"], name: "index_desired_activities_on_activity_id"
@@ -355,8 +348,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   end
 
   create_table "desired_time_intervals", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "activity_application_id"
     t.bigint "time_interval_id"
     t.index ["activity_application_id"], name: "index_desired_time_intervals_on_activity_application_id"
@@ -367,8 +360,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "coupon_id", null: false
     t.string "discountable_type", null: false
     t.bigint "discountable_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.index ["coupon_id"], name: "index_discounts_on_coupon_id"
     t.index ["discountable_type", "discountable_id"], name: "index_discounts_on_discountable"
     t.index ["discountable_type", "discountable_id"], name: "index_discounts_on_discountable_type_and_discountable_id", unique: true
@@ -377,8 +370,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "due_payment_statuses", force: :cascade do |t|
     t.string "label"
     t.string "color"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "built_in", default: false
   end
 
@@ -387,8 +380,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.integer "number"
     t.date "previsional_date"
     t.decimal "amount"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "payment_method_id"
     t.bigint "due_payment_status_id"
     t.bigint "location_id"
@@ -402,8 +395,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "name"
     t.string "code"
     t.string "user_message"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.index ["code"], name: "index_error_codes_on_code", unique: true
   end
 
@@ -411,8 +404,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "message"
     t.jsonb "stack_trace", default: "[]", null: false
     t.jsonb "related_objects", default: "{}", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.bigint "error_code_id", null: false
     t.index ["error_code_id"], name: "index_error_histories_on_error_code_id"
   end
@@ -422,8 +415,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "teacher_id"
     t.bigint "time_interval_id"
     t.bigint "season_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "activity_ref_id"
     t.bigint "activity_application_id"
     t.bigint "room_id"
@@ -433,8 +426,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "evaluation_level_refs", force: :cascade do |t|
     t.integer "value"
     t.string "label"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "can_continue", default: false
   end
 
@@ -445,8 +438,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "event"
     t.string "eventName"
     t.string "subject"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.string "templateName"
     t.string "carbon_copy"
   end
@@ -456,8 +449,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "event_type", null: false
     t.jsonb "metadata"
     t.jsonb "data", null: false
-    t.datetime "created_at", null: false
-    t.datetime "valid_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "valid_at", precision: 6
     t.index ["created_at"], name: "index_event_store_events_on_created_at"
     t.index ["event_id"], name: "index_event_store_events_on_event_id", unique: true
     t.index ["event_type"], name: "index_event_store_events_on_event_type"
@@ -468,7 +461,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "stream", null: false
     t.integer "position"
     t.uuid "event_id", null: false
-    t.datetime "created_at", null: false
+    t.datetime "created_at", precision: 6, null: false
     t.index ["created_at"], name: "index_event_store_events_in_streams_on_created_at"
     t.index ["stream", "event_id"], name: "index_event_store_events_in_streams_on_stream_and_event_id", unique: true
     t.index ["stream", "position"], name: "index_event_store_events_in_streams_on_stream_and_position", unique: true
@@ -482,8 +475,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.json "serialized_params", default: []
     t.json "serialized_params_types", default: []
     t.string "subscribe_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "export_templates", force: :cascade do |t|
@@ -491,8 +484,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "model", null: false
     t.string "content", null: false
     t.bigint "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "failed_payment_import_reasons", force: :cascade do |t|
@@ -507,8 +500,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "due_date"
     t.string "cashing_date"
     t.decimal "amount"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "reason"
     t.bigint "failed_payment_import_reason_id"
     t.bigint "user_id"
@@ -522,9 +515,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "is_accompanying"
     t.boolean "is_paying_for"
     t.boolean "is_legal_referent"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
-    t.datetime "deleted_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
     t.boolean "is_to_call", default: false
     t.bigint "season_id"
     t.index ["deleted_at"], name: "index_family_member_users_on_deleted_at"
@@ -538,15 +531,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.integer "nb_hour", default: 0, null: false
     t.integer "solo_duo_rate", default: 0, null: false
     t.integer "group_rate", default: 0, null: false
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "holidays", force: :cascade do |t|
     t.date "date"
     t.bigint "season_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "label"
     t.string "kind"
     t.index ["season_id"], name: "index_holidays_on_season_id"
@@ -569,8 +562,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.integer "evaluation_level_ref_id"
     t.integer "activity_ref_id"
     t.integer "user_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "season_id"
     t.boolean "can_continue"
     t.index ["activity_ref_id"], name: "index_levels_on_activity_ref_id"
@@ -581,23 +574,23 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
 
   create_table "locations", force: :cascade do |t|
     t.string "label"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "materials", force: :cascade do |t|
     t.string "name", null: false
     t.boolean "active", default: false, null: false
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.float "prix"
   end
 
   create_table "message_recipients", force: :cascade do |t|
     t.bigint "message_id", null: false
     t.bigint "user_id", null: false
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "messages", force: :cascade do |t|
@@ -606,22 +599,22 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "is_sms", null: false
     t.boolean "is_email", null: false
     t.bigint "user_id", null: false
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "music_genres", force: :cascade do |t|
     t.string "name", null: false
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "new_student_level_questionnaires", force: :cascade do |t|
     t.bigint "user_id"
     t.bigint "season_id"
     t.bigint "activity_ref_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "notification_templates", primary_key: "path", id: :string, force: :cascade do |t|
@@ -630,8 +623,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "handler"
     t.boolean "partial", default: false
     t.string "format"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.string "name"
     t.string "json"
   end
@@ -639,8 +632,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "oidc_access_token_request_objects", force: :cascade do |t|
     t.bigint "oidc_access_token_id"
     t.bigint "oidc_request_object_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_access_token_id"], name: "oidc_acc_tok_req_obj_index_on_oidc_acc_tok_id"
     t.index ["oidc_request_object_id"], name: "oidc_acc_tok_req_obj_index_on_oidc_req_obj_id"
   end
@@ -648,8 +641,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "oidc_access_token_scopes", force: :cascade do |t|
     t.bigint "oidc_access_token_id"
     t.bigint "oidc_scope_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_access_token_id"], name: "index_oidc_access_token_scopes_on_oidc_access_token_id"
     t.index ["oidc_scope_id"], name: "index_oidc_access_token_scopes_on_oidc_scope_id"
   end
@@ -658,9 +651,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "user_id"
     t.bigint "oidc_client_id"
     t.string "token"
-    t.datetime "expires_at", precision: nil
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_client_id"], name: "index_oidc_access_tokens_on_oidc_client_id"
     t.index ["token"], name: "index_oidc_access_tokens_on_token", unique: true
     t.index ["user_id"], name: "index_oidc_access_tokens_on_user_id"
@@ -669,8 +662,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "oidc_authorization_request_objects", force: :cascade do |t|
     t.bigint "oidc_authorization_id"
     t.bigint "oidc_request_object_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_authorization_id"], name: "oidc_auth_req_obj_index_on_oidc_auth_id"
     t.index ["oidc_request_object_id"], name: "oidc_auth_req_obj_index_on_oidc_req_obj_id"
   end
@@ -678,8 +671,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "oidc_authorization_scopes", force: :cascade do |t|
     t.bigint "oidc_authorization_id"
     t.bigint "oidc_scope_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_authorization_id"], name: "index_oidc_authorization_scopes_on_oidc_authorization_id"
     t.index ["oidc_scope_id"], name: "index_oidc_authorization_scopes_on_oidc_scope_id"
   end
@@ -690,9 +683,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "code"
     t.string "nonce"
     t.string "redirect_uri"
-    t.datetime "expires_at", precision: nil
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["code"], name: "index_oidc_authorizations_on_code", unique: true
     t.index ["oidc_client_id"], name: "index_oidc_authorizations_on_oidc_client_id"
     t.index ["user_id"], name: "index_oidc_authorizations_on_user_id"
@@ -709,10 +702,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "dynamic", default: false
     t.boolean "native", default: false
     t.boolean "ppid", default: false
-    t.datetime "expires_at", precision: nil
+    t.datetime "expires_at"
     t.text "raw_registered_json"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["identifier"], name: "index_oidc_clients_on_identifier", unique: true
     t.index ["user_id"], name: "index_oidc_clients_on_user_id"
   end
@@ -720,8 +713,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "oidc_id_token_request_objects", force: :cascade do |t|
     t.bigint "oidc_id_token_id"
     t.bigint "oidc_request_object_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_id_token_id"], name: "index_oidc_id_token_request_objects_on_oidc_id_token_id"
     t.index ["oidc_request_object_id"], name: "index_oidc_id_token_request_objects_on_oidc_request_object_id"
   end
@@ -730,32 +723,32 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "user_id"
     t.bigint "oidc_client_id"
     t.string "nonce"
-    t.datetime "expires_at", precision: nil
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["oidc_client_id"], name: "index_oidc_id_tokens_on_oidc_client_id"
     t.index ["user_id"], name: "index_oidc_id_tokens_on_user_id"
   end
 
   create_table "oidc_request_objects", force: :cascade do |t|
     t.text "jwt_string"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "oidc_scopes", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["name"], name: "index_oidc_scopes_on_name", unique: true
   end
 
   create_table "options", force: :cascade do |t|
     t.integer "desired_activity_id"
     t.integer "activity_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
-    t.datetime "deleted_at", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
     t.index ["activity_id"], name: "index_options_on_activity_id"
     t.index ["desired_activity_id"], name: "index_options_on_desired_activity_id"
   end
@@ -764,8 +757,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "name"
     t.string "reg_number"
     t.jsonb "tax_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "packs", force: :cascade do |t|
@@ -773,8 +766,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.bigint "activity_ref_pricing_id", null: false
     t.bigint "season_id", null: false
     t.bigint "lessons_remaining", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.index ["activity_ref_pricing_id"], name: "index_packs_on_activity_ref_pricing_id"
     t.index ["season_id"], name: "index_packs_on_season_id"
     t.index ["user_id"], name: "index_packs_on_user_id"
@@ -783,16 +776,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "parameters", force: :cascade do |t|
     t.string "label"
     t.string "value"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "value_type", default: "string"
   end
 
   create_table "payer_payment_terms", force: :cascade do |t|
     t.integer "day_for_collection"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at", precision: nil
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
     t.bigint "payer_id", null: false
     t.bigint "payment_schedule_options_id", null: false
     t.bigint "season_id", null: false
@@ -805,8 +798,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
 
   create_table "payment_methods", force: :cascade do |t|
     t.string "label"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "is_special"
     t.boolean "is_credit_note", default: false
     t.boolean "built_in", default: false
@@ -818,9 +811,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.integer "payments_number"
     t.jsonb "payments_months"
     t.jsonb "available_payments_days"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "deleted_at", precision: nil
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
     t.bigint "pricing_category_id"
     t.integer "index"
     t.index ["pricing_category_id"], name: "index_payment_schedule_options_on_pricing_category_id"
@@ -828,14 +821,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
 
   create_table "payment_schedule_statuses", force: :cascade do |t|
     t.string "label"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "payment_schedules", force: :cascade do |t|
     t.bigint "payable_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "payable_type"
     t.bigint "location_id"
     t.bigint "season_id"
@@ -847,20 +840,20 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "payment_statuses", force: :cascade do |t|
     t.string "label"
     t.string "color"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "built_in", default: false
   end
 
   create_table "payments", force: :cascade do |t|
     t.bigint "payable_id"
     t.bigint "payment_method_id"
-    t.datetime "reception_date", precision: nil
+    t.datetime "reception_date"
     t.date "cashing_date"
     t.decimal "amount"
     t.boolean "direction"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "due_payment_id"
     t.string "check_number"
     t.string "payable_type"
@@ -877,15 +870,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "planning_conflicts", force: :cascade do |t|
     t.bigint "planning_id"
     t.bigint "conflict_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["conflict_id"], name: "index_planning_conflicts_on_conflict_id"
     t.index ["planning_id"], name: "index_planning_conflicts_on_planning_id"
   end
 
   create_table "plannings", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.float "hours_count", default: 0.0
     t.boolean "is_locked", default: false
@@ -895,9 +888,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "plugins", id: :serial, force: :cascade do |t|
     t.string "name", limit: 30, default: "", null: false
     t.string "download_gem_link"
-    t.datetime "created_at", precision: nil
-    t.datetime "updated_at", precision: nil
-    t.datetime "activated_at", precision: nil
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.datetime "activated_at"
     t.boolean "hidden", default: false, null: false
     t.string "display_name"
     t.string "author"
@@ -915,8 +908,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.integer "room_id"
     t.time "duration"
     t.integer "practice_room_planning_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "practice_room_plannings", force: :cascade do |t|
@@ -935,24 +928,24 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.integer "friday_time_interval_id"
     t.integer "saturday_time_interval_id"
     t.integer "sunday_time_interval_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "practice_sessions", force: :cascade do |t|
     t.integer "band_id"
     t.integer "time_interval_id"
     t.integer "room_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "pre_application_activities", force: :cascade do |t|
     t.boolean "status"
     t.string "comment"
     t.string "action"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "pre_application_id"
     t.bigint "activity_id"
     t.bigint "activity_application_id"
@@ -962,8 +955,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   end
 
   create_table "pre_application_desired_activities", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "pre_application_id"
     t.bigint "desired_activity_id"
     t.boolean "status"
@@ -976,8 +969,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
 
   create_table "pre_applications", force: :cascade do |t|
     t.bigint "user_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "season_id"
     t.index ["user_id"], name: "index_pre_applications_on_user_id"
   end
@@ -986,12 +979,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "name", null: false
     t.integer "number_lessons"
     t.boolean "is_a_pack", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "pricings", force: :cascade do |t|
-    t.string "label", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "questions", force: :cascade do |t|
@@ -1012,8 +1001,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   end
 
   create_table "room_activities", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "room_id"
     t.bigint "activity_ref_id"
     t.index ["activity_ref_id"], name: "index_room_activities_on_activity_ref_id"
@@ -1028,8 +1017,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   create_table "room_room_features", force: :cascade do |t|
     t.bigint "room_id"
     t.bigint "room_features_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.index ["room_features_id"], name: "index_room_room_features_on_room_features_id"
     t.index ["room_id"], name: "index_room_room_features_on_room_id"
   end
@@ -1038,8 +1027,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "label"
     t.string "kind"
     t.integer "floor"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "image"
     t.bigint "location_id"
     t.boolean "is_practice_room"
@@ -1049,8 +1038,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
 
   create_table "schools", force: :cascade do |t|
     t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
     t.bigint "address_id"
     t.string "phone_number"
     t.string "email"
@@ -1069,23 +1058,23 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
 
   create_table "seasons", force: :cascade do |t|
     t.string "label"
-    t.datetime "start", precision: nil
-    t.datetime "end", precision: nil
+    t.datetime "start"
+    t.datetime "end"
     t.boolean "is_current"
     t.boolean "is_off"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
-    t.datetime "closing_date_for_applications", precision: nil
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "closing_date_for_applications"
     t.integer "nb_lessons", default: 31
-    t.datetime "opening_date_for_applications", precision: nil
-    t.datetime "opening_date_for_new_applications", precision: nil
-    t.datetime "date_for_teacher_planning_validation", precision: nil
+    t.datetime "opening_date_for_applications"
+    t.datetime "opening_date_for_new_applications"
+    t.datetime "date_for_teacher_planning_validation"
     t.bigint "next_season_id"
     t.index ["next_season_id"], name: "index_seasons_on_next_season_id"
   end
 
   create_table "settings", id: :serial, force: :cascade do |t|
-    t.string "name", limit: 100, default: "", null: false
+    t.string "name", limit: 100, null: false
     t.text "value"
   end
 
@@ -1108,8 +1097,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   end
 
   create_table "students", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.bigint "activity_id"
     t.integer "payment_frequency"
@@ -1141,8 +1130,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   end
 
   create_table "teachers_activity_refs", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "activity_ref_id"
     t.bigint "user_id"
     t.index ["activity_ref_id"], name: "index_teachers_activity_refs_on_activity_ref_id"
@@ -1153,8 +1142,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "number"
     t.string "label"
     t.bigint "phonable_id"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "phonable_type"
     t.index ["phonable_id"], name: "index_telephones_on_phonable_id"
   end
@@ -1174,17 +1163,17 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
   end
 
   create_table "time_intervals", force: :cascade do |t|
-    t.datetime "start", precision: nil
-    t.datetime "end", precision: nil
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "start"
+    t.datetime "end"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "kind"
     t.boolean "is_validated", default: false
   end
 
   create_table "time_slots", force: :cascade do |t|
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.bigint "time_interval_id"
     t.bigint "planning_id"
     t.index ["planning_id"], name: "index_time_slots_on_planning_id"
@@ -1200,18 +1189,18 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.string "email", default: ""
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
-    t.datetime "reset_password_sent_at", precision: nil
-    t.datetime "remember_created_at", precision: nil
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
     t.integer "sign_in_count", default: 0, null: false
-    t.datetime "current_sign_in_at", precision: nil
-    t.datetime "last_sign_in_at", precision: nil
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
     t.inet "current_sign_in_ip"
     t.inet "last_sign_in_ip"
-    t.datetime "created_at", precision: nil, null: false
-    t.datetime "updated_at", precision: nil, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.string "confirmation_token"
-    t.datetime "confirmed_at", precision: nil
-    t.datetime "confirmation_sent_at", precision: nil
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
     t.string "first_name"
     t.string "last_name"
     t.string "sex"
@@ -1224,14 +1213,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_05_31_090621) do
     t.boolean "solfege"
     t.boolean "handicap", default: false
     t.string "handicap_description"
-    t.serial "adherent_number"
+    t.serial "adherent_number", null: false
     t.bigint "evaluation_level_ref_id"
     t.boolean "is_paying"
     t.boolean "is_accompanying"
     t.integer "address_id"
-    t.datetime "deleted_at", precision: nil
+    t.datetime "deleted_at"
     t.text "authentication_token"
-    t.datetime "authentication_token_created_at", precision: nil
+    t.datetime "authentication_token_created_at"
     t.boolean "first_connection", default: true
     t.boolean "has_verified_infos", default: false
     t.boolean "checked_gdpr", default: false

@@ -8,10 +8,10 @@ require "active_record/railtie"
 require "active_storage/engine"
 require "action_controller/railtie"
 require "action_mailer/railtie"
-# require "action_mailbox/engine"
-# require "action_text/engine"
 require "action_view/railtie"
 require "action_cable/engine"
+require "sprockets/railtie"
+require 'active_support/core_ext'
 require_relative "../lib/elvis/version"
 # require "rails/test_unit/railtie"
 
@@ -25,21 +25,24 @@ class FalseClass; def to_i; 0 end end
 module RailsStarter
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
-    config.load_defaults 7.0
+    config.load_defaults 5.1
     config.autoloader = :zeitwerk
 
     config.autoload_paths += [Rails.root.join("lib")]
 
-    # Configuration for the application, engines, and railties goes here.
-    #
-    # These settings can be overridden in specific environments using the files
-    # in config/environments, which are processed later.
-    #
-    # config.time_zone = "Central Time (US & Canada)"
-    # config.eager_load_paths << Rails.root.join("extras")
+    # Settings in config/environments/* take precedence over those specified here.
+    # Application configuration should go into files in config/initializers
+    # -- all .rb files in that directory are automatically loaded.
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+    config.generators do |g|
+        g.test_framework false
+        g.stylesheets    false
+        g.javascripts    false
+        g.helper         false
+        g.channel        assets: false
+    end
 
     config.middleware.use Rack::Deflater
 
