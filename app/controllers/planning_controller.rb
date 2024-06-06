@@ -554,14 +554,17 @@ class PlanningController < ApplicationController
     @lock_link = url_for action: "lock", id: planning.id
   end
 
-  def add_default_to_planning
-    planning = Planning.find(params[:id])
+  def add_defaults_to_planning
+    planning = Planning.find_by(id: params[:id])
+    save_defaults_to_planning = planning && params[:save_defaults_to_planning].to_b
     school = School.first
     season = params[:season_id].present? ? Season.find(params[:season_id]) : Season.current_apps_season || Season.current
 
-    existing_intervals = planning.time_intervals.where({ start: (season.start..season.end), kind: "p" })
+    existing_intervals = planning&.time_intervals&.where({ start: (season.start..season.end), kind: "p" }) || []
 
-    render json: "already filled or planning locked", status: :bad_request and return if planning.is_locked || existing_intervals.count > 0
+    if planning&.is_locked || existing_intervals&.count > 0
+      render json: "already filled or planning locked", status: :bad_request and return
+    end
 
     if school.planning.nil?
       school.create_planning
@@ -608,8 +611,10 @@ class PlanningController < ApplicationController
       end
     end
 
-    planning.time_intervals << default_intervals
-    planning.save!
+    if save_defaults_to_planning
+      planning.time_intervals << default_intervals
+      planning.save!
+    end
 
     render json: default_intervals
   end

@@ -350,7 +350,7 @@ Rails.application.routes.draw do
   get "/plannings/teachers", to: "planning#index_for_teachers"
   get "/plannings/rooms", to: "planning#index_for_rooms"
   get "/plannings/generic/:id", to: "planning#show_generic", as: :generic_planning
-  get "/planning/:id/availabilities/defaults/(:season_id)", to: "planning#add_default_to_planning"
+  get "/planning/:id/availabilities/defaults", to: "planning#add_defaults_to_planning"
 
   get "/plannings/show_incoherent_intervals", to: "planning#incoherent_intervals"
   get "/plannings/remove_incoherent_intervals", to: "planning#remove_incoherent_intervals"

@@ -529,7 +529,7 @@ class Wizard extends React.Component {
         const family = state.infos.family_links_with_user;
         const user_infos = state.infos;
         const familyPayers = family.filter(user => user.is_paying_for).map(user => user.id);
-        state.infos.payers = user_infos.is_paying ? [...familyPayers, user_infos.id] : familyPayers;
+        state.infos.payers = (user_infos.is_paying ? [...familyPayers, user_infos.id] : familyPayers ) || [];
 
         this.setState(state);
 
@@ -614,7 +614,8 @@ class Wizard extends React.Component {
         this.setState({
             infos: {
                 ...this.state.infos,
-                payers: payers
+                payers: payers || [],
+                is_paying: payers.includes(this.state.infos.id),
             }
         });
     }

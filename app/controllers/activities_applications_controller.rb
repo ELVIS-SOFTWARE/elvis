@@ -561,7 +561,7 @@ class ActivitiesApplicationsController < ApplicationController
         # mise à jour de l'indicateur de paiement
         payers = params.dig(:application, :infos, :payers)
         if payers
-          @user.is_paying = payers.any? { |p| p == @user.id }
+          @user.is_paying ||= payers.any? { |p| p == @user.id }
         end
 
         # @user.skip_confirmation_notification!

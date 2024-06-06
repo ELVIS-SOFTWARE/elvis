@@ -33,7 +33,7 @@ export default function TimePreferencesStep({
                     availabilityRef.current.componentDidMount();
                     setDefaultFetched(true);
                 })
-                .get(`/planning/${planningId}/availabilities/defaults/${season.id}`);
+                .get(`/planning/${planningId}/availabilities/defaults?season_id=${season.id}&save_defaults_to_planning=${!disableLiveReload}`)
         }
     }, [defaultFetched]);
 
