@@ -276,7 +276,12 @@ class ActivitiesApplicationsController < ApplicationController
     # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
     # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
 
-    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(
+      methods: [:display_price, :display_name, :kind, :display_prices_by_season],
+      include: {
+        activity_ref_kind: {},
+      }
+    )
 
     activity_refs = if current_user&.is_admin
                       @all_activity_refs.filter { |ar| ar["is_lesson"] }
