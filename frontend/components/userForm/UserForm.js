@@ -285,7 +285,7 @@ class UserForm extends React.PureComponent {
         YES_NO_FIELDS.forEach(f => _.set(formattedInitialValues, f, formatRadioValue(_.get(formattedInitialValues, f))));
 
         return (
-            <div className="padding-page application-form">
+            <div className="application-form" style={{margin: 0}}>
                 <div>
                     <h3 style={{color: "#8AA4B1"}}>Informations personnelles de {initialValues.first_name}</h3>
                     <div>

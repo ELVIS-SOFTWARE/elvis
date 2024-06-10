@@ -995,7 +995,7 @@ class Wizard extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div style={{marginBottom: "50px"}}>
+                <div style={{marginBottom: "35px"}}>
                     <h1 style={{color: "#00334A"}}>Nouvelle demande d’inscription</h1>
                     <h3 style={{color: "#8AA4B1"}}>Demande d'inscription
                         {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
