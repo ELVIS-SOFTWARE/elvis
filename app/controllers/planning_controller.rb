@@ -556,7 +556,7 @@ class PlanningController < ApplicationController
 
   def add_defaults_to_planning
     planning = Planning.find_by(id: params[:id])
-    save_defaults_to_planning = planning && params[:save_defaults_to_planning].to_b
+    save_defaults_to_planning = planning && "#{params[:save_defaults_to_planning]}".downcase == "true"
     school = School.first
     season = params[:season_id].present? ? Season.find(params[:season_id]) : Season.current_apps_season || Season.current
 
