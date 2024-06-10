@@ -62,8 +62,7 @@ class AvailabilityManager extends PureComponent {
                 is_validated: false,
                 created_at: undefined,
                 updated_at: undefined,
-                id: undefined,
-                tabId: (this.state.list || []).length,
+                id: undefined
             }
 
             this.setState({
@@ -83,7 +82,7 @@ class AvailabilityManager extends PureComponent {
                     }
 
                     this.setState({
-                        list: this.state.list.concat(data.intervals).map(interval => ({...interval, tabId: interval.id})),
+                        list: this.state.list.concat(data.intervals),
                         isFetching: false,
                     });
                 })
@@ -106,7 +105,7 @@ class AvailabilityManager extends PureComponent {
 
             intervalIds.forEach(id => {
                 list.splice(
-                    list.findIndex(interval => interval.tabId === id),
+                    list.findIndex(interval => interval.id === id),
                     1
                 );
             });
