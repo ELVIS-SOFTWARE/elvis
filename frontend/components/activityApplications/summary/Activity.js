@@ -68,6 +68,15 @@ class Activity extends React.Component {
     constructor(props) {
         super(props);
 
+        let level = "";
+
+        const levelSeason = _.find(
+            props.application.user.levels,
+            l =>
+                l.activity_ref_id === props.activityRef.id &&
+                l.season_id === props.application.season_id
+        );
+
         this.state = {
             suggestionsMode: "CUSTOM", // Values : CUSTOM (suggests activities following user's availabilities/choices), ALL (no filter, display all activities)
             loading: false,
@@ -75,6 +84,7 @@ class Activity extends React.Component {
                 expanded: {},
                 pageSize: 10,
             },
+            studentLevel: levelSeason ? levelSeason.evaluation_level_ref_id : null,
         };
 
         this.tableRef = React.createRef();
@@ -615,7 +625,7 @@ class Activity extends React.Component {
         const levelSeason = _.find(
             this.props.application.user.levels,
             l =>
-                l.activity_ref.kind === this.props.activityRef.kind &&
+                l.activity_ref_id === this.props.activityRef.id &&
                 l.season_id === this.props.application.season_id
         );
 
