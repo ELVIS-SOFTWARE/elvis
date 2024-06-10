@@ -608,10 +608,12 @@ class PlanningController < ApplicationController
       default_intervals = default_intervals.map do |interval|
         interval = interval.dup
         interval.id = nil # reset id to avoid conflict
+
+        interval
       end
     end
 
-    if save_defaults_to_planning
+    if save_defaults_to_planning && planning
       planning.time_intervals << default_intervals
       planning.save!
     end
