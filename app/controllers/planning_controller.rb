@@ -579,7 +579,7 @@ class PlanningController < ApplicationController
         &.where("EXTRACT(YEAR FROM start) = :year", year: season.start.year)
         &.where("date_trunc(:granularity, time_intervals.start AT TIME ZONE 'Europe/Paris') = date_trunc(:granularity, :date::date AT TIME ZONE 'Europe/Paris')", {
           granularity: 'week',
-          date: season.start
+          date: season.start.to_s
         })
         &.to_a || []
     school_has_default = default_intervals.any?
