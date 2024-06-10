@@ -45,7 +45,7 @@ const GroupedAvailabilities = ({
                         <button
                             className="btn btn-xs m-l-xs btn-primary"
                             disabled={disabled}
-                            onClick={() => onDelete(item.id)}
+                            onClick={() => onDelete(item.tabId || item.id)}
                         >
                             <i className="fas fa-times no-margins" />
                         </button>
@@ -102,7 +102,7 @@ class AvailabilityList extends React.PureComponent {
                             !interval.is_validated &&
                             this.props.allowedKinds.includes(interval.kind)
                     )
-                    .map(interval => interval.id)
+                    .map(interval => interval.tabId || interval.id)
             );
         }
     }
