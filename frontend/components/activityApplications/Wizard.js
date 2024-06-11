@@ -700,19 +700,32 @@ class Wizard extends React.Component {
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
         const steps = [
-            !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
+            {
                 name: "Choisir un utilisateur",
                 component: (
-                    this.props.currentUserIsAdmin ? <UserSearch
-                        user={this.props.user}
-                        onSelect={this.handleSelectUser.bind(this)}
-                        season={this.state.season}
-                    /> :
-                        <WizardUserSelectMember
+                    this.props.preSelectedUser && this.props.preSelectedUser.id === this.props.user.id && this.props.currentUserIsAdmin ?
+                        <UserSearch
                             user={this.props.user}
                             onSelect={this.handleSelectUser.bind(this)}
                             season={this.state.season}
-                        />
+                        /> :
+                        this.props.preSelectedUser && this.props.currentUserIsAdmin ?
+                            <WizardUserSelectMember
+                                user={this.props.preSelectedUser}
+                                onSelect={this.handleSelectUser.bind(this)}
+                                season={this.state.season}
+                            /> :
+                            this.props.currentUserIsAdmin ?
+                                <UserSearch
+                                    user={this.props.user}
+                                    onSelect={this.handleSelectUser.bind(this)}
+                                    season={this.state.season}
+                                /> :
+                                <WizardUserSelectMember
+                                    user={this.props.user}
+                                    onSelect={this.handleSelectUser.bind(this)}
+                                    season={this.state.season}
+                                />
                 ),
             },
             {
