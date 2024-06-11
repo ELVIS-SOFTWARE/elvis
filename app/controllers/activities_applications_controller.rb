@@ -816,7 +816,7 @@ class ActivitiesApplicationsController < ApplicationController
       if creator.present? && Parameter.get_value("app.notify_wizard_error") == true
         MessageMailer.with(message: {
           title: "Notification d'erreur dans le wizard d'inscription (non-catcher)",
-          content: "#{e.message}\n#{e.backtrace&.join("\n")} ",
+          content: "#{e.message}\n#{e.backtrace&.join("\n")}",
           isSMS: false,
           isEmail: true
         }, to: User.where(id: creator.id, from: User.new(email: Parameter.get_value("app.application_mailer.default_from")))).send_message.deliver_later
