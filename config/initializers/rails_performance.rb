@@ -5,7 +5,7 @@ RailsPerformance.setup do |config|
   redis = Redis.new(url: ENV['REDIS_URL'])
 
   config.redis = Redis::Namespace.new("#{ENV['INSTANCE_NAME'] || "development"}-#{Rails.env}-rails-performance", redis: redis)
-  config.duration = 4.hours
+  config.duration = (ENV['RAILS_PERFORMANCE_DURATION'] || "4").to_i.hours
 
   # default path where to mount gem
   config.mount_at = '/rails/performance'
