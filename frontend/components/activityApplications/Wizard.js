@@ -699,8 +699,7 @@ class Wizard extends React.Component {
 
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
-        const steps = [
-            {
+        const steps = [ {
                 name: "Choisir un utilisateur",
                 component: (
                     this.props.preSelectedUser && this.props.preSelectedUser.id === this.props.user.id && this.props.currentUserIsAdmin ?
