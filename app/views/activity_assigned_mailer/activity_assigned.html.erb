@@ -118,7 +118,8 @@
                   <div style="color: #000000; line-height: 180%; text-align: left; word-wrap: break-word;">
                     <p style="font-size: 14px; line-height: 180%; text-align: center;">
                         <span style="font-family: Montserrat, sans-serif; font-size: 16px; line-height: 28.8px;">
-                          Un créneau vous a été proposé pour le cours <strong>"<%= @activity.activity_ref.label %>"</strong>.<br />
+                          Un créneau vous a été proposé pour le cours <br />
+                          <strong>"<%= @activity.activity_ref.label %>"</strong>.
                         </span>
                       <br/>
                     </p>
@@ -127,8 +128,7 @@
                   <div style="color: #000000; line-height: 180%; text-align: left; word-wrap: break-word;">
                     <p style="font-size: 14px; line-height: 180%; text-align: center;">
                         <span style="font-family: Montserrat, sans-serif; font-size: 16px; line-height: 28.8px;">
-                          Demande n°<span style="color:#0079bf"><%= @application.id %></span> concernant <%= @application.user.first_name %> <%= @application.user.last_name %> pour l'activité
-                          <span style="color:#0079bf"><%= @activity.activity_ref.activity_type == "child" ? @activity.activity_ref.label : @activity.activity_ref.kind%></span>.
+                          Demande n°<span style="color:#0079bf"><%= @application.id %></span> concernant <%= @application.user.first_name %> <%= @application.user.last_name %>
                           <br/>
                         </span>
                       <br/>
@@ -138,9 +138,11 @@
                   <div style="color: #000000; line-height: 180%; text-align: left; word-wrap: break-word;">
                     <p style="font-size: 14px; line-height: 180%; text-align: center;">
                         <span style="font-family: Montserrat, sans-serif; font-size: 16px; line-height: 28.8px;">
-                          Pour la <strong><%= @application.season.label %></strong>, le cours se déroulera le :
-                          <strong><%= l(@activity.time_interval.start, format: "%A").capitalize %></strong> de <strong><%= @activity.time_interval.start.strftime("%H:%M") %></strong>
-                          à <strong><%= @activity.time_interval.end.strftime("%H:%M") %></strong> avec le professeur <strong><%= @activity.teachers.first.full_name %></strong>
+                          Pour la <strong><%= @application.season.label %></strong>, le cours se déroulera le : <br />
+                          <strong><%= @activity.time_interval.start.strftime("%A").capitalize %></strong> <br />
+                          de <strong><%= @activity.time_interval.start.strftime("%H:%M") %></strong>
+                          à <strong><%= @activity.time_interval.end.strftime("%H:%M") %> <br />
+                        </strong> avec le professeur <strong><%= @activity.teachers.first.full_name %></strong>
                         </span>
                       <br/>
                     </p>
