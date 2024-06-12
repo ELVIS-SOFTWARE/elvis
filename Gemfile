@@ -65,7 +65,12 @@ gem "recaptcha", require: "recaptcha/rails"
 gem "countries"
 gem "money"
 gem "phony_rails"
+
+# Profiling
 gem 'rails_performance'
+gem 'rack-mini-profiler', require: false
+gem 'memory_profiler' # For memory profiling
+gem 'stackprof' # For call-stack profiling flamegraphs
 
 
 group :development, :test do

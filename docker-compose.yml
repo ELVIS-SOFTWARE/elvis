@@ -9,8 +9,10 @@ x-base_elvis: &base_elvis
     dockerfile: Dockerfile
     args:
       - GITHUB_TOKEN=${GITHUB_TOKEN:?GITHUB_TOKEN is required}
+      - PLUGINS_LIST_DOWNLOAD_URL=${PLUGINS_LIST_DOWNLOAD_URL}
   environment:
     - Rails_ENV=kubernetes
+    - INSTANCE_NAME=${INSTANCE_NAME:-elvis}
     - STORAGE_ACCOUNT=${STORAGE_ACCOUNT:-local}
     - ELVIS_DB=${POSTGRES_DB_NAME:-elvis}
     - ELVIS_DB_USER=${POSTGRES_DB_USER:-postgres}
@@ -22,6 +24,13 @@ x-base_elvis: &base_elvis
     - PLUGINS_LIST_DOWNLOAD_URL=${PLUGINS_LIST_DOWNLOAD_URL}
     - ES_PREFIX=elvis
     - RAILS_SERVE_STATIC_FILES=true
+    - REDIS_URL=redis://redis:6379/0
+    - RAILS_PERFORMANCE_ENABLED=true
+    - RAILS_PERFORMANCE_PASSWORD=${RAILS_PERFORMANCE_PASSWORD:-12345678}
+    - RAILS_PERFORMANCE_USER=${RAILS_PERFORMANCE_USER:-admin}
+    - RAILS_PERFORMANCE_DURATION=${RAILS_PERFORMANCE_DURATION:-48}
+    - RACK_MINI_PROFILER=true
+    - RACK_MINI_PROFILER_REDIS_URL=redis://redis:6379/1
   networks:
     - elvis
   logging:
@@ -35,6 +44,8 @@ services:
     <<: *base_elvis
     container_name: elvis_init
     depends_on:
+      redis:
+        condition: service_healthy
       elasticsearch:
         condition: service_healthy
       database:
@@ -76,6 +87,22 @@ services:
       options:
         max-size: "10m"
         max-file: "1"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - elvis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   database:
     image: postgres:14.0
