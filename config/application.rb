@@ -50,8 +50,6 @@ module RailsStarter
 
     config.i18n.default_locale = :fr
 
-    config.active_job.queue_adapter = :sidekiq
-
     # TODO env var
 
     if Rails.env.kubernetes?

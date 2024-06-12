@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
 
   before_action do
     if current_user&.creator?
-      Rack::MiniProfiler.authorize_request
+      Rack::MiniProfiler.authorize_request if defined?(Rack::MiniProfiler)
     end
   end
 

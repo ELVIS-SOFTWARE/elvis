@@ -143,11 +143,7 @@ Rails.application.configure do
   ## ACTIVE JOB
   ##################
   # Use a real queuing backend for Active Job (and separate queues per environment)
-  config.active_job.queue_adapter = :async
-  # NOTE: disabled for now
-  # config.active_job.queue_adapter = :sidekiq
-  # Sidekiq.logger = Logger.new(STDOUT)
-  #
+  config.active_job.queue_adapter = ENV["USE_SIDEKIQ"] == "true" ? :sidekiq : :async
 
   Recaptcha.configure do |config|
     config.site_key = ENV["SITE_KEY"]

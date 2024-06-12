@@ -32,6 +32,7 @@ x-base_elvis: &base_elvis
     - RAILS_PERFORMANCE_DURATION=${RAILS_PERFORMANCE_DURATION:-48}
     - RACK_MINI_PROFILER=true
     - RACK_MINI_PROFILER_REDIS_URL=redis://redis:6379/1
+    - USE_SIDEKIQ=true
   networks:
     - elvis
   logging:
@@ -66,6 +67,14 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+
+  sidekiq:
+    <<: *base_elvis
+    container_name: sidekiq
+    depends_on:
+      redis:
+        condition: service_healthy
+    entrypoint: bundle exec sidekiq -C config/sidekiq.yml
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
