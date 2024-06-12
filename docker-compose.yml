@@ -61,6 +61,11 @@ services:
         condition: service_completed_successfully
     ports:
       - "7212:80"
+    healthcheck:
+      test: curl -s http://localhost:80 >/dev/null || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
@@ -100,10 +105,25 @@ services:
         max-size: "10m"
         max-file: "2"
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: redis-cli ping || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    profiles:
+      - redisinsight
+    container_name: redis-insight
+    volumes:
+      - redisinsight_data:/data
+    ports:
+      - '5540:5540'
+    networks:
+      - elvis
+    depends_on:
+      redis:
+        condition: service_healthy
 
   database:
     image: postgres:14.0
@@ -132,3 +152,4 @@ networks:
 volumes:
   postgres_data:
   elasticsearch_data:
+  redisinsight_data:
