@@ -139,7 +139,6 @@ class RenewActivityItem extends React.Component {
 
     render() {
         const {
-            data,
             pre_application_activity,
             user,
         } = this.props;
@@ -195,6 +194,11 @@ class RenewActivityItem extends React.Component {
         let activityApplicationId = this.state.preApplicationActivity.activity_application.id.toString();
         let paddedActivityApplicationId = activityApplicationId.padStart(3, '0');
 
+        /**
+         *  Affichage du nom de l'activité
+         */
+        let activityDisplayName = _.get(this.props, "pre_application_activity.activity_application.desired_activities[0].activity_ref.display_name");
+
         return (
             <React.Fragment>
                 <tr>
@@ -206,7 +210,7 @@ class RenewActivityItem extends React.Component {
                         </b>
                     </td>
                     <td className="font-weight-bold" style={{ color: "#00283B" }}>
-                        {data.activity_ref.label}
+                        {activityDisplayName}
                     </td>
                     <td>
                         {user.first_name} {user.last_name}

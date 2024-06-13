@@ -68,7 +68,6 @@ class PreApplication extends React.Component {
                     key={i}
                     current_user={this.props.current_user}
                     authToken={this.props.user.authentication_token}
-                    data={pre_application_activity.activity}
                     pre_application_activity={pre_application_activity}
                     user={this.props.user}
                     allowPreApplication={allowPreApplication}
