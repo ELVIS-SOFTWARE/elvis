@@ -23,7 +23,7 @@
 
 
 <div class="m-b-lg px-4">
-    <% if @user.family(@season).length > 0 %>
+    <% if @user.family(@season).length > 0 || @users_to_show_in_family_list.any? %>
         <% family = @user.family_links_with_user(@season) %>
         <div class="contact-thumb-list">
             <div class="d-flex row contact align-items-center mb-2">

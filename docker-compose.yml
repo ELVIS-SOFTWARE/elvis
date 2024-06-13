@@ -9,8 +9,10 @@ x-base_elvis: &base_elvis
     dockerfile: Dockerfile
     args:
       - GITHUB_TOKEN=${GITHUB_TOKEN:?GITHUB_TOKEN is required}
+      - PLUGINS_LIST_DOWNLOAD_URL=${PLUGINS_LIST_DOWNLOAD_URL}
   environment:
     - Rails_ENV=kubernetes
+    - INSTANCE_NAME=${INSTANCE_NAME:-elvis}
     - STORAGE_ACCOUNT=${STORAGE_ACCOUNT:-local}
     - ELVIS_DB=${POSTGRES_DB_NAME:-elvis}
     - ELVIS_DB_USER=${POSTGRES_DB_USER:-postgres}
@@ -22,6 +24,15 @@ x-base_elvis: &base_elvis
     - PLUGINS_LIST_DOWNLOAD_URL=${PLUGINS_LIST_DOWNLOAD_URL}
     - ES_PREFIX=elvis
     - RAILS_SERVE_STATIC_FILES=true
+    - REDIS_URL=redis://redis:6379/0
+    - USE_REDIS_FOR_CACHING=true
+    - RAILS_PERFORMANCE_ENABLED=true
+    - RAILS_PERFORMANCE_PASSWORD=${RAILS_PERFORMANCE_PASSWORD:-12345678}
+    - RAILS_PERFORMANCE_USER=${RAILS_PERFORMANCE_USER:-admin}
+    - RAILS_PERFORMANCE_DURATION=${RAILS_PERFORMANCE_DURATION:-48}
+    - RACK_MINI_PROFILER=true
+    - RACK_MINI_PROFILER_REDIS_URL=redis://redis:6379/1
+    - USE_SIDEKIQ=true
   networks:
     - elvis
   logging:
@@ -35,6 +46,8 @@ services:
     <<: *base_elvis
     container_name: elvis_init
     depends_on:
+      redis:
+        condition: service_healthy
       elasticsearch:
         condition: service_healthy
       database:
@@ -49,6 +62,19 @@ services:
         condition: service_completed_successfully
     ports:
       - "7212:80"
+    healthcheck:
+      test: curl -s http://localhost:80 >/dev/null || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  sidekiq:
+    <<: *base_elvis
+    container_name: sidekiq
+    depends_on:
+      redis:
+        condition: service_healthy
+    entrypoint: bundle exec sidekiq -C config/sidekiq.yml
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
@@ -77,6 +103,37 @@ services:
         max-size: "10m"
         max-file: "1"
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - elvis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+    healthcheck:
+      test: redis-cli ping || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    profiles:
+      - redisinsight
+    container_name: redis-insight
+    volumes:
+      - redisinsight_data:/data
+    ports:
+      - '5540:5540'
+    networks:
+      - elvis
+    depends_on:
+      redis:
+        condition: service_healthy
+
   database:
     image: postgres:14.0
     container_name: database
@@ -104,3 +161,4 @@ networks:
 volumes:
   postgres_data:
   elasticsearch_data:
+  redisinsight_data:

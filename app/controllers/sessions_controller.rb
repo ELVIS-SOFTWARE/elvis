@@ -81,7 +81,7 @@ class SessionsController < Devise::SessionsController
     validated = true
 
     if params[:login].blank? || params[:password].blank? || !user.valid_password?(params[:password])
-      user.errors[:base] << "Login ou mot de passe incorrect."
+      user.errors.add(:base, "Login ou mot de passe incorrect.")
       validated = false
     end
 

@@ -139,7 +139,6 @@ class RenewActivityItem extends React.Component {
 
     render() {
         const {
-            data,
             pre_application_activity,
             user,
         } = this.props;
@@ -196,6 +195,11 @@ class RenewActivityItem extends React.Component {
         let activityApplicationId = this.state.preApplicationActivity.activity_application.id.toString();
         let paddedActivityApplicationId = activityApplicationId.padStart(3, '0');
 
+        /**
+         *  Affichage du nom de l'activité
+         */
+        let activityDisplayName = _.get(this.props, "pre_application_activity.activity_application.desired_activities[0].activity_ref.display_name");
+
         return (
             <React.Fragment>
                 <div className="card p-4 pt-0 col-md-12 col-lg-6 mr-4 mb-4"
@@ -203,7 +207,7 @@ class RenewActivityItem extends React.Component {
                     <div className='d-inline-flex align-items-top pt-0 row'>
                         <div className="col-sm-6">
                             {(this.props.current_user || {}).is_admin ? <a href={`/inscriptions/${this.state.preApplicationActivity.activity_application.id}`}>{`#${paddedActivityApplicationId}`}</a> : null}
-                            <h3 className="font-weight-bold">{data.activity_ref.label}</h3>
+                            <h3 className="font-weight-bold">{activityDisplayName}</h3>
                             <div>{activityDetails}</div>
                         </div>
                         <div className="col-sm-6 text-right">

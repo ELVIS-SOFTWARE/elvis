@@ -276,7 +276,12 @@ class ActivitiesApplicationsController < ApplicationController
     # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
     # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
 
-    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @all_activity_refs = ActivityRef.includes(:activity_ref_kind).as_json(
+      methods: [:display_price, :display_name, :kind, :display_prices_by_season],
+      include: {
+        activity_ref_kind: {},
+      }
+    )
 
     activity_refs = if current_user&.is_admin
                       @all_activity_refs.filter { |ar| ar["is_lesson"] }
@@ -561,7 +566,7 @@ class ActivitiesApplicationsController < ApplicationController
         # mise à jour de l'indicateur de paiement
         payers = params.dig(:application, :infos, :payers)
         if payers
-          @user.is_paying = payers.any? { |p| p == @user.id }
+          @user.is_paying ||= payers.any? { |p| p == @user.id }
         end
 
         # @user.skip_confirmation_notification!
@@ -768,16 +773,32 @@ class ActivitiesApplicationsController < ApplicationController
         end
       end
 
-      # notify new users of their new application
-      new_applications.each do |app|
-        EventHandler.notification.application_created.trigger(
-          sender: {
-            controller_name: self.class.name,
-          },
-          args: {
-            activity_application_id: app.id
-          }
-        )
+      begin
+        # notify new users of their new application
+        new_applications.each do |app|
+          EventHandler.notification.application_created.trigger(
+            sender: {
+              controller_name: self.class.name,
+            },
+            args: {
+              activity_application_id: app.id
+            }
+          )
+        end
+
+      rescue StandardError => e
+        Rails.logger.error "#{e.message}\n#{e.backtrace&.join("\n")} "
+
+        creator = User.find_by(is_creator: true)
+
+        if creator.present? && Parameter.get_value("app.notify_wizard_error") == true
+          MessageMailer.with(message: {
+            title: "Notification d'erreur dans le wizard d'inscription",
+            content: "#{e.message}\n#{e.backtrace&.join("\n")} ",
+            isSMS: false,
+            isEmail: true
+          }, to: User.where(id: creator.id, from: User.new(email: Parameter.get_value("app.application_mailer.default_from")))).send_message.deliver_later
+        end
       end
 
       render json: {
@@ -789,6 +810,17 @@ class ActivitiesApplicationsController < ApplicationController
       render status: 400, json: { errors: [e.message] }
     rescue StandardError => e
       Rails.logger.error "#{e.message}\n#{e.backtrace&.join("\n")} "
+
+      creator = User.find_by(is_creator: true)
+
+      if creator.present? && Parameter.get_value("app.notify_wizard_error") == true
+        MessageMailer.with(message: {
+          title: "Notification d'erreur dans le wizard d'inscription (non-catcher)",
+          content: "#{e.message}\n#{e.backtrace&.join("\n")}",
+          isSMS: false,
+          isEmail: true
+        }, to: User.where(id: creator.id, from: User.new(email: Parameter.get_value("app.application_mailer.default_from")))).send_message.deliver_later
+      end
 
       render status: 500, json: {
         errors: ["Une erreur est survenue lors de la création de votre demande d'inscription, veuillez-contactez l'administration."],

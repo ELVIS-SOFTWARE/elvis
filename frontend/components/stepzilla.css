@@ -1,99 +1,120 @@
 ol.progtrckr {
-  list-style-type: none;
-  padding: 0;
-  text-align: center;
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    counter-reset: step;
+    margin-bottom: 130px !important;
 }
 
 ol.progtrckr li {
-  display: inline-block;
-  text-align: center;
-  line-height: 4.5rem;
-  cursor: pointer;
+    line-height: 4.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex: 1;
+    max-width: 200px;
+
 }
 
 ol.progtrckr li span {
-  padding: 0 1.5rem;
+    font-size-adjust: inherit;
+    font-size: 1.5rem;
+    font-weight: bold;
+    position: relative;
+    bottom: -145%;
+    left: -11%;
 }
 
-@media (max-width: 650px) {
-  .progtrckr li span {
-    display: none;
-  }
+@media (max-width: 1000px) {
+    .progtrckr li span {
+        display: none;
+    }
 }
+
+@media (max-width: 640px) {
+    ol.progtrckr li {
+        border-bottom: none !important;
+    }
+}
+
 .progtrckr em {
-  display: none;
-  font-weight: 700;
-  padding-left: 1rem;
-}
-
-@media (max-width: 650px) {
-  .progtrckr em {
-    display: inline;
-  }
+    display: none;
 }
 
 ol.progtrckr li.progtrckr-todo {
-  color: silver;
-  border-bottom: 4px solid silver;
+    color: silver;
+    border-bottom: 12px dotted silver;
 }
 
 ol.progtrckr li.progtrckr-doing {
-  color: black;
-  border-bottom: 4px solid #CCCCCC;
+    color: #0079BF;
+    border-bottom: 12px dotted #0079BF;
 }
 
 ol.progtrckr li.progtrckr-done {
-  color: black;
-  border-bottom: 4px solid #ce292a;
+    color: #00334A;
+    border-bottom: 12px dotted #00334A;
 }
 
 ol.progtrckr li:after {
-  content: "\00a0\00a0";
+    content: "\00a0\00a0";
 }
 
 ol.progtrckr li:before {
-  position: relative;
-  bottom: -3.7rem;
-  float: left;
-  left: 50%;
+    position: relative;
+    bottom: -28px;
+    float: left;
+    left: 36.6%;
 }
 
 ol.progtrckr li.progtrckr-todo:before {
-  content: "\039f";
-  color: silver;
-  background-color: #f4f3f4;
-  width: 1.2em;
-  line-height: 1.4em;
+    content: counter(step);
+    counter-increment: step;
+    color: white;
+    background-color: silver;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: bold;
 }
 
 ol.progtrckr li.progtrckr-todo:hover:before {
-  color: #ff4500;
+    color: #0079BF;
 }
 
 ol.progtrckr li.progtrckr-doing:before {
-  content: "\2022";
-  color: white;
-  background-color: #cccccc;
-  width: 1.2em;
-  line-height: 1.2em;
-  border-radius: 1.2em;
+    content: counter(step);
+    counter-increment: step;
+    color: white;
+    background-color: #0079BF;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: bold;
 }
 
 ol.progtrckr li.progtrckr-doing:hover:before {
-  color: #ff4500;
+    color: #0079BF;
 }
 
 ol.progtrckr li.progtrckr-done:before {
-  content: "\2713";
-  color: white;
-  background-color: #ce292a;
-  width: 1.2em;
-  line-height: 1.2em;
-  border-radius: 1.2em;
+    content: counter(step);
+    counter-increment: step;
+    color: white;
+    background-color: #00283B;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 22px;
+    font-weight: bold;
 }
 
 ol.progtrckr li.progtrckr-done:hover:before {
-  color: #333;
+    color: #00283B;
 }
 
 .progtrckr {

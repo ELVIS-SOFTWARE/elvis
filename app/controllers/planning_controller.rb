@@ -554,14 +554,17 @@ class PlanningController < ApplicationController
     @lock_link = url_for action: "lock", id: planning.id
   end
 
-  def add_default_to_planning
-    planning = Planning.find(params[:id])
+  def add_defaults_to_planning
+    planning = Planning.find_by(id: params[:id])
+    save_defaults_to_planning = planning && "#{params[:save_defaults_to_planning]}".downcase == "true"
     school = School.first
     season = params[:season_id].present? ? Season.find(params[:season_id]) : Season.current_apps_season || Season.current
 
-    existing_intervals = planning.time_intervals.where({ start: (season.start..season.end), kind: "p" })
+    existing_intervals = planning&.time_intervals&.where({ start: (season.start..season.end), kind: "p" }) || []
 
-    render json: "already filled or planning locked", status: :bad_request and return if planning.is_locked || existing_intervals.count > 0
+    if planning&.is_locked || existing_intervals&.count > 0
+      render json: "already filled or planning locked", status: :bad_request and return
+    end
 
     if school.planning.nil?
       school.create_planning
@@ -576,7 +579,7 @@ class PlanningController < ApplicationController
         &.where("EXTRACT(YEAR FROM start) = :year", year: season.start.year)
         &.where("date_trunc(:granularity, time_intervals.start AT TIME ZONE 'Europe/Paris') = date_trunc(:granularity, :date::date AT TIME ZONE 'Europe/Paris')", {
           granularity: 'week',
-          date: season.start
+          date: season.start.to_s
         })
         &.to_a || []
     school_has_default = default_intervals.any?
@@ -605,11 +608,15 @@ class PlanningController < ApplicationController
       default_intervals = default_intervals.map do |interval|
         interval = interval.dup
         interval.id = nil # reset id to avoid conflict
+
+        interval
       end
     end
 
-    planning.time_intervals << default_intervals
-    planning.save!
+    if save_defaults_to_planning && planning
+      planning.time_intervals << default_intervals
+      planning.save!
+    end
 
     render json: default_intervals
   end

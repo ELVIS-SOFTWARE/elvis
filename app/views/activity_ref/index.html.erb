@@ -4,7 +4,7 @@
       <button class="btn btn-primary btn-sm pull-right m-sm"><i class="fas fa-plus"></i> Ajouter une activité</button>
     <% end %>
     <%= link_to activity_ref_index_path(format: :csv) do %>
-      <button class="btn btn-primary btn-sm pull-right m-sm"><i class="fas fa-download"></i> Exporter </button>
+      <button class="btn btn-primary btn-sm pull-right m-sm"><i class="fas fa-download"></i> Exporter</button>
     <% end %>
   </h2>
 </div>
@@ -27,6 +27,15 @@
             <h4><strong><%= a.label %></strong></h4>
             <p>Type: <%= kind.name %></p>
             <p>Places possibles: <%= a.occupation_limit %> (max: <%= a.occupation_hard_limit %>)</p>
+            <% unless a.duration.nil? %>
+              <% hours = a.duration / 60 %>
+              <% minutes = a.duration % 60 %>
+              <% if hours > 0 %>
+                <p>Durée: <%= "#{hours}h#{minutes.to_s.rjust(2, '0')}" %></p>
+              <% else %>
+                <p>Durée: <%= "#{minutes} minutes" %></p>
+              <% end %>
+            <% end %>
 
             <div class="d-flex">
               <%= link_to edit_activity_ref_path(a), class: "mr-2" do %>

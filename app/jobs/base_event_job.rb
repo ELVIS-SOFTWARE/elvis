@@ -3,6 +3,9 @@
 class BaseEventJob < ActiveJob::Base
   prepend RailsEventStore::AsyncHandler
 
+  # Need to be async because sub classes defined in main process ==> Rework of async event needed
+  self.queue_adapter = :async
+
   class_attribute :block
   class_attribute :custom_class_name
 
