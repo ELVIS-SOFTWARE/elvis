@@ -163,10 +163,10 @@ class CurrentActivityItem extends React.Component {
         let StopButton =
             <button
                 onClick={() => this.openStopModal()}
-                className="btn btn-danger btn-sm"
+                className="btn btn-danger btn-sm font-weight-bold"
                 style={ {borderRadius: "8px"} }
             >
-                <i className="fas fa-times"/>
+                S'arrêter
             </button>
 
         if (isPreapplicationEnabled) {
@@ -202,13 +202,13 @@ class CurrentActivityItem extends React.Component {
             } else {
                 actionButtons =
                     <React.Fragment>
+                        {StopButton}
                         <a href={`/inscriptions/new/${user.id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
-                            className="btn btn-info btn-sm mr-2 font-weight-bold"
+                            className="btn btn-info btn-sm ml-2 font-weight-bold"
                             style={{borderRadius: "8px"}}
                         >
                             Se réinscrire
                         </a>
-                        {StopButton}
                     </React.Fragment>
             }
         }
@@ -222,9 +222,6 @@ class CurrentActivityItem extends React.Component {
                     </td>
                     <td>
                         {this.props.user.first_name} {this.props.user.last_name}
-                    </td>
-                    <td>
-                        {data.activity_ref.nb_lessons ? data.activity_ref.nb_lessons : "0"}
                     </td>
                     <td className="text-right">
                         {actionButtons}
