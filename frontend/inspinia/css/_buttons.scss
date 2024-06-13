@@ -1,6 +1,6 @@
 
 .btn {
-  border-radius: $btn-border-radius;
+  border-radius: 8px;
 }
 
 .float-e-margins .btn {
@@ -12,11 +12,11 @@
 }
 
 .btn-primary.btn-outline {
-  color: $navy;
+  color: $lazur;
 }
 
 .btn-success.btn-outline {
-  color: $blue;
+  color: #0079BF;
 }
 
 .btn-info.btn-outline {
@@ -40,8 +40,8 @@
 }
 
 .btn-primary {
-  background-color: $navy;
-  border-color: $navy;
+  background-color: $lazur;
+  border-color: $lazur;
   color: #FFFFFF;
 }
 
@@ -64,7 +64,6 @@
   background-color: $blue;
   border-color: $blue;
   color: #FFFFFF;
-  margin-bottom: 20px !important;
 }
 
 .btn-success:hover, .btn-success:focus, .btn-success:active, .btn-success.active, .open .dropdown-toggle.btn-success, .btn-success:active:focus, .btn-success:active:hover, .btn-success.active:hover, .btn-success.active:focus {
