@@ -53,14 +53,14 @@ class ContactInfos extends React.PureComponent {
         const { push, update } = this.props.mutators;
 
         return (
-            <div className="mt-4">
+            <div className="row d-flex flex-column mt-4">
                 <FormSpy
                     subscription={{ values: true }}
                     onChange={props => this.handleChangeInfos(props)} />
 
-                <h3 className="pb-3" style={{color: "#8AA4B1"}}>Coordonnées personnelles du demandeur</h3>
+                <h3 className="col pb-3" style={{color: "#8AA4B1"}}>Coordonnées personnelles du demandeur</h3>
 
-                <div className="col p-0 mb-5">
+                <div className="col mb-5">
                     <FieldArray
                         name="addresses"
                         render={props => <AddressFields {...props} ignoreValidate={ignoreValidate} />}
@@ -89,8 +89,7 @@ class ContactInfos extends React.PureComponent {
                     </button>
                 </div>
 
-                <div className="row">
-                    <div className="col-xs-12 col-md-8 col-lg-6 col-xl-4">
+                <div className="col-xs-12 col-lg-6 mb-5 pr-0">
                         {displaySameAs && <Fragment>
                             {Array.isArray(values.family) &&
                                 values.family.length > 0 && (
@@ -116,10 +115,9 @@ class ContactInfos extends React.PureComponent {
                             validate={!ignoreValidate && required}
                             required={!currentUser.is_attached && !ignoreValidate}
                         />
-                    </div>
                 </div>
 
-                <div className="m-b-md" style={{maxWidth: "600px"}}>
+                <div className="col-xs-12 col-lg-6 mb-5 pr-0">
                     <FieldArray
                         name="telephones"
                         render={(props) => <TelephoneFields {...props} ignoreValidate={ignoreValidate} />}
