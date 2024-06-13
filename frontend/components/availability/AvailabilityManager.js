@@ -6,6 +6,7 @@ import ErrorList from "../common/ErrorList";
 import WeekSelector from "./WeekSelector";
 import { INTERVAL_KINDS } from "../../tools/constants";
 import AvailabilityCommentModal from "./AvailabilityCommentModal";
+import moment from "moment";
 
 const kindsForSeason = [
     INTERVAL_KINDS.LESSON,
@@ -48,24 +49,50 @@ class AvailabilityManager extends PureComponent {
         this.setState({ isFetching: !this.state.isFetching, errors: [] });
     }
 
-    handleAdd(interval) {
-        api.set()
-            .before(this.toggleFetching)
-            .success(data => {
-                if (this.props.onAdd) {
-                    this.props.onAdd(data.intervals);
-                }
-                
-                this.setState({
-                    list: this.state.list.concat(data.intervals),
-                    isFetching: false,
-                });
-            })
-            .error(errors => this.setState({ errors, isFetching: false }))
-            .patch(addToken(`/plannings/availabilities/${this.props.planningId}${this.props.disableLiveReload ? "/can_update" : ""}`, this.props.authToken), {
-                ...interval,
-                season_id: this.props.seasonId,
+    handleAdd(interval)
+    {
+        if(this.props.planningId === undefined && this.props.disableLiveReload)
+        {
+            // new members in wizard mode
+
+            const newInterval = {
+                start: new Date(interval.from).toISOString(),
+                end: new Date(interval.to).toISOString(),
+                kind: interval.kind,
+                is_validated: false,
+                created_at: undefined,
+                updated_at: undefined,
+                id: undefined,
+                tabId: (this.state.list || []).length,
+            }
+
+            this.setState({
+                list: this.state.list.concat([newInterval]),
+                isFetching: false,
             });
+
+            this.props.onAdd([newInterval]);
+        }
+        else
+        {
+            api.set()
+                .before(this.toggleFetching)
+                .success(data => {
+                    if (this.props.onAdd) {
+                        this.props.onAdd(data.intervals);
+                    }
+
+                    this.setState({
+                        list: this.state.list.concat(data.intervals).map(interval => ({...interval, tabId: interval.id})),
+                        isFetching: false,
+                    });
+                })
+                .error(errors => this.setState({ errors, isFetching: false }))
+                .patch(addToken(`/plannings/availabilities/${this.props.planningId}${this.props.disableLiveReload ? "/can_update" : ""}`, this.props.authToken), {
+                    ...interval,
+                    season_id: this.props.seasonId,
+                });
+        }
     }
 
     handleDelete(ids) {
@@ -79,7 +106,7 @@ class AvailabilityManager extends PureComponent {
 
             intervalIds.forEach(id => {
                 list.splice(
-                    list.findIndex(interval => interval.id === id),
+                    list.findIndex(interval => interval.tabId === id),
                     1
                 );
             });

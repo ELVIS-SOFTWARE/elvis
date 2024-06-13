@@ -1,6 +1,16 @@
 import React, {Fragment, useEffect, useState} from "react";
 import ToggleButton from "./ToggleButton";
 
+/**
+ * @param {number} maxSelected
+ * @param {Array<JSX.Element>} childrenContent
+ * @param {Array<number>} selected
+ * @param {function} onChange
+ * @param {React.CSSProperties} buttonStyles
+ * @param {string} buttonClasses
+ * @returns {JSX.Element}
+ * @constructor
+ */
 export default function ToggleButtonGroup({maxSelected, childrenContent, selected, onChange, buttonStyles, buttonClasses}) {
 
     maxSelected = maxSelected || 1;

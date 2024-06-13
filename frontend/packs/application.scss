@@ -2126,9 +2126,9 @@ body {
 /* ========================================================================== */
 
 .custom-select {
-    border: 1px solid black;
-    border-radius: 2px;
-    padding: 4px 12px 5px;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 12px 5px;
     margin-bottom: 0;
     font-size: 14px;
     display: inline-flex;
@@ -3338,6 +3338,13 @@ body {
     user-select: none;
     -webkit-user-select: none; /* Safari */
     -ms-user-select: none; /* IE 10 and IE 11 */
+}
+
+@media(max-width: 576px) {
+    .toggle-button-w-100-sm {
+        max-width: unset!important;
+        width: 100%;
+    }
 }
 
 .border-hover {

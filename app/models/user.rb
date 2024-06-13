@@ -444,6 +444,10 @@ class User < ApplicationRecord
     is_admin
   end
 
+  def creator?
+    is_creator
+  end
+
   def teacher?
     is_teacher
   end

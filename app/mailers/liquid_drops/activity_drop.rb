@@ -82,6 +82,10 @@ module LiquidDrops
       I18n.l(DateTime.parse(@activity["time_interval"]["end"]), format: "%A %d ")
     end
 
+    def day_in_week
+      I18n.l(DateTime.parse(@activity["time_interval"]["end"]), format: "%A")
+    end
+
   end
 end
 

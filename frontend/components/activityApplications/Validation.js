@@ -1,4 +1,4 @@
-import React, {Fragment} from "react";
+import React, { Fragment } from "react";
 import _ from "lodash";
 import TimePreferencesTable from "./TimePreferencesTable";
 import SelectedActivitiesTable from "./SelectedActivitiesTable";
@@ -53,7 +53,7 @@ const Validation = ({
     };
 
     const selectedActivities = application.selectedActivities.map(a =>
-        _.find(allActivityRefs, ar => ar.id == a)
+        _.find(allActivityRefs, ar => ar.id == a),
     );
 
     const selectedActivityIds = _.map(selectedActivities, sa => sa.id);
@@ -67,12 +67,12 @@ const Validation = ({
     const address = Object.values(application.infos.addresses).filter(a => a.city && a.country && a.postcode)[0];
 
     const selectedEvaluations = Object.entries(application.selectedEvaluationIntervals)
-        .map(([refId, timeInterval]) => ({refId, timeInterval}));
+        .map(([refId, timeInterval]) => ({ refId, timeInterval }));
 
 
     // Récupération des contacts et des payeurs -------------------------------------------------------------------------------------------------------------
     const pushPayerToList = (payer, list) => {
-        const {first_name, last_name} = payer;
+        const { first_name, last_name } = payer;
         list.push({
             name: `${first_name} ${last_name}`,
         });
@@ -85,9 +85,11 @@ const Validation = ({
         return contacts.some(contact => contact.name !== "/");
     };
 
-    const {infos} = application;
-    const {is_paying, id, first_name, last_name, family_links_with_user, payers} = infos;
-    is_paying && (!payers || payers.includes(id)) ? pushPayerToList({first_name, last_name}, payersList) : null;
+    const { infos } = application;
+    const { is_paying, id, first_name, last_name, family_links_with_user, payers } = infos;
+    if (is_paying || !payers || payers.includes(id)) {
+        pushPayerToList({ first_name, last_name }, payersList);
+    }
 
     // récupération des contacts et des payeurs parmis les membres de la famille
     if (family_links_with_user) {
@@ -99,38 +101,38 @@ const Validation = ({
                 is_paying_for,
                 is_accompanying,
                 is_to_call,
-                is_legal_referent
+                is_legal_referent,
             } = familyMember;
 
-            if (is_paying_for && (!payers || payers.includes(id))) {
-                pushPayerToList({first_name, last_name}, payersList);
+            if (is_paying_for || payers.includes(id)) {
+                pushPayerToList({ first_name, last_name }, payersList);
             }
 
             if (is_accompanying) {
-                accompanying.push({name: `${first_name} ${last_name}`});
+                accompanying.push({ name: `${first_name} ${last_name}` });
             }
 
             if (is_to_call) {
-                emergencyContacts.push({name: `${first_name} ${last_name}`});
+                emergencyContacts.push({ name: `${first_name} ${last_name}` });
             }
 
             if (is_legal_referent) {
-                legalReferents.push({name: `${first_name} ${last_name}`});
+                legalReferents.push({ name: `${first_name} ${last_name}` });
             }
         });
     }
 
     if (payersList.length === 0) {
-        payersList.push({name: "/"});
+        payersList.push({ name: "/" });
     }
     if (accompanying.length === 0) {
-        accompanying.push({name: "/"});
+        accompanying.push({ name: "/" });
     }
     if (emergencyContacts.length === 0) {
-        emergencyContacts.push({name: "/"});
+        emergencyContacts.push({ name: "/" });
     }
     if (legalReferents.length === 0) {
-        legalReferents.push({name: "/"});
+        legalReferents.push({ name: "/" });
     }
 
 
@@ -138,21 +140,21 @@ const Validation = ({
     const preferencesArray = [];
     if (application.intervals.length > 0) {
         preferencesArray.push({
-            intervals: application.intervals
+            intervals: application.intervals,
         });
     }
     if (showChildhoodActivities) {
         Object.keys(application.childhoodPreferences).forEach(refId => {
             preferencesArray.push({
                 activityRef: allActivityRefs.find(ref => ref.id === parseInt(refId)),
-                preferences: application.childhoodPreferences[refId]
+                preferences: application.childhoodPreferences[refId],
             });
         });
     }
 
     // Affichage des préférences de paiement -------------------------------------------------------------------------------------------------------------
-    let selectedPaymentMethod
-    let selectedPaymentScheduleOption
+    let selectedPaymentMethod;
+    let selectedPaymentScheduleOption;
     if (paymentTerms && paymentTerms[0]) {
         const paymentMethod = availPaymentMethods.find(pm => pm.id === paymentTerms[0].payment_method_id);
         if (paymentMethod) {
@@ -195,7 +197,7 @@ const Validation = ({
                                 <p className="m-0 small">Date de naissance</p>
                                 <p className="font-weight-bold" style={{color: "#00283B"}}>
                                     {moment(application.user.birthday).format(
-                                        "DD/MM/YYYY"
+                                        "DD/MM/YYYY",
                                     )}
                                 </p>
                             </div>
@@ -357,14 +359,14 @@ const Validation = ({
         <button
             onClick={handleSubmit}
             disabled={buttonDisabled}
-            className="btn btn-primary btn-md submit-activity mt-5"
+            className="btn btn-success font-weight-bold btn-md submit-activity mt-5"
         >
             {buttonDisabled ? (
                 <Fragment><i className="fa fa-spinner fa-spin"/> &nbsp;</Fragment>
             ) : ""}
             {"Envoyer la demande"}
         </button>
-    </Fragment>
+    </Fragment>;
 };
 
 export default Validation;

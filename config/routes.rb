@@ -1,7 +1,7 @@
 # == Route Map
 #
 
-#require "sidekiq/web"
+require "sidekiq/web" if ENV["USE_SIDEKIQ"] == "true"
 require "token_endpoint"
 
 Rails.application.routes.draw do
@@ -99,7 +99,7 @@ Rails.application.routes.draw do
   end
 
   # Monitoring webpages for sidekiq
-  # mount Sidekiq::Web => "/sidekiq"
+  mount Sidekiq::Web => "/sidekiq" if ENV["USE_SIDEKIQ"] == "true"
 
   resources :activities_applications, path: "inscriptions"
   post "/inscriptions/create_import_csv", to: "activities_applications#create_import_csv"
@@ -350,7 +350,7 @@ Rails.application.routes.draw do
   get "/plannings/teachers", to: "planning#index_for_teachers"
   get "/plannings/rooms", to: "planning#index_for_rooms"
   get "/plannings/generic/:id", to: "planning#show_generic", as: :generic_planning
-  get "/planning/:id/availabilities/defaults/(:season_id)", to: "planning#add_default_to_planning"
+  get "/planning/:id/availabilities/defaults", to: "planning#add_defaults_to_planning"
 
   get "/plannings/show_incoherent_intervals", to: "planning#incoherent_intervals"
   get "/plannings/remove_incoherent_intervals", to: "planning#remove_incoherent_intervals"

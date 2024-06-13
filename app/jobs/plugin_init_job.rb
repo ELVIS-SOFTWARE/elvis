@@ -2,6 +2,8 @@ require "elvis/plugin_loader"
 require 'concurrent'
 
   class PluginInitJob < ApplicationJob
+    # need to be async because it define && require plugins
+    self.queue_adapter = :async
 
   def initialize
     super

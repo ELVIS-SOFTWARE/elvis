@@ -12,8 +12,10 @@ function PayersListEditor({
                           }) {
 
     const family_with_user = [...family, user];
-    return <div>
+    return <div className="d-md-inline-flex">
         {family_with_user.map(user => {
+            //console.log("selectedPayers", selectedPayers, "type", typeof selectedPayers);
+            //debugger
                 const isSelected = selectedPayers.includes(user.id);
 
                 return <Checkbox
@@ -85,119 +87,112 @@ export default function PayerPaymentTerms({
         onChangeDayForCollection && onChangeDayForCollection(paymentTerms.day_for_collection);
     }
 
-
-    function handleAddPayer(user_id) {
-        const newSelectedPayers = [...selectedPayers, user_id];
-        setSelectedPayers(newSelectedPayers);
-
-        onChangePayers && onChangePayers(newSelectedPayers);
-
+    function handleAddPayer(newSelectedPayers) {
+        const payers = _.uniq([...selectedPayers, newSelectedPayers]);
+        setSelectedPayers(payers);
+        onChangePayers && onChangePayers(payers);
     }
 
-    function handleRemovePayer(user_id) {
-        const newSelectedPayers = selectedPayers.filter(id => id !== user_id);
-        setSelectedPayers(newSelectedPayers);
-
-        onChangePayers && onChangePayers(newSelectedPayers);
+    function handleRemovePayer(newSelectedPayers) {
+        const payers = selectedPayers.filter(payer => payer !== newSelectedPayers);
+        setSelectedPayers(payers);
+        onChangePayers && onChangePayers(payers);
     }
 
     useEffect(() => {
-            if (!scheduleOptionChanged)
-                return;
+        if (!scheduleOptionChanged)
+            return;
 
-            if (selectedPaymentTerms) {
-                if (availableChoices === 1) {
-                    setSelectedDaysForCollection([0]);
-                    handleDayChange([0]);
-                } else {
-                    setSelectedDaysForCollection([]);
-                    handleDayChange([]);
-                }
+        if (selectedPaymentTerms) {
+            if (availableChoices === 1) {
+                setSelectedDaysForCollection([0]);
+                handleDayChange([0]);
+            } else {
+                setSelectedDaysForCollection([]);
+                handleDayChange([]);
             }
-            setScheduleOptionChanged(false);
-        },
-        [selectedPaymentTermsId, availableChoices],
-    );
+        }
+        setScheduleOptionChanged(false);
+    }, [selectedPaymentTermsId, availableChoices]);
 
     return (
-        <div className="ibox">
-            <div className="ibox-title">
-                <h3>Modalités de paiement</h3>
-            </div>
-            <div className="ibox-content">
-
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // échéancier
-                }
-
-                {
-                    availPaymentMethods.length > 0 && availPaymentScheduleOptions.length > 0 ?
-                        <Fragment>
-                            <div className="form-group m-t-md">
-                                <label htmlFor="payment_schedule_options_id">Sélectionner votre échéancier</label>
-                                <select
-                                    className="form-control"
-                                    name="payment_schedule_options_id"
-                                    onChange={handleScheduleOptionChange}
-                                    value={selectedPaymentTermsId}
-                                >
-                                    <option key={-1} value="0">(choisissez une option)</option>
-                                    {availPaymentScheduleOptions.map(apt =>
-                                        <option key={apt.id} value={apt.id}>{apt.label}</option>,
-                                    )}
-                                </select>
+        <div className="row mt-4">
+            {//////////////////////////////////////////////////////////////////////////////////
+                // Modalités de paiement & date de paiement
+            }
+            {
+                availPaymentMethods.length > 0 && availPaymentScheduleOptions.length > 0 ?
+                    <Fragment>
+                        <div className="d-sm-inline-flex justify-content-between w-100">
+                            <div className="col-md-6 p-0">
+                                <div className="form-group">
+                                    <h3 className="font-weight-bold mb-4" style={{ color: "#8AA4B1" }}>Modalités de
+                                        paiement</h3>
+                                    <select
+                                        className="form-control"
+                                        name="payment_schedule_options_id"
+                                        onChange={handleScheduleOptionChange}
+                                        value={selectedPaymentTermsId}
+                                        style={{ borderRadius: "8px", border: "0" }}
+                                    >
+                                        <option key={-1} value="0">Choisissez une option</option>
+                                        {availPaymentScheduleOptions.map(apt =>
+                                            <option key={apt.id} value={apt.id}>{apt.label}</option>,
+                                        )}
+                                    </select>
+                                </div>
                             </div>
-
-                            {//////////////////////////////////////////////////////////////////////////////////
-                                // date de paiement
-                            }
                             {selectedPaymentTerms &&
-                                <Fragment>
-
-                                    <div className="form-group m-t-lg">
-                                        <label htmlFor="payment_schedule_options_id">Règlement</label>
-                                        <p>Sélectionner la date de règlement mensuel</p>
+                                <div className="col-md-5 p-0">
+                                    <div className="form-group">
+                                        <h3 className="font-weight-bold m-2" style={{ color: "#8AA4B1" }}>Date de
+                                            règlement</h3>
+                                        <ToggleButtonGroup
+                                            multiSelect={false}
+                                            selected={selectedDaysForCollection}
+                                            childrenContent={
+                                                selectedPaymentTerms.available_payments_days.map((day, i) => {
+                                                    return <span> {day} </span>;
+                                                })
+                                            }
+                                            onChange={handleDayChange}
+                                            buttonClasses="p-0"
+                                            buttonStyles={{ height: "35px", width: "35px", borderRadius: "8px" }}
+                                        />
                                     </div>
-
-                                    <ToggleButtonGroup
-                                        multiSelect={false}
-                                        selected={selectedDaysForCollection}
-                                        childrenContent={
-                                            selectedPaymentTerms.available_payments_days.map((day, i) =>
-                                            {
-                                                return <span> {day} </span>;
-                                            })
-                                        }
-                                        onChange={handleDayChange}
-                                    />
-                                </Fragment>
+                                </div>
                             }
+                        </div>
 
-                            {//////////////////////////////////////////////////////////////////////////////////
-                                // moyen de paiement
-                            }
-                            <div className="form-group m-t-md">
-                                <label htmlFor="payment_method_id">Sélectionner votre moyen de paiement</label>
+                        {//////////////////////////////////////////////////////////////////////////////////
+                            // moyen de paiement
+                        }
+                        <div className="row ml-1 mb-4">
+                            <div className="col-md-6 p-0 pr-3">
+                                <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>Moyens de paiement</h3>
                                 <select
                                     className="form-control"
                                     name="payment_method_id"
                                     onChange={handleSelectMethodChange}
                                     value={selectedPaymentMethodId}
+                                    style={{ borderRadius: "8px", border: "0" }}
                                 >
-                                    <option key={-1} value="0">(choisissez une option)</option>
+                                    <option key={-1} value="0">Choisissez une option</option>
                                     {availPaymentMethods.map(apm =>
                                         <option key={apm.id} value={apm.id}>{apm.label}</option>,
                                     )}
                                 </select>
                             </div>
-                        </Fragment> : ""
-                }
+                        </div>
+                    </Fragment> : ""
+            }
 
-                {//////////////////////////////////////////////////////////////////////////////////
-                    // payeurs
-                }
+            {//////////////////////////////////////////////////////////////////////////////////
+                // payeurs
+            }
+            <div className="row ml-1">
                 <div className="form-group m-t-md">
-                    <label htmlFor="payer_id">Sélectionner les payeurs</label>
+                    <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>Payeur(s)</h3>
                     <PayersListEditor
                         user={user}
                         selectedPayers={selectedPayers}

@@ -6,7 +6,7 @@ const Checkbox = props => {
     return (
         <div className="form-group">
             {extraTitle && <label>{extraTitle}</label>}
-            <div className="checkbox checkbox-primary m-0">
+            <div className="checkbox checkbox-primary m-0 mr-5">
                 <input {...input} id={id} type="checkbox"/>
                 <label
                     className="control-label"
