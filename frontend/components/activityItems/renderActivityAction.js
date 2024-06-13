@@ -78,7 +78,7 @@ function renderActivityAction(actionLabel) {
             return (
                 <React.Fragment>
                     <div className="badge badge-pill badge-secondary text-white" style={{backgroundColor: "#676a6c"}}>
-                        <i className="fas fa-hourglass mr-2"/>En attente
+                        <i className="fas fa-hourglass mr-2"/>En attente de traitement
                     </div>
                 </React.Fragment>
             );

@@ -37,6 +37,12 @@ export const APPLICATION_TAGS = {
 }
 
 export const ACTIVITY_TAGS = {
+    activity_day_in_week: {
+        name: "Jour de la semaine de l'activité",
+        value: "{{activity.day_in_week}}",
+        sample: "Jour de la semaine de l'activité"
+    },
+
     activity_start_date: {
         name: "Date de début de l'activité",
         value: "{{activity.startDate}}",

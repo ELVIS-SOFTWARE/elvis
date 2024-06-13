@@ -579,7 +579,7 @@ class PlanningController < ApplicationController
         &.where("EXTRACT(YEAR FROM start) = :year", year: season.start.year)
         &.where("date_trunc(:granularity, time_intervals.start AT TIME ZONE 'Europe/Paris') = date_trunc(:granularity, :date::date AT TIME ZONE 'Europe/Paris')", {
           granularity: 'week',
-          date: season.start
+          date: season.start.to_s
         })
         &.to_a || []
     school_has_default = default_intervals.any?
@@ -608,10 +608,12 @@ class PlanningController < ApplicationController
       default_intervals = default_intervals.map do |interval|
         interval = interval.dup
         interval.id = nil # reset id to avoid conflict
+
+        interval
       end
     end
 
-    if save_defaults_to_planning
+    if save_defaults_to_planning && planning
       planning.time_intervals << default_intervals
       planning.save!
     end

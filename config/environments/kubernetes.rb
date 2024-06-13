@@ -45,7 +45,14 @@ Rails.application.configure do
   # config.force_ssl = true
 
   # Use a different cache store in production.
-  config.cache_store = :memory_store
+  if !ENV["REDIS_URL"].nil? && ENV["USE_REDIS_FOR_CACHING"] == "true"
+    config.cache_store = :redis_cache_store, {
+      url: ENV["REDIS_URL"],
+      namespace: "#{ENV['INSTANCE_NAME'] || "development"}-#{Rails.env}-cache_store"
+    }
+  else
+    config.cache_store = :memory_store
+  end
 
   # config.active_job.queue_name_prefix = "rails-starter_#{Rails.env}"
   config.action_mailer.perform_caching = false
@@ -136,11 +143,7 @@ Rails.application.configure do
   ## ACTIVE JOB
   ##################
   # Use a real queuing backend for Active Job (and separate queues per environment)
-  config.active_job.queue_adapter = :async
-  # NOTE: disabled for now
-  # config.active_job.queue_adapter = :sidekiq
-  # Sidekiq.logger = Logger.new(STDOUT)
-  #
+  config.active_job.queue_adapter = ENV["USE_SIDEKIQ"] == "true" ? :sidekiq : :async
 
   Recaptcha.configure do |config|
     config.site_key = ENV["SITE_KEY"]

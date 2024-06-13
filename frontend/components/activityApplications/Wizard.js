@@ -700,7 +700,7 @@ class Wizard extends React.Component {
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
         const steps = [ {
-                name: "Choisir un utilisateur",
+                name: "Membre Concerné",
                 component: (
                     this.props.preSelectedUser && this.props.preSelectedUser.id === this.props.user.id && this.props.currentUserIsAdmin ?
                         <UserSearch
@@ -810,7 +810,7 @@ class Wizard extends React.Component {
             //this.props.actionType !== PRE_APPLICATION_ACTIONS.RENEW &&
             this.state.selectedActivities.length > 0 &&
             {
-                name: "Préférences horaires",
+                name: "Disponibilités",
                 component: (
                     <TimePreferencesStep
                         selectionLabels={this.getLabelsFromSelectedActivities()}
@@ -876,7 +876,7 @@ class Wizard extends React.Component {
             },
 
             (this.props.availPaymentScheduleOptions && this.props.availPaymentScheduleOptions.length > 0 || this.props.paymentStepDisplayText) && {
-                name: "Modalités de paiement",
+                name: "Paiement",
                 component: (
                     <WrappedPayerPaymentTerms
                         informationalStepOnly={false}
@@ -926,36 +926,10 @@ class Wizard extends React.Component {
 
         return (
             <div className="padding-page application-form" style={{ width: "85%" }}>
-                <div>
-                    <h1 className="text-center">
-                        Demande d’inscription
-                        {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
-                            " aux activités"
-                              : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
-                        }
-                    </h1>
-                    <div className="col d-flex justify-content-center">
-                        {
-                            this.props.inscription_path &&
-                            <a
-                                href={this.props.inscription_path}
-                                className="btn btn-primary">
-                                <i className="fas fa-table"/> Retours aux demandes d'inscription
-                            </a>
-                        }
-                        {
-                            this.props.user_path &&
-                            <a
-                                href={this.props.user_path}
-                                className="btn btn-primary btn-outline m-l-xs">
-                                <i className="fas fa-user"/> Voir le profil
-                            </a>
-                        }
-                    </div>
+                <div className="d-md-inline-flex justify-content-between w-100">
                     {this.props.currentUserIsAdmin ? (
                         <div className="flex flex-center-justified m-t-md m-b-sm">
                             <div className="form-group">
-                                <label className="m-r-sm">Saison</label>
                                 <select
                                     className="custom-select"
                                     value={this.state.season.id}
@@ -982,6 +956,7 @@ class Wizard extends React.Component {
                                 <input
                                     type="date"
                                     className="w-150 form-control"
+                                    style={{border: "none", borderRadius: "8px"}}
                                     min={moment(
                                         findAndGet(
                                             this.props.seasons,
@@ -1010,19 +985,50 @@ class Wizard extends React.Component {
                             </div>
                         </div>
                     ) : null}
+                    <div className="flex flex-center-justified m-t-md m-b-sm">
+                        <div className="form-group">
+                        {
+                            this.props.inscription_path &&
+                            <a
+                                href={this.props.inscription_path}
+                                className="btn btn-primary"
+                                style={{borderRadius: "8px"}}>
+                                <i className="fas fa-table"/> Retours aux demandes d'inscription
+                            </a>
+                        }
+                        {
+                            this.props.user_path &&
+                            <a
+                                href={this.props.user_path}
+                                className="btn btn-primary btn-outline m-l-xs"
+                                style={{borderRadius: "8px", color: "#00334A", borderColor: "#00334A"}}>
+                                <i className="fas fa-user"/> Voir le profil
+                            </a>
+                        }
+                        </div>
+                    </div>
+                </div>
+                <div style={{marginBottom: "35px"}}>
+                    <h1 style={{color: "#00334A"}}>Nouvelle demande d’inscription</h1>
+                    <h3 style={{color: "#8AA4B1"}}>Demande d'inscription
+                        {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
+                            " aux activités"
+                            : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
+                        } pour la {this.state.season.label}
+                    </h3>
                 </div>
                 <div className="step-progress">
                     <StepZilla
                         steps={steps}
                         showSteps={true}
                         stepsNavigation={true}
-                        nextButtonText={"Étape suivante"}
-                        backButtonText={"Étape précédente"}
+                        nextButtonText={"Suivant"}
+                        backButtonText={"Précédent"}
                         nextButtonCls={
-                            "btn btn-prev btn-primary btn-md pull-right"
+                            "btn btn-prev btn-primary btn-md pull-right font-weight-bold"
                         }
                         backButtonCls={
-                            "btn btn-prev btn-primary btn-md pull-left"
+                            "btn btn-prev btn-primary btn-md pull-left font-weight-bold"
                         }
                     />
                 </div>

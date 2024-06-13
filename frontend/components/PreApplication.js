@@ -68,7 +68,6 @@ class PreApplication extends React.Component {
                     key={i}
                     current_user={this.props.current_user}
                     authToken={this.props.user.authentication_token}
-                    data={pre_application_activity.activity}
                     pre_application_activity={pre_application_activity}
                     user={this.props.user}
                     allowPreApplication={allowPreApplication}
@@ -246,7 +245,6 @@ class PreApplication extends React.Component {
                                 <tr style={{backgroundColor: "#00334A", color: "white"}}>
                                     <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
                                     <th>Membre</th>
-                                    <th>Séances restantes</th>
                                     <th style={{borderRadius: "0 12px 0 0"}}></th>
                                 </tr>
                                 </thead>

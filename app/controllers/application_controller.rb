@@ -11,6 +11,12 @@ class ApplicationController < ActionController::Base
 
   attr_accessor :call_render
 
+  before_action do
+    if current_user&.creator?
+      Rack::MiniProfiler.authorize_request if Object.const_defined?("Rack::MiniProfiler")
+    end
+  end
+
   # catch all error in actions
   rescue_from BaseRendererError do |exception|
 

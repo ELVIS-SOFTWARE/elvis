@@ -29,7 +29,7 @@ export default function TimePreferencesStep({
         if (mode === PLANNING_MODE && !defaultFetched && (intervals || []).length === 0) {
             api.set()
                 .success(intervals => {
-                    onAvailabilityAdd(intervals);
+                    onAvailabilityAdd(_.compact(intervals).map((interval, i) => ({...interval, tabId: interval.id || i})));
                     availabilityRef.current.componentDidMount();
                     setDefaultFetched(true);
                 })
