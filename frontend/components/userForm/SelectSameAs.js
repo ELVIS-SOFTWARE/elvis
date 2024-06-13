@@ -52,7 +52,7 @@ const SelectSameAs = ({ setSameAs, family, accessor, format, currentUser }) => {
 
     return (
         <div className="row">
-            <div className="col-md-6 form-group pr-0 m-0 d-inline-flex align-items-baseline">
+            <div className="col-12 form-group m-0 d-inline-flex align-items-baseline" style={{maxWidth: "534px"}}>
                 <label className="small col-2 p-0" style={{color: "rgb(138, 164, 177)"}}>Identique à</label>
                 <select
                     defaultValue={currentValue()}
