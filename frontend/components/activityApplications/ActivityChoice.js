@@ -86,6 +86,11 @@ const ActivityChoice = ({
         ).length > 0;
     const unpopularActivitiesSelected = unpopularActivities.filter(a => selectedActivities.includes(a.id));
 
+    // Check is CHAM is only visible to admin
+    if (!currentUserIsAdmin) {
+        activityRefsCham = activityRefsCham.filter(ar => ar.is_visible_admin === true);
+    }
+
     const renderChildrenAccompaniments = () => {
         /* additionalStudents only exist here in Edit Mode while adding activities */
         if (additionalStudents && additionalStudents.length > 0) {
@@ -128,8 +133,7 @@ const ActivityChoice = ({
     };
 
     // Display the Activities and Packs ---------------------------------------------------------------------------------------------------------------------------------------------
-    function generateActivityRow(item, key, isPack = false, isSelected = false)
-    {
+    function generateActivityRow(item, key, isPack = false, isSelected = false) {
         const label = item.label;
         const duration = item.duration;
         const price = item.price;
@@ -198,7 +202,13 @@ const ActivityChoice = ({
     const individualRefs = _.uniqBy(
         _.union(
             filteredActivityRefsChildhood,
-            allActivityRefs.filter(ar => ar.substitutable === false && isInAgeRange(ar)),
+            allActivityRefs.filter(ar => {
+                const suitableActivityRefs = ar.substitutable === false && isInAgeRange(ar);
+                if (currentUserIsAdmin) {
+                    return suitableActivityRefs;
+                }
+                return suitableActivityRefs && ar.is_visible_admin !== true;
+            }),
         ), "id"
     );
 
@@ -238,8 +248,7 @@ const ActivityChoice = ({
         });
     }
     if (searchTerm) {
-        availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item =>
-        {
+        availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item => {
             return item.display_name.toLowerCase().includes(searchTerm.toLowerCase());
         });
     }
@@ -381,7 +390,9 @@ const ActivityChoice = ({
                                     <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total
                                         estimé
                                     </td>
-                                    <td colSpan="3" className="text-center">{isNaN(totalSelectedPrice) ? "--" : totalSelectedPrice} €</td>
+                                    <td colSpan="3"
+                                        className="text-center">{isNaN(totalSelectedPrice) ? "--" : totalSelectedPrice} €
+                                    </td>
                                 </tr>
                                 </tbody>
                             )}
