@@ -1,21 +1,34 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import PayerPaymentTerms from "./PayerPaymentTerms";
 import PropTypes from "prop-types";
 import PayerPaymentTermsInfo from "./PayerPaymentTermsInfo";
-import { Editor, EditorState, convertFromRaw, ContentState } from "draft-js";
-import { toast } from "react-toastify";
-import { MESSAGES } from "../tools/constants";
+import {Editor, EditorState, convertFromRaw, ContentState} from "draft-js";
+import {toast} from "react-toastify";
+import {MESSAGES} from "../tools/constants";
 
 class WrappedPayerPaymentTerms extends React.Component {
     constructor(props) {
         super(props);
+        const isMinor = this.userIsMinor(props.user.birthday);
         this.state = {
             paymentTerms: {
                 payment_schedule_options_id: props.paymentTerms.payment_schedule_options_id,
                 day_for_collection: props.paymentTerms.day_for_collection,
                 payment_method_id: props.paymentTerms.payment_method_id,
             },
+            requiredIdentificationNumber: props.displayIdentificationNumber && isMinor,
         };
+    }
+
+    userIsMinor(birthday) {
+        const today = new Date();
+        const birthDate = new Date(birthday);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age < 18;
     }
 
 
@@ -34,7 +47,7 @@ class WrappedPayerPaymentTerms extends React.Component {
             !!this.state.paymentTerms.payment_method_id)
             return true;
         else {
-            toast.error(MESSAGES.err_must_select_payment_terms, { autoClose: 3000 });
+            toast.error(MESSAGES.err_must_select_payment_terms, {autoClose: 3000});
             return false;
         }
     }
@@ -99,17 +112,17 @@ class WrappedPayerPaymentTerms extends React.Component {
             editorState = EditorState.createWithContent(savedContentState);
         }
 
-        return <div className="padding-page application-form">
+        return <div className="application-form" style={{margin: 0}}>
 
             <div className="row">
                 {this.props.paymentStepDisplayText &&
                     <div className="alert alert-info d-inline-flex align-items-center p-1 pr-3"
-                         style={{ border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF" }}>
+                         style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
                         <div className="col-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
                         </div>
                         <div className="col p-0">
-                            {<Editor editorState={editorState} readOnly={true} />}
+                            {<Editor editorState={editorState} readOnly={true}/>}
                         </div>
                     </div>}
             </div>
@@ -132,6 +145,9 @@ class WrappedPayerPaymentTerms extends React.Component {
                     onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                     onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
                     onChangePayers={this.handleChangePayers.bind(this)}
+                    displayIdentificationNumber={this.props.displayIdentificationNumber}
+                    requiredIdentificationNumber={this.state.requiredIdentificationNumber}
+
                 />
             )
             }

@@ -868,7 +868,7 @@ class Wizard extends React.Component {
                 component: (
                     <WrappedPayerPaymentTerms
                         informationalStepOnly={false}
-                        user={{id: this.state.infos.id, first_name: this.state.infos.first_name, last_name: this.state.infos.last_name, is_paying: this.state.infos.is_paying}}
+                        user={{id: this.state.infos.id, first_name: this.state.infos.first_name, last_name: this.state.infos.last_name, is_paying: this.state.infos.is_paying, birthday: this.state.infos.birthday, identification_number: this.state.infos.identification_number}}
                         family={this.state.infos.family_links_with_user}
                         initialSelectedPayers={this.state.infos.payers || []}
                         paymentTerms={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
@@ -880,6 +880,7 @@ class Wizard extends React.Component {
                         onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                         onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
                         onChangePayers={this.handleChangePayers.bind(this)}
+                        displayIdentificationNumber={this.props.countryCode==="BE"}
                     />
                 )
             },
