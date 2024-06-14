@@ -298,7 +298,7 @@ $ticks-group-color: #fff !default;
             position: absolute;
             left: #{-1 * nth($ticks-position, 2) };
             width: nth($ticks-position, 2);
-            height: calc(50% + #{$item-vertical-spacing/2});
+            height: calc(50% + #{calc($item-vertical-spacing / 2)});
             border-color: $ticks-color;
             border-style: solid;
         }
