@@ -93,7 +93,7 @@ class Wizard extends React.Component {
     componentDidMount() {
         if (!this.props.season) return;
 
-        if (this.props.preSelectedUser) {
+        if (this.props.preSelectedUser && !this.props.currentUserIsAdmin) {
             api.post("/users/search?auth_token=" + this.props.user.authentication_token,
                 {
                     first_name: this.props.preSelectedUser.first_name,
@@ -700,7 +700,7 @@ class Wizard extends React.Component {
         const activityChoiceActionTypes = [PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD, PRE_APPLICATION_ACTIONS.NEW, PRE_APPLICATION_ACTIONS.RENEW];
 
         const steps = [
-            !this.props.preApplicationActivity && (this.props.preSelectedUser.id === this.props.user.id) && {
+            !this.props.preApplicationActivity && this.props.preSelectedUser && (this.props.preSelectedUser.id === this.props.user.id) && {
                 name: "Membre Concerné",
                 component: (
                     this.props.currentUserIsAdmin ? <UserSearch
