@@ -1,11 +1,11 @@
 # frozen_string_literal: true
-
 sidekiq_redis_url = ENV['SIDEKIQ_REDIS_URL'] || ENV['REDIS_URL']
 
-unless sidekiq_redis_url.nil?
+if ENV["USE_SIDEKIQ"] == "true" && !sidekiq_redis_url.nil?
+  require 'sidekiq/web'
+
   redis_config = {
-    url: sidekiq_redis_url,
-    namespace: "#{ENV['INSTANCE_NAME'] || "development"}-#{Rails.env}-sidekiq"
+    url: sidekiq_redis_url
   }
 
   Sidekiq.configure_server do |config|
@@ -14,5 +14,13 @@ unless sidekiq_redis_url.nil?
 
   Sidekiq.configure_client do |config|
     config.redis = redis_config
+  end
+
+  Rails.application.config.after_initialize do
+    Rails.application.routes.draw do
+      authenticate :user, lambda { |u| u.admin? } do
+        mount Sidekiq::Web => '/sidekiq'
+      end
+    end
   end
 end
