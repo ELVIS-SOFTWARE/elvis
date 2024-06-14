@@ -2341,7 +2341,7 @@ body {
 .profile-left-col>.member-status-icons {
     position: absolute;
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     top: -17.5px;
     left: 0;
     padding: 0 10px;
