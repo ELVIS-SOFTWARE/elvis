@@ -126,7 +126,7 @@ RUN apt-get install -y --no-install-recommends libjemalloc2 curl shared-mime-inf
 
 COPY --from=build /usr/bin/node /usr/bin/
 
-#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT

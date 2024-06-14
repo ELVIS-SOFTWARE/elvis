@@ -25,6 +25,7 @@ class FalseClass; def to_i; 0 end end
 module RailsStarter
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
+    config.middleware.use Rack::Deflater
     config.load_defaults 5.1
     config.autoloader = :zeitwerk
 
@@ -43,8 +44,6 @@ module RailsStarter
         g.helper         false
         g.channel        assets: false
     end
-
-    config.middleware.use Rack::Deflater
 
     config.time_zone = "Paris"
 
