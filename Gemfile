@@ -15,15 +15,14 @@ gem "pg"
 # Use Puma as the app server
 gem "puma"
 gem "bootsnap"
+gem "mutex_m"
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
-gem "react-rails", "<3"
+gem "react-rails", "~> 3.2.1"
 gem "webpack"
-gem "webpacker", "<= 3.5.5"
+gem "webpacker", "~> 5.4.4"
 
-gem "irb", "<= 1.7.4"
-
-# forcer < 1.9 pour éviter le bug https://github.com/ruby-i18n/i18n/issues/603
-gem "i18n", "< 1.9.0"
+gem "irb"
+gem "i18n"
 
 gem "foreman"
 
@@ -44,7 +43,7 @@ gem "wicked_pdf"
 gem "wkhtmltopdf-binary"
 gem 'rubyzip'
 
-gem "kaminari", '~> 1.2.1'
+gem "kaminari", '~> 1.2.2'
 
 gem "deep_cloneable"
 
@@ -57,7 +56,7 @@ gem "sentry-ruby"
 
 gem "acts_as_paranoid"
 gem "chewy", "< 7.4"
-gem "sidekiq", "< 7" # breaking change in 7.0
+gem "sidekiq"
 
 gem "rqrcode"
 

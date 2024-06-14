@@ -48,7 +48,7 @@ class School < ApplicationRecord
   def phone_number
     tel = self[:phone_number]&.strip
 
-    unless tel.start_with?("+")
+    unless tel&.start_with?("+")
       tel = "+33#{tel[1..-1]}" # TODO: handle other countries
     end
 

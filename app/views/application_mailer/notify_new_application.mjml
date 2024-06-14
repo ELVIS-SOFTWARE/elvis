@@ -9,7 +9,7 @@
   </mj-head>
   <mj-body background-color="#fff">
     <mj-column>
-      <mj-image width="100px" src="<%= asset_pack_path 'images/logo.jpg' %>"></mj-image>
+      <mj-image width="100px" src="<%= asset_pack_path 'media/images/logo.jpg' %>"></mj-image>
       <mj-divider border-color="#006fb0"></mj-divider>
       <mj-text>Bonjour,</mj-text>
       <mj-text>Nous accusons réception de votre demande d'inscription pour la <b style="color:#d006fb0">
