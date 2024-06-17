@@ -35,7 +35,7 @@ class PreApplication extends React.Component {
             .pre_application_activities
             .find(a => _.get(a, "activity.activity_ref.activity_type") === "child") !== undefined;
 
-        const inscription_path = `/inscriptions/new?user_id=` + this.props.user.id
+        const inscription_path = `/inscriptions/new`;
         const user_path = '/users/' + current_user.id;
 
         // Liste les activités actuellement suivie par l'utilisateur
@@ -165,18 +165,14 @@ class PreApplication extends React.Component {
                             <h1 style={{ color: "#00283B" }}>Mes demandes d'inscription</h1>
 
                             {hasChildhoodLesson ? null : (
-                                <button disabled={!allowNewApplication} className="btn btn-sm font-weight-bold"
+                                <a className={`btn btn-sm font-weight-bold ${!allowNewApplication ? "disabled" : ""}`}
                                         style={{ backgroundColor: "#00334A", color: "white", borderRadius: "8px"}}
                                         title={!allowNewApplication ? "La période d'inscription aux nouvelles activités n'a pas commencé"
                                             : null}
-                                        onClick={() => {
-                                            if (allowNewApplication) {
-                                                window.location = inscription_path;
-                                            }
-                                        }}
+                                        href={inscription_path}
                                 >
                                     <i className="fas fa-plus"/><span className="ml-3">Nouvelle Demande</span>
-                                </button>
+                                </a>
                             )}
                         </div>
                         <div className="row m-2">

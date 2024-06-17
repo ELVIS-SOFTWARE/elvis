@@ -78,7 +78,7 @@ const ActivityChoice = ({
             selectedActivities,
             filteredActivityRefsChildhood.map(aref => aref.id),
         ).length > 0;
-    const unpopularActivities = allActivityRefs.filter(ref => ref.is_unpopular);
+    const unpopularActivities = activityRefs.filter(ref => ref.is_unpopular);
     const unpopularActivityChosen =
         _.intersection(
             unpopularActivities.map(a => a.id),
@@ -202,7 +202,7 @@ const ActivityChoice = ({
     const individualRefs = _.uniqBy(
         _.union(
             filteredActivityRefsChildhood,
-            allActivityRefs.filter(ar => {
+            activityRefs.filter(ar => {
                 const suitableActivityRefs = ar.substitutable === false && isInAgeRange(ar);
                 if (currentUserIsAdmin) {
                     return suitableActivityRefs;
@@ -254,7 +254,7 @@ const ActivityChoice = ({
     }
 
     const selectedActivitiesArray = selectedActivities.map(activityId => {
-        const selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(activityId, 10));
+        const selectedActivity = _.find(activityRefs, ar => ar.id == parseInt(activityId, 10));
         return {
             id: selectedActivity.id,
             key: null,

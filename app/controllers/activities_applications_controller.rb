@@ -276,14 +276,16 @@ class ActivitiesApplicationsController < ApplicationController
     # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
     # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
 
-    @all_activity_refs = (current_user&.is_admin ? ActivityRef.all : ActivityRef.where(is_visible_to_admin: false)).includes(:activity_ref_kind).as_json(
+    @all_activity_refs = ActivityRef.all.includes(:activity_ref_kind).as_json(
       methods: [:display_price, :display_name, :kind, :display_prices_by_season],
       include: {
         activity_ref_kind: {},
       }
     )
 
-    activity_refs = @all_activity_refs.filter { |ar| ar["is_lesson"] }
+    activity_refs = @all_activity_refs.filter { |ar| ar["is_lesson"] || ar["is_visible_to_admin"] }
+
+    activity_refs = activity_refs.filter { |ar| ar["is_visible_to_admin"] == false } unless current_user&.is_admin
 
     # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
@@ -304,11 +306,7 @@ class ActivitiesApplicationsController < ApplicationController
     @activity_refs_childhood = activity_refs
                                  .select { |ar| ar["activity_type"] == "child" }
 
-    @activity_refs_cham = if current_user&.is_admin
-                            @all_activity_refs.filter { |ar| ar["activity_type"] == "cham" }
-                          else
-                            @all_activity_refs.filter { |ar| ar["activity_type"] == "cham" }
-                          end
+    @activity_refs_cham = activity_refs.filter { |ar| ar["activity_type"] == "cham" }
 
     @application_change_questions = Question.application_change_questionnaire
     @new_student_level_questions = Question.new_student_level_questionnaire
