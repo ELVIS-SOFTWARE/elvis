@@ -9,7 +9,11 @@ class ApplicationMailer < LayoutMailer
     ApplicationUrl.main_root_url || (Rails.env.kubernetes? ? "https://#{ENV["DOMAIN"]}" : "http://localhost:5000")
   end
 
-  def notify_new_application(activity_application_id)
+  def notify_new_application(params)
+    args = params[:args]
+
+    activity_application_id = args[0]
+
     application = ActivityApplication.find(activity_application_id)
 
     @application = LiquidDrops::ApplicationDrop.new(application.as_json(include: {desired_activities: { activity_ref: {} }, user: {}, season: {}}))

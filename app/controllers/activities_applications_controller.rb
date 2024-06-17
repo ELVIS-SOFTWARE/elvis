@@ -799,6 +799,8 @@ class ActivitiesApplicationsController < ApplicationController
             isEmail: true
           }.as_json, to: creator.id.to_s, from: User.new(email: Parameter.get_value("app.application_mailer.default_from"), id: 0)).send_message.deliver_later
         end
+
+        Sentry.capture_exception(e)
       end
 
       render json: {
