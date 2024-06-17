@@ -15,22 +15,28 @@ module ActivityRefs
 
     def call
       pricings = fetch_pricings
-      pricings_by_ar = group_pricings_by_activity_ref(pricings)
-      compute_and_cache_max_prices(pricings_by_ar)
+      group_pricings_by_activity_ref_result = group_pricings_by_activity_ref(pricings)
+
+      compute_and_cache_max_prices(group_pricings_by_activity_ref_result)
     end
 
     private
 
-    def compute_and_cache_max_prices(pricings_by_ar)
+    def compute_and_cache_max_prices(group_pricings_by_activity_ref_result)
       max_ar_pricings_by_season = {}
       max_ar_kind_pricings_by_season = {}
 
+      pricings_by_ar = group_pricings_by_activity_ref_result[0]
+      activity_ref_substitutable = group_pricings_by_activity_ref_result[1]
+
       pricings_by_ar.each do |activity_ref_id, pricings|
-        compute_and_cache_max_price_for_activity_ref(activity_ref_id, max_ar_kind_pricings_by_season, max_ar_pricings_by_season, pricings)
+        current_activity_ref_is_substitutable = activity_ref_substitutable[activity_ref_id]
+
+        compute_and_cache_max_price_for_activity_ref(activity_ref_id, max_ar_kind_pricings_by_season, max_ar_pricings_by_season, pricings, current_activity_ref_is_substitutable)
       end
     end
 
-    def compute_and_cache_max_price_for_activity_ref(activity_ref_id, max_ar_kind_pricings_by_season, max_pricings_by_season, pricings)
+    def compute_and_cache_max_price_for_activity_ref(activity_ref_id, max_ar_kind_pricings_by_season, max_pricings_by_season, pricings, current_activity_ref_is_substitutable)
       max_pricings_by_season[activity_ref_id] = {}
 
       ar_kind_id = if pricings.any?
@@ -43,7 +49,10 @@ module ActivityRefs
       @seasons.find_each do |season|
         max_price = compute_max_price_for_activity_ref(pricings, season)
         cache_max_price_for_activity_ref(activity_ref_id, max_price, season)
-        update_max_price_for_activity_ref_kind(ar_kind_id, max_ar_kind_pricings_by_season, max_price, season)
+
+        if current_activity_ref_is_substitutable
+          update_max_price_for_activity_ref_kind(ar_kind_id, max_ar_kind_pricings_by_season, max_price, season)
+        end
       end
 
       cache_max_prices_for_activity_ref_kinds(max_ar_kind_pricings_by_season)
@@ -107,10 +116,12 @@ module ActivityRefs
 
     def group_pricings_by_activity_ref(pricings)
       pricings_by_ar = {}
+      activity_ref_substitutable = {}
 
       # initialize the hash with empty arrays for each activity_ref_id
-      ActivityRef.with_deleted.pluck(:id).each do |activity_ref_id|
-        pricings_by_ar[activity_ref_id] = []
+      ActivityRef.with_deleted.pluck(:id, :substitutable).each do |activity_ref_data|
+        pricings_by_ar[activity_ref_data[0]] = []
+        activity_ref_substitutable[activity_ref_data[0]] = activity_ref_data[1]
       end
 
       # fill the hash with the pricings
@@ -118,7 +129,7 @@ module ActivityRefs
         pricings_by_ar[pricing.activity_ref_id] << pricing
       end
 
-      pricings_by_ar
+      [pricings_by_ar, activity_ref_substitutable]
     end
 
   end

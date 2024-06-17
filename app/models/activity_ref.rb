@@ -137,16 +137,23 @@ class ActivityRef < ApplicationRecord
     end
   end
 
+  def self.erase_all_display_price_cache
+    Rails.cache.delete_matched("activity_ref_kind_id:*:price")
+    Rails.cache.delete_matched("activity_ref_id:*:price")
+  end
+
   def display_price(season = Season.current_apps_season || Season.current)
-    unless Rails.cache.exist?("activity_ref_id:#{id}:#{season.id}:price")
+    cached_price_name = if substitutable
+                          "activity_ref_kind_id:#{activity_ref_kind_id}:#{season.id}:price"
+                        else
+                          "activity_ref_id:#{id}:#{season.id}:price"
+                        end
+
+    unless Rails.cache.exist?(cached_price_name)
       ActivityRefs::MaxPricesCalculator.new.call
     end
 
-    if substitutable
-      Rails.cache.read("activity_ref_kind_id:#{activity_ref_kind_id}:#{season.id}:price")
-    else
-      Rails.cache.read("activity_ref_id:#{id}:#{season.id}:price")
-    end
+    Rails.cache.read(cached_price_name)
   end
 
   def display_prices_by_season
