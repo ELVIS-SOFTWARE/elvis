@@ -178,8 +178,7 @@ class SeasonsController < ApplicationController
 
     if result
       # on invalide le cache de saisons (même si ce n'est pas la saison active)
-      Rails.cache.delete("current_season")
-      Rails.cache.delete("current_apps_season")
+      Season.clear_method_cache :current, :current_apps_season
 
       redirect_to seasons_path
     else
