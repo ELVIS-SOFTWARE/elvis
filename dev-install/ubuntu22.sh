@@ -67,14 +67,14 @@ fi
 
 echo ""
 echo "-----------------------------------------------"
-echo "installing ruby 3.0.2"
+echo "installing ruby 3.3.2"
 echo ""
 echo "-----------------------------------------------"
 echo ""
 rvm autolibs disable
 rvm requirements
 sudo apt install -y libssl1.0-dev openssl1.0
-rvm install 3.0.2 --with-openssl-dir="$HOME"/.rvm/usr
+rvm install 3.3.2 --with-openssl-dir="$HOME"/.rvm/usr
 source /etc/profile.d/rvm.sh
 
 sleep 1
@@ -106,7 +106,7 @@ echo ""
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 export NVM_DIR=${HOME}/.nvm
 source "$NVM_DIR"/nvm.sh
-nvm install 14
+nvm install 20
 
 sleep 1
 

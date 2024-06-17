@@ -1,4 +1,4 @@
-FROM ruby:3.0.2-slim AS build
+FROM ruby:3.3.2-slim AS build
 
 # Sets the path where the app is going to be installed
 ENV RAILS_ROOT /Elvis
@@ -18,18 +18,20 @@ RUN mkdir -p $RAILS_ROOT
 # all the contents are going to be stored.
 WORKDIR $RAILS_ROOT
 
-COPY nodesetup_14.x .
-RUN chmod +x ./nodesetup_14.x && ./nodesetup_14.x
 RUN apt-get update
 
 RUN apt-get install -y \
   curl \
-  python \
+  python3 \
   build-essential \
   libpq-dev postgresql-client \
   git \
-  shared-mime-info \
-  nodejs
+  shared-mime-info
+
+RUN curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
+RUN bash /tmp/nodesource_setup.sh
+
+RUN apt-get install -y nodejs
 
 RUN npm install -g yarn
 
@@ -68,10 +70,10 @@ COPY frontend /Elvis/frontend
 COPY db /Elvis/db
 COPY public /Elvis/public
 COPY app/assets /Elvis/app/assets
-COPY .postcssrc.yml .babelrc /Elvis/
+COPY babel.config.js postcss.config.js /Elvis/
 
-# compile webpacker without app components/routes/initializers
-RUN bundle exec rails webpacker:compile
+# ignore error when precompiling assets
+RUN NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile
 ENV RAILS_ENV=kubernetes
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
 
@@ -85,7 +87,7 @@ RUN bundle exec bootsnap precompile --gemfile app/ lib/
 RUN rm -rf log/*
 RUN rm -rf tmp/cache
 RUN rm -rf frontend
-RUN rm -rf package.json yarn.lock nodesetup_14.x
+RUN rm -rf package.json yarn.lock
 
 # remove yarn dependencies and modules
 RUN rm -rf node_modules
@@ -109,7 +111,7 @@ COPY config.ru /Elvis/
 
 
 
-FROM ruby:3.0.2-slim AS release
+FROM ruby:3.3.2-slim AS release
 
 ENV RAILS_ROOT /Elvis
 ENV RAILS_ENV=kubernetes

@@ -61,6 +61,7 @@ const request = method => (
         credentials: "same-origin",
         headers: {
             Accept: "application/json",
+            "Accept-Encoding": "gzip, deflate, br",
             "X-Csrf-Token": csrfToken,
             "Content-Type": "application/json",
             ...additionalHeaders,

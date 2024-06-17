@@ -68,6 +68,10 @@ Rails.application.configure do
     config.secret_key = ""
   end
 
+  Sidekiq.configure_server do |config|
+    config.logger =  Logger.new(STDOUT)
+  end
+
   config.after_initialize do
     ENV["INSTANCE_NAME"] = "elvis-salsa"
   #   Bullet.enable = true
@@ -79,7 +83,3 @@ Rails.application.configure do
   #   Bullet.add_footer = true
   end
 end
-
-
-
-Sidekiq.logger = Logger.new(STDOUT)

@@ -19,7 +19,7 @@ export default function EditApplication(props) {
 
     return (
         <Fragment>
-            <button className="btn text-white btn-sm m-xs"
+            <button className="btn text-white btn-sm"
                     style={{
                         backgroundColor: "#00334A",
                         borderRadius: "8px",
@@ -27,7 +27,7 @@ export default function EditApplication(props) {
                     }}
                     onClick={() => handleCloseEditModal()}
             >
-               <i className="fas fa-comment"></i>
+               Commenter
             </button>
 
             <Modal

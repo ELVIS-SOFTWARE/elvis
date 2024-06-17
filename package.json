@@ -6,11 +6,12 @@
     "build": "react-scripts --max_old_space_size=2048 build"
   },
   "engines": {
-    "node": "^14.21.3",
-    "yarn": "^1.22.19"
+    "node": "^20.9.0",
+    "yarn": "^1.22.21"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
+    "@babel/preset-react": "^7.24.6",
     "@fullcalendar/core": "^5.5.1",
     "@fullcalendar/daygrid": "^5.5.0",
     "@fullcalendar/interaction": "^5.5.0",
@@ -19,7 +20,7 @@
     "@fullcalendar/timegrid": "^5.5.1",
     "@hookform/resolvers": "^2.8.8",
     "@mui/x-date-pickers-pro": "^5.0.0-alpha.1",
-    "@rails/webpacker": "^3.2.1",
+    "@rails/webpacker": "5.4.4",
     "@ramonak/react-progress-bar": "^5.0.3",
     "@wojtekmaj/react-daterange-picker": "^3.4.0",
     "@wojtekmaj/react-timerange-picker": "^3.5.0",
@@ -86,10 +87,11 @@
     "tui-calendar": "https://github.com/SIXMON/tui.calendar.git",
     "tui-calendar-react": "^0.1.0",
     "tui-code-snippet": "^1.5.0",
-    "yup": "^0.32.11"
+    "yup": "^0.32.11",
+    "ipaddr.js": "^2.2.0"
   },
   "devDependencies": {
-    "node-sass": "^4.14.1",
-    "webpack-dev-server": "^2.11.1"
+    "node-sass": "^9.0.0",
+    "webpack-dev-server": "^3.11.3"
   }
 }

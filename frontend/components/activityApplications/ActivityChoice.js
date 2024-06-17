@@ -249,7 +249,7 @@ const ActivityChoice = ({
     }
     if (searchTerm) {
         availableActivitiesAndPacks = availableActivitiesAndPacks.filter(item => {
-            return item.display_name.toLowerCase().includes(searchTerm.toLowerCase());
+            return item.label.toLowerCase().includes(searchTerm.toLowerCase());
         });
     }
 

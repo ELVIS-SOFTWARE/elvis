@@ -4,7 +4,7 @@
         <% if @user.avatar.attached? %>
             <img src="<%= url_for(@user.avatar) %>" class="card-image" alt="User Avatar">
         <% else %>
-            <img src="<%= asset_pack_path 'images/default_avatar.png' %>" class="card-image" alt="User Avatar">
+            <img src="<%= asset_pack_path 'media/images/default_avatar.png' %>" class="card-image" alt="User Avatar">
         <% end %>
 
 

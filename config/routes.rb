@@ -1,7 +1,5 @@
 # == Route Map
-#
 
-require "sidekiq/web" if ENV["USE_SIDEKIQ"] == "true"
 require "token_endpoint"
 
 Rails.application.routes.draw do
@@ -97,9 +95,6 @@ Rails.application.routes.draw do
     # An admin doesn't have the same home than a mere user.
     root "users#current_user_root", as: :authenticated_root
   end
-
-  # Monitoring webpages for sidekiq
-  mount Sidekiq::Web => "/sidekiq" if ENV["USE_SIDEKIQ"] == "true"
 
   resources :activities_applications, path: "inscriptions"
   post "/inscriptions/create_import_csv", to: "activities_applications#create_import_csv"
