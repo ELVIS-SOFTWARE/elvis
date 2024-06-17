@@ -797,7 +797,7 @@ class ActivitiesApplicationsController < ApplicationController
             content: "#{e.message}\n#{e.backtrace&.join("\n")} ",
             isSMS: false,
             isEmail: true
-          }, to: User.where(id: creator.id, from: User.new(email: Parameter.get_value("app.application_mailer.default_from")))).send_message.deliver_later
+          }.as_json, to: creator.id.to_s, from: User.new(email: Parameter.get_value("app.application_mailer.default_from"), id: 0)).send_message.deliver_later
         end
       end
 
