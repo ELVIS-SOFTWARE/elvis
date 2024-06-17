@@ -165,11 +165,11 @@ class PreApplication extends React.Component {
                             <h1 style={{ color: "#00283B" }}>Mes demandes d'inscription</h1>
 
                             {hasChildhoodLesson ? null : (
-                                <a className={`btn btn-sm font-weight-bold ${!allowNewApplication ? "disabled" : ""}`}
+                                <a className={`btn btn-sm font-weight-bold ${!allowNewApplication && "disabled"}`}
                                         style={{ backgroundColor: "#00334A", color: "white", borderRadius: "8px"}}
                                         title={!allowNewApplication ? "La période d'inscription aux nouvelles activités n'a pas commencé"
                                             : null}
-                                        href={inscription_path}
+                                        href={allowNewApplication && inscription_path}
                                 >
                                     <i className="fas fa-plus"/><span className="ml-3">Nouvelle Demande</span>
                                 </a>
