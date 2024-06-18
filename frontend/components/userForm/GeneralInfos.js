@@ -36,15 +36,16 @@ const GeneralInfos = ({
                                     {genders.map((gender, index) => (
                                         <div key={index} className="mr-5" style={{color: "#155979", fontWeight: "light"}}>
                                             <Field
+                                                id={`${input.name}-${gender.value}`}
                                                 name={input.name}
                                                 component="input"
-                                                type="radio"
-                                                value={gender.value}S
+                                                type={"radio"}
+                                                value={gender.value}
                                                 checked={gender.value === input.value}
                                                 onChange={input.onChange}
                                                 className="mr-2"
                                             />
-                                            {gender.label}
+                                            <label key={`${input.name}-${gender.value}`} htmlFor={`${input.name}-${gender.value}`}>{gender.label}</label>
                                         </div>
                                     ))}
                                 </div>

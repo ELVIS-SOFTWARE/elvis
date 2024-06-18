@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { Form, FormSpy, Field } from "react-final-form";
 import { toast } from "react-toastify";
 import arrayMutators from "final-form-arrays";
@@ -288,120 +288,122 @@ class UserForm extends React.PureComponent {
             <div className="application-form" style={{margin: 0}}>
                 <div>
                     <h3 style={{color: "#8AA4B1"}}>Informations personnelles de {initialValues.first_name}</h3>
-                    <div>
-                        <Form
-                            onSubmit={this.submit.bind(this)}
-                            mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType }}
-                            initialValues={formattedInitialValues}
-                            validate={this.validate.bind(this)}
-                        >
-                            {({ handleSubmit, form, values }) => {
 
-                                // Bind handle submit to trigger
-                                // Submit inside isValidated()
-                                this.handleSubmit = handleSubmit;
-                                this.mutators = form.mutators;
+                    <Form
+                        onSubmit={this.submit.bind(this)}
+                        mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType }}
+                        initialValues={formattedInitialValues}
+                        validate={this.validate.bind(this)}
+                    >
+                        {({ handleSubmit, form, values }) => {
 
-                                return (
-                                    <form
-                                        onSubmit={handleSubmit}
-                                        className="user-form">
+                            // Bind handle submit to trigger
+                            // Submit inside isValidated()
+                            this.handleSubmit = handleSubmit;
+                            this.mutators = form.mutators;
 
-                                        <FormSpy
-                                            subscription={{ values: true }}
-                                            onChange={props => this.handleChangeInfos(props)} />
+                            return (
+                                <form
+                                    onSubmit={handleSubmit}
+                                    className="user-form">
 
-                                        <GeneralInfos
-                                            displayBirthday
-                                            ignoreValidate={user ? user.is_admin : false}
-                                            displayGender
-                                            displayIdentificationNumber={this.props.displayIdentificationNumber && this.state.requireIdentificationNumber}
-                                            requireIdentificationNumber={this.state.requireIdentificationNumber}
-                                            birthday={values.birthday}
-                                            organizationOptions={this.props.organizationOptions}
-                                            userId={this.props.initialValues.id}
-                                        />
+                                    <FormSpy
+                                        subscription={{ values: true }}
+                                        onChange={props => this.handleChangeInfos(props)} />
 
-                                        {
-                                            (this.props.hidePayers !== true) && (
-                                                <Payers
-                                                    values={values}
-                                                    mutators={form.mutators}
-                                                    currentUser={{ ...initialValues }}
-                                                />
-                                            )
-                                        }
+                                    <GeneralInfos
+                                        displayBirthday
+                                        ignoreValidate={user ? user.is_admin : false}
+                                        displayGender
+                                        displayIdentificationNumber={this.props.displayIdentificationNumber && this.state.requireIdentificationNumber}
+                                        requireIdentificationNumber={this.state.requireIdentificationNumber}
+                                        birthday={values.birthday}
+                                        organizationOptions={this.props.organizationOptions}
+                                        userId={this.props.initialValues.id}
+                                    />
 
-                                        <ContactInfos
-                                            values={values}
-                                            form={form}
-                                            displaySameAs
-                                            ignoreValidate={user ? user.is_admin : false}
-                                            mutators={form.mutators}
-                                            canAddContacts
-                                            onContactAdd={() => {
-                                                this.selectFamilyMember(-1, {});
-                                                this.toggleModal();
-                                            }}
-                                            onContactEdit={idx => {
-                                                this.selectFamilyMember(-1, {});
-                                                this.toggleModal();
-                                            }}
-                                            onContactDelete={(idx, member) => {
-                                                this.removeFamilyMember(
-                                                    idx,
-                                                    member,
-                                                );
-                                            }}
-                                            currentUser={{ ...initialValues }}
-                                        />
-                                        <hr />
-                                        <HandicapInfos />
+                                    {
+                                        (this.props.hidePayers !== true) && (
+                                            <Payers
+                                                values={values}
+                                                mutators={form.mutators}
+                                                currentUser={{ ...initialValues }}
+                                            />
+                                        )
+                                    }
 
+                                    <ContactInfos
+                                        values={values}
+                                        form={form}
+                                        displaySameAs
+                                        ignoreValidate={user ? user.is_admin : false}
+                                        mutators={form.mutators}
+                                        canAddContacts
+                                        onContactAdd={() => {
+                                            this.selectFamilyMember(-1, {});
+                                            this.toggleModal();
+                                        }}
+                                        onContactEdit={idx => {
+                                            this.selectFamilyMember(-1, {});
+                                            this.toggleModal();
+                                        }}
+                                        onContactDelete={(idx, member) => {
+                                            this.removeFamilyMember(
+                                                idx,
+                                                member,
+                                            );
+                                        }}
+                                        currentUser={{ ...initialValues }}
+                                    />
+                                    <hr />
+                                    <HandicapInfos />
+
+                                    <div className="row" style={{marginBottom: "75px"}}>
                                         {this.props.consent_docs && this.props.consent_docs.map(doc =>
+                                            <div key={doc.id} className="col-sm-12">
                                                 <ConsentDocItem
-                                                    key={doc.id}
                                                     docItem={doc}
                                                     schoolName={this.props.schoolName}
                                                     defaultValue={((initialValues.consent_document_users || []).find(cdu => cdu.consent_document_id === doc.id) || {}).has_consented}
-                                                />)
+                                                />
+                                            </div>)
                                         }
+                                    </div>
 
-                                        {this.props.displaySubmit && (
-                                            <button
-                                                type="submit"
-                                                disabled={submitting}
-                                                className="btn btn-primary btn-block"
-                                            >
-                                                {"Enregistrer"}
-                                            </button>
-                                        )}
-                                    </form>
-                                );
+                                    {this.props.displaySubmit && (
+                                        <button
+                                            type="submit"
+                                            disabled={submitting}
+                                            className="btn btn-primary btn-block"
+                                        >
+                                            {"Enregistrer"}
+                                        </button>
+                                    )}
+                                </form>
+                            );
+                        }}
+                    </Form>
+
+                    <Modal
+                        isOpen={isModalOpen}
+                        style={modalStyle}
+                        ariaHideApp={false}
+                        contentLabel="Ajouter un contact"
+                        onRequestClose={this.toggleModal}
+                    >
+                        <ContactForm
+                            initialValues={familyMember}
+                            onClose={() => this.toggleModal()}
+                            onSubmit={values => {
+                                if (selectedFamilyMember === -1) {
+                                    this.addFamilyMember(values);
+                                } else {
+                                    this.updateFamilyMember(values);
+                                }
+                                this.toggleModal();
                             }}
-                        </Form>
-
-                        <Modal
-                            isOpen={isModalOpen}
-                            style={modalStyle}
-                            ariaHideApp={false}
-                            contentLabel="Ajouter un contact"
-                            onRequestClose={this.toggleModal}
-                        >
-                            <ContactForm
-                                initialValues={familyMember}
-                                onClose={() => this.toggleModal()}
-                                onSubmit={values => {
-                                    if (selectedFamilyMember === -1) {
-                                        this.addFamilyMember(values);
-                                    } else {
-                                        this.updateFamilyMember(values);
-                                    }
-                                    this.toggleModal();
-                                }}
-                            />
-                        </Modal>
-                    </div>
+                        />
+                    </Modal>
                 </div>
             </div>
         );

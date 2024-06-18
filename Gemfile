@@ -8,7 +8,7 @@ git_source(:github) do |repo_name|
 end
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem "rails", "6.1.4.4"
+gem "rails", "6.1.7.8"
 gem "rails_event_store"
 # Use postgresql as the database for Active Record
 gem "pg"

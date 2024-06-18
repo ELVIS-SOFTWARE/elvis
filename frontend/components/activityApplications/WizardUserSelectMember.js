@@ -258,8 +258,8 @@ export default class WizardUserSelectMember extends React.Component {
                             whiteSpace: "nowrap",
                             overflowX: "auto",
                             boxShadow: "none",
-                            "-webkit-box-shadow": "none",
-                            "-moz-box-shadow": "none",
+                            WebkitBoxShadow: "none",
+                            MozBoxShadow: "none",
                         }}
                         buttonClasses={"col-sm-auto toggle-button-w-100-sm"}
                     />
