@@ -95,7 +95,7 @@ class Season < ApplicationRecord
 
   def self.all_seasons_cached
     Rails.cache.fetch("seasons:all", expires_in: 5.minutes) do
-      Season.all
+      Season.all.to_a # if only Season.all cached, it will return an ActiveRecord::Relation object, not the result of the query.
     end
   end
 

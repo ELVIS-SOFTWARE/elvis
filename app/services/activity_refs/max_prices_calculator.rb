@@ -46,7 +46,7 @@ module ActivityRefs
                    end
       max_ar_kind_pricings_by_season[ar_kind_id] ||= {}
 
-      @seasons.find_each do |season|
+      @seasons.each do |season|
         max_price = compute_max_price_for_activity_ref(pricings, season)
         cache_max_price_for_activity_ref(activity_ref_id, max_price, season)
 

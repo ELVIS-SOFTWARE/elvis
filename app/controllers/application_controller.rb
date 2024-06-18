@@ -119,17 +119,8 @@ class ApplicationController < ActionController::Base
 
   def url_registration
     url_string = request.base_url
-    url_model = ApplicationUrl.find_or_create_by!(url: url_string)
 
-    url_model.last_used_at = DateTime.now
-
-    unless ApplicationUrl.where(is_main: true).any?
-      url_model.is_main = true
-    end
-
-    url_model.save
-
-  rescue StandardError => e
-    Rails.logger.error e.message
+    UpdateApplicationUrlUsageJob.perform_later url_string, DateTime.now.to_s
   end
+
 end

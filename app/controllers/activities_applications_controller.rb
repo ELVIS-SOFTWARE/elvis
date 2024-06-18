@@ -308,13 +308,13 @@ class ActivitiesApplicationsController < ApplicationController
 
     @activity_refs_cham = activity_refs.filter { |ar| ar["activity_type"] == "cham" }
 
-    @application_change_questions = Question.application_change_questionnaire
-    @new_student_level_questions = Question.new_student_level_questionnaire
-    @locations = Location.all
+    @application_change_questions = Question.application_change_questionnaire.to_a
+    @new_student_level_questions = Question.new_student_level_questionnaire.to_a
+    @locations = Location.all.to_a
     @all_activity_ref_kinds = ActivityRefKind.all.as_json
     @last_adherent_number = User.maximum("adherent_number")
     @actionType = 0 # new application
-    @instruments = Instrument.all
+    @instruments = Instrument.all.to_a
     @consent_docs = ConsentDocument.jsonize_consent_document_query(ConsentDocument.all.order(:index))
 
     show_payment_schedule_options_param = Parameter.find_or_create_by(label: "payment_terms.activated", value_type: "boolean")
@@ -329,12 +329,19 @@ class ActivitiesApplicationsController < ApplicationController
     show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
     @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
 
-    @packs = ActivityRefPricing
-               .where('("activity_ref_pricings"."from_season_id" <= ? AND ("activity_ref_pricings"."to_season_id" IS NULL OR "activity_ref_pricings"."to_season_id" >= ?))', Season.current.id, Season.current.id)
-               .as_json(include: {
-                 pricing_category: {},
-                 activity_ref: {},
-               })
+    @packs = Rails.cache.fetch("activity_refs_packs:season_#{Season.current.id}", expires_in: 1.hour) do
+      ActivityRefPricing
+        .joins(:pricing_category)
+        .for_season_id(Season.current.id)
+        .where(pricing_categories: { is_a_pack: true })
+        .as_json(include: {
+          pricing_category: {},
+        })
+    end
+
+    @packs.each do |pack|
+      pack["activity_ref"] = @all_activity_refs.find { |ar| ar["id"] == pack["activity_ref_id"] }
+    end
 
     # on regroupe les activity_ref_pricings par label
     @packs = @packs.group_by { |arp| arp["activity_ref"]["label"] }

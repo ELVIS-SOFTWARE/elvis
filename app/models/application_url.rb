@@ -21,7 +21,12 @@ class ApplicationUrl < ApplicationRecord
   end
 
   def self.main_root_url
-    ApplicationUrl.where(is_main: true).first&.url
+    Rails.cache.fetch("ApplicationUrl::main_root_url", expires_in: 12.hours) do
+      ApplicationUrl.where(is_main: true).first&.url
+    end
   end
 
+  def self.reset_main_root_url_cache
+    Rails.cache.delete("ApplicationUrl::main_root_url")
+  end
 end
