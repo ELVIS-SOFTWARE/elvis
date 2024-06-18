@@ -18,13 +18,10 @@ gem "bootsnap"
 gem "mutex_m"
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
 gem "react-rails", "~> 3.2.1"
-gem "webpack"
 gem "webpacker", "~> 5.4.4"
 
 gem "irb"
 gem "i18n"
-
-gem "foreman"
 
 gem "request_store"
 
@@ -99,6 +96,7 @@ group :development do
 
   gem "seed_dump"
   gem "letter_opener"
+  gem "foreman"
 end
 
 gem "rack-cors"

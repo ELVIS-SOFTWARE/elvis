@@ -47,8 +47,7 @@ RUN bundle config set force_ruby_platform true
 COPY Gemfile /Elvis/
 COPY lib /Elvis/lib
 
-RUN PLUGINS_LIST_DOWNLOAD_URL=$PLUGINS_LIST_DOWNLOAD_URL bundle install
-
+RUN PLUGINS_LIST_DOWNLOAD_URL=$PLUGINS_LIST_DOWNLOAD_URL RAILS_ENV=kubernetes bundle install
 
 COPY package.json yarn.lock Gemfile Rakefile /Elvis/
 COPY config /Elvis/config
@@ -97,6 +96,8 @@ RUN rm -rf .git
 
 COPY entrypoints /Elvis/entrypoints
 COPY config.ru /Elvis/
+
+RUN rm -r /usr/local/bundle/cache
 
 
 
