@@ -14,6 +14,8 @@ x-base_elvis: &base_elvis
     - Rails_ENV=kubernetes
     - INSTANCE_NAME=${INSTANCE_NAME:-elvis}
     - STORAGE_ACCOUNT=${STORAGE_ACCOUNT:-local}
+    - RAILS_LOG_TO_STDOUT=true
+    - RAILS_SERVE_STATIC_FILES=true
     - ELVIS_DB=${POSTGRES_DB_NAME:-elvis}
     - ELVIS_DB_USER=${POSTGRES_DB_USER:-postgres}
     - ELVIS_DB_PASS=${POSTGRES_DB_PASS:-12345678}

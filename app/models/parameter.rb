@@ -22,15 +22,23 @@ class Parameter < ApplicationRecord
       value.to_i
     when "boolean", "bool"
       value == "true"
+    when "duration"
+      begin
+        value.to_i.send(value.split(".").last || "minutes")
+      rescue StandardError
+        nil
+      end
     else
       value
     end
   end
 
   def self.get_value(label)
-    p = Parameter.find_by(label: label)
-    return nil unless p
+    Rails.cache.fetch("parameter_#{label}", expires_in: 1.hour) do
+      p = Parameter.find_by(label: label)
+      return nil unless p
 
-    p.parse
+      p.parse
+    end
   end
 end

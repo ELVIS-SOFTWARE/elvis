@@ -276,7 +276,11 @@ class ActivitiesApplicationsController < ApplicationController
     # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
     # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
 
-    @all_activity_refs = ActivityRef.all.includes(:activity_ref_kind).as_json(
+    if MaxActivityRefPriceForSeason.all.empty?
+      MaxPricesCalculatorJob.perform_now(nil)
+    end
+
+    @all_activity_refs = ActivityRef.all.includes(:activity_ref_kind, :max_prices).as_json(
       methods: [:display_price, :display_name, :kind, :display_prices_by_season],
       include: {
         activity_ref_kind: {},
@@ -329,7 +333,7 @@ class ActivitiesApplicationsController < ApplicationController
     show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
     @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
 
-    @packs = Rails.cache.fetch("activity_refs_packs:season_#{Season.current.id}", expires_in: 1.hour) do
+    @packs = Rails.cache.fetch("activity_refs_packs:season_#{Season.current.id}", expires_in: 5.minutes) do
       ActivityRefPricing
         .joins(:pricing_category)
         .for_season_id(Season.current.id)

@@ -6,15 +6,15 @@ class ActivityRefListener < BaseListener
     event_ids ||= []
 
     event_ids << EventHandler.activity_ref_pricing.create.subscribe(true) do |sender:, args:|
-      ActivityRef.erase_all_display_price_cache
+      MaxPricesCalculatorJob.perform_later(nil)
     end
 
     event_ids << EventHandler.activity_ref_pricing.destroy.subscribe(true) do |sender:, args:|
-      ActivityRef.erase_all_display_price_cache
+      MaxPricesCalculatorJob.perform_later(nil)
     end
 
     event_ids << EventHandler.activity_ref_pricing.update.subscribe(true) do |sender:, args:|
-      ActivityRef.erase_all_display_price_cache
+      MaxPricesCalculatorJob.perform_later(nil)
     end
   end
 end

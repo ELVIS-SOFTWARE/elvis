@@ -150,10 +150,6 @@ Rails.application.configure do
     config.secret_key = ENV["SECRET_KEY"]
   end
 
-  config.after_initialize do
-
-  end
-
   # redis_conn = proc {
   #   Redis.current = Redis.new({
   #                               url: "redis://mymaster",

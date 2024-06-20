@@ -82,6 +82,8 @@ class ActivityRef < ApplicationRecord
 
   update_index("activities") { self }
 
+  has_many :max_prices, as: :target, dependent: :destroy, class_name: "MaxActivityRefPriceForSeason"
+
   def run_chewy_callbacks
     base_chewy_callbacks
   end
@@ -137,23 +139,10 @@ class ActivityRef < ApplicationRecord
     end
   end
 
-  def self.erase_all_display_price_cache
-    Rails.cache.delete_matched("activity_ref_kind_id:*:price")
-    Rails.cache.delete_matched("activity_ref_id:*:price")
-  end
-
   def display_price(season = Season.current_apps_season || Season.current)
-    cached_price_name = if substitutable
-                          "activity_ref_kind_id:#{activity_ref_kind_id}:#{season.id}:price"
-                        else
-                          "activity_ref_id:#{id}:#{season.id}:price"
-                        end
-
-    unless Rails.cache.exist?(cached_price_name)
-      ActivityRefs::MaxPricesCalculator.new.call
+    Rails.cache.fetch("activity_ref_#{id}_price_#{season.id}", expires_in: Parameter.get_value("app.cache.max_price.duration") || 5.minutes) do
+      substitutable ? activity_ref_kind.max_prices.find_by(season_id: season.id)&.price : max_prices.find_by(season_id: season.id)&.price
     end
-
-    Rails.cache.read(cached_price_name)
   end
 
   def display_prices_by_season

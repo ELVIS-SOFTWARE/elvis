@@ -24,3 +24,13 @@ if ENV["USE_SIDEKIQ"] == "true" && !sidekiq_redis_url.nil?
     end
   end
 end
+
+Rails.application.config.after_initialize do
+  if ActiveRecord::Base.connected? && (Rails.env.development? || (Rails.env.kubernetes? && ENV["kube_env"] == "start"))
+    begin
+      MaxPricesCalculatorJob.perform_later(nil)
+    rescue StandardError
+      # Ignored
+    end
+  end
+end

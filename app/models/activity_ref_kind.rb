@@ -22,6 +22,8 @@ class ActivityRefKind < ApplicationRecord
 
   validate :verify_default_activity_ref_is_for_same_activity_ref_kind
 
+  has_many :max_prices, as: :target, dependent: :destroy, class_name: "MaxActivityRefPriceForSeason"
+
   def self.display_class_name(singular = true)
     singular ? "famille d'activité" : "familles d'activités"
   end
