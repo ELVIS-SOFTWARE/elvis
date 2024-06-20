@@ -315,7 +315,7 @@ class ActivitiesApplicationsController < ApplicationController
         ar["substitutable"] ? ar["activity_ref_kind_id"] : ar["id"],
         ar["substitutable"] ? "ActivityRefKind" : "ActivityRef",
         @season["id"]
-      )
+      ) || 0
 
       ar["display_prices_by_season"] = @seasons.each_with_object({}) do |season, hash|
         hash[season["id"]] = get_max_price_for_target_id(
