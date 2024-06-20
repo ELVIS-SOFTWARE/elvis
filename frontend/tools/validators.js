@@ -70,7 +70,7 @@ export const ordCheck = (b, ord, formatB = x => x) => a => {
 }
 
 export const isPostalCode = value =>
-    /([0-9]{5})/.test(value) ? undefined : "err_postal_code";
+    /([0-9]{4,5})/.test(value) ? undefined : "err_postal_code";
 
 export const isPhoneNumber = value =>
     /([0-9]{10})/.test(value.replace(/\s/gi, ""))
