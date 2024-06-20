@@ -289,7 +289,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     activity_refs = @all_activity_refs.filter { |ar| ar["is_lesson"] || ar["is_visible_to_admin"] }
 
-    activity_refs = activity_refs.filter { |ar| ar["is_visible_to_admin"] == false } unless current_user&.is_admin
+    activity_refs = activity_refs.filter { |ar| (ar["is_visible_to_admin"] || false) == false } unless current_user&.is_admin
 
     all_max_prices = Rails.cache.fetch("wizard:activity_ref_max_prices", expires_in: 5.minutes) do
       MaxActivityRefPriceForSeason
@@ -340,6 +340,7 @@ class ActivitiesApplicationsController < ApplicationController
                               .values
 
     @activity_refs = display_activity_refs
+                       .append(activity_refs.select { |ar| ar["activity_type"] != "child" && ar["activity_type"] != "cham" && !ar["substitutable"] })
                        .flatten
                        .sort_by { |a| a["kind"] }
 
