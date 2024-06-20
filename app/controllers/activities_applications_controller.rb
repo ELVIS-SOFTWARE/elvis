@@ -281,7 +281,7 @@ class ActivitiesApplicationsController < ApplicationController
     end
 
     @all_activity_refs = ActivityRef.all.includes(:activity_ref_kind, :max_prices).as_json(
-      methods: [:display_price, :display_name, :kind, :display_prices_by_season],
+      methods: [:display_name, :kind],
       include: {
         activity_ref_kind: {},
       }
@@ -290,6 +290,42 @@ class ActivitiesApplicationsController < ApplicationController
     activity_refs = @all_activity_refs.filter { |ar| ar["is_lesson"] || ar["is_visible_to_admin"] }
 
     activity_refs = activity_refs.filter { |ar| ar["is_visible_to_admin"] == false } unless current_user&.is_admin
+
+    all_max_prices = Rails.cache.fetch("wizard:activity_ref_max_prices", expires_in: 5.minutes) do
+      MaxActivityRefPriceForSeason
+        .where(target_id: activity_refs.map{|a| a["id"]}.append(activity_refs.map{|a| a["activity_ref_kind_id"]}).uniq)
+        .as_json
+    end
+
+    # do not add display_prices_by_season and display_price to @all_activity_refs.as_json
+    # because this can be a huge amount of data && sql queries
+    # So add them to activity_refs in a bulk operation
+    def get_max_price_for_target_id(all_max_prices, target_id, target_type, season_id)
+      all_max_prices
+        .find { |mp|
+          mp["target_type"] == target_type &&
+            mp["target_id"] == target_id &&
+            mp["season_id"] == season_id
+        }&.dig("price")
+    end
+
+    activity_refs.each do |ar|
+      ar["display_price"] = get_max_price_for_target_id(
+        all_max_prices,
+        ar["substitutable"] ? ar["activity_ref_kind_id"] : ar["id"],
+        ar["substitutable"] ? "ActivityRefKind" : "ActivityRef",
+        @season["id"]
+      )
+
+      ar["display_prices_by_season"] = @seasons.each_with_object({}) do |season, hash|
+        hash[season["id"]] = get_max_price_for_target_id(
+          all_max_prices,
+          ar["substitutable"] ? ar["activity_ref_kind_id"] : ar["id"],
+          ar["substitutable"] ? "ActivityRefKind" : "ActivityRef",
+          season["id"]
+        )
+      end
+    end
 
     # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
