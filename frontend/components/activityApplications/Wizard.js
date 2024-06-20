@@ -658,6 +658,20 @@ class Wizard extends React.Component {
         return moment().isBetween(moment(dateToUse), moment(season.closing_date_for_applications));
     }
 
+    onChangeIdentificationNumber(user_id, identification_number) {
+        this.setState({
+            infos: {
+                ...this.state.infos,
+                identification_number: user_id === this.state.infos.id ? identification_number : this.state.infos.identification_number,
+                family_links_with_user: this.state.infos.family_links_with_user.map(user => {
+                    if (user.id === user_id) {
+                        user.identification_number = identification_number;
+                    }
+                    return user;
+                })
+            }
+        })
+    }
 
     render() {
 
@@ -725,7 +739,7 @@ class Wizard extends React.Component {
                         shouldCheckGdpr={!this.props.currentUserIsAdmin}
                         hidePayers={true}
                         initialValues={userFormInitialValues}
-                        displayIdentificationNumber={this.props.countryCode==="BE"}
+                        displayIdentificationNumber={false}
                         onSubmit={values => this.handleUserFormSubmit(values)}
                         documentUrl={this.props.documentUrl}
                         consent_docs={this.props.consent_docs}
@@ -880,6 +894,8 @@ class Wizard extends React.Component {
                         onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                         onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
                         onChangePayers={this.handleChangePayers.bind(this)}
+                        displayIdentificationNumber={this.props.countryCode==="BE"}
+                        onChangeIdentificationNumber={this.onChangeIdentificationNumber.bind(this)}
                     />
                 )
             },

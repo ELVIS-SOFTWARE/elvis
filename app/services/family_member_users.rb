@@ -53,6 +53,7 @@ module FamilyMemberUsers
       fmu.first_name = member[:first_name]
       fmu.last_name = member[:last_name]
       fmu.birthday = member[:birthday]
+      fmu.identification_number = member[:identification_number]
 
       link = member[:link]
 

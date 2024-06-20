@@ -254,7 +254,7 @@ const ActivityChoice = ({
     }
 
     const selectedActivitiesArray = selectedActivities.map(activityId => {
-        const selectedActivity = _.find(activityRefs, ar => ar.id == parseInt(activityId, 10));
+        const selectedActivity = _.find(allActivityRefs, ar => ar.id == parseInt(activityId, 10));
         return {
             id: selectedActivity.id,
             key: null,

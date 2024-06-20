@@ -2,6 +2,9 @@ import React, { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import Checkbox from "./common/Checkbox";
+import { composeValidators, isValidNN, required } from "../tools/validators";
+import Input from "./common/Input";
+import { Field } from "react-final-form";
 
 function PayersListEditor({
                               user,
@@ -9,6 +12,8 @@ function PayersListEditor({
                               family,
                               onAddPayer,
                               onRemovePayer,
+                              displayIdentificationNumber,
+                              onChangeIdentificationNumber,
                           }) {
 
     const family_with_user = [...family, user];
@@ -18,22 +23,42 @@ function PayersListEditor({
             //debugger
                 const isSelected = selectedPayers.includes(user.id);
 
-                return <Checkbox
-                    key={user.id}
-                    id={user.id}
-                    name="payer_id"
-                    label={`${user.first_name} ${user.last_name}`}
-                    input={{
-                        checked: isSelected,
-                        onChange: e => {
-                            if (isSelected) {
-                                onRemovePayer(user.id);
-                            } else {
-                                onAddPayer(user.id);
-                            }
-                        },
-                    }}
-                />;
+                return <div className="row" key={user.id}>
+                    <div className="col-md-2 col-sm-4">
+                        <Checkbox
+                            id={user.id}
+                            name="payer_id"
+                            label={`${user.first_name} ${user.last_name}`}
+                            input={{
+                                checked: isSelected,
+                                onChange: e => {
+                                    if (isSelected) {
+                                        onRemovePayer(user.id);
+                                    } else {
+                                        onAddPayer(user.id);
+                                    }
+                                },
+                            }}
+                        />
+                    </div>
+
+                        {displayIdentificationNumber && isSelected && <div className="col-sm-8 col-md-10">
+                            <label className="small" style={{ color: "#003E5C" }}>Numéro national d'identification</label>
+                            <Input
+                                name={`identification_number_${user.id}`}
+                                type="text"
+                                className="form-control"
+                                placeholder="85 07 30 033 28"
+                                mask="99 99 99 999 99"
+                                htmlOptions={{
+                                    value: user.identification_number,
+                                    onChange: e => onChangeIdentificationNumber(user.id, e.target.value)
+                                }}
+                                meta={{ error: null, touched: false }}
+                            />
+                        </div>}
+
+                </div>
             },
         )}
     </div>;
@@ -51,6 +76,8 @@ export default function PayerPaymentTerms({
                                               onChangeDayForCollection,
                                               onChangePaymentMethod,
                                               onChangePayers,
+                                              displayIdentificationNumber,
+                                              onChangeIdentificationNumber
                                           }) {
 
     const [scheduleOptionChanged, setScheduleOptionChanged] = useState(paymentTerms.day_for_collection === undefined);
@@ -199,6 +226,8 @@ export default function PayerPaymentTerms({
                         family={family}
                         onAddPayer={handleAddPayer}
                         onRemovePayer={handleRemovePayer}
+                        displayIdentificationNumber={displayIdentificationNumber}
+                        onChangeIdentificationNumber={onChangeIdentificationNumber}
                     />
                 </div>
 

@@ -5,6 +5,7 @@ import PayerPaymentTermsInfo from "./PayerPaymentTermsInfo";
 import { Editor, EditorState, convertFromRaw, ContentState } from "draft-js";
 import { toast } from "react-toastify";
 import { MESSAGES } from "../tools/constants";
+import WysiwygViewer from "./utils/WysiwygViewer";
 
 class WrappedPayerPaymentTerms extends React.Component {
     constructor(props) {
@@ -86,32 +87,14 @@ class WrappedPayerPaymentTerms extends React.Component {
 
     render() {
 
-        let editorState = EditorState.createEmpty();
-        let savedContentRaw = null;
-        let savedContentState = null;
-        if (this.props.paymentStepDisplayText != null) {
-            try {
-                savedContentRaw = JSON.parse(this.props.paymentStepDisplayText);
-                savedContentState = convertFromRaw(savedContentRaw);
-            } catch (e) {
-                savedContentState = ContentState.createFromText(this.props.paymentStepDisplayText);
-            }
-            editorState = EditorState.createWithContent(savedContentState);
-        }
-
         return <div className="padding-page application-form">
 
             <div className="row">
-                {this.props.paymentStepDisplayText &&
-                    <div className="alert alert-info d-inline-flex align-items-center p-1 pr-3"
-                         style={{ border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF" }}>
-                        <div className="col-1 p-0 text-center">
-                            <i className="fas fa-info-circle"></i>
-                        </div>
-                        <div className="col p-0">
-                            {<Editor editorState={editorState} readOnly={true} />}
-                        </div>
-                    </div>}
+                {this.props.paymentStepDisplayText && <WysiwygViewer
+                    className="alert alert-info w-100 pre-wrap"
+                    style={{ border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF" }}
+                    wysiwygStrData={this.props.paymentStepDisplayText}
+                />}
             </div>
 
 
@@ -132,6 +115,8 @@ class WrappedPayerPaymentTerms extends React.Component {
                     onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                     onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
                     onChangePayers={this.handleChangePayers.bind(this)}
+                    displayIdentificationNumber={this.props.displayIdentificationNumber}
+                    onChangeIdentificationNumber={this.props.onChangeIdentificationNumber}
                 />
             )
             }
