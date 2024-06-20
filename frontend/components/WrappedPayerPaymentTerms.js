@@ -6,6 +6,7 @@ import { Editor, EditorState, convertFromRaw, ContentState } from "draft-js";
 import { toast } from "react-toastify";
 import { MESSAGES } from "../tools/constants";
 import WysiwygViewer from "./utils/WysiwygViewer";
+import { isEmpty } from "../tools/validators";
 
 class WrappedPayerPaymentTerms extends React.Component {
     constructor(props) {
@@ -21,6 +22,18 @@ class WrappedPayerPaymentTerms extends React.Component {
 
 
     isValidated() {
+
+        if(this.props.displayIdentificationNumber)
+        {
+            for (const familyMember of [...(this.props.family || []), this.props.user])
+            {
+                if(this.props.initialSelectedPayers.includes(familyMember.id) && isEmpty((familyMember.identification_number || "").replaceAll(/[_ ]/g, "")))
+                {
+                    return false;
+                }
+            }
+        }
+
         if (this.props.informationalStepOnly)
             return true;
 

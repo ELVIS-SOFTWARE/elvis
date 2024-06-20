@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import Checkbox from "./common/Checkbox";
-import { composeValidators, isValidNN, required } from "../tools/validators";
+import { composeValidators, isEmpty, isValidNN, required } from "../tools/validators";
 import Input from "./common/Input";
 import { Field } from "react-final-form";
 
@@ -54,7 +54,7 @@ function PayersListEditor({
                                     value: user.identification_number,
                                     onChange: e => onChangeIdentificationNumber(user.id, e.target.value)
                                 }}
-                                meta={{ error: null, touched: false }}
+                                meta={{ error: isSelected && isEmpty((user.identification_number || "").replaceAll(/[_ ]/g, "")) ? "err_required" : null, touched: true }}
                             />
                         </div>}
 
