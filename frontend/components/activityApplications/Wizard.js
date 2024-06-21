@@ -739,7 +739,7 @@ class Wizard extends React.Component {
                         shouldCheckGdpr={!this.props.currentUserIsAdmin}
                         hidePayers={true}
                         initialValues={userFormInitialValues}
-                        displayIdentificationNumber={false}
+                        displayIdentificationNumber={this.props.countryCode==="BE"}
                         onSubmit={values => this.handleUserFormSubmit(values)}
                         documentUrl={this.props.documentUrl}
                         consent_docs={this.props.consent_docs}
