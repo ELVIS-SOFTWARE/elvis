@@ -27,7 +27,7 @@ const GeneralInfos = ({
 
 
             {displayGender && (
-                <div className="col mt-3">
+                <div className="col-sm mt-3">
                     <Field name="sex" validate={!ignoreValidate && required} required>
                         {({ input, meta }) => (
                             <div>
@@ -56,7 +56,7 @@ const GeneralInfos = ({
                 </div>
             )}
 
-            <div className="col mt-4">
+            <div className="col-sm mt-4">
                 <div className="col-xs-12 col-md-6 p-0">
                     <label className="small" style={{color: "#003E5C"}}>Nom</label><br/>
                     <Field
@@ -82,7 +82,7 @@ const GeneralInfos = ({
 
 
             {displayBirthday && (
-                <div className="col-md-6 pr-0">
+                <div className="col-xs-12 col-md-6 pr-0">
                     <label className="small" style={{color: "#003E5C"}}>Date de naissance</label><br/>
                     <Field
                         name="birthday"

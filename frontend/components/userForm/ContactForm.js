@@ -176,7 +176,7 @@ class ContactForm extends React.PureComponent {
             const hasError = meta.error && meta.touched;
 
             return (
-                <div className={`col-sm-12 form-group ${hasError ? "has-error" : ""}`}>
+                <div className={`col-xs-12 form-group ${hasError ? "has-error" : ""}`}>
                     <h3>
                         Lien familial
                         {required && <span className="text-danger">{" *"}</span>}

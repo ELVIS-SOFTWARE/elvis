@@ -1021,7 +1021,7 @@ class Wizard extends React.Component {
                         } pour la {this.state.season.label}
                     </h3>
                 </div>
-                <div className="step-progress">
+                <div className="step-progress" style={{marginBottom: "75px"}}>
                     <StepZilla
                         steps={steps}
                         showSteps={true}
