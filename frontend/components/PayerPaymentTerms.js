@@ -17,14 +17,14 @@ function PayersListEditor({
                           }) {
 
     const family_with_user = [...family, user];
-    return <div className="d-md-inline-flex">
+    return <Fragment>
         {family_with_user.map(user => {
             //console.log("selectedPayers", selectedPayers, "type", typeof selectedPayers);
             //debugger
                 const isSelected = selectedPayers.includes(user.id);
 
                 return <div className="row" key={user.id}>
-                    <div className="col-md-2 col-sm-4">
+                    <div className="col-xs-12 col-md-auto">
                         <Checkbox
                             id={user.id}
                             name="payer_id"
@@ -42,7 +42,7 @@ function PayersListEditor({
                         />
                     </div>
 
-                        {displayIdentificationNumber && isSelected && <div className="col-sm-8 col-md-10">
+                        {displayIdentificationNumber && isSelected && <div className="col-xs-12 col-md">
                             <label className="small" style={{ color: "#003E5C" }}>Numéro national d'identification</label>
                             <Input
                                 name={`identification_number_${user.id}`}
@@ -61,7 +61,7 @@ function PayersListEditor({
                 </div>
             },
         )}
-    </div>;
+    </Fragment>;
 }
 
 
