@@ -2,7 +2,7 @@
   @minimum_password_length = User.password_length.min
 %>
 
-<div class="mb-5">
+<div>
   <% if !resource.errors[:uniqueness].empty? %>
     <div class="alert alert-danger">
       <% resource.errors[:uniqueness].each do |msg| %>
