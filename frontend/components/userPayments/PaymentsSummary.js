@@ -152,7 +152,6 @@ class PaymentsSummary extends React.Component {
                             return <p>{(this.props.adhesionPrices.find(a => props.original.adhesionPriceId) || {}).label}</p>;
                         }
 
-                        // Si il n'y a qu'un seul tarif d'adhésion, l'affecter par défaut
                         let defaultAdhesionPriceId = this.props.adhesionPrices.length === 1 ? this.props.adhesionPrices[0].id : 0;
 
                         return <Fragment>
