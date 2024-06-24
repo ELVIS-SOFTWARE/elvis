@@ -1,0 +1,19 @@
+name: elvis_dev
+
+services:
+  elvis_dev:
+    image: elvis:dev_run
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        - GITHUB_TOKEN=${GITHUB_TOKEN:?GITHUB_TOKEN is required}
+        - PLUGINS_LIST_DOWNLOAD_URL=${PLUGINS_LIST_DOWNLOAD_URL}
+    container_name: elvis_dev_run
+    volumes:
+      - .:/Elvis
+    ports:
+      - "8080:5000"
+    command: ${COMMAND}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
