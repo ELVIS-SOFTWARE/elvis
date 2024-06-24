@@ -2,7 +2,7 @@
   @minimum_password_length = User.password_length.min
 %>
 
-<div>
+<div class="mb-5">
   <% if !resource.errors[:uniqueness].empty? %>
     <div class="alert alert-danger">
       <% resource.errors[:uniqueness].each do |msg| %>
@@ -66,31 +66,25 @@
 </div>
 
 <script>
-    document.getElementById('toggle-password').addEventListener('click', function (e) {
-        var passwordInput = document.getElementById('password');
-        var icon = this.firstChild
+    function togglePasswordVisibility(passwordInputId, buttonId) {
+        var passwordInput = document.getElementById(passwordInputId);
+        var icon = document.getElementById(buttonId).firstChild;
         if (passwordInput.type === "password") {
             passwordInput.type = "text";
             icon.classList.remove('fas', 'fa-eye');
             icon.classList.add('fas', 'fa-eye-slash');
         } else {
             passwordInput.type = "password";
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
+            icon.classList.remove('fas', 'fa-eye-slash');
+            icon.classList.add('fas', 'fa-eye');
         }
+    }
+
+    document.getElementById('toggle-password').addEventListener('click', function () {
+        togglePasswordVisibility('password', 'toggle-password');
     });
 
-    document.getElementById('toggle-password-confirmation').addEventListener('click', function (e) {
-        var passwordConfirmationInput = document.getElementById('password-confirmation');
-        var icon = this.firstChild
-        if (passwordConfirmationInput.type === "password") {
-            passwordConfirmationInput.type = "text";
-            icon.classList.remove('fas', 'fa-eye');
-            icon.classList.add('fas', 'fa-eye-slash');
-        } else {
-            passwordConfirmationInput.type = "password";
-            icon.classList.remove('fas', 'fa-eye');
-            icon.classList.add('fas', 'fa-eye-slash');
-        }
+    document.getElementById('toggle-password-confirmation').addEventListener('click', function () {
+        togglePasswordVisibility('password-confirmation', 'toggle-password-confirmation');
     });
 </script>
