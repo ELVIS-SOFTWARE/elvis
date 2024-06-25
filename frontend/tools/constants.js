@@ -132,5 +132,5 @@ export const MESSAGES = {
     err_must_respond: "Vous devez répondre pour continuer.",
     err_must_select_price: "Sélectionnez un tarif ou supprimez la ligne.",
     err_cannot_duplicate_price: "Impossible d'ajouter deux fois le même produit avec le même tarif.",
-    err_must_select_payment_terms: "veuillez sélectionnez les modalités de paiement.",
+    err_must_select_payment_terms: "veuillez sélectionner les modalités de paiement.",
 };
