@@ -1,10 +1,11 @@
 import React from 'react';
 
 export default function UserAvatar({ user, size }) {
-    const userInitials = user.full_name.split(' ').map(name => name[0]).join('');
+    const userFullName = user.full_name ? user.full_name : `${user.first_name} ${user.last_name}`
+    const userInitials = userFullName.split(' ').map(name => name[0]).join('');
     return (
-        user.avatar ? (
-                <img src={user.avatar} alt="avatar" style={{
+        user.avatar_url ? (
+                <img src={user.avatar_url} alt="avatar" style={{
                     borderRadius: "50%",
                     width: `${size}px`,
                     height: `${size}px`,
@@ -23,7 +24,7 @@ export default function UserAvatar({ user, size }) {
                 alignItems: "center",
                 color: "#FF6066",
                 fontWeight: "bold",
-                fontSize: "20px",
+                fontSize: "26px",
                 objectFit: "cover"
             }}>
                 {userInitials}
