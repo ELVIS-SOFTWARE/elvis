@@ -10,9 +10,12 @@ class ApplicationMailer < LayoutMailer
   end
 
   def notify_new_application(params)
-    args = params.first
 
-    activity_application_id = args.is_a?(Integer) ? args : args.first
+    activity_application_id = if params.is_a?(Integer)
+                                params
+                              else
+                                params.first.is_a?(Integer) ? params.first : params.first.first
+                              end
 
     application = ActivityApplication.find(activity_application_id)
 
