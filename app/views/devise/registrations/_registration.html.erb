@@ -53,11 +53,8 @@
       </div>
     <% end %>
 
-
-    <% resource.errors[:base].each do |message| %>
-      <div class="alert alert-danger">
-        <li><%= message %></li>
-      </div>
+    <% resource.errors[:base].each do |msg| %>
+        <li class="alert alert-danger"><%= msg %></li>
     <% end %>
 
     <%= f.submit "Inscription", class: "btn btn-primary block full-width m-b" %>
