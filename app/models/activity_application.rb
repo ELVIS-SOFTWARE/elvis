@@ -59,7 +59,6 @@ class ActivityApplication < ApplicationRecord
 
   scope :for_activity_id, ->(activity_id) { joins(:desired_activities).where(desired_activities: { activity_id: activity_id }) }
 
-
   def self.display_class_name(singular = true)
     singular ? "demande d'inscription" : "demandes d'inscription"
   end
@@ -77,10 +76,15 @@ class ActivityApplication < ApplicationRecord
 
     AdditionalStudent.create(desired_activity: desired_activity, user: additional_student) unless additional_student.nil?
 
-    # Creating user level for this activity if it does not exists
-    if self.user.levels.find_by(activity_ref_id: activity_ref.id).nil?
-      user.levels << Level.new(activity_ref_id: activity_ref.id, season_id: self.season_id, evaluation_level_ref_id: EvaluationLevelRef.first&.id)
+    # If no NewStudentLevelQuestionnaire exists for the specified activity, user, and season,
+    # check if the user lacks a level for the activity. If so, create a new level for the user.
+    unless NewStudentLevelQuestionnaire.exists?(activity_ref_id: activity_ref.id, user_id: self.user_id, season_id: self.season_id)
+      if self.user.levels.find_by(activity_ref_id: activity_ref.id).nil?
+        user.levels << Level.new(activity_ref_id: activity_ref.id, season_id: self.season_id, evaluation_level_ref_id: EvaluationLevelRef.first&.id)
+      end
     end
+
+
   end
 
   def add_activities(activity_ref_ids, additional_students, family)
@@ -117,10 +121,10 @@ class ActivityApplication < ApplicationRecord
 
     else
       query = self
-        .user
-        .planning
-        .time_intervals
-        .where(start: self.season.start..self.season.end)
+                .user
+                .planning
+                .time_intervals
+                .where(start: self.season.start..self.season.end)
 
       (include_validated ? query : query.where(is_validated: false)).to_a
     end
