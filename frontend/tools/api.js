@@ -91,7 +91,7 @@ const request = method => (
                 swal({
                     type: 'error',
                     title: 'Oops... une erreur est survenue',
-                    text: error.message ? `${error.message} (${error.code})` : `Veuillez contactez l'administrateur du site pour plus d'informations et lui donner le cod suivant : ${error.code}`
+                    text: error.message ? `${error.message} (${error.code})` : `Veuillez contacter l'administrateur du site pour plus d'informations et lui donner le cod suivant : ${error.code}`
                 });
             }
 

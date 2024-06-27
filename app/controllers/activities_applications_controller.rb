@@ -867,7 +867,7 @@ class ActivitiesApplicationsController < ApplicationController
       end
 
       render status: 500, json: {
-        errors: ["Une erreur est survenue lors de la création de votre demande d'inscription, veuillez-contactez l'administration."],
+        errors: ["Une erreur est survenue lors de la création de votre demande d'inscription, veuillez-contacter l'administration."],
       }
     end
   end

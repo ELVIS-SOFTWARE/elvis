@@ -1,0 +1,54 @@
+FROM ruby:3.3.2-slim AS build
+
+ENV RAILS_ROOT /Elvis
+
+ARG GITHUB_TOKEN
+ENV BUNDLE_GITHUB__COM $GITHUB_TOKEN
+RUN export BUNDLE_GITHUB__COM=$BUNDLE_GITHUB__COM
+
+# Creates the directory and all the parents (if they don't exist)
+RUN mkdir -p $RAILS_ROOT
+
+# This is given by the Ruby Image.
+# This will be the de-facto directory that
+# all the contents are going to be stored.
+WORKDIR $RAILS_ROOT
+
+RUN apt-get update && apt-get install -y \
+  curl \
+  python3 \
+  build-essential \
+  libpq-dev postgresql-client \
+  git \
+  shared-mime-info
+
+RUN curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
+RUN bash /tmp/nodesource_setup.sh
+
+RUN apt-get install -y nodejs
+
+RUN npm install -g yarn
+
+RUN apt-get install -y --no-install-recommends libjemalloc2
+
+#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+
+RUN gem install bundler foreman
+
+RUN rm -rf vendor/cache
+RUN bundle config set force_ruby_platform true
+
+COPY Gemfile /Elvis/
+COPY lib /Elvis/lib
+
+ARG PLUGINS_LIST_DOWNLOAD_URL
+ENV PLUGINS_LIST_DOWNLOAD_URL=$PLUGINS_LIST_DOWNLOAD_URL
+RUN export PLUGINS_LIST_DOWNLOAD_URL=$PLUGINS_LIST_DOWNLOAD_URL
+
+RUN bundle install
+
+EXPOSE 5000
+
+VOLUME $RAILS_ROOT
+
+ENTRYPOINT ["/Elvis/entrypoints/dev.sh"]

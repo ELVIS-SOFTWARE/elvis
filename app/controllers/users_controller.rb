@@ -1472,7 +1472,7 @@ end
   def resend_confirmation
     ids = params[:ids]
 
-    ids = User.all.where(encrypted_password: nil).pluck(:id) if ids.blank?
+    ids = User.all.where(encrypted_password: nil, attached_to_id: nil).pluck(:id) if ids.blank?
 
     user_sended = []
     ids.each do |id|

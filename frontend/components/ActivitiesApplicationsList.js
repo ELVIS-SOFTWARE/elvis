@@ -1,9 +1,5 @@
 import React from "react";
 import _ from "lodash";
-
-const moment = require("moment");
-require("moment/locale/fr");
-
 import ReactTable from "react-table";
 import Select from "react-select";
 import Loader from "react-loader-spinner";
@@ -23,6 +19,9 @@ import {
     ACTIVITY_PROPOSED_ID,
     PROPOSAL_ACCEPTED_ID,
 } from "./utils/ActivityApplicationsStatuses";
+
+const moment = require("moment");
+require("moment/locale/fr");
 
 const FILTER_STORAGE_KEY = "activities_application_list_filters";
 const PREFERENCES_STORAGE_KEY = "activities_applications_list_preferences";
@@ -396,15 +395,11 @@ class ActivitiesApplicationsList extends React.Component {
 
     statusFilterContainsTerminalStatus()
     {
-        const statusFilter = ([...this.state.filter.filtered].find(f => f.id === "activity_application_status_id") || {}).value || [];
+        const statusFilter = [...this.state.data]
+            .filter(f => (this.state.bulkTargets || []).includes(f.id))
+            .map(f => f.activity_application_status_id);
 
-        console.log(statusFilter)
-
-        const value = statusFilter.some(s => [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s));
-
-        console.log(value)
-
-        return value;
+        return statusFilter.some(s => [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s));
     }
 
     render() {

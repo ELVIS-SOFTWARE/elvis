@@ -19,7 +19,13 @@ class SessionsController < Devise::SessionsController
       redirect_to after_sign_in_path_for(matching_user.first) and return
     end
 
-    super
+    u = User.new
+    u.login = u.email = params[:user][:login]
+    u.errors.add(:login, "ou mot de passe incorrect.")
+
+    self.resource = u
+
+    respond_with resource, location: new_user_session_path
   end
 
   def create_with_token

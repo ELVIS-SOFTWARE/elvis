@@ -41,10 +41,12 @@
       </div>
     <% end %>
 
+    <% resource.errors[:base].each do |msg| %>
+        <li class="alert alert-danger"><%= msg %></li>
+    <% end %>
+
     <%= f.submit "Inscription", class: "btn btn-primary block full-width m-b" %>
 
     <%= render "devise/shared/links" %>
   <% end %>
-  </div>
-
-
+</div>
