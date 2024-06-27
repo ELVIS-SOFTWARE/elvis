@@ -48,8 +48,7 @@
                                     </div>
                                 <% end %>
                                 <div class="form-group">
-                                    <%= f.label "Mot de passe" %><br />
-                                    <%= f.password_field :password, required: true, autocomplete: "off", class: "form-control" %>
+                                  <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe' }) %>
                                 </div>
                             <%= f.submit "Se connecter", class: "form-control" %>
                         <% end %>
