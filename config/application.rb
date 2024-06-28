@@ -13,6 +13,8 @@ require "action_cable/engine"
 require "sprockets/railtie"
 require 'active_support/core_ext'
 require_relative "../lib/elvis/version"
+require 'combine_pdf'
+
 # require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems

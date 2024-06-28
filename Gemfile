@@ -114,6 +114,8 @@ gem "liquid-rails", git:"https://github.com/Countable-us/liquid-rails", branch: 
 gem "panoramic", github: "abstracts33d/panoramic"
 gem "whenever"
 
+gem 'combine_pdf', '~> 1.0'
+
 PluginGemUtils.get_plugins_to_install(include_libraries: true).each do |plugin|
 
   if plugin.is_from_tag?
