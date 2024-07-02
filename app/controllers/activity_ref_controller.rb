@@ -88,7 +88,7 @@ class ActivityRefController < ApplicationController
 
     @activity_ref = ActivityRef.find(params[:id])
 
-    @activity_kinds = ActivityRefKind.all.map { |ar| [ar.name, ar.id] }
+    @activity_kinds = ActivityRefKind.all.order(:name).map { |ar| [ar.name, ar.id] }
     @seasons = Season.order(:start)
     @activity_refs = ActivityRef.all.group_by(&:activity_ref_kind).transform_values { |arr| arr.map { |a| { label: a.label, id: a.id } } }.to_a
     @next_cycles = @activity_ref.next_cycles.pluck(:to_activity_ref_id)
