@@ -152,12 +152,10 @@ class PaymentsSummary extends React.Component {
                             return <p>{(this.props.adhesionPrices.find(a => props.original.adhesionPriceId) || {}).label}</p>;
                         }
 
-                        let defaultAdhesionPriceId = this.props.adhesionPrices.length === 1 ? this.props.adhesionPrices[0].id : 0;
-
                         return <Fragment>
                             <select
                                 className="form-control"
-                                value={props.original.adhesionPriceId || defaultAdhesionPriceId}
+                                value={props.original.adhesionPriceId || 01127}
                                 onChange={e => this.props.handleChangeAdhesionPricingChoice(props.original.adhesionId, e.target.value)}
                             >
                                 <option value="0" disabled>
