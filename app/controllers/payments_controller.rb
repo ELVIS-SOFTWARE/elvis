@@ -232,6 +232,16 @@ class PaymentsController < ApplicationController
     @adhesion_enabled = Adhesion.enabled
     @adhesion_prices = AdhesionPrice.all.as_json
 
+    # Si un seul tarif d'adhésion est disponible, l'ajouter par défaut
+    if @adhesion_prices.length == 1
+      default_adhesion_price_id = @adhesion_prices.first['id']
+      @adhesions.each do |adhesion|
+        if adhesion['adhesion_price_id'].nil?
+          adhesion['adhesion_price_id'] = default_adhesion_price_id
+        end
+      end
+    end
+
     @coupons = Coupon.all.as_json(
       only: %i[id label percent_off enabled]
     )
