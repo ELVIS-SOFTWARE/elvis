@@ -55,10 +55,14 @@ class ActivityDetailsModal extends React.Component {
 
         const room_id = props.interval.activity_instance ? props.interval.activity_instance.room.id : activity ? activity.room.id : props.room_id;
 
-        const location_id = activity
-            ? _.filter(props.room_refs, room => room.id == room_id)[0]
-                .location_id
-            : props.location_id;
+        let location_id;
+        if (activity) {
+            location_id = _.filter(props.room_refs, room => room.id == room_id)[0].location_id;
+        } else if (props.locations && props.locations.length === 1) {
+            location_id = props.locations[0].id;
+        } else {
+            location_id = props.location_id;
+        }
 
         const rooms_constrained = activity
             ? _.chain(props.rooms)
@@ -1540,6 +1544,10 @@ const ActivitySelection = ({
 };
 
 const LocationSelection = ({locations, locationId, handleSelectLocation}) => {
+
+    const defaultLocation = locations.length === 1 ? locations[0].id : 0;
+
+
     return (
         <form>
             <label className="control-label" htmlFor="o">
