@@ -10,7 +10,7 @@ export default function upcomingActivityInstancesList(props) {
     let minimalDisplay = false;
     let url = `/get_upcoming_activities` + window.location.pathname;
 
-    if (!url.includes("/upcoming")){
+    if (!url.includes("/upcoming")) {
         url += "/upcoming";
         minimalDisplay = true;
     }
@@ -18,15 +18,13 @@ export default function upcomingActivityInstancesList(props) {
     const fetchData = () => {
         api.set()
             .useLoading()
-            .success(res =>
-            {
+            .success(res => {
                 let futureActivity = res.filter(activity => moment(activity.time_interval.start).isAfter(moment(), 'minute'));
                 setActivities(sortActivitiesByMonth(minimalDisplay ? futureActivity.slice(0, 4) : res));
 
                 setLoading(false);
             })
-            .error(res =>
-            {
+            .error(res => {
                 swal("Une erreur est survenue lors de la récupération des données", res.error, "error");
             })
             .get(url, {});
@@ -83,12 +81,17 @@ export default function upcomingActivityInstancesList(props) {
 
     if (Object.keys(activities).length === 0) {
         return (
-            <div className="col-md-12">
-                <div className="ibox">
-                    <div className="ibox-content text-center">
-                        <h3 className="font-bold">Vous n'avez pas de cours prévus {minimalDisplay ? "pour ce mois" : ""}</h3>
-                        <i className="fa fa-pause" aria-hidden="true"></i>
-                    </div>
+            <div className="col-md-12 mt-5 mb-5">
+                <div className="card" style={{
+                    height: "200px",
+                    background: "none",
+                    border: "none"
+                }}>
+                    <div className="text-center my-auto">
+                        <p className="font-weight-bold" style={{color: "#00334A"}}>Vous n'avez pas de cours prévus</p>
+                        <p> Pas encore inscrit ? Réaliser un demande d'inscription pour une ou plusieurs activités</p>
+                        <a href={`/inscriptions/new?user_id=${props.user_id}`}
+                           className="btn btn-primary mt-5">S'inscrire</a></div>
                 </div>
             </div>
         )
