@@ -153,7 +153,7 @@ export default function PayerPaymentTerms({
                         <div className="d-sm-inline-flex justify-content-between w-100">
                             <div className="col-md-6 p-0">
                                 <div className="form-group">
-                                    <h3 className="font-weight-bold mb-4" style={{ color: "#8AA4B1" }}>Modalités de
+                                    <h3 className="mb-4" style={{ color: "#8AA4B1" }}>Modalités de
                                         paiement</h3>
                                     <select
                                         className="form-control"
@@ -172,7 +172,7 @@ export default function PayerPaymentTerms({
                             {selectedPaymentTerms &&
                                 <div className="col-md-5 p-0">
                                     <div className="form-group">
-                                        <h3 className="font-weight-bold m-2" style={{ color: "#8AA4B1" }}>Date de
+                                        <h3 className="m-2" style={{ color: "#8AA4B1" }}>Date de
                                             règlement</h3>
                                         <ToggleButtonGroup
                                             multiSelect={false}
@@ -196,7 +196,7 @@ export default function PayerPaymentTerms({
                         }
                         <div className="row ml-1 mb-4">
                             <div className="col-md-6 p-0 pr-3">
-                                <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>Moyens de paiement</h3>
+                                <h3 className="" style={{ color: "#8AA4B1" }}>Moyens de paiement</h3>
                                 <select
                                     className="form-control"
                                     name="payment_method_id"
@@ -219,7 +219,7 @@ export default function PayerPaymentTerms({
             }
             <div className="row ml-1">
                 <div className="form-group m-t-md">
-                    <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>Payeur(s)</h3>
+                    <h3 style={{ color: "#8AA4B1" }}>Payeur(s)</h3>
                     <PayersListEditor
                         user={user}
                         selectedPayers={selectedPayers}

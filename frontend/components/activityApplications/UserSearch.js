@@ -180,12 +180,12 @@ class UserSearch extends React.PureComponent {
         // }
 
         return (
-            <div className="ibox">
-                <div className="ibox-title">
-                    <h3>{"Chercher un utilisateur"}</h3>
+            <div className="application-form" style={{margin: 0}}>
+                <div>
+                    <h3 style={{color: "#8AA4B1"}}>{"Chercher un utilisateur"}</h3>
                 </div>
 
-                <div className="ibox-content">
+                <div>
                     <div className="row">
                         <div className="col-sm-6">
                             <Input

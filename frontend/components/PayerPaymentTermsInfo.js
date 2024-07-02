@@ -5,7 +5,7 @@ export default function PayerPaymentTermsInfo({availPaymentScheduleOptions}) {
     availPaymentScheduleOptions.sort((a, b) => a.index - b.index);
 
     return <div className="row">
-        <h3 className='font-weight-bold mb-5' style={{color: "#8AA4B1"}}>Type de paiement</h3>
+        <h3 className='mb-5' style={{color: "#8AA4B1"}}>Type de paiement</h3>
         <div>
             <h4>
                 Nous

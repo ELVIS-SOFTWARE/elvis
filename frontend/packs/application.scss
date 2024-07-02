@@ -2011,10 +2011,18 @@ body {
     border-top: 1px solid #e7eaec;
     transition: left .3s ease-out;
 
+    @media(max-width: 800px) {
+        background: none;
+        border-top: none;
+        padding : 0;
+        margin-top: 35px;
+    }
+
     &::after {
         margin-bottom: 0;
     }
 }
+
 
 .step-progress {
     .footer-buttons {
