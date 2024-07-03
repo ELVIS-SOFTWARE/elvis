@@ -155,7 +155,7 @@ class PaymentsSummary extends React.Component {
                         return <Fragment>
                             <select
                                 className="form-control"
-                                value={props.original.adhesionPriceId || 01127}
+                                value={props.original.adhesionPriceId || 0}
                                 onChange={e => this.props.handleChangeAdhesionPricingChoice(props.original.adhesionId, e.target.value)}
                             >
                                 <option value="0" disabled>
