@@ -130,7 +130,7 @@ class NewActivityItem extends React.Component {
                 });
             })
             .post("/comments", {
-                commentable_id: this.state.preApplicationActivity.activity_application_id,
+                commentable_id: this.props.new_activity_application.id,
                 commentable_type: "ActivityApplication",
                 user_id: this.props.current_user.id,
                 content: content,

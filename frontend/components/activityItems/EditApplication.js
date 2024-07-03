@@ -52,12 +52,7 @@ export default function EditApplication(props) {
                                   placeholder="Indiquer les modifications à nous communiquer (disponibilité, choix professeur)"></textarea>
                     </div>
                     <div className="d-flex justify-content-end mt-5">
-                        <button className="btn text-white"
-                                style={{
-                                    backgroundColor: "#00334A",
-                                    borderRadius: "8px",
-                                    fontWeight: "bold"
-                                }}
+                        <button className="btn btn-primary text-white"
                                 onClick={() => {
                                     if (editInput === "") {
                                         swal.fire({
