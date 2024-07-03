@@ -31,7 +31,7 @@
       <%= f.email_field :email, required: true, autofocus: true, autocomplete: "email", class: "form-control" %>
     </div>
 
-    <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe', info: @minimum_password_length }) %>
+    <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe', additional_attr: {minLength: @minimum_password_length} }) %>
 
     <%= react_component('PasswordInput', { id: 'password_confirmation', name: 'user[password_confirmation]', label: 'Confirmer mot de passe', error: resource.errors[:password_confirmation].join(', ') }) %>
 

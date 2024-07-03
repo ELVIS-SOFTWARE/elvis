@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 
 export default function PasswordInput({id, name, label, error, additional_attr}) {
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const {minLength} = additional_attr || {};
 
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
@@ -17,7 +16,7 @@ export default function PasswordInput({id, name, label, error, additional_attr})
                     className="form-control"
                     id={id}
                     name={name}
-                    minLength={minLength}
+                    {...additional_attr}
                 />
                 <button
                     type="button"
@@ -27,7 +26,7 @@ export default function PasswordInput({id, name, label, error, additional_attr})
                     <i className={`fas fa-eye${passwordVisible ? '-slash' : ''}`}></i>
                 </button>
             </div>
-            {minLength && <p className="form-text text-muted">({minLength} caractères minimum)</p>}
+            {additional_attr.minLength && <p className="form-text text-muted">({additional_attr.minLength} caractères minimum)</p>}
             {error && <div className="alert alert-danger">{error}</div>}
         </div>
     );
