@@ -100,7 +100,7 @@ class WrappedPayerPaymentTerms extends React.Component {
 
     render() {
 
-        return <div className="padding-page application-form">
+        return <div className="application-form" style={{margin: 0}}>
 
             <div className="row">
                 {this.props.paymentStepDisplayText && <WysiwygViewer

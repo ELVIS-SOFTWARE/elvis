@@ -931,11 +931,25 @@ class Wizard extends React.Component {
         return (
             <div className="padding-page application-form" style={{ width: "85%" }}>
                 <div className="d-md-inline-flex justify-content-between w-100">
+
+
+                </div>
+                <div style={{
+                    marginBottom: "35px",
+                    marginTop: "45px",
+                }}>
+                    <h1 style={{color: "#00334A"}}>Nouvelle demande d’inscription</h1>
+                    <h3 style={{color: "#8AA4B1"}}>Demande d'inscription
+                        {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
+                            " aux activités"
+                            : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
+                        } pour la {this.state.season.label}
+                    </h3>
                     {this.props.currentUserIsAdmin ? (
-                        <div className="flex flex-center-justified m-t-md m-b-sm">
+                        <div className="flex flex-justified m-t-md m-b-sm">
                             <div className="form-group">
                                 <select
-                                    className="custom-select"
+                                    className="custom-select h-100"
                                     value={this.state.season.id}
                                     onChange={e =>
                                         this.handleChangeSeason(
@@ -950,9 +964,9 @@ class Wizard extends React.Component {
                                     ))}
                                 </select>
                             </div>
-                            <div className="form-group flex flex-center-aligned m-l">
+                            <div className="form-group flex flex-center-aligned m-l ml-5">
                                 <label
-                                    className="m-r-sm"
+                                    className="m-r-sm my-auto"
                                     style={{width: "100%"}}
                                 >
                                     Date de début
@@ -989,37 +1003,6 @@ class Wizard extends React.Component {
                             </div>
                         </div>
                     ) : null}
-                    <div className="flex flex-center-justified m-t-md m-b-sm">
-                        <div className="form-group">
-                        {
-                            this.props.inscription_path &&
-                            <a
-                                href={this.props.inscription_path}
-                                className="btn btn-primary"
-                                style={{borderRadius: "8px"}}>
-                                <i className="fas fa-table"/> Retours aux demandes d'inscription
-                            </a>
-                        }
-                        {
-                            this.props.user_path &&
-                            <a
-                                href={this.props.user_path}
-                                className="btn btn-primary btn-outline m-l-xs"
-                                style={{borderRadius: "8px", color: "#00334A", borderColor: "#00334A"}}>
-                                <i className="fas fa-user"/> Voir le profil
-                            </a>
-                        }
-                        </div>
-                    </div>
-                </div>
-                <div style={{marginBottom: "35px"}}>
-                    <h1 style={{color: "#00334A"}}>Nouvelle demande d’inscription</h1>
-                    <h3 style={{color: "#8AA4B1"}}>Demande d'inscription
-                        {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
-                            " aux activités"
-                            : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
-                        } pour la {this.state.season.label}
-                    </h3>
                 </div>
                 <div className="step-progress" style={{marginBottom: "75px"}}>
                     <StepZilla
