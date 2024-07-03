@@ -166,7 +166,3 @@ Rails.application.configure do
   #   config.redis = ConnectionPool.new(size: 25, &redis_conn)
   # end
 end
-
-# Raven.configure do |config|
-#     config.dsn = 'https://f9b163fc0cb148b4b2f7354526c78906:d9a3c8e4e9bb4293b86579f7577decc7@sentry.io/1204978'
-# end

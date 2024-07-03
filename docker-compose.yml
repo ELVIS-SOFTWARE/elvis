@@ -65,7 +65,7 @@ services:
     ports:
       - "7212:80"
     healthcheck:
-      test: curl -s http://localhost:80 >/dev/null || exit 1
+      test: curl -s http://localhost:80/ping >/dev/null || exit 1
       interval: 10s
       timeout: 3s
       retries: 10

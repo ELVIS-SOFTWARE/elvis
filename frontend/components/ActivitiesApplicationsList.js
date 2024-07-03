@@ -365,7 +365,7 @@ class ActivitiesApplicationsList extends React.Component {
             inputValue: 0,
             inputPlaceholder: "<p class=\"mt-3\">Renvoyer les mails ?</p>",
         }).then(v => {
-            console.log(v.value);
+
             if (v.value !== undefined) {
                 fetch(`/inscriptions/send_all_confirmation_mail`, {
                     method: "POST",
