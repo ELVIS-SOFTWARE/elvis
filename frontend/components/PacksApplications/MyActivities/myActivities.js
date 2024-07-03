@@ -93,13 +93,13 @@ export default function myActivities() {
 
                 <div className="row mt-lg-3">
 
-                    <div className="col-xl-8 col-lg-12 no-padding h-100">
+                    <div className="col-xl-6 col-lg-11 no-padding h-100">
                         <div className="d-flex align-items-baseline justify-content-between mt-3 mx-4 mx-lg-0">
                             <div className="px-lg-4">
                                 <h4 className="title font-bold">MES ACTIVITÉS</h4>
                             </div>
 
-                            <div className="px-lg-4 mr-3">
+                            <div className="px-lg-3 mr-3">
                                 {season_list.length > 1 &&
                                     <select className="custom-select" value={selectedSeason}
                                             onChange={handleSeasonChange}>
@@ -147,13 +147,15 @@ export default function myActivities() {
                             }
                         </div>
                     </div>
-                    <div className="col-xl-4 col-lg-12 d-flex flex-column">
-                        <div className="mx-4 d-flex align-items-baseline justify-content-between mb-4">
+                    <div className="col-xl-3 col-lg-12 d-flex flex-column">
+                        <div className="d-flex align-items-baseline justify-content-between mt-3">
                             <h4 className="title font-bold">MES PROCHAINS COURS</h4>
-                            <a href={window.location.href + "/upcoming"} className="color-black font-bold mr-4">Voir mon
+                            <a href={window.location.href + "/upcoming"} className="font-weight-bold mr-4" style={{color: "#00334A"}}>Voir mon
                                 planning &nbsp; &gt;</a>
                         </div>
-                        <UpcomingActivityInstancesList/>
+                        <UpcomingActivityInstancesList
+                        user_id={user.id}
+                        />
                     </div>
 
                 </div>
