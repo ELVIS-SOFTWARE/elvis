@@ -1,4 +1,5 @@
 import React from 'react';
+import Bars from 'react-loader-spinner';
 
 export default function LoadingComponent()
 {
@@ -36,13 +37,16 @@ export default function LoadingComponent()
           position: 'absolute',
           top: '50%',
           left: '50%',
-          transform: 'translate(-50%,-50%)',
-          fontSize: '50px',
-          fontWeight: 'bold',
-          color: '#000',
         }}
     >
-        <p className="animated fadeIn">Loading...</p>
+        <Bars
+            height="100"
+            width="100"
+            color="#0079BF"
+            ariaLabel="bars-loading"
+            wrapperClass=""
+            visible={true}
+        />
     </div>
   </div>
 }
