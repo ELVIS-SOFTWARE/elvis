@@ -2,7 +2,7 @@
   <div class="middle-box loginscreen">
     <div>
       <div>
-        <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "media/images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen" />
+        <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "media/images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen"/>
       </div>
     </div>
   </div>
@@ -11,14 +11,14 @@
 <div class="loginscreen-iboxes">
   <div class="row">
     <div class="col-lg-6">
-      <div class="ibox">
+      <div class="ibox" >
         <div class="ibox-title">
           <h5>Accédez à votre espace</h5>
         </div>
         <div class="ibox-content">
           <%= form_for(resource, as: resource_name, url: session_path(resource_name), class: "m-t") do |f| %>
             <div class="form-group">
-              <%= f.label "Courriel ou Numéro d'adhérent" %><br />
+              <%= f.label "Courriel ou Numéro d'adhérent" %><br/>
               <%= f.text_field :login, required: true, autofocus: true, class: "form-control" %>
               <% if resource.errors.any? %>
                 <div class="alert alert-danger">
@@ -30,8 +30,7 @@
             </div>
 
             <div class="form-group">
-              <%= f.label "Mot de passe" %><br />
-              <%= f.password_field :password, required: true, autocomplete: "off", class: "form-control" %>
+              <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe' }) %>
             </div>
 
             <% if devise_mapping.rememberable? -%>
@@ -51,7 +50,7 @@
 
     <% if devise_mapping.registerable? && controller_name != "registrations" %>
       <div class="col-lg-6">
-        <div class="ibox">
+        <div class="ibox" style="margin-bottom: 60px">
           <div class="ibox-title">
             <h5>Vous n'avez pas de compte ?</h5>
           </div>

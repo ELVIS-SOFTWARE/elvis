@@ -31,21 +31,9 @@
       <%= f.email_field :email, required: true, autofocus: true, autocomplete: "email", class: "form-control" %>
     </div>
 
-    <div class="form-group mb-0 text-left">
-      <%= f.label "Mot de passe" %>
-      <%= f.password_field :password, required: true, minlength: @minimum_password_length, autocomplete: "off", class: "form-control" %>
-      <% if @minimum_password_length %>
-        <p class="help-text mb-0">(<%= @minimum_password_length %> caractères minimum)</p>
-      <% end %><br/>
-    </div>
+    <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe', info: @minimum_password_length }) %>
 
-    <div class="form-group text-left">
-      <%= f.label "Confirmer mot de passe" %><br/>
-      <%= f.password_field :password_confirmation, required: true, autocomplete: "off", class: "form-control" %>
-      <% resource.errors[:password_confirmation].each do |msg| %>
-        <li class="alert alert-danger"><%= msg %></li>
-      <% end %>
-    </div>
+    <%= react_component('PasswordInput', { id: 'password_confirmation', name: 'user[password_confirmation]', label: 'Confirmer mot de passe', error: resource.errors[:password_confirmation].join(', ') }) %>
 
     <% unless Recaptcha.configuration.site_key.nil? %>
       <div class="form-group">
