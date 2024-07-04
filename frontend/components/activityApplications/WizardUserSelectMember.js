@@ -204,9 +204,9 @@ export default class WizardUserSelectMember extends React.Component {
         return <Fragment>
             <div className="application-form" style={{margin: 0}}>
                 <div className="row">
-                    <div className="d-inline-flex justify-content-between align-items-center w-100 mb-5">
+                    <div className="d-inline-flex justify-content-between align-items-end w-100 mb-5">
                         <div>
-                            <h3 className="mb-0" style={{color: "#8AA4B1"}}>Membre concerné</h3>
+                            <h3 style={{color: "#8AA4B1"}}>Membre concerné</h3>
                         </div>
 
                         <div className="text-right">
