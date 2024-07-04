@@ -276,12 +276,13 @@ class ContactForm extends React.PureComponent {
                                     {
                                         suggestedUsers.length ? <div>
                                                 <div className="alert alert-info m-b-sm">
-                                                    Nous avons trouvé des profils correspondant aux informations saisies
+                                                    Ce membre existe déjà dans la base de données :
                                                 </div>
                                                 <div className="list-group">
                                                     {suggestedUsers.map((u, i) => <button
                                                         type="button"
-                                                        onClick={() => this.selectUserMatch(i)} key={i}
+                                                        // onClick={() => this.selectUserMatch(i)} key={i}
+                                                        disabled
                                                         className={`list-group-item ${i === selectedUserMatch ? "active" : ""
                                                         }`}>
                                                         <b>{fullname(u)}</b>
@@ -410,19 +411,24 @@ class ContactForm extends React.PureComponent {
                                     <i className="fas fa-times m-r-sm"></i>
                                     Annuler
                                 </button>
-                                <button
-                                    type="submit"
-                                    className="btn btn-sm btn-primary"
-                                    disabled={!isUserSearchOver && !suggestedUsers}
-                                    onClick={() => {
-                                        if (!isUserSearchOver && suggestedUsers) {
-                                            this.disabledUserSearch();
-                                        }
-                                    }}>
-                                    <i className="fas fa-check m-r-sm"></i>
-                                    {"Valider"}
-                                </button>
-
+                                {
+                                    isUserSearchOver &&
+                                    <button
+                                        type="submit"
+                                        className="btn btn-sm btn-primary">
+                                        <i className="fas fa-check m-r-sm"></i>
+                                        {"Valider"}
+                                    </button>
+                                }
+                                {
+                                    !isUserSearchOver && suggestedUsers &&
+                                    <button type="button"
+                                            className="btn btn-primary"
+                                            disabled = {suggestedUsers}
+                                            onClick={() => this.disabledUserSearch()}>
+                                        Valider
+                                    </button>
+                                }
                             </div>
                         </form>
                     }}
