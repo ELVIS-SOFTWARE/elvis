@@ -992,7 +992,6 @@ class PaymentsController < ApplicationController
                    .for_season(s)
                    .compact
 
-
       # verify if exist a due_payment for the user
       why_payers_added = {}
       tmp_payers = tmp_fm
@@ -1005,7 +1004,11 @@ class PaymentsController < ApplicationController
       end
                      .compact
 
-      tmp_payers << user if user.is_paying || user.payment_schedules.find_by(season_id: s.id)&.due_payments&.any?
+      # Also add the user to tmp_payers if they are paying or have due payments for the season
+      if user.is_paying || user.payment_schedules.find_by(season_id: s.id)&.due_payments&.any?
+        tmp_payers << user
+        why_payers_added[user.id] = user.is_paying
+      end
 
       tmp_payers.uniq!(&:id)
 
@@ -1026,6 +1029,7 @@ class PaymentsController < ApplicationController
       arr
     end
   end
+
 
   def payment_params
     params.require(:payment).permit(
