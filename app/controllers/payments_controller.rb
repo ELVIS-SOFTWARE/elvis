@@ -992,6 +992,7 @@ class PaymentsController < ApplicationController
                    .for_season(s)
                    .compact
 
+
       # verify if exist a due_payment for the user
       why_payers_added = {}
       tmp_payers = tmp_fm
@@ -1017,6 +1018,7 @@ class PaymentsController < ApplicationController
       # si l'utilisateur paie pour au moins une autre personne, on l'ajoute aux payeurs
       if user.id == @user.id && !arr.last[:payers].any? { |u| u.id == user.id } && (@user.is_paying || user.any_users_self_is_paying_for?(s))
         arr.last[:payers] << user
+        why_payers_added[user.id] = user.is_paying
       end
 
       arr.last[:payers].uniq!
