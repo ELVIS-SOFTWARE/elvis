@@ -417,14 +417,14 @@ class ContactForm extends React.PureComponent {
                                         type="submit"
                                         className="btn btn-sm btn-primary">
                                         <i className="fas fa-check m-r-sm"></i>
-                                        {"Valider"}
+                                        {"Confirmer"}
                                     </button>
                                 }
                                 {
                                     !isUserSearchOver && suggestedUsers &&
                                     <button type="button"
                                             className="btn btn-primary"
-                                            disabled = {suggestedUsers}
+                                            disabled = {suggestedUsers.length}
                                             onClick={() => this.disabledUserSearch()}>
                                         Valider
                                     </button>
