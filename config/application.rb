@@ -12,6 +12,7 @@ require "action_view/railtie"
 require "action_cable/engine"
 require "sprockets/railtie"
 require 'active_support/core_ext'
+require 'sidekiq/component'
 require_relative "../lib/elvis/version"
 # require "rails/test_unit/railtie"
 

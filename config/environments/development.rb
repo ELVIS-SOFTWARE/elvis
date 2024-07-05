@@ -68,8 +68,10 @@ Rails.application.configure do
     config.secret_key = ""
   end
 
-  Sidekiq.configure_server do |config|
-    config.logger =  Logger.new(STDOUT)
+  if ENV["USE_SIDEKIQ"]
+    Sidekiq.configure_server do |config|
+      config.logger =  Logger.new(STDOUT)
+    end
   end
 
   config.after_initialize do
