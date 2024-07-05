@@ -188,9 +188,9 @@ u.save!
 # Additional information
 ## Recommended versions
 - postgresql v14
-- node v14
-- ruby v3.0.2
-- rails v6.1.4.1
+- node v20
+- ruby v3.3.2
+- rails v6.1.7.8
 - elastic-search v7.16.3
 ## Soft restart
 - send `SIGUSR2` signal to process
