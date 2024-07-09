@@ -124,27 +124,6 @@ class ContactForm extends React.PureComponent {
             });
     }
 
-    selectUserMatch(idx) {
-        this.setState({
-            selectedUserMatch: idx,
-        });
-    }
-
-    validateUserMatch() {
-        const selectedUser = this.state.suggestedUsers[this.state.selectedUserMatch];
-
-        this.mutators.changeUser({
-            ...selectedUser,
-            is_inverse: this.state.is_inverse,
-            is_attached: false
-        });
-        this.setState({
-            isUserSearchOver: true,
-            suggestedUsers: null,
-            is_attached: false,
-        });
-    }
-
     disabledUserSearch() {
         this.mutators.changeUser({
             ...this.props.initialValues,
@@ -275,44 +254,24 @@ class ContactForm extends React.PureComponent {
                                 !isUserSearchOver && suggestedUsers && <div>
                                     {
                                         suggestedUsers.length ? <div>
-                                                <div className="alert alert-info m-b-sm">
-                                                    Ce membre existe déjà dans la base de données :
-                                                </div>
+                                                <h3>Utilisateur trouvé : </h3>
                                                 <div className="list-group">
-                                                    {suggestedUsers.map((u, i) => <button
-                                                        type="button"
-                                                        // onClick={() => this.selectUserMatch(i)} key={i}
-                                                        disabled
-                                                        className={`list-group-item ${i === selectedUserMatch ? "active" : ""
-                                                        }`}>
-                                                        <b>{fullname(u)}</b>
-                                                        {` né(e) le ${toLocaleDate(
-                                                            toDate(u.birthday)
-                                                        )}, Adhérent #${u.adherent_number}`}
-                                                    </button>)}
+                                                    {suggestedUsers.map((u, i) => (
+                                                        <div className="alert alert-info m-b-sm">
+                                                            <b>{fullname(u)}{` né(e) le ${toLocaleDate(toDate(u.birthday))}, `}</b>
+                                                            existe déjà dans la base de données
+                                                                {u.attached_to_id !== user_linked.id && (
+                                                                    <React.Fragment>
+                                                                        {" mais n'est pas rattaché à votre compte."}<br/><br/>
+                                                                        {"Veuillez contacter l'école pour le rattacher."}
+                                                                    </React.Fragment>
+                                                                )}
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div> :
                                             null
                                     }
-
-                                    <div className="d-flex justify-content-between" style={{marginBottom: "20px"}}>
-                                        {/*<button type="button" className="btn btn-primary"*/}
-                                        {/*        onClick={() => this.validateUserMatch()}*/}
-                                        {/*        disabled={selectedUserMatch === null}>*/}
-                                        {/*    Utiliser ce profil*/}
-                                        {/*</button>*/}
-                                        {/*<button*/}
-                                        {/*    onClick={onClose}*/}
-                                        {/*    type="button"*/}
-                                        {/*    className="btn btn-sm">*/}
-                                        {/*    <i className="fas fa-times m-r-sm"></i>*/}
-                                        {/*    Annuler*/}
-                                        {/*</button>*/}
-                                        {/*<button type="button" className="btn btn-primary"*/}
-                                        {/*        onClick={() => this.disabledUserSearch()}>*/}
-                                        {/*    Valider*/}
-                                        {/*</button>*/}
-                                    </div>
                                 </div>
                             }
 
@@ -424,7 +383,7 @@ class ContactForm extends React.PureComponent {
                                     !isUserSearchOver && suggestedUsers &&
                                     <button type="button"
                                             className="btn btn-primary"
-                                            disabled = {suggestedUsers.length}
+                                            disabled={suggestedUsers.length}
                                             onClick={() => this.disabledUserSearch()}>
                                         Valider
                                     </button>
