@@ -58,10 +58,11 @@ const OptionItems = ({options, color}) => {
     );
 };
 
-const RawActivity = ({timeInterval, isTeacher, seasons}) => {
+const RawActivity = ({timeInterval, isTeacher, seasons, evaluationsLevelRefs}) => {
     // Vars
     const activity =
         timeInterval.activity || timeInterval.activity_instance.activity;
+
 
     const inactiveIds =
         timeInterval.activity_instance &&
@@ -87,6 +88,18 @@ const RawActivity = ({timeInterval, isTeacher, seasons}) => {
         last_name: "",
     };
 
+    const studentsGlobalLevel =
+        activity.evaluation_level_ref_id !== null ?
+            (evaluationsLevelRefs.find(e => e.id === activity.evaluation_level_ref_id).label)
+            :
+            (levelDisplay(
+                    students,
+                    activity.activity_ref_id,
+                    timeInterval,
+                    seasons)
+            );
+
+
     // Render
     return (
         <div className="raw-activity">
@@ -108,17 +121,7 @@ const RawActivity = ({timeInterval, isTeacher, seasons}) => {
                     <p className="font-bold font-italic">
                         {students.length + options.length}/
                         {activity.activity_ref.occupation_limit} élèves -{" "}
-                        {activity.evaluation_level_ref_id !== null ? (
-                                <p>{activity.evaluation_level_ref_id}</p>
-                            ) : (
-                                levelDisplay(
-                                    students,
-                                    activity.activity_ref_id,
-                                    timeInterval,
-                                    seasons
-                                )
-                            )
-                        }
+                        {studentsGlobalLevel}
                     </p>
 
                     <ul className="list-group">
@@ -134,11 +137,10 @@ const RawActivity = ({timeInterval, isTeacher, seasons}) => {
 class RawPlanning extends React.Component {
     constructor(props) {
         super(props);
-        // console.log(props)
     }
 
     renderDayColumns(tis) {
-        const {isTeacher, seasons} = this.props;
+        const {isTeacher, seasons, evaluations_level_refs} = this.props;
         return Array.isArray(tis) && tis.length
             ? tis
                 .sort((a, b) => toDate(a.start) - toDate(b.start))
@@ -150,6 +152,7 @@ class RawPlanning extends React.Component {
                                 timeInterval={ti}
                                 seasons={seasons}
                                 isTeacher={isTeacher}
+                                evaluationsLevelRefs={evaluations_level_refs}
                             />
                         );
                     }
