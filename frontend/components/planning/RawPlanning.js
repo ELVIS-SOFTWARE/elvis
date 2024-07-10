@@ -1,5 +1,5 @@
-import React, { Fragment } from "react";
-import { array, bool, object } from "prop-types";
+import React, {Fragment} from "react";
+import {array, bool, object} from "prop-types";
 import _ from "lodash";
 
 import * as TimeIntervalHelpers from "./TimeIntervalHelpers.js";
@@ -9,7 +9,7 @@ import {
     toDate,
     toHourMin,
 } from "../../tools/format.js";
-import { WEEKDAYS } from "../../tools/constants";
+import {WEEKDAYS} from "../../tools/constants";
 
 const levelDisplay = (users, activityRefId, timeInterval, seasons) => {
     const season = TimeIntervalHelpers.getSeasonFromDate(
@@ -24,7 +24,7 @@ const levelDisplay = (users, activityRefId, timeInterval, seasons) => {
     );
 };
 
-const StudendItems = ({ students }) => {
+const StudendItems = ({students}) => {
     return (
         <Fragment>
             {_.map(students, u => (
@@ -38,15 +38,15 @@ const StudendItems = ({ students }) => {
     );
 };
 
-const OptionItems = ({ options, color }) => {
+const OptionItems = ({options, color}) => {
     return (
         <Fragment>
             {_.map(options, opt => (
-                <li key={opt.desired_activity.activity_application.user.id}  className="list-group-item no-borders">
+                <li key={opt.desired_activity.activity_application.user.id} className="list-group-item no-borders">
                     <a
                         className="taureau"
                         href={`/users/${opt.desired_activity.activity_application.user.id}`}
-                        style={{ color: color }}
+                        style={{color: color}}
                     >
                         {fullnameWithAge(
                             opt.desired_activity.activity_application.user
@@ -58,7 +58,7 @@ const OptionItems = ({ options, color }) => {
     );
 };
 
-const RawActivity = ({ timeInterval, isTeacher, seasons }) => {
+const RawActivity = ({timeInterval, isTeacher, seasons}) => {
     // Vars
     const activity =
         timeInterval.activity || timeInterval.activity_instance.activity;
@@ -108,17 +108,22 @@ const RawActivity = ({ timeInterval, isTeacher, seasons }) => {
                     <p className="font-bold font-italic">
                         {students.length + options.length}/
                         {activity.activity_ref.occupation_limit} élèves -{" "}
-                        {levelDisplay(
-                            students,
-                            activity.activity_ref_id,
-                            timeInterval,
-                            seasons
-                        )}
+                        {activity.evaluation_level_ref_id !== null ? (
+                                <p>{activity.evaluation_level_ref_id}</p>
+                            ) : (
+                                levelDisplay(
+                                    students,
+                                    activity.activity_ref_id,
+                                    timeInterval,
+                                    seasons
+                                )
+                            )
+                        }
                     </p>
 
                     <ul className="list-group">
-                        <StudendItems students={students} />
-                        <OptionItems options={options} color={'purple'} />
+                        <StudendItems students={students}/>
+                        <OptionItems options={options} color={'purple'}/>
                     </ul>
                 </div>
             </div>
@@ -133,29 +138,29 @@ class RawPlanning extends React.Component {
     }
 
     renderDayColumns(tis) {
-        const { isTeacher, seasons } = this.props;
+        const {isTeacher, seasons} = this.props;
         return Array.isArray(tis) && tis.length
             ? tis
-                  .sort((a, b) => toDate(a.start) - toDate(b.start))
-                  .reduce((comps, ti) => {
-                      if (ti.is_validated && ti.kind !== "e") {
-                          comps.push(
-                              <RawActivity
-                                  key={ti.id}
-                                  timeInterval={ti}
-                                  seasons={seasons}
-                                  isTeacher={isTeacher}
-                              />
-                          );
-                      }
+                .sort((a, b) => toDate(a.start) - toDate(b.start))
+                .reduce((comps, ti) => {
+                    if (ti.is_validated && ti.kind !== "e") {
+                        comps.push(
+                            <RawActivity
+                                key={ti.id}
+                                timeInterval={ti}
+                                seasons={seasons}
+                                isTeacher={isTeacher}
+                            />
+                        );
+                    }
 
-                      return comps;
-                  }, [])
+                    return comps;
+                }, [])
             : null;
     }
 
     render() {
-        const { data } = this.props;
+        const {data} = this.props;
         const sortedData = Object.keys(data).sort();
         sortedData.push(sortedData.shift()); // Dimanche en dernier jour
 
