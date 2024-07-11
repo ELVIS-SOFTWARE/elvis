@@ -202,11 +202,11 @@ export default class WizardUserSelectMember extends React.Component {
         });
 
         return <Fragment>
-            <div className="padding-page application-form">
+            <div className="application-form" style={{margin: 0}}>
                 <div className="row">
                     <div className="d-inline-flex justify-content-between align-items-center w-100 mb-5">
                         <div>
-                            <p className="font-weight-bold mb-0" style={{color: "#8AA4B1"}}>Membre concerné</p>
+                            <h3 className="mb-0" style={{color: "#8AA4B1"}}>Membre concerné</h3>
                         </div>
 
                         <div className="text-right">
@@ -241,7 +241,7 @@ export default class WizardUserSelectMember extends React.Component {
                         <p className="text-danger">{this.state.error.members}</p>
                 </div>}
 
-                <div className="row align-items-center text-center mb-4">
+                <div className="row mb-4">
                     <ToggleButtonGroup
                         maxSelected={1}
                         childrenContent={members.map((member, i) => renderUserItem(user.id, member, i, selected === i))}
@@ -348,7 +348,7 @@ export default class WizardUserSelectMember extends React.Component {
  */
 const renderUserItem = (currentUserId, user, i, isSelected) => <Fragment>
     <div className="d-inline-flex ml-0 mt-0 w-100 justify-content-between">
-        <div className="text-left ml-3">
+        <div className="text-left">
             <UserAvatar user={user} size={75}/>
             <h4 className="font-weight-bold" style={{color: "#00283B"}}>{user.full_name}</h4>
             <p style={{color: "#8AA4B1"}}>{new Date(user.birthday).toLocaleDateString()}</p>
