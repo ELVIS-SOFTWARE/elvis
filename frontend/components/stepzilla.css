@@ -9,22 +9,21 @@ ol.progtrckr {
 }
 
 ol.progtrckr li {
-    line-height: 4.8rem;
+    line-height: 3.8rem;
     cursor: pointer;
     white-space: nowrap;
     text-overflow: ellipsis;
     flex: 1;
-    max-width: 200px;
+    max-width: 150px;
 
 }
 
 ol.progtrckr li span {
     font-size-adjust: inherit;
-    font-size: 1.5rem;
+    font-size: 12px;
     font-weight: bold;
     position: relative;
     bottom: -145%;
-    left: -11%;
 }
 
 @media (max-width: 1000px) {
@@ -45,17 +44,17 @@ ol.progtrckr li span {
 
 ol.progtrckr li.progtrckr-todo {
     color: silver;
-    border-bottom: 12px dotted silver;
+    border-bottom: 10px dotted silver;
 }
 
 ol.progtrckr li.progtrckr-doing {
     color: #0079BF;
-    border-bottom: 12px dotted #0079BF;
+    border-bottom: 10px dotted #0079BF;
 }
 
 ol.progtrckr li.progtrckr-done {
     color: #00334A;
-    border-bottom: 12px dotted #00334A;
+    border-bottom: 10px dotted #00334A;
 }
 
 ol.progtrckr li:after {
@@ -64,9 +63,8 @@ ol.progtrckr li:after {
 
 ol.progtrckr li:before {
     position: relative;
-    bottom: -28px;
+    bottom: -25px;
     float: left;
-    left: 36.6%;
 }
 
 ol.progtrckr li.progtrckr-todo:before {
@@ -74,8 +72,8 @@ ol.progtrckr li.progtrckr-todo:before {
     counter-increment: step;
     color: white;
     background-color: silver;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     font-size: 22px;
     font-weight: bold;
@@ -90,8 +88,8 @@ ol.progtrckr li.progtrckr-doing:before {
     counter-increment: step;
     color: white;
     background-color: #0079BF;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     font-size: 22px;
     font-weight: bold;
@@ -106,8 +104,8 @@ ol.progtrckr li.progtrckr-done:before {
     counter-increment: step;
     color: white;
     background-color: #00283B;
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     font-size: 22px;
     font-weight: bold;
