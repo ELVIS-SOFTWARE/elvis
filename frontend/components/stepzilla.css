@@ -9,12 +9,12 @@ ol.progtrckr {
 }
 
 ol.progtrckr li {
-    line-height: 3.8rem;
+    /*line-height: 3.8rem;*/
     cursor: pointer;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    flex: 1;
-    max-width: 150px;
+    white-space: break-spaces;
+    /*text-overflow: ellipsis;*/
+    flex: 1 1;
+    max-width: 130px;
 
 }
 
@@ -23,7 +23,8 @@ ol.progtrckr li span {
     font-size: 12px;
     font-weight: bold;
     position: relative;
-    bottom: -145%;
+    bottom: -175%;
+    right: 49%;
 }
 
 @media (max-width: 1000px) {
@@ -77,6 +78,7 @@ ol.progtrckr li.progtrckr-todo:before {
     border-radius: 50%;
     font-size: 22px;
     font-weight: bold;
+    align-content: center;
 }
 
 ol.progtrckr li.progtrckr-todo:hover:before {
@@ -93,6 +95,7 @@ ol.progtrckr li.progtrckr-doing:before {
     border-radius: 50%;
     font-size: 22px;
     font-weight: bold;
+    align-content: center;
 }
 
 ol.progtrckr li.progtrckr-doing:hover:before {
@@ -109,6 +112,7 @@ ol.progtrckr li.progtrckr-done:before {
     border-radius: 50%;
     font-size: 22px;
     font-weight: bold;
+    align-content: center;
 }
 
 ol.progtrckr li.progtrckr-done:hover:before {
