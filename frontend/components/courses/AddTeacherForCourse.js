@@ -21,41 +21,47 @@ export default class AddTeacherForCourse extends React.Component {
         this.handleChange = this.handleChange.bind(this);
     }
 
+
     componentDidMount() {
-        api.get(
-            `/teachers/index?activityId=${this.props.initialValues.activityRefId}`
-        ).then(({ data, error }) => {
-            if (error) {
-                console.log(error);
-            } else {
-                this.setState({ ...this.state, teachers: data });
-            }
-            if (data.length > 0) {
-                if (this.state.summary.teacher) {
-                    const teacher = this.state.summary.teacher;
-                    this.setState({
-                        ...this.state,
-                        teacherId: teacher.id,
-                    });
-                    this.handleChange(teacher.id);
+        api.get(`/teachers/index?activityId=${this.props.initialValues.activityRefId}`)
+            .then(({ data, error }) => {
+                if (error) {
+                    console.log(error);
                 } else {
-                    const teacher = data[0];
-                    this.setState({
-                        ...this.state,
-                        teacherId: teacher.id,
-                        summary: {
-                            ...this.state.summary,
-                            teacher: {
-                                last_name: teacher.last_name,
-                                first_name: teacher.first_name,
-                            },
-                        },
-                    });
-                    this.handleChange(teacher.id);
+                    this.setState({ ...this.state, teachers: data });
                 }
-            }
-        });
+                if (data.length > 0) {
+                    if (this.state.summary.teacher) {
+                        const teacher = { ...this.state.summary.teacher, id: this.state.teacherId };
+                        this.setState({
+                            ...this.state,
+                            teacherId: teacher.id,
+                            summary: {
+                                ...this.state.summary,
+                                teacher,
+                            },
+                        });
+                        this.handleChange(teacher.id);
+                    } else {
+                        const teacher = data[0];
+                        this.setState({
+                            ...this.state,
+                            teacherId: teacher.id,
+                            summary: {
+                                ...this.state.summary,
+                                teacher: {
+                                    id: teacher.id,
+                                    last_name: teacher.last_name,
+                                    first_name: teacher.first_name,
+                                },
+                            },
+                        });
+                        this.handleChange(teacher.id);
+                    }
+                }
+            });
     }
+
 
 
     isValidated() {
@@ -79,6 +85,7 @@ export default class AddTeacherForCourse extends React.Component {
                 summary: {
                     ...this.state.summary,
                     teacher: {
+                        id: selected.id,
                         last_name: selected.last_name,
                         first_name: selected.first_name,
                     },
@@ -108,6 +115,7 @@ export default class AddTeacherForCourse extends React.Component {
                             summary: {
                                 ...this.state.summary,
                                 teacher: {
+                                    id: data.id,
                                     last_name: data.last_name,
                                     first_name: data.first_name,
                                 },
@@ -122,6 +130,7 @@ export default class AddTeacherForCourse extends React.Component {
                             summary: {
                                 ...this.state.summary,
                                 teacher: {
+                                    id: data.id,
                                     last_name: data.last_name,
                                     first_name: data.first_name,
                                 },
