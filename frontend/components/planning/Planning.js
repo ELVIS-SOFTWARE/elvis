@@ -1505,6 +1505,7 @@ class Planning extends React.Component {
                         <hr className="hr-line-solid"/>
                         <RawPlanning
                             seasons={this.props.seasons}
+                            evaluations_level_refs={this.props.evaluation_level_refs}
                             data={this.state.selectedIntervals.reduce((acc, i) => {
                                 const k = moment(i.start).isoWeekday() % 7;
                                 return {
