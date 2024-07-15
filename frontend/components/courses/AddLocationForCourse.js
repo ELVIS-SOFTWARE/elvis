@@ -68,6 +68,7 @@ export default class AddLocationForCourse extends React.Component {
         let selectedRoom;
         if (this.state.rooms && update.roomId) {
             selectedRoom = this.state.rooms.find(room => update.roomId === room.id);
+
         }
 
         let selectedLocation;
@@ -201,7 +202,7 @@ export default class AddLocationForCourse extends React.Component {
                                                 name: "room",
                                                 onChange: e =>
                                                     this.handleChange({
-                                                        roomId: e.target.value,
+                                                        roomId: parseInt(e.target.value),
                                                     }),
                                                 value: roomId,
                                             }}
