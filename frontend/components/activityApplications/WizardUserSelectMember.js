@@ -12,6 +12,7 @@ import Input from "../common/Input";
 import {required} from "../../tools/validators";
 import arrayMutators from "final-form-arrays";
 import UserAvatar from "../UserAvatar";
+import WizardContactForm from "../userForm/WizardContactForm";
 
 /**
  * Class used because stepzilla doesn't support functional components for validation
@@ -204,9 +205,9 @@ export default class WizardUserSelectMember extends React.Component {
         return <Fragment>
             <div className="application-form" style={{margin: 0}}>
                 <div className="row">
-                    <div className="d-inline-flex justify-content-between align-items-center w-100 mb-5">
+                    <div className="d-inline-flex justify-content-between align-items-end w-100 mb-5">
                         <div>
-                            <h3 className="mb-0" style={{color: "#8AA4B1"}}>Membre concerné</h3>
+                            <h3 style={{color: "#8AA4B1"}}>Membre concerné</h3>
                         </div>
 
                         <div className="text-right">
@@ -325,7 +326,7 @@ export default class WizardUserSelectMember extends React.Component {
             >
                 <h2 className="mt-0">Ajouter un membre</h2>
                 <h4>création du lien familial du point de vue de {user.first_name} {user.last_name}</h4>
-                <ContactForm
+                <WizardContactForm
                     user_linked={user}
                     current_user={user}
                     initialValues={{}}
