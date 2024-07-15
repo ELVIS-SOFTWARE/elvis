@@ -76,6 +76,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      elvis_init:
+        condition: service_completed_successfully
     entrypoint: bundle exec sidekiq -C config/sidekiq.yml
 
   elasticsearch:

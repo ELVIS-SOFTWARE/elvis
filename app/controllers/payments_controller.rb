@@ -1014,7 +1014,11 @@ class PaymentsController < ApplicationController
       end
                      .compact
 
-      tmp_payers << user if user.is_paying || user.payment_schedules.find_by(season_id: s.id)&.due_payments&.any?
+      # Also add the user to tmp_payers if they are paying or have due payments for the season
+      if user.is_paying || user.payment_schedules.find_by(season_id: s.id)&.due_payments&.any?
+        tmp_payers << user
+        why_payers_added[user.id] = user.is_paying
+      end
 
       tmp_payers.uniq!(&:id)
 
@@ -1027,6 +1031,7 @@ class PaymentsController < ApplicationController
       # si l'utilisateur paie pour au moins une autre personne, on l'ajoute aux payeurs
       if user.id == @user.id && !arr.last[:payers].any? { |u| u.id == user.id } && (@user.is_paying || user.any_users_self_is_paying_for?(s))
         arr.last[:payers] << user
+        why_payers_added[user.id] = user.is_paying
       end
 
       arr.last[:payers].uniq!
@@ -1034,6 +1039,7 @@ class PaymentsController < ApplicationController
       arr
     end
   end
+
 
   def payment_params
     params.require(:payment).permit(

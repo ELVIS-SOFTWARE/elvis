@@ -92,8 +92,7 @@ export default function myActivities() {
                 </div>
 
                 <div className="row mt-lg-3">
-
-                    <div className="col-xl-6 col-lg-11 no-padding h-100">
+                    <div className="col-xl-8 col-lg-11 no-padding h-100">
                         <div className="d-flex align-items-baseline justify-content-between mt-3 mx-4 mx-lg-0">
                             <div className="px-lg-4">
                                 <h4 className="title font-bold">MES ACTIVITÉS</h4>
@@ -147,7 +146,7 @@ export default function myActivities() {
                             }
                         </div>
                     </div>
-                    <div className="col-xl-3 col-lg-12 d-flex flex-column">
+                    <div className="col-xl-4 col-lg-12 d-flex flex-column">
                         <div className="d-flex align-items-baseline justify-content-between mt-3">
                             <h4 className="title font-bold">MES PROCHAINS COURS</h4>
                             <a href={window.location.href + "/upcoming"} className="font-weight-bold mr-4" style={{color: "#00334A"}}>Voir mon

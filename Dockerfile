@@ -1,4 +1,4 @@
-FROM ruby:3.3.2-slim AS build
+FROM ruby:3.3.3-slim AS build
 
 # Sets the path where the app is going to be installed
 ENV RAILS_ROOT /Elvis
@@ -112,7 +112,7 @@ RUN rm -r /usr/local/bundle/cache
 
 
 
-FROM ruby:3.3.2-slim AS release
+FROM ruby:3.3.3-slim AS release
 
 ENV RAILS_ROOT /Elvis
 ENV RAILS_ENV=kubernetes

@@ -115,9 +115,9 @@ All parameters in [] are optional, if you don't specify them, default values wil
     ```shell
     sudo usermod -a -G rvm $USER
     ```
-- install ruby version 3.0.2 
+- install ruby version 3.3.2 
   - ```shell
-    rvm install 3.0.2
+    rvm install 3.3.2
     ```
 - install bundler (bundle version is specified in the `Gemfile.lock` file) :
   ```shell
@@ -130,10 +130,10 @@ All parameters in [] are optional, if you don't specify them, default values wil
   - ```shell
     sudo apt-get install libpq-dev postgresql-client-14
     ```
-- install node version 14
+- install node version 20
   - direct install
     ```shell
-    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt-get install -y nodejs
     ```
   - install with nvm
@@ -141,7 +141,7 @@ All parameters in [] are optional, if you don't specify them, default values wil
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
     export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")" && \. "$NVM_DIR/nvm.sh"
     source $NVM_DIR/nvm.sh
-    nvm install 14
+    nvm install 20
     ```
 - install yarn in global
   ```shell
@@ -188,9 +188,9 @@ u.save!
 # Additional information
 ## Recommended versions
 - postgresql v14
-- node v14
-- ruby v3.0.2
-- rails v6.1.4.1
+- node v20
+- ruby v3.3.2
+- rails v6.1.7.8
 - elastic-search v7.16.3
 ## Soft restart
 - send `SIGUSR2` signal to process

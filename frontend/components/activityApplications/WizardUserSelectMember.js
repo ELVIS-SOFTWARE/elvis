@@ -348,7 +348,7 @@ export default class WizardUserSelectMember extends React.Component {
  */
 const renderUserItem = (currentUserId, user, i, isSelected) => <Fragment>
     <div className="d-inline-flex ml-0 mt-0 w-100 justify-content-between">
-        <div className="text-left ml-3">
+        <div className="text-left">
             <UserAvatar user={user} size={75}/>
             <h4 className="font-weight-bold" style={{color: "#00283B"}}>{user.full_name}</h4>
             <p style={{color: "#8AA4B1"}}>{new Date(user.birthday).toLocaleDateString()}</p>
