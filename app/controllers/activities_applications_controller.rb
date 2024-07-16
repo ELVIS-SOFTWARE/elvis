@@ -331,7 +331,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     activity_refs = activity_refs.filter { |ar| (ar["is_visible_to_admin"] || false) == false } unless current_user&.is_admin
 
-    all_max_prices = Rails.cache.fetch("wizard:activity_ref_max_prices", expires_in: 5.minutes) do
+    all_max_prices = Elvis::CacheUtils.cache_block_if_enabled("wizard:activity_ref_max_prices") do
       MaxActivityRefPriceForSeason
         .where(target_id: activity_refs.map{|a| a["id"]}.append(activity_refs.map{|a| a["activity_ref_kind_id"]}).uniq)
         .as_json
@@ -410,7 +410,7 @@ class ActivitiesApplicationsController < ApplicationController
     show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
     @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
 
-    @packs = Rails.cache.fetch("activity_refs_packs:season_#{Season.current.id}", expires_in: 5.minutes) do
+    @packs = Elvis::CacheUtils.cache_block_if_enabled("activity_refs_packs:season_#{Season.current.id}") do
       ActivityRefPricing
         .joins(:pricing_category)
         .for_season_id(Season.current.id)
