@@ -77,7 +77,7 @@ class ActivityApplication < ApplicationRecord
 
   # Check for the existence of a NewStudentLevelQuestionnaire for the specified activity, user, and season
   unless NewStudentLevelQuestionnaire.exists?(activity_ref_id: activity_ref.id, user_id: self.user_id, season_id: self.season_id)
-    # If the user does not have a level for this activity, assign a default level ("Débutant")
+    # If the user does not have a level for this activity, assign a default level ("DEBUTANT")
     unless self.user.levels.find_by(activity_ref_id: activity_ref.id)
       default_level = Level.new(activity_ref_id: activity_ref.id, season_id: self.season_id, evaluation_level_ref_id: EvaluationLevelRef::DEFAULT_LEVEL_REF_ID)
       self.user.levels << default_level
