@@ -295,7 +295,7 @@ function OtherActivityItem({user, season}) {
     //         .map(pa => `${_.get(pa, "desired_activity.activity_ref.label")} (X))`).join(" - ");
     // }
 
-    return <div className="card col-sm-5 col-xl-3 mr-4 "
+    return <div className="card col-sm-5 col-xl-3 mr-4 mb-4"
                 style={{border: "none", borderRadius: "12px"}}>
         <div className="d-inline-flex align-items-center justify-content-between p-3">
             <UserAvatar user={user} size={50} />
