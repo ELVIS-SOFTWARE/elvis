@@ -61,18 +61,16 @@ class ActivityInstance < ApplicationRecord
 
   # Returns inactive students from this activity_instance
   def inactive_students
-    lesson_time = self.time_interval && self.time_interval.start
+    lesson_time = self.time_interval&.start
 
-    return [] if !lesson_time
+    return [] unless lesson_time
 
-    students = self.activity.users
+    self.activity.users
       .joins(:activity_applications => :desired_activities)
-      .where("desired_activities.activity_id = ?
+        .where("desired_activities.activity_id = ?
               AND ((activity_applications.stopped_at IS NOT NULL AND (activity_applications.stopped_at AT TIME ZONE 'GMT' AT TIME ZONE 'Europe/Paris')::date <= ?::date)
               OR (activity_applications.begin_at AT TIME ZONE 'GMT' AT TIME ZONE 'Europe/Paris')::date > ?::date)",
              self.activity_id, lesson_time, lesson_time)
-
-    students
   end
 
   def change_cover_teacher(teacher_id)

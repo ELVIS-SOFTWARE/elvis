@@ -17,7 +17,7 @@ module Utils
                                       }
                                     },
                                     location: {},
-                                    room: {},
+                                    #room: {},
                                     time_interval: {
                                       include: :time_interval_preferences
                                     },
@@ -27,13 +27,25 @@ module Utils
                                     }
                                   })
 
-        time_pref = activity.time_interval.time_interval_preferences.where(user_id: user.id).first
+        time_pref = result.dig("time_interval", "time_interval_preferences").find{|tp| tp["user_id"] == user.id}
         result['rank'] = time_pref ?
-                           time_pref.rank + 1
+                           time_pref["rank"] + 1
                            : 0
 
         result["closest_lesson"] = instance&.time_interval&.start
-        result["users"] = instance&.active_students&.as_json(include: {
+
+        instance_users = activity.users&.includes({
+                                                    levels: {
+                                                      activity_ref: :activity_ref_kind,
+                                                      evaluation_level_ref: {}
+                                                    },
+                                                    activity_applications: {
+                                                      desired_activities: {}
+                                                    }
+                                                  })&.to_a || []
+        inactive_users_ids = instance&.inactive_students&.pluck(:id)&.to_a || []
+
+        result["users"] = instance_users.filter { |u| !inactive_users_ids.include?(u.id) }.as_json(include: {
                                                                levels: {
                                                                  include: {
                                                                    activity_ref: { include: [:activity_ref_kind] },
@@ -41,7 +53,7 @@ module Utils
                                                                  }
                                                                }
                                                              }) || []
-        result["inactive_users"] = instance&.inactive_students&.as_json(include: {
+        result["inactive_users"] = instance_users.filter { |u| inactive_users_ids.include?(u.id) }.as_json(include: {
                                                                           activity_applications: {
                                                                             include: {
                                                                               desired_activities: {}
