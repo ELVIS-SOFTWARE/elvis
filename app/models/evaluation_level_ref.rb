@@ -11,7 +11,12 @@
 #
 
 class EvaluationLevelRef < ApplicationRecord
+    extend Elvis::ConstantLike
+
     has_many :levels
+
+    DEFAULT_LEVEL_REF_ID = 1
+    DEFAULT_LEVEL_REF = find_or_create_by!(id: DEFAULT_LEVEL_REF_ID, label: 'DEBUTANT', value: 0, can_continue: false)
 
     def self.display_class_name(singular = true)
         singular ? "référentiel d'évaluation" : "référentiels d'évaluation"
