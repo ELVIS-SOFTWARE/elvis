@@ -319,16 +319,17 @@ class TimeInterval < ApplicationRecord
     query = TimeInterval
               .validated
               .where(start: (season.start..season.end))
-              .includes({ :activity => { :activity_ref => :activity_ref_kind } })
-              .joins({ :activity => { :activity_ref => :activity_ref_kind } })
+              .joins(:activity)
 
     if act_ref.activity_type == "child"
-      query = query.where("activity_refs.id = ?", act_ref.id)
+      query = query.where(activity: { activity_ref_id: act_ref.id })
     else
-      query = query.where("activity_ref_kinds.name = ?", act_ref.kind)
+      query = query
+                .joins({ activity: :activity_ref })
+                .where(activity: {activity_refs: {activity_ref_kind_id: act_ref.activity_ref_kind_id}})
     end
 
-    query.select do |i|
+    query.to_a.select do |i|
       self.to_iso.overlap_completely?(i.to_iso) &&
         busy.find_index { |b| i.to_iso.overlap_in_any_way?(b.to_iso) }.nil?
     end

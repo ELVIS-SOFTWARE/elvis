@@ -380,10 +380,23 @@ class Activity < ApplicationRecord
   end
 
   def closest_instance(from_date)
-    self
-      .activity_instances
-      .includes(:time_interval)
-      .min_by { |instance| (from_date - instance.time_interval.start).abs }
+    Elvis::CacheUtils.cache_block_if_enabled("activity:#{self.id}:closest_instance_from:#{from_date.to_date}") do
+      # Possiblement plus rapide, mais plus consommateur en mémoire/réseau/CPU du serveur rails
+      #self
+      #  .activity_instances
+      #  .includes(:time_interval)
+      #  n'est ps une methode traduite en sql ==> oblige à raméné toutes les instances pour avoir le min
+      #  .min_by { |instance| (from_date - instance.time_interval.start).abs }
+
+      self
+        .activity_instances
+        .joins(:time_interval)
+        .includes(:time_interval)
+        .select("activity_instances.*, min(abs(EXTRACT(EPOCH FROM ('#{from_date}'::timestamp - time_intervals.start)))) as time_from_date")
+        .group("activity_instances.id, time_intervals.id")
+        .order("time_from_date")
+        .first
+    end
   end
 
   def full_periods(period_start, period_end)

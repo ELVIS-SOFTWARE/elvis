@@ -73,23 +73,6 @@ class Summary extends React.Component {
     }
 
     loadData() {
-        fetch(`/inscriptions/${this.props.application.id}.json`, {
-            method: "GET",
-            credentials: "same-origin",
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                "Content-Type": "application/json",
-                pragma: "no-cache",
-                Accept: "application/json",
-            },
-        })
-            .then(response => response.json())
-            .then(application => {
-                const desiredActivities = application.desired_activities;
-                this.setState({
-                    desiredActivities,
-                });
-            });
         this.handleAlertProposal();
     }
 
