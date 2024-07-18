@@ -566,18 +566,32 @@ class ActivitiesApplicationsController < ApplicationController
         end
 
         levels = []
-        params[:application][:personalLevels].each do |id, level_param|
-          existing_level = Level.find_by(season_id: params[:application][:season_id], activity_ref_id: id, user_id: @user.id)
-          existing_level_questionnaire = NewStudentLevelQuestionnaire.find_by(user_id: @user.id, activity_ref_id: id, season_id: params[:application][:season_id])
 
-          if existing_level.nil? && existing_level_questionnaire.nil?
-            new_level = Level.new(activity_ref_id: id, evaluation_level_ref_id: level_param)
+        params[:application][:personalLevels].each do |activity_ref_id, level_param|
+          existing_level = Level.find_by(
+            season_id: params[:application][:season_id],
+            activity_ref_id: activity_ref_id,
+            user_id: @user.id
+          )
+
+          # Check if the activity_ref_id exists in levelQuestionnaireAnswers
+          existing_level_questionnaire = params[:application][:levelQuestionnaireAnswers].key?(activity_ref_id.to_s)
+
+          if existing_level_questionnaire
+            next
+          elsif existing_level.nil?
+            # If there is no questionnaire and no current level, create a new level
+            new_level = Level.new(
+              activity_ref_id: activity_ref_id,
+              evaluation_level_ref_id: level_param,
+              season_id: params[:application][:season_id]
+            )
             levels << new_level
-          else
-            levels << existing_level
           end
         end
-        @user.levels = levels
+
+        @user.levels = levels unless levels.empty?
+
 
         # enregistrement du niveau de l'élève
         # parcourir chaque selected activities
