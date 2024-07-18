@@ -324,8 +324,7 @@ class Activity < ApplicationRecord
   # @param [Season] season the season to refer
   # @return [Integer] the intended number of lessons for this activity
   def intended_nb_lessons(season = nil)
-    season = Season.current if season.nil?
-    activity_ref.nb_lessons || season.nb_lessons || 31
+    activity_ref.nb_lessons || (season || Season.current)&.nb_lessons || 31
   end
 
   # Computes and returns the number of existing activity instances for this activity
@@ -340,7 +339,7 @@ class Activity < ApplicationRecord
     #   .count("activity_instance.id")
 
     query = StudentAttendance
-              .includes(activity_instance: :time_interval)
+              .joins(activity_instance: :time_interval)
               .where(activity_instance: { activity_id: self.id })
 
     query = query.where("time_intervals.start > ?", from_date) if from_date
@@ -355,7 +354,7 @@ class Activity < ApplicationRecord
   # @return [Integer] the number of activity instances that the student was enrolled in
   def count_registered_instances_for_student(user_id, is_option = false)
     StudentAttendance
-      .includes(:activity_instance)
+      .joins(:activity_instance)
       .where(activity_instance: { activity_id: self.id }, user_id: user_id, is_option: is_option)
       .count
   end
@@ -366,13 +365,25 @@ class Activity < ApplicationRecord
   def calculate_prorata_for_student(user_id)
     # On calcule le nombre de séances manquées par l'utilisateur
     # (parce qu'il a commencé plus tard que le début des cours ou parce qu'il s'est arrêté plus tôt)
-    missed_lessons = count_lessons - count_registered_instances_for_student(user_id)
+
+    nb_lessons = count_lessons
+
+    missed_lessons = nb_lessons - count_registered_instances_for_student(user_id)
 
     # On déduit ce nombre de séances manquées du nombre de séances prévues pour ce cours
     # NB : la référence n'est pas le nombre de séances dans le planning (count(activity_instances))
     # mais le nombre de séances prévues pour l'activité (définition administrative, utilisée pour les calculs
     # des montants dûs)
-    intended_nb_lessons - missed_lessons
+
+    intended_lessons = intended_nb_lessons
+
+    if intended_lessons >= nb_lessons
+      intended_lessons - missed_lessons
+    else
+      res = nb_lessons - missed_lessons
+
+      (res.to_f * intended_lessons / nb_lessons).ceil
+    end
   end
 
   def count_active_instruments
