@@ -19,20 +19,18 @@ module NewStudentLevelQuestionnaires
 
         @answers.each do |id, val|
           question = Question.new_student_level_questionnaire.find(id)
+          existing_level = @user.levels.find_by(season: @season, activity_ref: @activity_ref, user_id: @user.id)
 
-          # Create beginner level if user has never practiced the instrument
-          if question == already_practiced_instrument && val == "false"
-            beginner_level_ref = EvaluationLevelRef.where(label: "DEBUTANT").first
-            @user.levels.find_or_create_by!(
-              season: @season,
-              activity_ref: @activity_ref,
-              evaluation_level_ref: beginner_level_ref,
-            ) if beginner_level_ref
-          else # Remove beginner level if user has practiced the instrument
-            @user.levels.find_by(
-              season: @season,
-              activity_ref: @activity_ref,
-            )&.destroy
+          # Create beginner level if user has never practiced the instrument and has no existing level
+          if existing_level.nil?
+            if question == already_practiced_instrument && val == "false"
+              beginner_level_ref = EvaluationLevelRef.where(label: "DEBUTANT").first
+              @user.levels.find_or_create_by!(
+                season: @season,
+                activity_ref: @activity_ref,
+                evaluation_level_ref: beginner_level_ref,
+              ) if beginner_level_ref
+            end
           end
 
           Answer.create!(
