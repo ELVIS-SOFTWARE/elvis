@@ -370,15 +370,18 @@ class UserForm extends React.PureComponent {
                                         }
                                     </div>
 
-                                    {this.props.displaySubmit && (
-                                        <button
-                                            type="submit"
-                                            disabled={submitting}
-                                            className="btn btn-primary btn-block"
-                                        >
-                                            {"Enregistrer"}
-                                        </button>
-                                    )}
+                                    <div className="mb-5 text-right">
+                                        {this.props.displaySubmit && (
+                                            <button
+                                                type="submit"
+                                                disabled={submitting}
+                                                className="btn btn-primary"
+                                            >
+                                                {"Enregistrer"}
+                                            </button>
+                                        )}
+                                    </div>
+
                                 </form>
                             );
                         }}
