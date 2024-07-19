@@ -333,7 +333,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     all_max_prices = Elvis::CacheUtils.cache_block_if_enabled("wizard:activity_ref_max_prices") do
       MaxActivityRefPriceForSeason
-        .where(target_id: activity_refs.map{|a| a["id"]}.append(activity_refs.map{|a| a["activity_ref_kind_id"]}).uniq)
+        .where(target_id: activity_refs.map { |a| a["id"] }.append(activity_refs.map { |a| a["activity_ref_kind_id"] }).uniq)
         .as_json
     end
 
@@ -605,12 +605,51 @@ class ActivitiesApplicationsController < ApplicationController
           @user.email = params[:application][:infos][:email]
         end
 
-        # levels = Array.new()
-        # params[:application][:personalLevels].each do |id, level|
-        #     level = Level.new(activity_ref_id: id, evaluation_level_ref_id: level)
-        #     levels << level
+        levels = []
+
+        params[:application][:personalLevels].each do |activity_ref_id, level_param|
+          existing_level = Level.find_by(
+            season_id: params[:application][:season_id],
+            activity_ref_id: activity_ref_id,
+            user_id: @user.id
+          )
+
+          # Check if the activity_ref_id exists in levelQuestionnaireAnswers
+          existing_level_questionnaire = params[:application][:levelQuestionnaireAnswers].key?(activity_ref_id.to_s)
+
+          if existing_level_questionnaire
+            next
+          elsif existing_level.nil?
+            # If there is no questionnaire and no current level, create a new level
+            new_level = Level.new(
+              activity_ref_id: activity_ref_id,
+              evaluation_level_ref_id: level_param,
+              season_id: params[:application][:season_id]
+            )
+            levels << new_level
+          end
+        end
+
+        @user.levels = levels unless levels.empty?
+
+
+        # enregistrement du niveau de l'élève
+        # parcourir chaque selected activities
+        # pour chaque selected activity, créer un niveau
+
+        # params[:application][:selectedActivities].map do |selected_id|
+        #   existing_level = Level.find_by(season_id: params[:application][:season_id], activity_ref_id: selected_id, user_id: @user.id)
+        #   existing_level_questionnaire = NewStudentLevelQuestionnaire.find_by(user_id: @user.id, activity_ref_id: selected_id, season_id: params[:application][:season_id])
+        #
+        #   # Create beginner level if user has no questionnaire and has no existing level
+        #   if existing_level.nil? && existing_level_questionnaire.nil?
+        #     @user.levels.find_or_create_by!(
+        #       season: @season,
+        #       activity_ref: @activity_ref,
+        #       evaluation_level_ref: EvaluationLevelRef::DEFAULT_LEVEL_REF_ID,
+        #     )
+        #   end
         # end
-        # @user.levels = levels
 
         @user.birthday = params[:application][:infos][:birthday]
         @user.sex = params[:application][:infos][:sex]
@@ -650,9 +689,6 @@ class ActivitiesApplicationsController < ApplicationController
         if payers
           @user.is_paying ||= payers.any? { |p| p == @user.id }
         end
-
-        # @user.skip_confirmation_notification!
-        @user.save!
 
         # enregistrement des consentements de l'élève
         params.dig(:application, :infos, :consent_docs)&.each do |doc|

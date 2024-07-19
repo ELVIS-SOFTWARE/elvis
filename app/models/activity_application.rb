@@ -67,23 +67,15 @@ class ActivityApplication < ApplicationRecord
     return :F
   end
 
- def add_activity(activity_ref_id, additional_student = nil)
-  activity_ref = ActivityRef.find(activity_ref_id)
+  def add_activity(activity_ref_id, additional_student = nil)
+    activity_ref = ActivityRef.find(activity_ref_id)
 
-  desired_activity = DesiredActivity.new(activity_ref: activity_ref)
-  self.desired_activities << desired_activity
+    desired_activity = DesiredActivity.new(activity_ref: activity_ref)
+    self.desired_activities << desired_activity
 
-  AdditionalStudent.create(desired_activity: desired_activity, user: additional_student) unless additional_student.nil?
+    AdditionalStudent.create(desired_activity: desired_activity, user: additional_student) unless additional_student.nil?
 
-  # Check for the existence of a NewStudentLevelQuestionnaire for the specified activity, user, and season
-  unless NewStudentLevelQuestionnaire.exists?(activity_ref_id: activity_ref.id, user_id: self.user_id, season_id: self.season_id)
-    # If the user does not have a level for this activity, assign a default level ("DEBUTANT")
-    unless self.user.levels.find_by(activity_ref_id: activity_ref.id)
-      default_level = Level.new(activity_ref_id: activity_ref.id, season_id: self.season_id, evaluation_level_ref_id: EvaluationLevelRef::DEFAULT_LEVEL_REF_ID)
-      self.user.levels << default_level
-    end
   end
- end
 
   def add_activities(activity_ref_ids, additional_students, family)
     activity_ref_ids.each do |activity_ref_id|
