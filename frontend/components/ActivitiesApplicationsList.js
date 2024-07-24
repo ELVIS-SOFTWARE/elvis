@@ -168,7 +168,7 @@ class ActivitiesApplicationsList extends React.Component {
 
                     let message = `<p>${data.message}</p>`;
                     if (data.errors.length > 0) {
-                        message += `<ul>Erreurs rencontrées</ul>`;
+                        message += `<ul>${data.errors.length} erreur(s) rencontrée(s)</ul>`;
                         data.errors.forEach(e => {
                             message += `<li>à la ligne ${e.line} : ${e.message}</li>`;
                         });
@@ -177,6 +177,7 @@ class ActivitiesApplicationsList extends React.Component {
                         title: "Import réussie",
                         html: message,
                         type: "success",
+                        width: "60%",
                     });
                 }
             });
