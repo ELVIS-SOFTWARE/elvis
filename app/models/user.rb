@@ -201,7 +201,7 @@ class User < ApplicationRecord
     base_params = ApplicationRecord.destroy_params
 
     base_params.merge({
-                        auto_deletable_references: [FamilyMemberUser, UserAddress, Adhesion, Planning, Student, Level, NewStudentLevelQuestionnaire, PreApplication, ConsentDocumentUser],
+                        auto_deletable_references: [FamilyMemberUser, UserAddress, Adhesion, Planning, Student, Level, NewStudentLevelQuestionnaire, PreApplication, ConsentDocumentUser, PayerPaymentTerms],
                         undeletable_message: "L'utilisateur ne peut pas être supprimé parce que:<br/>",
                         success_message: success_message
                       })
