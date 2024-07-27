@@ -1,8 +1,9 @@
 import React from "react";
 import * as api from "../../../tools/api";
 import swal from "sweetalert2";
-import ProgressBar from "@ramonak/react-progress-bar";
 import {throttle} from 'lodash';
+import JobProgress from "../../JobProgress";
+import ReactDOM from 'react-dom';
 
 export default class ReplicateWeekAct extends React.Component {
     constructor(props) {
@@ -14,8 +15,7 @@ export default class ReplicateWeekAct extends React.Component {
             endDate: '',
             replicateOnVac: undefined,
             jobSubmitted: false,
-            jobProgressValue: 0,
-            jobProgressText: ""
+            jobId: null
         };
 
         this.handleChangeDate = this.handleChangeDate.bind(this);
@@ -23,15 +23,25 @@ export default class ReplicateWeekAct extends React.Component {
         this.throttledSubmit = throttle(this.handleSubmit, 1000); // Limiter à 1 clic par seconde
     }
 
+     showJobProgressModal(jobId) {
+        const container = document.createElement('div');
+        ReactDOM.render(<JobProgress jobId={jobId} onError={(res) => swal({ title: "Erreur", text: res, type: "error" })} />, container);
+
+        swal.fire({
+            title: 'Suivi de la réplication',
+            html: container,
+            showCloseButton: true,
+            focusConfirm: false,
+            confirmButtonText: 'OK',
+        });
+    }
+
     render() {
         const { replicationMaxDelay = 14 } = this.props;
-        const {refWeekDate, startDate, endDate, jobSubmitted} = this.state;
+        const {refWeekDate, startDate, endDate, jobSubmitted, jobId} = this.state;
         const maxEndDate = startDate ?
             new Date(new Date(startDate).getTime() + (replicationMaxDelay * 24 * 60 * 60 * 1000)).toISOString().split('T')[0]
             : ''
-
-        console.log("props", this.props);
-        console.log("replicationMaxDelay", replicationMaxDelay);
 
         return <div className="row">
             <div className="col-md-12">
@@ -100,35 +110,11 @@ export default class ReplicateWeekAct extends React.Component {
 
                 {refWeekDate && startDate && endDate ?
                     <button className="btn btn-success" onClick={this.throttledSubmit}
-                            disabled={this.state.jobSubmitted}>Valider</button>
-                    : ""
-                }
-            </div>
-            <div className="col-md-12 my-3">
-                {this.state.jobSubmitted ?
-                    <div>
-                        <ProgressBar completed={this.state.jobProgressValue}/>
-                        <p>{this.state.jobProgressText}</p>
-                    </div>
+                            disabled={jobSubmitted}>Valider</button>
                     : ""
                 }
             </div>
         </div>
-    }
-
-    trackProgress(jobId) {
-        api.set()
-            .success(({jobStatus}) => {
-                // update progress bar
-                this.setState({
-                    jobProgressValue: Math.round(jobStatus.progress / jobStatus.total * 100),
-                    jobProgressText: jobStatus.step
-                })
-                if (jobStatus.status !== "completed" && jobStatus.status !== "failed")
-                    setTimeout(() => this.trackProgress(jobId), 1000);
-            })
-            .error(res => swal({title: "Erreur", text: res, type: "error"}))
-            .get("/scripts/replicate_week_activities/job_status", {jobId: jobId});
     }
 
     handleChangeDate(event) {
@@ -157,14 +143,11 @@ export default class ReplicateWeekAct extends React.Component {
                     refWeekDate: [],
                     startDate: undefined,
                     endDate: undefined,
-                    replicateOnVac: undefined
+                    replicateOnVac: undefined,
+                    jobId: res.jobId
                 });
-                this.trackProgress(res.jobId);
-                swal({
-                    title: "Réplication en cours...",
-                    type: "success",
-                    confirmButtonText: "Ok"
-                });
+
+                this.showJobProgressModal(res.jobId);
 
             })
             .error(res => swal({title: "Erreur", text: res, type: "error"}))

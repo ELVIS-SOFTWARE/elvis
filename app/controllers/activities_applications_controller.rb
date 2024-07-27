@@ -219,7 +219,7 @@ class ActivitiesApplicationsController < ApplicationController
                                               .where(
                                                 season: activity_application.season,
                                                 activity_ref: activity_application.desired_activities.map(&:activity_ref),
-                                                )
+                                              )
                                               .as_json(include: { answers: {}, activity_ref: { include: [:activity_ref_kind] } })
 
         @student_evaluations = {
@@ -632,7 +632,6 @@ class ActivitiesApplicationsController < ApplicationController
 
         @user.levels = levels unless levels.empty?
 
-
         # enregistrement du niveau de l'élève
         # parcourir chaque selected activities
         # pour chaque selected activity, créer un niveau
@@ -949,20 +948,21 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def create_import_csv
-    importer_name = Parameter.get_value('activity_applications.importer_name')
-    importer = case importer_name
-               when 'tes_importer'
-                 ActivityApplications::TesImporter.new params[:file]
-               else
-                 nil
-               end
+    begin
 
-    render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if importer.nil?
+      # save file to file with GUID as filename
+      file_path = 'tmp/' + SecureRandom.uuid
+      file_content = File.binread(params[:file].path).force_encoding('UTF-8')
+      File.write(file_path, file_content)
 
-    result = importer.call
+      job = CsvImporterJob.perform_later(file_path, "ActivityApplications::TesImportHandler")
 
-    status = result.delete(:status)
-    render json: result, status: status
+    rescue StandardError, NoMemoryError => e
+      render json: { errors: e }, status: 500
+      return
+    end
+
+    render json: { jobId: job.job_id }
   end
 
   def bulk_update
