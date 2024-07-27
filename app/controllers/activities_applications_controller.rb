@@ -947,7 +947,17 @@ class ActivitiesApplicationsController < ApplicationController
     end
   end
 
+
   def create_import_csv
+    handler_class_name = case Parameter.get_value('activity_applications.importer_name')
+               when 'tes_importer'
+                  "ActivityApplications::TesImportHandler"
+               else
+                 nil
+               end
+
+    render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if handler_class_name.nil?
+
     begin
 
       # save file to file with GUID as filename
@@ -955,7 +965,7 @@ class ActivitiesApplicationsController < ApplicationController
       file_content = File.binread(params[:file].path).force_encoding('UTF-8')
       File.write(file_path, file_content)
 
-      job = CsvImporterJob.perform_later(file_path, "ActivityApplications::TesImportHandler")
+      job = CsvImporterJob.perform_later(file_path, handler_class_name)
 
     rescue StandardError, NoMemoryError => e
       render json: { errors: e }, status: 500
