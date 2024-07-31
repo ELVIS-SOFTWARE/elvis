@@ -689,6 +689,8 @@ class ActivitiesApplicationsController < ApplicationController
           @user.is_paying ||= payers.any? { |p| p == @user.id }
         end
 
+        @user.save!
+
         # enregistrement des consentements de l'élève
         params.dig(:application, :infos, :consent_docs)&.each do |doc|
 
@@ -888,6 +890,8 @@ class ActivitiesApplicationsController < ApplicationController
             @pack_created = true
           end
         end
+
+        @user.save!
       end
 
       begin
