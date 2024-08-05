@@ -34,7 +34,8 @@ const GeneralInfos = ({
                                 <label className="small" style={{color: "#003E5C"}}>Civilité</label><br/>
                                 <div className="d-inline-flex">
                                     {genders.map((gender, index) => (
-                                        <div key={index} className="mr-5" style={{color: "#155979", fontWeight: "light"}}>
+                                        <div key={index} className="mr-5"
+                                             style={{color: "#155979", fontWeight: "light"}}>
                                             <Field
                                                 id={`${input.name}-${gender.value}`}
                                                 name={input.name}
@@ -45,11 +46,14 @@ const GeneralInfos = ({
                                                 onChange={input.onChange}
                                                 className="mr-2"
                                             />
-                                            <label key={`${input.name}-${gender.value}`} htmlFor={`${input.name}-${gender.value}`}>{gender.label}</label>
+                                            <label key={`${input.name}-${gender.value}`}
+                                                   htmlFor={`${input.name}-${gender.value}`}>{gender.label}</label>
                                         </div>
                                     ))}
                                 </div>
-                                {meta.touched && meta.error && <span>{meta.error}</span>}
+                                <div>
+                                    {meta.touched && meta.error && <span className="text-danger">{meta.error}</span>}
+                                </div>
                             </div>
                         )}
                     </Field>
