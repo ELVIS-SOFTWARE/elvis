@@ -189,16 +189,16 @@ class TimeIntervalController < ApplicationController
 
   def create_activity_instances
     availability = TimeInterval.includes(
-        :time_slots, 
-        :plannings,
+      :time_slots,
+      :plannings,
       ).find(params[:activity][:availabilityTimeIntervalId])
 
     intervals = []
     teacher_id = params[:activity][:teachers].to_unsafe_h.key(true)
-    
+
     Activity.transaction do
       interval = availability.deep_clone
-      
+
       activity_ref = ActivityRef.find(params[:activity][:activityRefId])
       room = Room.find(params[:activity][:roomId])
       location = room.location
@@ -209,10 +209,10 @@ class TimeIntervalController < ApplicationController
         room: room,
         location: location,
         instruments: activity_ref.instruments, # instantiates ref's template positions
-      )
+        )
       activity.add_teacher(teacher_id, true)
 
-      # NOTE Pourquoi fait-on un reload ici ?
+      # NOTE Pourquoi fait-on un reload ici ?
       # Il y avait un problème de synchro de données avec la base
       activity.teachers_activities.reload
 
@@ -231,13 +231,8 @@ class TimeIntervalController < ApplicationController
         end: DateTime.parse(i[:end]),
       } })
 
-      if intervals.select{ |i| i.start == availability.start && i.end == availability.end }.any?
-        availability.destroy!
-      else
-        # front end assumes availability will be deleted
-        # give it back if it isn't supposed to be deleted
-        intervals << availability
-      end
+      # Supprimer l'intervalle de disponibilité initial
+      availability.destroy!
     end
 
     Activities::AssignGroupsNames
