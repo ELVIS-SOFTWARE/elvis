@@ -47,7 +47,8 @@ class RoomsController < ApplicationController
       :endTime,
       :recurrence,
       :fromDate,
-      :toDate
+      :toDate,
+      :activityRefId,
     )
 
     interval = TimeInterval.new({start: ti_params[:startTime], end: ti_params[:endTime]})
@@ -62,12 +63,21 @@ class RoomsController < ApplicationController
       from_date = ti_params[:fromDate]&.to_date
       to_date = ti_params[:toDate]&.to_date
     end
-    
+
+
     # on récupère la liste des salles
-    @rooms = Room.order(label: :asc)
+    if(ti_params[:activityRefId])
+    room_id = RoomActivity.where(activity_ref_id: ti_params[:activityRefId]).pluck(:room_id)
+    @rooms = Room.where(id: room_id)
+    else
+      @rooms = Room.order(label: :asc)
+    end
+
+
+
     rooms_json = @rooms.as_json(
-      except: [:created_at, :updated_at, :deleted_at, 
-        :authentication_token, :authentication_token_created_at, :first_connection, :is_creator] )
+      except: [:created_at, :updated_at, :deleted_at,
+               :authentication_token, :authentication_token_created_at, :first_connection, :is_creator] )
         
     # et on l'enrichit avec leur disponibilité
     i = 0

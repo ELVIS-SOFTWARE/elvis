@@ -43,13 +43,15 @@ export default class AddLocationForCourse extends React.Component {
             toDate,
             firstDayStartTime,
             firstDayEndTime,
+            activityRefId,
         } = this.props.initialValues;
         api.get(
-            `/rooms/index_with_overlap?fromDate=${fromDate}&toDate=${toDate}&startTime=${firstDayStartTime}&endTime=${firstDayEndTime}`
+            `/rooms/index_with_overlap?fromDate=${fromDate}&toDate=${toDate}&startTime=${firstDayStartTime}&endTime=${firstDayEndTime}&activityRefId=${activityRefId}`
         ).then(({ data, error }) => {
             if (error) {
                 console.log(error);
             } else {
+                console.log(data)
                 this.setState({
                     ...this.state,
                     rooms: data,
