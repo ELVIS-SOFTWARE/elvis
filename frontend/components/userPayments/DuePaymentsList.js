@@ -109,7 +109,7 @@ class DuePaymentsList extends React.Component {
                     payment_method_id: this.state.payment_method_id,
                     specialDues: this.state.specialDues,
                     adhesionNewDuePayment: this.state.adhesionNewDuePayment,
-                    isolateAdhesion: this.state.adhesionIsolated,
+                    // isolateAdhesion: this.state.adhesionIsolated,
                 }),
                 numberOfDuePaymentsSelect: numberOfDuePayments,
             });
@@ -126,14 +126,14 @@ class DuePaymentsList extends React.Component {
                 payment_method_id: this.state.payment_method_id,
                 specialDues: this.state.specialDues,
                 adhesionNewDuePayment: this.state.adhesionNewDuePayment,
-                isolateAdhesion: this.state.adhesionIsolated,
+                // isolateAdhesion: this.state.adhesionIsolated,
             }),
         });
     }
 
-    handleAddAdhesionToSchedule(e) {
-        this.setState({ adhesionIncluded: e.target.checked });
-    }
+    // handleAddAdhesionToSchedule(e) {
+    //     this.setState({ adhesionIncluded: e.target.checked });
+    // }
 
     handleCreateDuePaymentForAdhesion(e) {
         this.setState({
@@ -144,24 +144,24 @@ class DuePaymentsList extends React.Component {
                 payment_method_id: this.state.payment_method_id,
                 specialDues: this.state.specialDues,
                 adhesionNewDuePayment: e.target.checked,
-                isolateAdhesion: this.state.adhesionIsolated,
+                // isolateAdhesion: this.state.adhesionIsolated,
             }),
         });
     }
 
-    handleIsolateDuePaymentForAdhesion(e) {
-        this.setState({
-            adhesionIsolated: e.target.checked,
-            generatedDuePayments: this.generateDuePayments({
-                startingDate: this.state.startingDate,
-                n: this.state.numberOfDuePayments,
-                payment_method_id: this.state.payment_method_id,
-                specialDues: this.state.specialDues,
-                adhesionNewDuePayment: this.state.adhesionNewDuePayment,
-                isolateAdhesion: e.target.checked,
-            }),
-        });
-    }
+    // handleIsolateDuePaymentForAdhesion(e) {
+    //     this.setState({
+    //         adhesionIsolated: e.target.checked,
+    //         generatedDuePayments: this.generateDuePayments({
+    //             startingDate: this.state.startingDate,
+    //             n: this.state.numberOfDuePayments,
+    //             payment_method_id: this.state.payment_method_id,
+    //             specialDues: this.state.specialDues,
+    //             adhesionNewDuePayment: this.state.adhesionNewDuePayment,
+    //             isolateAdhesion: e.target.checked,
+    //         }),
+    //     });
+    // }
 
     handleSelectPaymentMethodForNewDuePayment(e) {
         this.setState({
@@ -244,11 +244,19 @@ class DuePaymentsList extends React.Component {
             .filter(item => adhesionNewDuePayment && isolateAdhesion || item.adhesionPriceId == null)
             .reduce((acc, i) => acc + i.discountedTotal, 0) - _.reduce(specialDues, (acc, due) => acc + due.count * due.amount, 0);
 
+        // Répartir l'adhesionPrice sur toutes les échéances si dates.length et adhesionPrice > 0
+        let distributedAdhesionPrice = 0;
+        if (!adhesionNewDuePayment && adhesionPrice > 0 && dates.length > 0) {
+            distributedAdhesionPrice = adhesionPrice / dates.length;
+        }
+
         const duePayments = _.map(dates, (date, i) => {
             let amount = (totalLeft / number);
 
             if (i == 0 && adhesionNewDuePayment && isolateAdhesion)
                 amount -= adhesionPrice;
+
+            amount += distributedAdhesionPrice;
 
             return {
                 id: starting_number + i + 1,
@@ -1076,124 +1084,124 @@ class DuePaymentsList extends React.Component {
                                                 </label>
                                             </div>
                                         </div>
-                                        <div className="form-group">
-                                            <div className="checkbox checkbox-primary">
-                                                <input
-                                                    type="checkbox"
-                                                    id="isolate"
-                                                    name="isolate"
-                                                    checked={
-                                                        this.state.isolateAdhesion
-                                                    }
-                                                    onChange={e => this.handleIsolateDuePaymentForAdhesion(e)}
-                                                />
-                                                <label
-                                                    className="control-label"
-                                                    htmlFor="isolate">
-                                                    Montant adhésion à déduire de la première échéance
-                                                </label>
-                                            </div>
-                                        </div>
+                                        {/*<div className="form-group">*/}
+                                            {/*<div className="checkbox checkbox-primary">*/}
+                                            {/*    <input*/}
+                                            {/*        type="checkbox"*/}
+                                            {/*        id="isolate"*/}
+                                            {/*        name="isolate"*/}
+                                            {/*        checked={*/}
+                                            {/*            this.state.isolateAdhesion*/}
+                                            {/*        }*/}
+                                            {/*        onChange={e => this.handleIsolateDuePaymentForAdhesion(e)}*/}
+                                            {/*    />*/}
+                                            {/*    <label*/}
+                                            {/*        className="control-label"*/}
+                                            {/*        htmlFor="isolate">*/}
+                                            {/*        Montant adhésion à déduire de la première échéance*/}
+                                            {/*    </label>*/}
+                                            {/*</div>*/}
+                                        {/*</div>*/}
                                     </Fragment>}
-                                <div className="form-group">
-                                    <div className="checkbox checkbox-primary">
-                                        <input
-                                            type="checkbox"
-                                            onChange={e => this.setState({
-                                                areSpecialDues: e.target.checked,
-                                                specialDues: {},
-                                                generatedDuePayments: this.generateDuePayments({
-                                                    startingDate: this.state.startingDate,
-                                                    n: this.state.numberOfDuePayments,
-                                                    payment_method_id: this.state.payment_method_id,
-                                                    adhesionNewDuePayment: this.state.adhesionNewDuePayment,
-                                                    isolateAdhesion: this.state.adhesionIsolated,
-                                                }),
-                                            })}
-                                            checked={this.state.areSpecialDues}
-                                            id={"special"} />
-                                        <label
-                                            className="control-label"
-                                            htmlFor="special">
-                                            Échéances spéciales
-                                        </label>
-                                    </div>
-                                </div>
-                                {
-                                    this.state.areSpecialDues ?
-                                        <div className="form-group">
-                                            <label>Echeances spéciales</label>
-                                            <table className="table table-bordered">
-                                                <thead>
-                                                <tr>
-                                                    <th>Moyen de paiement</th>
-                                                    <th>Nombre échéances</th>
-                                                    <th>Montant</th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {
-                                                    _(this.props.paymentMethods)
-                                                        .filter(pm => pm.is_special === true)
-                                                        .map(pm => <tr key={pm.id}>
-                                                            <td>{pm.label}</td>
-                                                            <td>
-                                                                <input
-                                                                    type="text"
-                                                                    onKeyUp={e => {
-                                                                        const specialDues = {
-                                                                            ...this.state.specialDues,
-                                                                            [pm.id]: {
-                                                                                ...this.state.specialDues[pm.id] || {},
-                                                                                count: parseInt(e.target.value) || 0,
-                                                                            },
-                                                                        };
-                                                                        this.setState({
-                                                                            specialDues,
-                                                                            generatedDuePayments: this.generateDuePayments({
-                                                                                startingDate: this.state.startingDate,
-                                                                                n: this.state.numberOfDuePayments,
-                                                                                payment_method_id: this.state.payment_method_id,
-                                                                                specialDues,
-                                                                                adhesionNewDuePayment: this.state.adhesionNewDuePayment,
-                                                                                isolateAdhesion: this.state.adhesionIsolated,
-                                                                            }),
-                                                                        });
-                                                                    }} />
-                                                            </td>
-                                                            <td>
-                                                                <input
-                                                                    type="text"
-                                                                    onKeyUp={e => {
-                                                                        const specialDues = {
-                                                                            ...this.state.specialDues,
-                                                                            [pm.id]: {
-                                                                                ...this.state.specialDues[pm.id],
-                                                                                amount: parseFloat(e.target.value) || 0,
-                                                                            },
-                                                                        };
+                                {/*<div className="form-group">*/}
+                                    {/*<div className="checkbox checkbox-primary">*/}
+                                    {/*    <input*/}
+                                    {/*        type="checkbox"*/}
+                                    {/*        onChange={e => this.setState({*/}
+                                    {/*            areSpecialDues: e.target.checked,*/}
+                                    {/*            specialDues: {},*/}
+                                    {/*            generatedDuePayments: this.generateDuePayments({*/}
+                                    {/*                startingDate: this.state.startingDate,*/}
+                                    {/*                n: this.state.numberOfDuePayments,*/}
+                                    {/*                payment_method_id: this.state.payment_method_id,*/}
+                                    {/*                adhesionNewDuePayment: this.state.adhesionNewDuePayment,*/}
+                                    {/*                isolateAdhesion: this.state.adhesionIsolated,*/}
+                                    {/*            }),*/}
+                                    {/*        })}*/}
+                                    {/*        checked={this.state.areSpecialDues}*/}
+                                    {/*        id={"special"} />*/}
+                                    {/*    <label*/}
+                                    {/*        className="control-label"*/}
+                                    {/*        htmlFor="special">*/}
+                                    {/*        Échéances spéciales*/}
+                                    {/*    </label>*/}
+                                    {/*</div>*/}
+                                {/*</div>*/}
+                                {/*{*/}
+                                {/*    this.state.areSpecialDues ?*/}
+                                {/*        <div className="form-group">*/}
+                                {/*            <label>Echeances spéciales</label>*/}
+                                {/*            <table className="table table-bordered">*/}
+                                {/*                <thead>*/}
+                                {/*                <tr>*/}
+                                {/*                    <th>Moyen de paiement</th>*/}
+                                {/*                    <th>Nombre échéances</th>*/}
+                                {/*                    <th>Montant</th>*/}
+                                {/*                </tr>*/}
+                                {/*                </thead>*/}
+                                {/*                <tbody>*/}
+                                {/*                {*/}
+                                {/*                    _(this.props.paymentMethods)*/}
+                                {/*                        .filter(pm => pm.is_special === true)*/}
+                                {/*                        .map(pm => <tr key={pm.id}>*/}
+                                {/*                            <td>{pm.label}</td>*/}
+                                {/*                            <td>*/}
+                                {/*                                <input*/}
+                                {/*                                    type="text"*/}
+                                {/*                                    onKeyUp={e => {*/}
+                                {/*                                        const specialDues = {*/}
+                                {/*                                            ...this.state.specialDues,*/}
+                                {/*                                            [pm.id]: {*/}
+                                {/*                                                ...this.state.specialDues[pm.id] || {},*/}
+                                {/*                                                count: parseInt(e.target.value) || 0,*/}
+                                {/*                                            },*/}
+                                {/*                                        };*/}
+                                {/*                                        this.setState({*/}
+                                {/*                                            specialDues,*/}
+                                {/*                                            generatedDuePayments: this.generateDuePayments({*/}
+                                {/*                                                startingDate: this.state.startingDate,*/}
+                                {/*                                                n: this.state.numberOfDuePayments,*/}
+                                {/*                                                payment_method_id: this.state.payment_method_id,*/}
+                                {/*                                                specialDues,*/}
+                                {/*                                                adhesionNewDuePayment: this.state.adhesionNewDuePayment,*/}
+                                {/*                                                isolateAdhesion: this.state.adhesionIsolated,*/}
+                                {/*                                            }),*/}
+                                {/*                                        });*/}
+                                {/*                                    }} />*/}
+                                {/*                            </td>*/}
+                                {/*                            <td>*/}
+                                {/*                                <input*/}
+                                {/*                                    type="text"*/}
+                                {/*                                    onKeyUp={e => {*/}
+                                {/*                                        const specialDues = {*/}
+                                {/*                                            ...this.state.specialDues,*/}
+                                {/*                                            [pm.id]: {*/}
+                                {/*                                                ...this.state.specialDues[pm.id],*/}
+                                {/*                                                amount: parseFloat(e.target.value) || 0,*/}
+                                {/*                                            },*/}
+                                {/*                                        };*/}
 
-                                                                        this.setState({
-                                                                            specialDues,
-                                                                            generatedDuePayments: this.generateDuePayments({
-                                                                                startingDate: this.state.startingDate,
-                                                                                n: this.state.numberOfDuePayments,
-                                                                                payment_method_id: this.state.payment_method_id,
-                                                                                specialDues,
-                                                                                adhesionNewDuePayment: this.state.adhesionNewDuePayment,
-                                                                                isolateAdhesion: this.state.adhesionIsolated,
-                                                                            }),
-                                                                        });
-                                                                    }} />
-                                                            </td>
-                                                        </tr>)
-                                                        .value()
-                                                }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        : null
-                                }
+                                {/*                                        this.setState({*/}
+                                {/*                                            specialDues,*/}
+                                {/*                                            generatedDuePayments: this.generateDuePayments({*/}
+                                {/*                                                startingDate: this.state.startingDate,*/}
+                                {/*                                                n: this.state.numberOfDuePayments,*/}
+                                {/*                                                payment_method_id: this.state.payment_method_id,*/}
+                                {/*                                                specialDues,*/}
+                                {/*                                                adhesionNewDuePayment: this.state.adhesionNewDuePayment,*/}
+                                {/*                                                isolateAdhesion: this.state.adhesionIsolated,*/}
+                                {/*                                            }),*/}
+                                {/*                                        });*/}
+                                {/*                                    }} />*/}
+                                {/*                            </td>*/}
+                                {/*                        </tr>)*/}
+                                {/*                        .value()*/}
+                                {/*                }*/}
+                                {/*                </tbody>*/}
+                                {/*            </table>*/}
+                                {/*        </div>*/}
+                                {/*        : null*/}
+                                {/*}*/}
                                 <div className="form-group">
                                     <label>Nombre d’échéances</label>
                                     <select
