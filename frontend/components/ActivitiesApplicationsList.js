@@ -401,14 +401,16 @@ class ActivitiesApplicationsList extends React.Component {
         });
     }
 
-    statusFilterContainsTerminalStatus()
-    {
-        const statusFilter = [...this.state.data]
-            .filter(f => (this.state.bulkTargets || []).includes(f.id))
-            .map(f => f.activity_application_status_id);
+    statusFilterContainsTerminalStatus() {
+        const selectedData = this.state.bulkTargets === "all"
+            ? this.state.data
+            : this.state.data.filter(f => this.state.bulkTargets.includes(f.id));  // Sinon, filtrer par les IDs sélectionnés
+
+        const statusFilter = selectedData.map(f => f.activity_application_status_id);
 
         return statusFilter.some(s => [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s));
     }
+
 
     render() {
         const activitiesFilterOptions = _.chain(this.props.activities)
