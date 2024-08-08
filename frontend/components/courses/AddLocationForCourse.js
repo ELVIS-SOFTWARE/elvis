@@ -51,7 +51,6 @@ export default class AddLocationForCourse extends React.Component {
             if (error) {
                 console.log(error);
             } else {
-                console.log(data)
                 this.setState({
                     ...this.state,
                     rooms: data,

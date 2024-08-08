@@ -67,8 +67,8 @@ class RoomsController < ApplicationController
 
     # on récupère la liste des salles
     if(ti_params[:activityRefId])
-    room_id = RoomActivity.where(activity_ref_id: ti_params[:activityRefId]).pluck(:room_id)
-    @rooms = Room.where(id: room_id)
+    room_ids = RoomActivity.where(activity_ref_id: ti_params[:activityRefId]).pluck(:room_id)
+    @rooms = Room.where(id: room_ids).order(label: :asc)
     else
       @rooms = Room.order(label: :asc)
     end
