@@ -5,6 +5,7 @@ import Input from "../common/Input";
 import InputSelect from "../common/InputSelect";
 import {toBirthday, toAge} from "../../tools/format";
 import CreateOrganizationModal from "./CreateOrganizationModal";
+import { MESSAGES } from "../../tools/constants";
 
 const genders = [
     {value: "F", label: "Madame"},
@@ -52,7 +53,7 @@ const GeneralInfos = ({
                                     ))}
                                 </div>
                                 <div>
-                                    {meta.touched && meta.error && <span className="text-danger">{meta.error}</span>}
+                                    {meta.touched && meta.error && <span className="text-danger">{MESSAGES[meta.error]}</span>}
                                 </div>
                             </div>
                         )}

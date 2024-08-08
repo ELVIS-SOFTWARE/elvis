@@ -54,7 +54,7 @@ export const isValidNN = value => {
 }
 
 export const required = value =>
-    !value || isEmpty(value) ? "Cette information est requise." : undefined;
+    !value || isEmpty(value) ? "err_required" : undefined;
 
 export const ordCheck = (b, ord, formatB = x => x) => a => {
     switch(ord) {
