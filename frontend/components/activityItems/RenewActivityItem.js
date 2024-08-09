@@ -17,7 +17,7 @@ class RenewActivityItem extends React.Component {
     constructor(props) {
         super(props);
 
-        const activity_application_status_id = _.get(this.props.default_activity_status_id);
+        const activity_application_status_id = _.get(this.props, "pre_application_activity.activity_application.activity_application_status_id");
 
         this.state = {
             preApplicationActivity: this.props.pre_application_activity,

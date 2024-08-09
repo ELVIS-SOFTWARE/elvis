@@ -177,8 +177,7 @@ class PreApplication extends React.Component {
                         </div>
                         <div className="row m-2">
                             <h4 className="mb-5" style={{color: "#8AA4B1"}}>
-                                Inscription aux activités de la
-                                saison {` ${moment(this.props.season.start).format("YYYY")}/${moment(this.props.season.end).format("YYYY")}`}
+                                Inscription aux activités de la {` ${this.props.season.label}`}
                             </h4>
                             <div className="col-xl-6 d-md-inline-flex justify-content-between p-0 pr-md-5 pr-xl-0">
                                 <div className="card col mr-3 mb-3"
@@ -269,7 +268,7 @@ class PreApplication extends React.Component {
                     <div className="row col-md-12 p-0">
                         {this.props.family_users.length > 0 ?
                             <Fragment>
-                                <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Autres inscription dans la famille</h3>
+                                <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Autres inscriptions dans la famille</h3>
                                 {othersActivities}
                             </Fragment> : null}
                     </div>
