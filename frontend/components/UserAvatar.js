@@ -4,8 +4,8 @@ export default function UserAvatar({ user, size }) {
     const userFullName = user.full_name ? user.full_name : `${user.first_name} ${user.last_name}`
     const userInitials = userFullName.split(' ').map(name => name[0]).join('');
     return (
-        user.avatar_url ? (
-                <img src={user.avatar_url} alt="avatar" style={{
+        user.avatar ? (
+                <img src={user.avatar} alt="avatar" style={{
                     borderRadius: "50%",
                     width: `${size}px`,
                     height: `${size}px`,
