@@ -1545,8 +1545,18 @@ const ActivitySelection = ({
 
 const LocationSelection = ({locations, locationId, handleSelectLocation}) => {
 
-    const defaultLocation = locations.length === 1 ? locations[0].id : 0;
-
+    if (locations.length === 1) {
+        return (
+            <div>
+                <label className="control-label">
+                    Lieu
+                </label>
+                <p className="form-control-static">
+                    {locations[0].label}
+                </p>
+            </div>
+        );
+    }
 
     return (
         <form>
