@@ -28,21 +28,21 @@ default: &default
 
 development:
   <<: *default
-  database: elvis
+  database: cem_020424
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
   # When left blank, postgres will use the default role. This is
   # the same name as the operating system user that initialized the database.
-  username: elvis
+  username: dim145
 
   # The password associated with the postgres role (username).
-  password: elvis
+  password: ku-IMbEE@d*r-ey
 
   # Connect on a TCP socket. Omitted by default since the client uses a
   # domain socket that doesn't need configuration. Windows does not have
   # domain sockets, so uncomment these lines.
-  host: 127.0.0.1
+  host: host.docker.internal
 
   # The TCP port the server listens on. Defaults to 5432.
   # If your server runs on a different port number, change accordingly.
@@ -61,6 +61,6 @@ kubernetes:
   <<: *default
   database: <%= ENV['ELVIS_DB'] %>
   username: <%= ENV['ELVIS_DB_USER'] %>
-  password: <%= ENV['ELVIS_DB_PASS'] %>
+  password: "<%= ENV['ELVIS_DB_PASS'] %>"
   host: <%= ENV['ELVIS_DB_HOST'] %>
   port: <%= ENV['ELVIS_DB_PORT'] %>
