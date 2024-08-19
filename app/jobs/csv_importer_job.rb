@@ -84,6 +84,8 @@ class CsvImporterJob < ApplicationJob
     message = "#{current_line} lignes traitées - #{total_activity_applications_created} inscriptions créées et #{total_ignored_activities} inscriptions existantes ignorées."
     status[:step] = message
     status[:errors] = errors
+
+    progress.finish
   end
 
 end

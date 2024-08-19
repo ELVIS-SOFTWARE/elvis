@@ -78,7 +78,6 @@ Question.create!([
 
 # =============================================================================
 EvaluationLevelRef.create!([
-                             { value: 0, label: "DEBUTANT", can_continue: false },
                              { value: 1, label: "1 AN", can_continue: false },
                              { value: 2, label: "2 ANS", can_continue: false },
                              { value: 3, label: "3 ANS", can_continue: false },
