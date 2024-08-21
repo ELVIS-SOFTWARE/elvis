@@ -263,17 +263,17 @@ form
 
         # Définir une structure de données pour les cas possibles
         cases = [
-          { match: /eveil musical/i, name: "eveil musical 5-7 ans", label: "eveil musical (5 à 7 ans)" },
-          { match: /chorale musiques actuelles/i, name: "chant", label: "chorale musiques actuelles ados / adultes" },
-          { match: /solfège gratuit/i, name: "chant", label: "solfège gratuit (mercredi 14h-15h)" },
-          { match: /solfège en ligne/i, name: "chant", label: "solfège en ligne" },
+          { match: /eveil musical/i, ark_name: "eveil musical 5-7 ans", label: "eveil musical (5 à 7 ans)" },
+          { match: /chorale musiques actuelles/i, ark_name: "chant", label: "chorale musiques actuelles ados / adultes" },
+          { match: /solfège gratuit/i, ark_name: "solfège", label: "solfège gratuit (mercredi 14h-15h)" },
+          { match: /solfège en ligne/i, ark_name: "solfège", label: "solfège en ligne" },
         ]
 
         # Itérer sur les cas
         ar_label = nil
         cases.each do |case_data|
           if activite.match(case_data[:match])
-            activity_ref_kind = ActivityRefKind.where("lower(name) = ?", case_data[:name]).first
+            activity_ref_kind = ActivityRefKind.where("lower(name) = ?", case_data[:ark_name]).first
             return [] if activity_ref_kind.nil?
             ar_label = case_data[:label]
             break
