@@ -26,14 +26,25 @@
       <%= f.date_field :birthday, required: true, autofocus: true, autocomplete: "birthday", id: "birthday", class: "form-control w-100" %>
     </div>
 
+    <% resource.errors[:base].each do |msg| %>
+      <div class="alert alert-danger"><%= msg %></div>
+    <% end %>
+
     <div class="form-group text-left">
       <%= f.label "Email" %><br/>
       <%= f.email_field :email, required: true, autofocus: true, autocomplete: "email", class: "form-control" %>
     </div>
 
-    <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe', additional_attr: {minLength: @minimum_password_length} }) %>
+    <% resource.errors[:email].each do |msg| %>
+      <div class="alert alert-danger"><%= msg %></div>
+    <% end %>
 
+    <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe', additional_attr: {minLength: @minimum_password_length} }) %>
+    <% resource.errors[:password].each do |msg| %>
+      <div class="alert alert-danger"><%= msg %></div>
+    <% end %>
     <%= react_component('PasswordInput', { id: 'password_confirmation', name: 'user[password_confirmation]', label: 'Confirmer mot de passe', error: resource.errors[:password_confirmation].join(', ') }) %>
+
 
     <% unless Recaptcha.configuration.site_key.nil? %>
       <div class="form-group">
@@ -41,9 +52,7 @@
       </div>
     <% end %>
 
-    <% resource.errors[:base].each do |msg| %>
-        <li class="alert alert-danger"><%= msg %></li>
-    <% end %>
+
 
     <%= f.submit "Inscription", class: "btn btn-primary block full-width m-b" %>
 
