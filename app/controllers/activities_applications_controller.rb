@@ -1125,6 +1125,28 @@ class ActivitiesApplicationsController < ApplicationController
     activity_application.destroy
   end
 
+  def bulk_delete
+    puts "test bulk_delete"
+    targets = params[:targets]
+    puts "Targets received: #{targets.inspect}"
+
+    if targets.blank? || !targets.is_a?(Array)
+      render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
+    end
+
+    activities_application = ActivityApplication.where(id: targets)
+    activities_application.each do |activity_application|
+      activity_application.desired_activities.each do |da|
+        Activity.find(da.activity_id).remove_student(da.id) if da.is_validated
+        additional_student = AdditionalStudent.find_by(desired_activity_id: da.id)
+        additional_student&.delete
+      end
+      activity_application.pre_application_activity ? activity_application.pre_application_activity.reset : nil
+    end
+    activities_application.destroy_all
+
+  end
+
   def find_activity_suggestions
     desired_activity_id = params[:des_id]
     do_format = params[:format] || true

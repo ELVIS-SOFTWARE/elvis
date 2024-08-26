@@ -234,6 +234,41 @@ class ActivitiesApplicationsList extends React.Component {
             });
     }
 
+    handleBulkDelete() {
+        swal({
+            title: "Confirmation",
+            text:
+                "Voulez-vous supprimer toutes les demandes d'inscription sélectionnées ?",
+            type: "question",
+            showCancelButton: true,
+        }).then(r => {
+            if (r.value) {
+                console.log("this.state.bulkTargets", this.state.bulkTargets);
+                fetch("/inscriptions", {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": csrfToken,
+                    },
+                    body: JSON.stringify({
+                        targets: this.state.bulkTargets,
+                    }),
+                })
+                    .catch(res => console.error(res))
+                    .then(res => {
+                        this.setState({
+                            data: this.state.data.filter(
+                                d => !this.state.bulkTargets.includes(d.id)
+                            ),
+                            targets: [],
+                        });
+                    });
+            } else {
+                console.log("cancelled");            }
+        });
+
+    }
+
     resetFilters() {
         localStorage.setItem(
             FILTER_STORAGE_KEY,
@@ -293,7 +328,7 @@ class ActivitiesApplicationsList extends React.Component {
                             className="btn btn-primary m-r-sm"
                             data-tippy-content="Envoi groupé mail confirmation"
                             disabled={false}>
-                            <i className="fas fa-envelope" />
+                            <i className="fas fa-envelope"/>
 
                         </button>
                     }
@@ -303,16 +338,22 @@ class ActivitiesApplicationsList extends React.Component {
                         data-toggle="modal"
                         data-target="#applications-bulk-edit-modal"
                         className="btn btn-primary m-r-sm">
-                        <i className="fas fa-edit m-r-xs" />
+                        <i className="fas fa-edit m-r-xs"/>
                         Édition de masse
                     </a>
+                    <button
+                        className="btn btn-danger"
+                        onClick={this.handleBulkDelete.bind(this)}
+                    >
+                        Supprimer
+                    </button>
                 </div>
             </div>
         </div>;
     }
 
     fetchData(filter) {
-        this.setState({ loading: true, filter });
+        this.setState({loading: true, filter});
 
         debounce(() => {
             requestData(
