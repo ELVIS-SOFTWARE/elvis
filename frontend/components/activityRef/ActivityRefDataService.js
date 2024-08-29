@@ -38,6 +38,23 @@ export default class ActivityRefDataService extends DataService
         });
     }
 
+    updateData(data) {
+        const {id, ...rest} = data;
+        return new Promise((resolve, reject) => {
+            api.set()
+                .success(
+                    () => {
+                        data.to_season_id = data.toSeason.value || null;
+                        data.from_season_id = data.fromSeason.value || null;
+                        resolve(data);
+                    }
+
+                )
+                .error(reject)
+                .put(`${this.urlRootData}/${id}`, rest);
+        });
+    }
+
     deleteData(activity_ref_pricing) {
         const isInUse = this.packs.some(pack => pack.activity_ref_pricing_id === activity_ref_pricing.id);
 
