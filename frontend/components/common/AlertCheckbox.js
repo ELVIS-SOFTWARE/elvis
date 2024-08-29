@@ -17,7 +17,7 @@ const AlertCheckbox = props => {
                 />
                 <p>{text}</p>
             </label>
-            {hasError && <p className="text-center text-danger">{MESSAGES[meta.error]}</p>}
+            {hasError && <p className="text-danger">{MESSAGES[meta.error]}</p>}
         </Fragment>
     );
 };
