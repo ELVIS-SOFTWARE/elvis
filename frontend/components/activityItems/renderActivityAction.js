@@ -37,8 +37,8 @@ function renderActivityAction(actionLabel) {
         case "En traitement":
             return (
                 <React.Fragment>
-                    <div className="badge badge-pill badge-primary text-white">
-                        <i className="fas fa-check-circle mr-2"/>En attente de traitement
+                    <div className="badge badge-pill badge-secondary text-white" style={{backgroundColor: "#676a6c"}}>
+                        <i className="fas fa-hourglass mr-2"/>En attente de traitement
                     </div>
                 </React.Fragment>
             );
@@ -46,7 +46,7 @@ function renderActivityAction(actionLabel) {
             return (
                 <React.Fragment>
                     <div className="badge badge-pill badge-danger text-white" style={{backgroundColor: "#ff6f3c"}}>
-                        <i className="fas fa-times-circle mr-2"/>Arrêt
+                    <i className="fas fa-times-circle mr-2"/>Arrêt
                     </div>
                 </React.Fragment>
             );
