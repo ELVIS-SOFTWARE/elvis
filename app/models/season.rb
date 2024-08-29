@@ -94,7 +94,7 @@ class Season < ApplicationRecord
   end
 
   def self.all_seasons_cached
-    Rails.cache.fetch("seasons:all", expires_in: 5.minutes) do
+    Elvis::CacheUtils.cache_block_if_enabled("seasons:all") do
       Season.all.to_a # if only Season.all cached, it will return an ActiveRecord::Relation object, not the result of the query.
     end
   end

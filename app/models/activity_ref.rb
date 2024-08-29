@@ -140,7 +140,7 @@ class ActivityRef < ApplicationRecord
   end
 
   def display_price(season = Season.current_apps_season || Season.current)
-    Rails.cache.fetch("activity_ref_#{id}_price_#{season.id}", expires_in: Parameter.get_value("app.cache.max_price.duration") || 5.minutes) do
+    Elvis::CacheUtils.cache_block_if_enabled("activity_ref_#{id}_price_#{season.id}", expires_in: Parameter.get_value("app.cache.max_price.duration") || 5.minutes) do
       substitutable ? activity_ref_kind.max_prices.find_by(season_id: season.id)&.price : max_prices.find_by(season_id: season.id)&.price
     end
   end

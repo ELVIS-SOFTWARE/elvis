@@ -45,6 +45,7 @@ class UsersController < ApplicationController
     @user = User.with_reset_password_token(params[:reset_password_token])
     if @user&.reset_password_period_valid?
       if @user.reset_password(params[:user][:password], params[:user][:password_confirmation])
+        sign_out(@user)
         sign_in(@user)
         redirect_to root_url
       else

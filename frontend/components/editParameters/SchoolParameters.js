@@ -298,7 +298,7 @@ export default function SchoolParameters(props) {
             </div>
 
             {/*submit*/}
-            <div className=" text-right">
+            <div className=" text-right mb-5">
                 <input type="submit" value="Enregistrer" className="btn text-white btn-primary"/>
             </div>
         </div>

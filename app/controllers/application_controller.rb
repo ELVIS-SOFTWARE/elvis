@@ -31,7 +31,7 @@ class ApplicationController < ActionController::Base
   end
 
   def require_logo
-    @school_informations = School.includes(:address).first
+    @school_informations = School.first
   end
 
   # def set_redirect_path_for_user

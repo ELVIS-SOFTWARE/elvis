@@ -242,6 +242,7 @@ export default class AddCourse extends React.Component {
                 component: (
                     <AddLocationForCourse
                         initialValues={{
+                            activityRefId: activityRef ? activityRef.id : "",
                             roomId: room ? room.id : undefined,
                             locationId: location ? location.id : undefined,
                             firstDayStartTime: firstDayStartTime

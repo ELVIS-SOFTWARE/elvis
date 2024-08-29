@@ -68,13 +68,52 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def show
-    activity_application = ActivityApplication.includes(
-      { user: [{ planning: [:time_intervals] }] },
-      activity_refs: { activity_ref_kind: {} },
-      activity_application_status: {},
-      evaluation_appointments: %i[time_interval teacher],
-      comments: [:user],
-    ).find(params[:id])
+
+    # @type [ActivityApplication]
+    activity_application = ActivityApplication.includes({
+                                                          user: {
+                                                            levels: {
+                                                              evaluation_level_ref: {},
+                                                              activity_ref: [:activity_ref_kind],
+                                                              season: {},
+                                                            },
+                                                            telephones: {},
+                                                            planning: [:time_intervals],
+                                                            instruments: {},
+                                                            adhesions: {},
+                                                            activity_applications: {
+                                                              pre_application_activity: {},
+                                                              pre_application_desired_activity: {},
+                                                              activity_application_status: {},
+                                                              desired_activities: {
+                                                                activity_ref: [:activity_ref_kind],
+                                                                activity: {
+                                                                  time_interval: {},
+                                                                  activity_ref: {},
+                                                                },
+                                                              },
+                                                              season: {},
+                                                            },
+                                                          },
+                                                          activity_refs: [:activity_ref_kind],
+                                                          activity_application_status: {},
+                                                          pre_application_activity: {
+                                                            activity: {
+                                                              activity_ref: [:activity_ref_kind],
+                                                              time_interval: {},
+                                                              room: {},
+                                                            },
+                                                          },
+                                                          pre_application_desired_activity: {},
+                                                          desired_activities: {
+                                                            options: {},
+                                                            user: {},
+                                                            activity_ref: [:activity_ref_kind],
+                                                          },
+                                                          evaluation_appointments: %i[time_interval teacher],
+                                                          comments: [:user],
+                                                          season: {},
+                                                        }).find(params[:id])
 
     authorize! :read, activity_application
 
@@ -158,94 +197,95 @@ class ActivitiesApplicationsController < ApplicationController
                                                                 .user
                                                                 .family_links_with_user(activity_application.season)
 
-    payer = activity_application.user.get_first_paying_family_member
-    @payer = payer.as_json
-    @payer[:kind] = payer.class.to_s unless @payer.nil?
-
-    @activity_refs = ActivityRef.all.as_json(methods: [:display_name])
-    @statuses = ActivityApplicationStatus.all
-    @levels = EvaluationLevelRef.all
-    @seasons = Season.all_seasons_cached
-    @student_evaluation_questions = Question.student_evaluation_questions.all
-    @application_change_questions = Question.application_change_questionnaire
-    @new_student_level_questions = Question.new_student_level_questionnaire
-    @evaluation_level_refs = EvaluationLevelRef.all
-
-    @new_student_level_questionnaires = activity_application
-                                          .user
-                                          .new_student_level_questionnaires
-                                          .includes(activity_ref: { activity_ref_kind: {} }, answers: {})
-                                          .where(
-                                            season: activity_application.season,
-                                            activity_ref: activity_application.desired_activities.map(&:activity_ref),
-                                          )
-                                          .as_json(include: { answers: {}, activity_ref: { include: [:activity_ref_kind] } })
-
-    @student_evaluations = {
-      common_reference_data: {
-        evaluation_level_refs: @levels.as_json,
-      },
-      forms: activity_application
-               .user
-               .student_evaluations
-               .joins(activity: { activity_ref: { activity_ref_kind: {} } })
-               .where({
-                        activities: {
-                          activity_refs: {
-                            id: activity_application.desired_activities.map(&:activity_ref_id),
-                          },
-                        },
-                      })
-               .map do |evaluation|
-        {
-          contextual_reference_data: {
-            activities: evaluation
-                          .teacher
-                          .season_teacher_activities(evaluation.season.previous)
-                          .as_json(only: %i[id group_name], include: :users),
-          },
-          form: evaluation.as_json({
-                                     include: {
-                                       teacher: {},
-                                       season: {},
-                                       activity: {},
-                                       answers: {},
-                                     },
-                                   }),
-        }
-      end,
-    }
-
-    @application_change_questionnaires = {
-      common_reference_data: {
-        locations: Location.all.as_json,
-      },
-      forms: activity_application.user
-                                 .application_change_questionnaires
-                                 .includes(activity: { activity_ref: { activity_ref_kind: {} }, teachers_activities: :teacher, time_interval: {} })
-                                 .where(season: activity_application.season)
-                                 .map do |questionnaire|
-        {
-          contextual_reference_data: {},
-          form: questionnaire.as_json({
-                                        include: {
-                                          activity: {
-                                            include: {
-                                              activity_ref: { include: [:activity_ref_kind] },
-                                              time_interval: {},
-                                            },
-                                            methods: :teacher,
-                                          },
-                                          answers: {},
-                                        },
-                                      }),
-        }
-      end,
-    }
-
-    @can_edit_availabilities = Parameter.get_value("activity_applications.can_edit_availabilities") == true
     respond_to do |format|
-      format.html
+      format.html do
+        payer = activity_application.user.get_first_paying_family_member
+        @payer = payer.as_json
+        @payer[:kind] = payer.class.to_s unless @payer.nil?
+
+        @activity_refs = ActivityRef.all.as_json(methods: [:display_name])
+        @statuses = ActivityApplicationStatus.all
+        @levels = EvaluationLevelRef.all
+        @seasons = Season.all_seasons_cached
+        @student_evaluation_questions = Question.student_evaluation_questions.all
+        @application_change_questions = Question.application_change_questionnaire
+        @new_student_level_questions = Question.new_student_level_questionnaire
+        @evaluation_level_refs = EvaluationLevelRef.all
+
+        @new_student_level_questionnaires = activity_application
+                                              .user
+                                              .new_student_level_questionnaires
+                                              .includes(activity_ref: { activity_ref_kind: {} }, answers: {})
+                                              .where(
+                                                season: activity_application.season,
+                                                activity_ref: activity_application.desired_activities.map(&:activity_ref),
+                                              )
+                                              .as_json(include: { answers: {}, activity_ref: { include: [:activity_ref_kind] } })
+
+        @student_evaluations = {
+          common_reference_data: {
+            evaluation_level_refs: @levels.as_json,
+          },
+          forms: activity_application
+                   .user
+                   .student_evaluations
+                   .joins(activity: { activity_ref: { activity_ref_kind: {} } })
+                   .where({
+                            activities: {
+                              activity_refs: {
+                                id: activity_application.desired_activities.map(&:activity_ref_id),
+                              },
+                            },
+                          })
+                   .map do |evaluation|
+            {
+              contextual_reference_data: {
+                activities: evaluation
+                              .teacher
+                              .season_teacher_activities(evaluation.season.previous)
+                              .as_json(only: %i[id group_name], include: :users),
+              },
+              form: evaluation.as_json({
+                                         include: {
+                                           teacher: {},
+                                           season: {},
+                                           activity: {},
+                                           answers: {},
+                                         },
+                                       }),
+            }
+          end,
+        }
+
+        @application_change_questionnaires = {
+          common_reference_data: {
+            locations: Location.all.as_json,
+          },
+          forms: activity_application.user
+                                     .application_change_questionnaires
+                                     .includes(activity: { activity_ref: { activity_ref_kind: {} }, teachers_activities: :teacher, time_interval: {} })
+                                     .where(season: activity_application.season)
+                                     .map do |questionnaire|
+            {
+              contextual_reference_data: {},
+              form: questionnaire.as_json({
+                                            include: {
+                                              activity: {
+                                                include: {
+                                                  activity_ref: { include: [:activity_ref_kind] },
+                                                  time_interval: {},
+                                                },
+                                                methods: :teacher,
+                                              },
+                                              answers: {},
+                                            },
+                                          }),
+            }
+          end,
+        }
+
+        @can_edit_availabilities = Parameter.get_value("activity_applications.can_edit_availabilities") == true
+      end
       format.json { render json: @activity_application }
     end
   end
@@ -291,9 +331,9 @@ class ActivitiesApplicationsController < ApplicationController
 
     activity_refs = activity_refs.filter { |ar| (ar["is_visible_to_admin"] || false) == false } unless current_user&.is_admin
 
-    all_max_prices = Rails.cache.fetch("wizard:activity_ref_max_prices", expires_in: 5.minutes) do
+    all_max_prices = Elvis::CacheUtils.cache_block_if_enabled("wizard:activity_ref_max_prices") do
       MaxActivityRefPriceForSeason
-        .where(target_id: activity_refs.map{|a| a["id"]}.append(activity_refs.map{|a| a["activity_ref_kind_id"]}).uniq)
+        .where(target_id: activity_refs.map { |a| a["id"] }.append(activity_refs.map { |a| a["activity_ref_kind_id"] }).uniq)
         .as_json
     end
 
@@ -370,7 +410,7 @@ class ActivitiesApplicationsController < ApplicationController
     show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
     @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
 
-    @packs = Rails.cache.fetch("activity_refs_packs:season_#{Season.current.id}", expires_in: 5.minutes) do
+    @packs = Elvis::CacheUtils.cache_block_if_enabled("activity_refs_packs:season_#{Season.current.id}") do
       ActivityRefPricing
         .joins(:pricing_category)
         .for_season_id(Season.current.id)
@@ -565,12 +605,50 @@ class ActivitiesApplicationsController < ApplicationController
           @user.email = params[:application][:infos][:email]
         end
 
-        # levels = Array.new()
-        # params[:application][:personalLevels].each do |id, level|
-        #     level = Level.new(activity_ref_id: id, evaluation_level_ref_id: level)
-        #     levels << level
+        levels = []
+
+        params[:application][:personalLevels].each do |activity_ref_id, level_param|
+          existing_level = Level.find_by(
+            season_id: params[:application][:season_id],
+            activity_ref_id: activity_ref_id,
+            user_id: @user.id
+          )
+
+          # Check if the activity_ref_id exists in levelQuestionnaireAnswers
+          existing_level_questionnaire = params[:application][:levelQuestionnaireAnswers].key?(activity_ref_id.to_s)
+
+          if existing_level_questionnaire
+            next
+          elsif existing_level.nil?
+            # If there is no questionnaire and no current level, create a new level
+            new_level = Level.new(
+              activity_ref_id: activity_ref_id,
+              evaluation_level_ref_id: level_param,
+              season_id: params[:application][:season_id]
+            )
+            levels << new_level
+          end
+        end
+
+        @user.levels = levels unless levels.empty?
+
+        # enregistrement du niveau de l'élève
+        # parcourir chaque selected activities
+        # pour chaque selected activity, créer un niveau
+
+        # params[:application][:selectedActivities].map do |selected_id|
+        #   existing_level = Level.find_by(season_id: params[:application][:season_id], activity_ref_id: selected_id, user_id: @user.id)
+        #   existing_level_questionnaire = NewStudentLevelQuestionnaire.find_by(user_id: @user.id, activity_ref_id: selected_id, season_id: params[:application][:season_id])
+        #
+        #   # Create beginner level if user has no questionnaire and has no existing level
+        #   if existing_level.nil? && existing_level_questionnaire.nil?
+        #     @user.levels.find_or_create_by!(
+        #       season: @season,
+        #       activity_ref: @activity_ref,
+        #       evaluation_level_ref: EvaluationLevelRef::DEFAULT_LEVEL_REF_ID,
+        #     )
+        #   end
         # end
-        # @user.levels = levels
 
         @user.birthday = params[:application][:infos][:birthday]
         @user.sex = params[:application][:infos][:sex]
@@ -611,7 +689,6 @@ class ActivitiesApplicationsController < ApplicationController
           @user.is_paying ||= payers.any? { |p| p == @user.id }
         end
 
-        # @user.skip_confirmation_notification!
         @user.save!
 
         # enregistrement des consentements de l'élève
@@ -813,6 +890,8 @@ class ActivitiesApplicationsController < ApplicationController
             @pack_created = true
           end
         end
+
+        @user.save!
       end
 
       begin
@@ -872,21 +951,32 @@ class ActivitiesApplicationsController < ApplicationController
     end
   end
 
+
   def create_import_csv
-    importer_name = Parameter.get_value('activity_applications.importer_name')
-    importer = case importer_name
+    handler_class_name = case Parameter.get_value('activity_applications.importer_name')
                when 'tes_importer'
-                 ActivityApplications::TesImporter.new params[:file]
+                  "ActivityApplications::TesImportHandler"
                else
                  nil
                end
 
-    render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if importer.nil?
+    render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if handler_class_name.nil?
 
-    result = importer.call
+    begin
 
-    status = result.delete(:status)
-    render json: result, status: status
+      # save file to file with GUID as filename
+      file_path = 'tmp/' + SecureRandom.uuid
+      file_content = File.binread(params[:file].path).force_encoding('UTF-8')
+      File.write(file_path, file_content)
+
+      job = CsvImporterJob.perform_later(file_path, handler_class_name)
+
+    rescue StandardError, NoMemoryError => e
+      render json: { errors: e }, status: 500
+      return
+    end
+
+    render json: { jobId: job.job_id }
   end
 
   def bulk_update

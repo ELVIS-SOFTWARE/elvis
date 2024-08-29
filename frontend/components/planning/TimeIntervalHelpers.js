@@ -287,7 +287,7 @@ export const levelDisplay = (users, activityRef, seasonId) => {
     if(uniqueLevels.length > 1)
         return "À PRÉCISER";
     else
-        return _.get(uniqueLevels, "[0].evaluation_level_ref.label") || "PAS DE NIVEAU";
+        return _.get(uniqueLevels, "[0].evaluation_level_ref.label") || "NON INDIQUÉ";
 }
 
 export const levelDisplayForActivity = (activity, seasons) => {

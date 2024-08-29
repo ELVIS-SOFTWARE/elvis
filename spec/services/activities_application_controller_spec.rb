@@ -69,6 +69,17 @@ RSpec.describe ActivityApplications::TesImporter, type: :service do
         end
       end
 
+      context 'when activite is atelier' do
+        let(:activite) { 'Atelier' }
+
+        it 'returns the correct activity reference' do
+
+          result = @service.send(:guess_activity_ref_and_level, activite, instrument)
+          ar = ActivityRef.find_by(label: "Atelier")
+          expect(result).to eq({activity_ref_id: ar.id, instrument: 'Guitare', is_workshop: true, level: '2 ans'})
+        end
+      end
+
     end
 
     context 'when instrument contains level 1 an' do

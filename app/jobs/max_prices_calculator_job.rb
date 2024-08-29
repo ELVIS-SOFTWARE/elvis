@@ -45,6 +45,8 @@ class MaxPricesCalculatorJob < ApplicationJob
 
     date_now = DateTime.now
 
+    return if max_pricings_to_save.empty?
+
     MaxActivityRefPriceForSeason.transaction do
       MaxActivityRefPriceForSeason.upsert_all(
         max_pricings_to_save.map do |p|

@@ -105,10 +105,4 @@ class ScriptsController < ApplicationController
     render json: {jobId: job.job_id}
   end
 
-  def get_job_status
-    job_id = params[:jobId]
-    status = ActiveJob::Status.get(job_id)
-
-    render json: {jobStatus: status.read}
-  end
 end

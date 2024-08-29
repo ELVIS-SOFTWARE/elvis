@@ -9,47 +9,62 @@ module ActivityApplications
     end
 
     def execute
-      desired_activity = DesiredActivity.includes(:activity_application).find(@desired_activity_id)
-      application = desired_activity.activity_application
-
+      desired_activity = nil
       matches = nil
 
       case @mode
       when "ALL"
-        matches = self.find_all_suggestions
+        desired_activity = DesiredActivity.includes({
+                                                      activity_application: :season,
+                                                      activity_ref: { activity_ref_kind: {} }
+                                                    }).find(@desired_activity_id)
+        matches = Elvis::CacheUtils.cache_block_if_enabled("find_all_suggestions_#{desired_activity.id}") do
+          self.find_all_suggestions(desired_activity)
+        end
       when "CUSTOM"
-        matches = self.find_custom_suggestions
+        desired_activity = DesiredActivity.includes({
+                                                      activity_application: {
+                                                        season: {},
+                                                        desired_activities: { activity: { activity_ref: [:activity_ref_kind] } },
+                                                        user: [:levels, { planning: :time_intervals }]
+                                                      },
+                                                      options: {},
+                                                      activity_ref: [:activity_ref_kind],
+                                                      activity: { time_interval: {}, activity_ref: [:activity_ref_kind] }
+                                                    }).find(@desired_activity_id)
+        matches = Elvis::CacheUtils.cache_block_if_enabled("find_custom_suggestions_#{desired_activity.id}") do
+          self.find_custom_suggestions(desired_activity)
+        end
       end
+
+      desired_activity = desired_activity || DesiredActivity.find(@desired_activity_id)
+
+      application = desired_activity.activity_application
+
+      matches = matches&.to_a || []
 
       # return with or without active/inactive students
       !@do_format ?
         matches :
         matches.map do |activity|
-          Utils.format_for_suggestion(application.user, activity, application.stopped_at ? Time.zone.now : application.begin_at)
+          from_date = application.stopped_at ? Time.zone.now : application.begin_at
+
+          Elvis::CacheUtils.cache_block_if_enabled("format_for_suggestion_u:#{application.user_id}_a:#{activity.id}_fd:#{from_date.to_date}") do
+            Utils.format_for_suggestion(application.user, activity, from_date)
+          end
         end
     end
 
-    def find_all_suggestions
-      desired_activity = DesiredActivity.includes({
-                                                    activity_application: :season,
-                                                    activity_ref: { activity_ref_kind: {} }
-                                                  }).find(@desired_activity_id)
-
+    # @param [DesiredActivity] desired_activity
+    def find_all_suggestions(desired_activity)
       activity_ref = desired_activity.activity_ref
       season = desired_activity.activity_application.season
 
       matches = Activity
                   .includes({
-                              evaluation_level_ref: {},
-                              options: {
-                                desired_activity: {
-                                  activity_application: :user,
-                                },
-                              },
-                              location: {},
-                              room: {},
                               time_interval: {},
-                              activity_ref: { activity_ref_kind: {} }
+                              activity_ref: { activity_ref_kind: {} },
+                              users: {},
                             })
                   .where({
                            time_intervals: {
@@ -57,13 +72,13 @@ module ActivityApplications
                            },
                          })
 
-      if activity_ref.activity_type == "child"
+      if activity_ref.activity_type&.to_s == "child"
         matches = matches.where({ activity_ref_id: activity_ref.id })
       else
         matches = matches
                     .where({
                              activity_refs: {
-                               activity_ref_kind_id: activity_ref.activity_ref_kind.id,
+                               activity_ref_kind_id: activity_ref.activity_ref_kind_id,
                              },
                            })
       end
@@ -71,19 +86,8 @@ module ActivityApplications
       matches
     end
 
-    def find_custom_suggestions
-      # @type [DesiredActivity]
-      desired_activity = DesiredActivity.includes({
-                                                    activity_application: {
-                                                      season: {},
-                                                      desired_activities: { activity: { activity_ref: [:activity_ref_kind] } },
-                                                      user: [:levels, { planning: :time_intervals }]
-                                                    },
-                                                    options: {},
-                                                    activity_ref: [:activity_ref_kind],
-                                                    activity: { time_interval: {}, activity_ref: [:activity_ref_kind] }
-                                                  }).find(@desired_activity_id)
-
+    # @param [DesiredActivity] desired_activity
+    def find_custom_suggestions(desired_activity)
       # @type [ActivityRef]
       activity_ref = ActivityRef.includes(:activity_ref_kind).find(desired_activity.activity_ref_id)
       # @type [ActivityApplication]
@@ -100,7 +104,7 @@ module ActivityApplications
 
       matches = []
 
-      if ["child", "chorale_ma"].include? desired_activity.activity_ref.activity_type
+      if %w[child chorale_ma].include? desired_activity.activity_ref.activity_type&.to_s
         is_childhood = true
 
         # si l'élève n'a sélectionné aucun créneau
@@ -110,7 +114,6 @@ module ActivityApplications
           matches = TimeInterval
                       .validated
                       .joins({ activity: { activity_ref: :activity_ref_kind } })
-                      .includes({ activity: { activity_ref: :activity_ref_kind } })
                       .where({
                                start: (application_season.start..application_season.end),
                                activities: {
@@ -125,21 +128,33 @@ module ActivityApplications
       availability_intervals = TimeInterval.merge_sticked application.availabilities(include_validated: true)
 
       unless skip_intervals_matching
-        busy_intervals = application
-                           .user
-                           .activity_applications
-                           .map(&:desired_activities)
-                           .flatten
-                           .compact
-                           .select(&:is_validated)
-                           .select(&:activity) - [desired_activity]
+        user_activity_application_ids = ActivityApplication
+                                          .where(user_id: application.user_id)
+                                          .pluck(:id)
+
+        busy_interval_ids = DesiredActivity
+          .joins(:activity)
+          .where(activity_application_id: user_activity_application_ids, is_validated: true)
+          .where.not(id: desired_activity.id)
+          .pluck(:time_interval_id)
+          .uniq
+
+        busy_intervals = TimeInterval.where(id: busy_interval_ids).to_a
+
+          #busy_intervals = ActivityApplication
+          #                 .where(user_id: application.user_id)
+          #                 .map(&:desired_activities)
+          #                 .flatten
+          #                 .compact
+          #                 .select(&:is_validated)
+          #                 .select(&:activity) - [desired_activity]
 
         #  On itère sur chaque time_pref pour trouver les matchs possibles parmi tous les créneaux validés
         availability_intervals.each do |time_pref|
           # Il nous faut désormais filtrer les créneaux pour ne garder que ceux dont le niveau correspond
           matches << time_pref.matching_intervals(
             activity_ref,
-            busy_intervals.map { |d| d.activity.time_interval }.compact,
+            busy_intervals,
             application_season
           )
         end
@@ -148,32 +163,49 @@ module ActivityApplications
         matches.uniq!
       end
 
-      # Il faut pouvoir tout de même inclure les utilisateurs déjà ajouté au créneau
-      matches.select! do |m|
-        instance = m.activity.closest_instance(application.begin_at)
+      activities = Activity
+        .includes({
+                    evaluation_level_ref: {},
+                    teachers_activities: {},
+                    options: {
+                      desired_activity: {
+                        activity_application: [:user]
+                      }
+                    },
+                    location: {},
+                    room: {},
+                    time_interval: [:time_interval_preferences],
+                    activity_ref: [:activity_ref_kind],
+                    activities_instruments: [:user],
+                    users: {},
+                    activity_instances: {}
+                  })
+        .where(time_interval_id: matches.map(&:id))
+        .to_a
+
+      activities.select! do |a|
+        instance = a.closest_instance(application.begin_at)
 
         if instance
           students_count = instance.active_students.count
 
-          (students_count <= m.activity.activity_ref.occupation_limit &&
-            students_count <= m.activity.activity_ref.occupation_hard_limit) ||
-            m.activity.users.include?(application.user)
+          (students_count <= a.activity_ref.occupation_limit &&
+            students_count <= a.activity_ref.occupation_hard_limit) ||
+            a.user_ids.include?(application.user_id)
         else
           false
         end
       end
 
+      # sort
       unless is_childhood
-        matches.sort_by! { |m| m.activity.users.length }.reverse!
+        activities.sort_by! { |a| a.users.count }.reverse!
 
-        matches = sort_by_teacher_prev(matches, application)
-        matches = sort_by_day_prev(matches, application)
+        activities = sort_by_teacher_prev(activities, application)
+        activities = sort_by_day_prev(activities, application)
       end
 
-
-      matches = [desired_activity.activity&.time_interval].compact + matches
-
-      matches.map(&:activity).uniq
+      (activities + [desired_activity.activity]).uniq!
     end
 
     def sort_by_teacher_prev(suggestions, application)
@@ -183,7 +215,7 @@ module ActivityApplications
         return suggestions
       else
         ordered_results = suggestions.sort_by do |s|
-          s.activity.teacher.id == prev_teacher.id ? -1 : 0
+          (s.is_a? Activity ? s : s.activity).teacher.id == prev_teacher.id ? -1 : 0
         end
 
         return ordered_results
@@ -197,7 +229,7 @@ module ActivityApplications
         return suggestions
       else
         ordered_results = suggestions.sort_by do |s|
-          s.activity.time_interval.start.strftime("%A") == prev_day ? -1 : 0
+          (s.is_a? Activity ? s : s.activity).time_interval.start.strftime("%A") == prev_day ? -1 : 0
         end
 
         return ordered_results

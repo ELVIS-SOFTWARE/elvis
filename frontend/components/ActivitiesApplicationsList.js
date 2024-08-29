@@ -14,6 +14,9 @@ import StopList from "./StopList";
 import UserWithInfos from "./common/UserWithInfos";
 import ButtonModal from "./common/ButtonModal";
 import ActivitiesApplicationsDashboard from "./ActivitiesApplicationsDashboard";
+import JobProgress from "./JobProgress";
+import ReactDOM from 'react-dom';
+
 import {
     ACTIVITY_ATTRIBUTED_ID,
     ACTIVITY_PROPOSED_ID,
@@ -80,11 +83,26 @@ class ActivitiesApplicationsList extends React.Component {
             bulkEdit: {
                 activity_application_status_id: "",
             },
+            jobSubmitted: false,
+            jobId: null,
         };
 
         this.fileInput = React.createRef();
 
         this.statusFilterContainsTerminalStatus = this.statusFilterContainsTerminalStatus.bind(this);
+    }
+
+    showJobProgressModal(jobId) {
+        const container = document.createElement('div');
+        ReactDOM.render(<JobProgress jobId={jobId} onError={(res) => swal({ title: "Erreur", text: res, type: "error" })} />, container);
+
+        swal.fire({
+            title: 'Suivi de l\'exécution',
+            html: container,
+            showCloseButton: true,
+            focusConfirm: false,
+            confirmButtonText: 'OK',
+        });
     }
 
     componentDidMount() {
@@ -164,20 +182,10 @@ class ActivitiesApplicationsList extends React.Component {
                         type: "error",
                     });
                 } else {
-                    this.fetchData(this.state.filter);
-
-                    let message = `<p>${data.message}</p>`;
-                    if (data.errors.length > 0) {
-                        message += `<ul>Erreurs rencontrées</ul>`;
-                        data.errors.forEach(e => {
-                            message += `<li>à la ligne ${e.line} : ${e.message}</li>`;
-                        });
-                    }
-                    swal.fire({
-                        title: "Import réussie",
-                        html: message,
-                        type: "success",
+                    this.setState({
+                        jobId: data.jobId,
                     });
+                    this.showJobProgressModal(data.jobId);
                 }
             });
     }
@@ -393,14 +401,18 @@ class ActivitiesApplicationsList extends React.Component {
         });
     }
 
-    statusFilterContainsTerminalStatus()
-    {
+    statusFilterContainsTerminalStatus() {
+        if (this.state.bulkTargets === "all") {
+            return true;
+        }
         const statusFilter = [...this.state.data]
             .filter(f => (this.state.bulkTargets || []).includes(f.id))
             .map(f => f.activity_application_status_id);
 
         return statusFilter.some(s => [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s));
+
     }
+
 
     render() {
         const activitiesFilterOptions = _.chain(this.props.activities)

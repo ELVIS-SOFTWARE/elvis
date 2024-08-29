@@ -54,19 +54,31 @@ export default function myActivities() {
         return !!da[0].activity;
     }
 
-    function isRegistrationOpen()
-    {
-        const ss = season_list.find(season => season.id == selectedSeason);
-
-        if (!ss)
-            return false;
-
+    function isRegistrationOpen() {
         const now = new Date();
+
+        // Vérifier si les inscriptions sont ouvertes pour la saison en cours
+        const ss = season_list.find(season => season.id == selectedSeason);
+        if (!ss) return false;
+
         const opening_date_for_new_applications = new Date(ss.opening_date_for_new_applications);
         const closing_date_for_applications = new Date(ss.closing_date_for_applications);
+        const isCurrentSeasonOpen = now >= opening_date_for_new_applications && now < closing_date_for_applications;
+        if (isCurrentSeasonOpen) {
+            return true;
+        }
 
-        return now >= opening_date_for_new_applications && now < closing_date_for_applications;
+        // Vérifier si les inscriptions sont ouvertes pour la saison suivante
+        const ns = season_list.find(season => season.id == ss.next_season_id);
+        if (!ns) return false;
+
+        const next_opening_date_for_new_applications = new Date(ns.opening_date_for_new_applications);
+        const next_closing_date_for_new_applications = new Date(ns.closing_date_for_applications);
+        const isNextSeasonOpen = now >= next_opening_date_for_new_applications && now < next_closing_date_for_new_applications;
+
+        return isNextSeasonOpen;
     }
+
 
     // Appel API pour récupérer les saisons et les données de la saison en cours
     useEffect(() => {

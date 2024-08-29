@@ -522,7 +522,9 @@ Rails.application.routes.draw do
   post "scripts/replicate_activities/execute", to: "scripts#execute_replicate_activities"
   get "scripts/replicate_week_activities", to: "scripts#replicate_week_activities", as: :replicate_week_activities
   post "scripts/replicate_week_activities/execute", to: "scripts#execute_replicate_week_activities"
-  get "scripts/replicate_week_activities/job_status", to: "scripts#get_job_status"
+  #get "scripts/job_status", to: "scripts#get_job_status"
+
+  get "/jobs/:id/status", to: "jobs#show_status"
 
   resources :payment_statuses
   resources :payment_method
