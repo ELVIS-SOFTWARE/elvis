@@ -38,7 +38,7 @@ function renderActivityAction(actionLabel) {
             return (
                 <React.Fragment>
                     <div className="badge badge-pill badge-primary text-white">
-                        <i className="fas fa-check-circle mr-2"/>En traitement
+                        <i className="fas fa-check-circle mr-2"/>En attente de traitement
                     </div>
                 </React.Fragment>
             );
