@@ -6,6 +6,8 @@ import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
 import {frenchEnumeration} from "../utils/index.js";
 import {Editor, EditorState, convertFromRaw, ContentState} from "draft-js";
 import WysiwygViewer from "../utils/WysiwygViewer";
+import {toast} from "react-toastify";
+import {MESSAGES} from "../../tools/constants";
 
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -289,6 +291,10 @@ const ActivityChoice = ({
     const availableActivitiesAndPacksDisplay = availableActivitiesAndPacks.map((item, i) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
+
+    if (selectedActivitiesAndPacksDisplay.length === 0) {
+        toast.error(MESSAGES.err_must_choose_activity, { autoClose: 3000 });
+    }
 
     return (
         <Fragment>
