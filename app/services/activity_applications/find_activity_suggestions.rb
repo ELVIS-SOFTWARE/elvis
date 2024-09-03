@@ -215,7 +215,7 @@ module ActivityApplications
         return suggestions
       else
         ordered_results = suggestions.sort_by do |s|
-          (s.is_a? Activity ? s : s.activity).teacher.id == prev_teacher.id ? -1 : 0
+          (s.is_a?(Activity) ? s : s.activity).teacher.id == prev_teacher.id ? -1 : 0
         end
 
         return ordered_results
@@ -229,7 +229,7 @@ module ActivityApplications
         return suggestions
       else
         ordered_results = suggestions.sort_by do |s|
-          (s.is_a? Activity ? s : s.activity).time_interval.start.strftime("%A") == prev_day ? -1 : 0
+          (s.is_a?(Activity) ? s : s.activity).time_interval.start.strftime("%A") == prev_day ? -1 : 0
         end
 
         return ordered_results
