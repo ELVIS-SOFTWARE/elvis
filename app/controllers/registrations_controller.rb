@@ -38,7 +38,6 @@ class RegistrationsController < Devise::RegistrationsController
       respond_with resource and return
     end
 
-
     resource.first_connection = has_mdp
     resource.has_verified_infos = !has_mdp
     if !validate_user_fields(resource, request)
@@ -93,6 +92,20 @@ class RegistrationsController < Devise::RegistrationsController
       end
     end
     # TODO send mail to user giving him credentials (adherent number)
+  end
+
+  def check_uniqueness
+    user_exists = User.exists?(first_name: params[:first_name], last_name: params[:last_name], birthday: params[:birthday])
+    email_exists = User.exists?(email: params[:email])
+
+    if user_exists
+      render json: { exists: true, message: "Un compte existe déjà avec cette combinaison ou cet email." }
+    elsif email_exists
+      render json: { exists: true, message: "Un compte existe déjà avec cet email." }
+    else
+      render json: { exists: false }
+    end
+
   end
 
   def update_resource(resource, params)
