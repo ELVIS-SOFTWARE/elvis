@@ -21,52 +21,54 @@ export default function UserDetailsInput({ errors = {}, onValidationError }) {
     };
 
     useEffect(() => {
-        const checkUniqueness = async () => {
-            try {
-                const response = await api.set()
-                    .success((res) => res)
-                    .error((res) => {
-                        console.log("error", res);
-                        throw new Error("API request failed");
-                    })
-                    .post("/check_uniqueness", {
-                        first_name: details['user[first_name]'],
-                        last_name: details['user[last_name]'],
-                        birthday: details['user[birthday]'],
-                        email: details['user[email]']
-                    });
+        const { 'user[first_name]': firstName, 'user[last_name]': lastName, 'user[birthday]': birthday, 'user[email]': email } = details;
 
-                if (response.exists) {
-                    if (response.field === 'user') {
-                        setValidationErrors({
-                            user: response.message,
-                            email: null
+        if (firstName && lastName && birthday) {
+            const checkUniqueness = async () => {
+                try {
+                    const response = await api.set()
+                        .success((res) => res)
+                        .error((res) => {
+                            console.log("error", res);
+                            throw new Error("API request failed");
+                        })
+                        .post("/check_uniqueness", {
+                            first_name: firstName,
+                            last_name: lastName,
+                            birthday: birthday,
+                            email: email
                         });
-                    } else if (response.field === 'email') {
+
+                    if (response.exists) {
+                        if (response.field === 'user') {
+                            setValidationErrors({
+                                user: response.message,
+                                email: null
+                            });
+                        } else if (response.field === 'email') {
+                            setValidationErrors({
+                                user: null,
+                                email: response.message
+                            });
+                        }
+                        if (onValidationError) onValidationError(response.message);
+                    } else {
                         setValidationErrors({
                             user: null,
-                            email: response.message
+                            email: null
                         });
                     }
-                    if (onValidationError) onValidationError(response.message);
-                } else {
+                } catch (error) {
+                    console.error("Error checking uniqueness:", error);
                     setValidationErrors({
-                        user: null,
+                        user: "Une erreur est survenue",
                         email: null
                     });
                 }
-            } catch (error) {
-                console.error("Error checking uniqueness:", error);
-                setValidationErrors({
-                    user: "Une erreur est survenue",
-                    email: null
-                });
-            }
-        };
+            };
 
-        const debounceCheckUniqueness = setTimeout(checkUniqueness, 500);
-
-        return () => clearTimeout(debounceCheckUniqueness); // Cleanup debounce
+            checkUniqueness(); // Appel direct sans debounce
+        }
     }, [details]);
 
     return (
