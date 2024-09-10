@@ -113,13 +113,13 @@ export default class ActivityRefApplication extends React.Component {
                         label="Rattacher cette activité à sa famille"
                         name="substitutable"
                         type="radio"
-                        value="true"
+                        value="false"
                         render={Radio}
                     />
                     <FormSpy subscription={{ values: true }}>
                         {({ values }) => {
                             console.log(values);
-                            if (values.substitutable==="true") {
+                            if (values.substitutable==="false") {
                                 return <AllowsTimeslotSelectionButtonGroup forcedValue={"false"} />
                             }
                             return null;
@@ -131,13 +131,13 @@ export default class ActivityRefApplication extends React.Component {
                         label="Dissocier cette activité de sa famille"
                         name="substitutable"
                         type="radio"
-                        value="false"
+                        value="true"
                         render={Radio}
                     />
                     <FormSpy subscription={{ values: true }}>
                         {({ values }) => {
                             console.log(values);
-                            if (values.substitutable==="false") {
+                            if (values.substitutable==="true") {
                                 return <AllowsTimeslotSelectionButtonGroup />
                             }
                             return null;
