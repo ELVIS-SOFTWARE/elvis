@@ -306,6 +306,12 @@ class ParametersController < ApplicationController
                                              title: "Exports CSV",
                                              text: "Paramétrez vos exports CSV.",
                                              link: url_for(action: :csv_parameters_edit, only_path: true)
-                                           })
+                                           },
+                                           {
+                                             title: "Notifications",
+                                              text: "Paramétrez et modifiez vos templates emails.",
+                                              link: "/notification_templates"
+                                            })
+
   end
 end
