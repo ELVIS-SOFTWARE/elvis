@@ -239,7 +239,7 @@ class User < ApplicationRecord
     # pour le moment, seulement pour les new records => compatibilité avec instances existantes
     # todo: remove new_record? condition
     if attached_to.nil? && new_record? && (User.where(email: email).any?)
-      errors.add(:base, "Un compte existe déjà avec cet email.")
+      errors.add(:email, "Un compte existe déjà avec cet email.")
     end
   end
 

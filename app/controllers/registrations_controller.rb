@@ -99,9 +99,9 @@ class RegistrationsController < Devise::RegistrationsController
     email_exists = User.exists?(email: params[:email])
 
     if user_exists
-      render json: { exists: true, message: "Un compte existe déjà avec cette combinaison ou cet email." }
+      render json: { exists: true, field: 'user', message: "Un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance." }
     elsif email_exists
-      render json: { exists: true, message: "Un compte existe déjà avec cet email." }
+      render json: { exists: true, field:'email', message: "Un compte existe déjà avec cet email." }
     else
       render json: { exists: false }
     end
