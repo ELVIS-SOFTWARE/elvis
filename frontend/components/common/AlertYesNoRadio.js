@@ -49,7 +49,7 @@ const AlertYesNoRadio = ({ ignoreValidate, text, alertType, name }) => {
                 name={name}
                 subscription={{ touched: true, error: true }}
                 render={({ meta: { touched, error } }) =>
-                    touched && error ? <span className="text-danger text-center">{MESSAGES[error]}</span> : null
+                    touched && error ? <span className="text-danger">{MESSAGES[error]}</span> : null
                 }/>
         </div>
     );
