@@ -243,7 +243,6 @@ class ActivitiesApplicationsList extends React.Component {
             showCancelButton: true,
         }).then(r => {
             if (r.value) {
-                console.log("this.state.bulkTargets", this.state.bulkTargets);
                 fetch("/inscriptions", {
                     method: "DELETE",
                     headers: {
@@ -263,8 +262,7 @@ class ActivitiesApplicationsList extends React.Component {
                             targets: [],
                         });
                     });
-            } else {
-                console.log("cancelled");            }
+            }
         });
 
     }
