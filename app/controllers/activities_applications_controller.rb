@@ -951,14 +951,13 @@ class ActivitiesApplicationsController < ApplicationController
     end
   end
 
-
   def create_import_csv
     handler_class_name = case Parameter.get_value('activity_applications.importer_name')
-               when 'tes_importer'
-                  "ActivityApplications::TesImportHandler"
-               else
-                 nil
-               end
+                         when 'tes_importer'
+                           "ActivityApplications::TesImportHandler"
+                         else
+                           nil
+                         end
 
     render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if handler_class_name.nil?
 
@@ -1115,14 +1114,23 @@ class ActivitiesApplicationsController < ApplicationController
 
   def destroy
     activity_application = ActivityApplication.find(params[:id])
-    activity_application.desired_activities.each do |da|
-      Activity.find(da.activity_id).remove_student(da.id) if da.is_validated
-      additional_student = AdditionalStudent.find_by(desired_activity_id: da.id)
-      additional_student&.delete
-    end
-    activity_application.pre_application_activity ? activity_application.pre_application_activity.reset : nil
-
+    handle_related_records(activity_application)
     activity_application.destroy
+  end
+
+  def bulk_delete
+    targets = params[:targets]
+
+    if targets.blank? || !targets.is_a?(Array)
+      render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
+    end
+
+    activities_application = ActivityApplication.where(id: targets)
+    activities_application.each do |activity_application|
+      handle_related_records(activity_application)
+    end
+
+    activities_application.destroy_all
   end
 
   def find_activity_suggestions
@@ -1266,6 +1274,16 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   private
+
+  def handle_related_records(activity_application)
+    activity_application.desired_activities.each do |da|
+      Activity.find(da.activity_id).remove_student(da.id) if da.is_validated
+      additional_student = AdditionalStudent.find_by(desired_activity_id: da.id)
+      additional_student&.delete
+    end
+
+    activity_application.pre_application_activity&.reset
+  end
 
   def application_update_params
     params.require(:application).permit(:activity_application_status_id, :referent_id, :stopped_at, :begin_at)

@@ -166,6 +166,7 @@ Rails.application.routes.draw do
   patch "/inscriptions/:id/add_activities", to: "activities_applications#add_activities"
   post "/inscriptions/list", to: "activities_applications#list"
   post "/inscriptions/bulk", to: "activities_applications#bulk_update"
+  delete "/inscriptions", to: "activities_applications#bulk_delete"
 
   post "/inscriptions/:id/comment", to: "activities_applications#add_comment"
   patch "/inscriptions/:id/comment/edit/:comment_id", to: "activities_applications#edit_comment"
