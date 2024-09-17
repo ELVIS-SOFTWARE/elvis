@@ -10,7 +10,8 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def create
-    valid = verify_recaptcha(action: "sign_up")
+    recaptcha_token = params[:recaptcha_token]
+    valid = verify_recaptcha(response: recaptcha_token,  action: "sign_up")
     score = if recaptcha_reply.present? # nil == recaptcha not configured
               (recaptcha_reply["score"] || 0)
             else

@@ -1,66 +1,38 @@
-<%
-  @minimum_password_length = User.password_length.min
+<%#
+<!--  @minimum_password_length = User.password_length.min-->
 %>
 
-<div>
-  <% if !resource.errors[:uniqueness].empty? %>
-    <div class="alert alert-danger">
-      <% resource.errors[:uniqueness].each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-    </div>
-  <% end %>
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
-<!--    <div class="form-group text-left">-->
-<!--      <%#= f.label "Votre Nom" %><br/>-->
-      <%#= f.text_field :last_name, required: true, autofocus: true, autocomplete: "last name", id: "last_name", class: "form-control" %>
+<!--<div>-->
+  <%# if !resource.errors[:uniqueness].empty? %>
+<!--    <div class="alert alert-danger">-->
+      <%# resource.errors[:uniqueness].each do |msg| %>
+<!--        <li><%#= msg %></li>-->
+      <%# end %>
 <!--    </div>-->
+  <%# end %>
+  <%#= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
 
-<!--    <div class="form-group text-left">-->
-<!--      <%#= f.label "Votre Prénom" %><br/>-->
-      <%#= f.text_field :first_name, required: true, autofocus: true, autocomplete: "first name", id: "first_name", class: "form-control" %>
-<!--    </div>-->
+    <%#= react_component('UserDetailsInput', { errors: resource.errors.to_hash }) %>
 
-<!--    <div class="form-group w-100 text-left">-->
-<!--      <%#= f.label "Votre date de naissance" %><br/>-->
-      <%#= f.date_field :birthday, required: true, autofocus: true, autocomplete: "birthday", id: "birthday", class: "form-control w-100" %>
-<!--    </div>-->
-
-
-    <%# resource.errors[:base].each do |msg| %>
+    <%#= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe', additional_attr: {minLength: @minimum_password_length} }) %>
+    <%# resource.errors[:password].each do |msg| %>
 <!--      <div class="alert alert-danger"><%#= msg %></div>-->
     <%# end %>
+    <%#= react_component('PasswordInput', { id: 'password_confirmation', name: 'user[password_confirmation]', label: 'Confirmer mot de passe', error: resource.errors[:password_confirmation].join(', ') }) %>
 
-<!--    <div class="form-group text-left">-->
-<!--      <%#= f.label "Email" %><br/>-->
-      <%#= f.email_field :email, required: true, autofocus: true, autocomplete: "email", class: "form-control" %>
-<!--    </div>-->
-    <%# resource.errors[:email].each do |msg| %>
-<!--      <div class="alert alert-danger"><%#= msg %></div>-->
+
+    <%# unless Recaptcha.configuration.site_key.nil? %>
+<!--      <div class="form-group">-->
+        <%#= recaptcha_v3(action: "sign_up") %>
+<!--      </div>-->
     <%# end %>
 
-    <%= react_component('UserDetailsInput', { errors: resource.errors.to_hash }) %>
 
 
+    <%#= f.submit "Inscription", class: "btn btn-primary block full-width m-b" %>
 
+    <%#= render "devise/shared/links" %>
+  <%# end %>
+<!--</div>-->
 
-    <%= react_component('PasswordInput', { id: 'password', name: 'user[password]', label: 'Mot de passe', additional_attr: {minLength: @minimum_password_length} }) %>
-    <% resource.errors[:password].each do |msg| %>
-      <div class="alert alert-danger"><%= msg %></div>
-    <% end %>
-    <%= react_component('PasswordInput', { id: 'password_confirmation', name: 'user[password_confirmation]', label: 'Confirmer mot de passe', error: resource.errors[:password_confirmation].join(', ') }) %>
-
-
-    <% unless Recaptcha.configuration.site_key.nil? %>
-      <div class="form-group">
-        <%= recaptcha_v3(action: "sign_up") %>
-      </div>
-    <% end %>
-
-
-
-    <%= f.submit "Inscription", class: "btn btn-primary block full-width m-b" %>
-
-    <%= render "devise/shared/links" %>
-  <% end %>
-</div>
+<%= react_component('RegistrationForm', { errors: resource.errors.to_hash, recaptcha_key: Recaptcha.configuration.site_key, additional_attr: {minLength: @minimum_password_length} }) %>
