@@ -133,11 +133,52 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
         }
     }
 
-    function submitForm() {
-        // Perform form submission here
-        console.log("Form submitted with reCAPTCHA token:", recaptchaToken);
+    async function submitForm() {
         console.log("Form values:", formValues);
+
+        try {
+            const userParams = {
+                user: {
+                    first_name: formValues['user[first_name]'],
+                    last_name: formValues['user[last_name]'],
+                    email: formValues['user[email]'],
+                    birthday: formValues['user[birthday]'],
+                    password: formValues['user[password]'],
+                    password_confirmation: formValues['user[password_confirmation]'],
+                }
+            };
+
+            if (recaptchaToken) {
+                userParams.recaptcha_token = recaptchaToken;
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            const response = await fetch("/u", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-Token": csrfToken
+                },
+                body: JSON.stringify(userParams)
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else if (response.ok) {
+                const res = await response.json();
+                console.log("Registration successful:", res);
+                window.location.reload();
+            } else {
+                const res = await response.json();
+                console.error("Registration error:", res);
+                setFormErrors(res.errors);
+            }
+        } catch (error) {
+            console.error("Error submitting form:", error);
+        }
     }
+
 
     return (
         <form onSubmit={handleSubmit}>
