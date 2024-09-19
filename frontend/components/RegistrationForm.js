@@ -4,22 +4,21 @@ import UserDetailsInput from "./UserDetailsInput";
 import * as api from "../tools/api";
 
 export default function RegistrationForm({errors, recaptchaKey, onValidationError, additional_attr}) {
+    const [recaptchaToken, setRecaptchaToken] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formValues, setFormValues] = useState({
-        'user[first_name]': "",
-        'user[last_name]': "",
-        'user[email]': "",
-        'user[birthday]': "",
-        'user[password]': "",
-        'user[password_confirmation]': "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        birthday: "",
+        password: "",
+        passwordConfirmation: "",
     });
 
-    const [recaptchaToken, setRecaptchaToken] = useState("");
-    const [formErrors, setFormErrors] = useState({});
-    const [validationErrors, setValidationErrors] = useState({
+    const [uniquenessErrors, setUniquenessErrors] = useState({
         user: null,
         email: null
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (recaptchaKey && window.grecaptcha) {
@@ -36,13 +35,7 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
 
 
     useEffect(() => {
-        const {
-            'user[first_name]': firstName,
-            'user[last_name]': lastName,
-            'user[birthday]': birthday,
-            'user[email]': email
-        } = formValues;
-
+        const {firstName, lastName, birthday, email} = formValues;
         if (firstName && lastName && birthday) {
             const checkUniqueness = async () => {
                 try {
@@ -58,29 +51,28 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
                             birthday: birthday,
                             email: email
                         });
-
                     if (response.exists) {
                         if (response.field === 'user') {
-                            setValidationErrors({
+                            setUniquenessErrors({
                                 user: response.message,
                                 email: null
                             });
                         } else if (response.field === 'email') {
-                            setValidationErrors({
+                            setUniquenessErrors({
                                 user: null,
                                 email: response.message
                             });
                         }
                         if (onValidationError) onValidationError(response.message);
                     } else {
-                        setValidationErrors({
+                        setUniquenessErrors({
                             user: null,
                             email: null
                         });
                     }
                 } catch (error) {
                     console.error("Error checking uniqueness:", error);
-                    setValidationErrors({
+                    setUniquenessErrors({
                         user: "Une erreur est survenue",
                         email: null
                     });
@@ -139,12 +131,12 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
         try {
             const userParams = {
                 user: {
-                    first_name: formValues['user[first_name]'],
-                    last_name: formValues['user[last_name]'],
-                    email: formValues['user[email]'],
-                    birthday: formValues['user[birthday]'],
-                    password: formValues['user[password]'],
-                    password_confirmation: formValues['user[password_confirmation]'],
+                    first_name: formValues['firstName'],
+                    last_name: formValues['lastName'],
+                    email: formValues['email'],
+                    birthday: formValues['birthday'],
+                    password: formValues['password'],
+                    password_confirmation: formValues['passwordConfirmation'],
                 }
             };
 
@@ -168,11 +160,9 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
             } else if (response.ok) {
                 const res = await response.json();
                 console.log("Registration successful:", res);
-                window.location.reload();
             } else {
                 const res = await response.json();
                 console.error("Registration error:", res);
-                setFormErrors(res.errors);
             }
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -188,12 +178,12 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
                     type="text"
                     className="form-control"
                     id="last_name"
-                    name="user[last_name]"
-                    value={formValues['user[last_name]']}
+                    name="lastName"
+                    value={formValues['lastName']}
                     onChange={handleChange}
                     required
                 />
-                {errors['user[last_name]'] && <div className="alert alert-danger">{errors['user[last_name]']}</div>}
+                {errors['lastName'] && <div className="alert alert-danger">{errors['lastName']}</div>}
             </div>
 
             <div className="form-group text-left">
@@ -202,12 +192,12 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
                     type="text"
                     className="form-control"
                     id="first_name"
-                    name="user[first_name]"
-                    value={formValues['user[first_name]']}
+                    name="firstName"
+                    value={formValues['firstName']}
                     onChange={handleChange}
                     required
                 />
-                {errors['user[first_name]'] && <div className="alert alert-danger">{errors['user[first_name]']}</div>}
+                {errors['firstName'] && <div className="alert alert-danger">{errors['firstName']}</div>}
             </div>
 
             <div className="form-group w-100 text-left">
@@ -216,13 +206,13 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
                     type="date"
                     className="form-control"
                     id="birthday"
-                    name="user[birthday]"
-                    value={formValues['user[birthday]']}
+                    name="birthday"
+                    value={formValues['birthday']}
                     onChange={handleChange}
                     required
                 />
-                {errors['user[birthday]'] && <div className="alert alert-danger">{errors['user[birthday]']}</div>}
-                {validationErrors.user && <div className="alert alert-danger">{validationErrors.user}</div>}
+                {errors['birthday'] && <div className="alert alert-danger">{errors['birthday']}</div>}
+                {uniquenessErrors.user && <div className="alert alert-danger">{uniquenessErrors.user}</div>}
             </div>
 
             <div className="form-group text-left">
@@ -231,19 +221,19 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
                     type="email"
                     className="form-control"
                     id="email"
-                    name="user[email]"
-                    value={formValues['user[email]']}
+                    name="email"
+                    value={formValues['email']}
                     onChange={handleChange}
                     required
                 />
-                {errors['user[email]'] && <div className="alert alert-danger">{errors['user[email]']}</div>}
-                {validationErrors.email && <div className="alert alert-danger">{validationErrors.email}</div>}
+                {errors['email'] && <div className="alert alert-danger">{errors['email']}</div>}
+                {uniquenessErrors.email && <div className="alert alert-danger">{uniquenessErrors.email}</div>}
 
             </div>
 
             <PasswordInput
                 id="password"
-                name='user[password]'
+                name='password'
                 label="Mot de passe"
                 onChange={handleChange}
                 error={errors.password}
@@ -252,7 +242,7 @@ export default function RegistrationForm({errors, recaptchaKey, onValidationErro
 
             <PasswordInput
                 id="password_confirmation"
-                name='user[password_confirmation]'
+                name='passwordConfirmation'
                 label="Confirmer mot de passe"
                 onChange={handleChange}
                 error={errors.password_confirmation}
