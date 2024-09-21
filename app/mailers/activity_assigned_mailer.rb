@@ -9,7 +9,7 @@ class ActivityAssignedMailer < LayoutMailer
     @user = user
     @confirmation_token = token
     @application = LiquidDrops::ApplicationDrop.new(application.as_json(include: {user: {}, season: {}}))
-    @activity = LiquidDrops::ActivityDrop.new(activity.as_json(include: {activity_ref: {}, teacher: {}, room: {}, time_interval: {}}))
+    @activity = LiquidDrops::ActivityDrop.new(activity.as_json(include: {activity_ref: {methods: :display_price}, teacher: {}, room: {}, time_interval: {}}))
 
     mail(to: @user.email, subject: "#{name} - Confirmation d'attribution de cours")
   end

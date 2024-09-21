@@ -30,16 +30,8 @@ module LiquidDrops
       @activity["activity_ref"]["occupation_limit"]
     end
 
-    def monthly_price
-      @activity["activity_ref"]["monthly_price"]
-    end
-
-    def quarterly_price
-      @activity["activity_ref"]["quarterly_price"]
-    end
-
-    def annual_price
-      @activity["activity_ref"]["annual_price"]
+    def display_price
+      ActiveSupport::NumberHelper::number_to_currency @activity["activity_ref"]["display_price"]
     end
 
     def from_age

@@ -77,7 +77,14 @@ export const ACTIVITY_TAGS = {
         name: "Nom du professeur",
         value: "{{activity.teacher_last_name}}",
         sample: "Nom du professeur"
-    }
+    },
+
+    activity_display_price: {
+        name: "Prix de l'activité",
+        value: "{{activity.display_price}}",
+        sample: "Prix de l'activité"
+    },
+
 }
 export const ACTIVITY_INSTANCE_TAGS = {
     activity_start_date: {
