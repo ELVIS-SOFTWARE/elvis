@@ -46,6 +46,10 @@ module LiquidDrops
       @application["season"]["label"]
     end
 
+    def total_due_payments
+      "woop woop"
+    end
+
   end
 end
 

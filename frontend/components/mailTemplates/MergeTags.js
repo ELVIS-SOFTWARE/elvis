@@ -33,7 +33,13 @@ export const APPLICATION_TAGS = {
         name: "Saison de l'application",
         value: "{{application.season_label}}",
         sample: "Saison de l'application"
-    }
+    },
+
+    application_total_due_payments: {
+        name: "Total des paiements dus",
+        value: "{{application.total_due_payments}}",
+        sample: "Total des paiements dus"
+    },
 }
 
 export const ACTIVITY_TAGS = {
