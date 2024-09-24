@@ -1,0 +1,3 @@
+class UpcomingPaymentMailer < ApplicationMailer
+
+end
