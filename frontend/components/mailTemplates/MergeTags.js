@@ -35,10 +35,16 @@ export const APPLICATION_TAGS = {
         sample: "Saison de l'application"
     },
 
-    application_total_due_payments: {
+    application_total_all_due_payments: {
         name: "Total des paiements dus",
-        value: "{{application.total_due_payments}}",
+        value: "{{application.total_all_due_payments}}",
         sample: "Total des paiements dus"
+    },
+
+    application_total_pending_due_payments: {
+        name: "Total des paiements dus restants",
+        value: "{{application.total_pending_due_payments}}",
+        sample: "Total des paiements dus restants"
     },
 }
 

@@ -46,7 +46,17 @@ module LiquidDrops
       @application["season"]["label"]
     end
 
-    def total_due_payments
+    def total_all_due_payments
+      user = @application["user"]
+      payment_schedules = user["payment_schedules"] || []
+
+      due_payments = payment_schedules.map { |schedule| schedule["due_payments"] }.flatten
+      total_due = due_payments.sum { |dp| dp["amount"].to_f }
+
+      total_due
+    end
+
+    def total_pending_due_payments
       user = @application["user"]
       payment_schedules = user["payment_schedules"] || []
 
