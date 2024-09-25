@@ -1,31 +1,31 @@
 import React from "react";
-import { Field } from "react-final-form";
+import {Field} from "react-final-form";
 
 import Checkbox from "../common/Checkbox";
 import Radio from "../common/Radio";
-import { FormSpy } from "react-final-form";
+import {FormSpy} from "react-final-form";
 
-const AllowsTimeslotSelectionButtonGroup =  ({ forcedValue }) => {
+const AllowsTimeslotSelectionButtonGroup = ({forcedValue}) => {
     return (
         <div className="btn-group pl-4" data-toggle="buttons">
-                <Field
-                    id="allows_timeslot_selection"
-                    label="Proposer à l'élève des créneaux de cours"
-                    name="allowsTimeslotSelection"
-                    value={"true"}
-                    disabled={forcedValue==="false"}
-                    type="radio"
-                    render={Radio}
-                />
-                <Field
-                    id="ask_availabilities"
-                    label="Demander à l'élève de saisir ses disponibilités"
-                    name="allowsTimeslotSelection"
-                    value={"false"}
-                    disabled={forcedValue==="true"}
-                    type="radio"
-                    render={Radio}
-                />
+            <Field
+                id="allows_timeslot_selection"
+                label="Proposer à l'élève des créneaux de cours"
+                name="allowsTimeslotSelection"
+                value={"true"}
+                disabled={forcedValue === "false"}
+                type="radio"
+                render={Radio}
+            />
+            <Field
+                id="ask_availabilities"
+                label="Demander à l'élève de saisir ses disponibilités"
+                name="allowsTimeslotSelection"
+                value={"false"}
+                disabled={forcedValue === "true"}
+                type="radio"
+                render={Radio}
+            />
         </div>
     );
 }
@@ -46,18 +46,19 @@ export default class ActivityRefApplication extends React.Component {
     render() {
         return (
             <div>
-                <hr />
+                <hr/>
 
                 <div className="row-sm">
                     <h3>Réinscription</h3>
-                    <label>Activités proposées lors d'une réinscription (si aucune sélection, toutes les activités seront proposées)
-                        <br />
+                    <label>Activités proposées lors d'une réinscription (si aucune sélection, toutes les activités
+                        seront proposées)
+                        <br/>
                         <Field
 
                             component="select"
                             multiple size="10"
                             name="nextCycles"
-                            style={{ width: '50%' }}>
+                            style={{width: '50%'}}>
 
                             {this.props.activityRefs.map((kind) => {
                                 return <optgroup key={kind[0].id} label={kind[0].name}>
@@ -71,8 +72,8 @@ export default class ActivityRefApplication extends React.Component {
                 </div>
 
                 <p className="row-sm text-muted">
-                    Sélectionner plusieurs activités avec <strong>CTRL</strong>.<br />
-                    Sélectionner la totalité entre deux activités avec <strong>MAJ/SHIFT</strong>.<br />
+                    Sélectionner plusieurs activités avec <strong>CTRL</strong>.<br/>
+                    Sélectionner la totalité entre deux activités avec <strong>MAJ/SHIFT</strong>.<br/>
                     Vous pouvez combiner <strong>CTRL</strong> et <strong>MAJ/SHIFT</strong>.
                 </p>
 
@@ -116,15 +117,6 @@ export default class ActivityRefApplication extends React.Component {
                         value="false"
                         render={Radio}
                     />
-                    <FormSpy subscription={{ values: true }}>
-                        {({ values }) => {
-                            console.log(values);
-                            if (values.substitutable==="false") {
-                                return <AllowsTimeslotSelectionButtonGroup forcedValue={"false"} />
-                            }
-                            return null;
-                        }}
-                    </FormSpy>
 
                     <Field
                         id="substitutable-false"
@@ -134,17 +126,17 @@ export default class ActivityRefApplication extends React.Component {
                         value="true"
                         render={Radio}
                     />
-                    <FormSpy subscription={{ values: true }}>
-                        {({ values }) => {
-                            console.log(values);
-                            if (values.substitutable==="true") {
+
+                    <FormSpy subscription={{values: true}}>
+                        {({values}) => {
+                            if (values.substitutable === "true") {
                                 return <AllowsTimeslotSelectionButtonGroup />
+                            } else if (values.substitutable === "false") {
+                                return <AllowsTimeslotSelectionButtonGroup forcedValue={"false"}/>
                             }
                             return null;
                         }}
                     </FormSpy>
-
-
                 </div>
 
 
