@@ -114,15 +114,6 @@ export default class ActivityRefApplication extends React.Component {
                         label="Rattacher cette activité à sa famille"
                         name="substitutable"
                         type="radio"
-                        value="false"
-                        render={Radio}
-                    />
-
-                    <Field
-                        id="substitutable-false"
-                        label="Dissocier cette activité de sa famille"
-                        name="substitutable"
-                        type="radio"
                         value="true"
                         render={Radio}
                     />
@@ -130,11 +121,27 @@ export default class ActivityRefApplication extends React.Component {
                     <FormSpy subscription={{values: true}}>
                         {({values}) => {
                             if (values.substitutable === "true") {
-                                return <AllowsTimeslotSelectionButtonGroup />
-                            } else if (values.substitutable === "false") {
                                 return <AllowsTimeslotSelectionButtonGroup forcedValue={"false"}/>
                             }
-                            return null;
+                            return null
+                        }}
+                    </FormSpy>
+
+                    <Field
+                        id="substitutable-false"
+                        label="Dissocier cette activité de sa famille"
+                        name="substitutable"
+                        type="radio"
+                        value="false"
+                        render={Radio}
+                    />
+
+                    <FormSpy subscription={{values: true}}>
+                        {({values}) => {
+                            if (values.substitutable === "false") {
+                                return <AllowsTimeslotSelectionButtonGroup/>
+                            }
+                            return null
                         }}
                     </FormSpy>
                 </div>
