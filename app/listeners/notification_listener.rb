@@ -84,7 +84,7 @@ class NotificationListener < BaseListener
       application = args[:application]
       UpcomingPaymentMailer.upcoming_payment(user, user.confirmation_token, application).deliver_later
 
-
     end
+
   end
 end
