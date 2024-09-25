@@ -19,10 +19,7 @@ export default class ActivityRefContainer extends React.Component {
         this.initialValues = {
             activityRef: this.props.activityRef,
             applicationOptions,
-            substitutable:
-                this.props.activityRef.substitutable === null ?
-                    "false" :
-                    this.props.activityRef.substitutable.toString(),
+            substitutable: this.props.activityRef.substitutable.toString(),
             allowsTimeslotSelection:
                 this.props.activityRef.allows_timeslot_selection === null ?
                     "false" :
