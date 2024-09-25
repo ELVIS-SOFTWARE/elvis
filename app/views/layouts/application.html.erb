@@ -61,11 +61,7 @@
             <% end %></div>
         </li>
 
-        <% render_menu Elvis::MenuManager.get_menu_with_role(:side_menu, if @current_user.is_admin?
-                                                                           "admin"
-                                                                         else
-                                                                           @current_user.is_teacher? ? "teacher" : "simple"
-                                                                         end) %>
+        <% render_menu Elvis::MenuManager.get_menu_with_roles(:side_menu, [@current_user.is_admin ? "admin" : nil, @current_user.is_teacher? ? "teacher" : nil, !@current_user.is_admin && !@current_user.is_teacher ? "simple" : nil].compact) %>
 
         <% unless @current_user.admin? or @current_user.teacher? %>
           <% unless @current_user.first_connection %>
