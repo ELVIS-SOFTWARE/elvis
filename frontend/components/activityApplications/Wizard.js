@@ -29,6 +29,7 @@ import Select from "react-select";
 import Swal from 'sweetalert2'
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
 import WizardUserSelectMember from "./WizardUserSelectMember";
+import WrappedActivityChoice from "./WrappedActivityChoice";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
     "already_practiced_instrument";
@@ -767,7 +768,7 @@ class Wizard extends React.Component {
             activityChoiceActionTypes.includes(this.props.actionType) && {
                 name: "Choix de l'activité",
                 component: (
-                    <ActivityChoice
+                    <WrappedActivityChoice
                         schoolName={this.props.schoolName}
                         adhesionPrices={this.props.adhesion_prices}
                         adhesionEnabled={this.props.adhesion_enabled}
