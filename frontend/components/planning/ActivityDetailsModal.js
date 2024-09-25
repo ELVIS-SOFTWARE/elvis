@@ -894,7 +894,7 @@ class ActivityDetailsModal extends React.Component {
                     </h2>
                 );
 
-            const editionPanelContent = this.props.isAdmin ? (
+            const editionPanelContent = this.props.isAdmin || (this.props.isTeacher && this.props.teacher_can_edit && _.get(this.props.planning, "user.id") === this.props.currentUserId) ? (
                 <ActivityEdition
                     selection={this.state.changes.instance}
                     rooms={this.props.room_refs}
@@ -914,7 +914,7 @@ class ActivityDetailsModal extends React.Component {
                     })}/>
             ) : null;
 
-            const recurrencesPanelContent = this.props.isAdmin ? (
+            const recurrencesPanelContent = this.props.isAdmin || (this.props.isTeacher && this.props.teacher_can_edit && _.get(this.props.planning, "user.id") === this.props.currentUserId) ? (
                 <div>
                     <YearlyCalendar
                         season={detectedSeason}
@@ -928,7 +928,7 @@ class ActivityDetailsModal extends React.Component {
                 </div>
             ) : null;
 
-            const instancePanelContent = this.props.isAdmin ? (
+            const instancePanelContent = this.props.isAdmin || (this.props.isTeacher && this.props.teacher_can_edit && _.get(this.props.planning, "user.id") === this.props.currentUserId) ? (
                 <TeacherCoveringEditor
                     teacher={_.get(this.props.interval, "activity_instance.activity.teacher")}
                     coverTeacherId={_.get(this.state.changes, "instance.cover_teacher_id")}
@@ -1013,8 +1013,7 @@ class ActivityDetailsModal extends React.Component {
             ];
 
             let deleteActivity =
-                this.props.isAdmin &&
-                this.state.activity.users.length == 0 ? (
+                (this.props.isAdmin || (this.props.isTeacher && this.props.teacher_can_edit && _.get(this.props.planning, "user.id") === this.props.currentUserId)) && this.state.activity.users.length == 0 ? (
                     <React.Fragment>
                         <hr/>
                         <button

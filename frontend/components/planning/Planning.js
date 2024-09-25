@@ -1689,6 +1689,8 @@ class Planning extends React.Component {
                             act => this.handleUpdateActivityInInstances(act)
                         }
                         savingActivityInstances={this.state.savingActivityInstances}
+                        teacher_can_edit={this.props.teacher_can_edit}
+                        currentUserId={this.props.currentUserId}
                     />
                 </Modal>
             </div>
