@@ -29,6 +29,7 @@ import Select from "react-select";
 import Swal from 'sweetalert2'
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
 import WizardUserSelectMember from "./WizardUserSelectMember";
+import WrappedActivityChoice from "./WrappedActivityChoice";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
     "already_practiced_instrument";
@@ -104,8 +105,8 @@ class Wizard extends React.Component {
             ).then((data, errors) => {
                 if (!errors) {
                     let user
-                    if(this.props.preSelectedUser.id !== undefined)
-                        user = data.data.filter(u => u.id === this.props.preSelectedUser.id ).shift()
+                    if (this.props.preSelectedUser.id !== undefined)
+                        user = data.data.filter(u => u.id === this.props.preSelectedUser.id).shift()
                     else
                         user = data.data.shift()
                     this.handleSelectUser(user)
@@ -121,8 +122,8 @@ class Wizard extends React.Component {
             ).then((data, errors) => {
                 if (!errors) {
                     let user
-                    if(this.props.user.id !== undefined)
-                        user = data.data.filter(u => u.id === this.props.user.id ).shift()
+                    if (this.props.user.id !== undefined)
+                        user = data.data.filter(u => u.id === this.props.user.id).shift()
                     else
                         user = data.data.shift()
                     this.handleSelectUser(user)
@@ -368,8 +369,7 @@ class Wizard extends React.Component {
         const authToken = _.get(this.state, "infos.authentication_token");
 
         api.set()
-            .success((data) =>
-            {
+            .success((data) => {
                 this.setState({buttonDisabled: false});
 
                 let user = this.state.user;
@@ -401,14 +401,13 @@ class Wizard extends React.Component {
                     allowOutsideClick: false,
                     confirmButtonText: confirmtext,
                 })
-                .then((result) =>
-                {
-                    if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                        window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
-                    } else {
-                        window.location.href = `/inscriptions/${data.activity_application.id}`;
-                    }
-                })
+                    .then((result) => {
+                        if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
+                            window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
+                        } else {
+                            window.location.href = `/inscriptions/${data.activity_application.id}`;
+                        }
+                    })
             })
             .error(data => {
                 this.setState({buttonDisabled: false});
@@ -478,7 +477,7 @@ class Wizard extends React.Component {
             })
             this.state.selectedActivities = [this.props.preSelectedActivityId];
 
-        // sinon on regarde si on peut en déduire une
+            // sinon on regarde si on peut en déduire une
         } else if (cycleActivityRefs.length) {
             // Pre select when there is only one activity to select
             if (cycleActivityRefs.length === 1
@@ -502,7 +501,7 @@ class Wizard extends React.Component {
         }
 
         this.setState({
-            skipActivityChoice: (this.state.selectedActivities.length === 1 && Object.keys(this.props.packs || {}).length === 0 )|| this.state.isApplicationChange
+            skipActivityChoice: (this.state.selectedActivities.length === 1 && Object.keys(this.props.packs || {}).length === 0) || this.state.isApplicationChange
         })
     }
 
@@ -529,7 +528,7 @@ class Wizard extends React.Component {
         const family = state.infos.family_links_with_user;
         const user_infos = state.infos;
         const familyPayers = family.filter(user => user.is_paying_for).map(user => user.id);
-        state.infos.payers = (user_infos.is_paying ? [...familyPayers, user_infos.id] : familyPayers ) || [];
+        state.infos.payers = (user_infos.is_paying ? [...familyPayers, user_infos.id] : familyPayers) || [];
 
         this.setState(state);
 
@@ -592,13 +591,11 @@ class Wizard extends React.Component {
         this.handleChangePaymentInfo('payment_method_id', paymentMethodId);
     }
 
-    handleChangeDayForCollection(dayForCollection)
-    {
+    handleChangeDayForCollection(dayForCollection) {
         const paymentTerms = [...(this.state.infos.payer_payment_terms || [])];
         const paymentTerm = paymentTerms.find(term => term.season_id == this.state.season_id);
 
-        if (paymentTerm)
-        {
+        if (paymentTerm) {
             paymentTerm.day_for_collection = dayForCollection;
         }
 
@@ -643,14 +640,13 @@ class Wizard extends React.Component {
 
     }
 
-    isApplicationAuthorized(season_id)
-    {
-        if(this.props.currentUserIsAdmin)
+    isApplicationAuthorized(season_id) {
+        if (this.props.currentUserIsAdmin)
             return true;
 
         const season = this.props.seasons.find(s => s.id === season_id);
 
-        if(!season)
+        if (!season)
             return false;
 
         const dateToUse = this.props.preApplicationActivity ? season.opening_date_for_applications : season.opening_date_for_new_applications;
@@ -675,8 +671,7 @@ class Wizard extends React.Component {
 
     render() {
 
-        if (!this.isApplicationAuthorized(this.state.season_id))
-        {
+        if (!this.isApplicationAuthorized(this.state.season_id)) {
             return <Fragment>
                 <div
                     className={`m-t m-b-sm h-auto img-rounded p-sm text-dark ${this.state.user.is_admin ? "bg-warning" : "bg-danger"}`}>
@@ -698,8 +693,8 @@ class Wizard extends React.Component {
             this.state.selectedActivities
         );
 
-        const timePrefsMode = preferencesActivities.length>0
-            ? preferencesActivities.length<this.state.selectedActivities.length ? PLANNING_AND_PREFERENCES_MODE : PREFERENCES_MODE
+        const timePrefsMode = preferencesActivities.length > 0
+            ? preferencesActivities.length < this.state.selectedActivities.length ? PLANNING_AND_PREFERENCES_MODE : PREFERENCES_MODE
             : PLANNING_MODE;
 
         const refsToEvaluate = this.state.activityRefs.filter(
@@ -718,10 +713,10 @@ class Wizard extends React.Component {
                 name: "Membre Concerné",
                 component: (
                     this.props.currentUserIsAdmin ? <UserSearch
-                        user={this.props.user}
-                        onSelect={this.handleSelectUser.bind(this)}
-                        season={this.state.season}
-                    /> :
+                            user={this.props.user}
+                            onSelect={this.handleSelectUser.bind(this)}
+                            season={this.state.season}
+                        /> :
                         <WizardUserSelectMember
                             user={this.props.user}
                             onSelect={this.handleSelectUser.bind(this)}
@@ -739,7 +734,7 @@ class Wizard extends React.Component {
                         shouldCheckGdpr={!this.props.currentUserIsAdmin}
                         hidePayers={true}
                         initialValues={userFormInitialValues}
-                        displayIdentificationNumber={this.props.countryCode==="BE"}
+                        displayIdentificationNumber={this.props.countryCode === "BE"}
                         onSubmit={values => this.handleUserFormSubmit(values)}
                         documentUrl={this.props.documentUrl}
                         consent_docs={this.props.consent_docs}
@@ -767,7 +762,7 @@ class Wizard extends React.Component {
             activityChoiceActionTypes.includes(this.props.actionType) && {
                 name: "Choix de l'activité",
                 component: (
-                    <ActivityChoice
+                    <WrappedActivityChoice
                         schoolName={this.props.schoolName}
                         adhesionPrices={this.props.adhesion_prices}
                         adhesionEnabled={this.props.adhesion_enabled}
@@ -882,7 +877,13 @@ class Wizard extends React.Component {
                 component: (
                     <WrappedPayerPaymentTerms
                         informationalStepOnly={false}
-                        user={{id: this.state.infos.id, first_name: this.state.infos.first_name, last_name: this.state.infos.last_name, is_paying: this.state.infos.is_paying, identification_number: this.state.infos.identification_number }}
+                        user={{
+                            id: this.state.infos.id,
+                            first_name: this.state.infos.first_name,
+                            last_name: this.state.infos.last_name,
+                            is_paying: this.state.infos.is_paying,
+                            identification_number: this.state.infos.identification_number
+                        }}
                         family={this.state.infos.family_links_with_user}
                         initialSelectedPayers={this.state.infos.payers || []}
                         paymentTerms={(this.state.infos.payer_payment_terms || []).find(pt => pt.season_id === this.state.season.id) || {}}
@@ -894,7 +895,7 @@ class Wizard extends React.Component {
                         onChangeDayForCollection={this.handleChangeDayForCollection.bind(this)}
                         onChangePaymentMethod={this.handleChangePaymentMethod.bind(this)}
                         onChangePayers={this.handleChangePayers.bind(this)}
-                        displayIdentificationNumber={this.props.countryCode==="BE"}
+                        displayIdentificationNumber={this.props.countryCode === "BE"}
                         onChangeIdentificationNumber={this.onChangeIdentificationNumber.bind(this)}
                     />
                 )
@@ -929,7 +930,7 @@ class Wizard extends React.Component {
         ].filter(e => e);
 
         return (
-            <div className="padding-page application-form" style={{ width: "85%" }}>
+            <div className="padding-page application-form" style={{width: "85%"}}>
                 <div className="d-md-inline-flex justify-content-between w-100">
 
 
@@ -942,7 +943,7 @@ class Wizard extends React.Component {
                     <h3 style={{color: "#8AA4B1"}}>Demande d'inscription
                         {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
                             " aux activités"
-                            : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
+                            : " à l'activité " + this.props.allActivityRefs.find(ar => ar.id === this.state.selectedActivities[0]).display_name
                         } pour la {this.state.season.label}
                     </h3>
                     {this.props.currentUserIsAdmin ? (
