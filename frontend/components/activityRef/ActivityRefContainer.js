@@ -1,13 +1,13 @@
 import React from "react";
-import { csrfToken } from "../utils";
+import {csrfToken} from "../utils";
 import swal from "sweetalert2";
 import ActivityRefBasics from "./ActivityRefBasics";
 import ActivityRefApplication from "./ActivityRefApplication";
 import TabbedComponent from "../utils/ui/tabs";
 import WorkGroupTemplateEditor from "./WorkGroupTemplateEditor";
-import { Form, Field, FormSpy } from "react-final-form";
+import {Form, Field, FormSpy} from "react-final-form";
 import * as api from "../../tools/api.js";
-import { redirectTo } from "../../tools/url";
+import {redirectTo} from "../../tools/url";
 import ActivityRefTeachers from "./ActivityRefTeachers";
 
 
@@ -19,10 +19,7 @@ export default class ActivityRefContainer extends React.Component {
         this.initialValues = {
             activityRef: this.props.activityRef,
             applicationOptions,
-            substitutable:
-                this.props.activityRef.substitutable === null ?
-                    "true" :
-                    this.props.activityRef.substitutable.toString(),
+            substitutable: this.props.activityRef.substitutable.toString(),
             allowsTimeslotSelection:
                 this.props.activityRef.allows_timeslot_selection === null ?
                     "false" :
@@ -85,7 +82,7 @@ export default class ActivityRefContainer extends React.Component {
         });
     }
 
-    onWorkgroupChange({ values }) {
+    onWorkgroupChange({values}) {
         this.instruments = values;
     }
 
@@ -183,12 +180,12 @@ export default class ActivityRefContainer extends React.Component {
                 });
 
             })
-            .post(this.route, { activity_ref: activityRef });
+            .post(this.route, {activity_ref: activityRef});
 
     }
 
     onValidate(values) {
-        const errors = { activityRef: {} };
+        const errors = {activityRef: {}};
 
         if (isIntStrInf(values.activityRef.occupation_hard_limit, values.activityRef.occupation_limit))
             errors.activityRef.occupation_hard_limit = "doit être supérieur au nombre de places";
@@ -212,7 +209,7 @@ export default class ActivityRefContainer extends React.Component {
                     validate={this.onValidate}
                     initialValues={this.initialValues}
 
-                    render={({ handleSubmit }) => (
+                    render={({handleSubmit}) => (
                         <form onSubmit={handleSubmit}>
 
                             <TabbedComponent tabs={[
@@ -240,6 +237,7 @@ export default class ActivityRefContainer extends React.Component {
                                     header: "Inscription",
                                     body: <ActivityRefApplication
                                         activityRefs={this.props.activityRefs}
+                                        substitutable={this.initialValues.substitutable}
                                     />,
                                 },
 
@@ -268,7 +266,7 @@ export default class ActivityRefContainer extends React.Component {
                             </TabbedComponent>
 
 
-                            <div style={{ padding: 20, display: "flex", justifyContent: "flex-end", gap: "20px" }}>
+                            <div style={{padding: 20, display: "flex", justifyContent: "flex-end", gap: "20px"}}>
                                 <div>
                                     <button type="reset" className="btn btn-block">Annuler</button>
                                 </div>

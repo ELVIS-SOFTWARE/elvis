@@ -41,7 +41,7 @@ class ActivityRefController < ApplicationController
   end
 
   def new
-    @activity_ref = ActivityRef.new
+    @activity_ref = ActivityRef.new(substitutable: false)
     @activity_ref_application_options = []
 
     @activity_kinds = ActivityRefKind.all.order(:name).map { |ar| [ar.name, ar.id] }
