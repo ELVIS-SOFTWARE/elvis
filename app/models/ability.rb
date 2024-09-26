@@ -53,5 +53,13 @@ class Ability
     can :manage, ActivityApplication, user_id: attached_account_ids
     can :create, ActivityApplication, user_id: 0
     can :read, Planning, user: user
+
+    can [:read, :edit], ActivityApplication, true do |activity_application|
+      return false if activity_application.season_id != Season.current_apps_season.id
+
+      user_activity_ref_ids = user.activity_refs.pluck(:id)
+
+      activity_application.desired_activities.pluck(:activity_ref_id).any? { |daarid| user_activity_ref_ids.any? {|aid| aid == daarid } }
+    end if user.is_teacher
   end
 end
