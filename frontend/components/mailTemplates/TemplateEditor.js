@@ -29,15 +29,22 @@ export default function TemplateEditor()  {
     }, [])
 
     useEffect(() => {
-        setMergeTags({
-            ...MergeTags.ACTIVITY_TAGS,
-            ...MergeTags.ACTIVITY_INSTANCE_TAGS,
-            ...MergeTags.APPLICATION_TAGS,
-            ...MergeTags.PAYMENT_TAGS,
-            ...MergeTags.REGLEMENTS_TAGS,
-            ...MergeTags.UTILS_TAGS
-        });
-    }, [event]);
+        if (template && template.path === 'upcoming_payment_mailer/upcoming_payment') {
+            setMergeTags({
+                ...MergeTags.UTILS_TAGS,
+                ...MergeTags.APPLICATION_TAGS
+            });
+        } else {
+            setMergeTags({
+                ...MergeTags.ACTIVITY_TAGS,
+                ...MergeTags.ACTIVITY_INSTANCE_TAGS,
+                ...MergeTags.APPLICATION_TAGS,
+                ...MergeTags.PAYMENT_TAGS,
+                ...MergeTags.REGLEMENTS_TAGS,
+                ...MergeTags.UTILS_TAGS
+            });
+        }
+    }, [event, template]);
 
     if (!loading) {
         return (
