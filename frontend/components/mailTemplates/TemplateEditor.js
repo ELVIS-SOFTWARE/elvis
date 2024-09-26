@@ -29,7 +29,7 @@ export default function TemplateEditor()  {
     }, [])
 
     useEffect(() => {
-        if (template && template.name === 'Notification de paiement à venir') {
+        if (template && template.path === 'upcoming_payment_mailer/upcoming_payment') {
             setMergeTags({
                 ...MergeTags.UTILS_TAGS,
                 ...MergeTags.APPLICATION_TAGS
