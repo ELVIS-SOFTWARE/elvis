@@ -1291,23 +1291,37 @@ class ActivitiesApplicationsController < ApplicationController
     })
   end
 
-  def get_default_and_list_activity_application_statuses
+  def get_activity_application_parameters
     render json: {
-      default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID),
-      list: ActivityApplicationStatus.all.as_json(except: %i[created_at updated_at]),
+      defaultActivityApplicationStatus: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID),
+      activityApplicationStatusList: ActivityApplicationStatus.all.as_json(except: %i[created_at updated_at]),
+      permitTeacherActivities: Parameter.get_value("activity_applications.authorize_teachers", default: false),
     }
   end
 
-  def set_default_activity_application_status
+  def set_activity_application_parameters
     status = Parameter.find_or_create_by(
       label: "activityApplication.default_status",
       value_type: "integer"
     )
 
-    authorize! :edit, status
+    authorize_teachers = Parameter.find_or_create_by(
+      label: "activity_applications.authorize_teachers",
+      value_type: "boolean"
+    )
 
-    status.value = params[:status_id]
+    authorize! :edit, status
+    authorize! :edit, authorize_teachers
+
+    status.value = params[:default_status_id]
     res = status.save
+
+    authorize_teachers.value = "#{params[:permit_teacher_activities]}"
+    res = authorize_teachers.save if res
+
+    if res
+      MenuGenerator.regenerate_menus
+    end
 
     respond_to do |format|
       format.json { render json: { success: res } }

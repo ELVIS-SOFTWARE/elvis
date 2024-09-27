@@ -100,8 +100,8 @@ Rails.application.routes.draw do
   resources :activities_applications, path: "inscriptions"
   post "/inscriptions/create_import_csv", to: "activities_applications#create_import_csv"
   
-  get "/get_default_and_list_activity_application_statuses", to: "activities_applications#get_default_and_list_activity_application_statuses"
-  post "/set_default_activity_application_status", to: "activities_applications#set_default_activity_application_status"
+  get "/get_activity_application_parameters", to: "activities_applications#get_activity_application_parameters"
+  post "/set_activity_application_parameters", to: "activities_applications#set_activity_application_parameters"
 
   # ==================
   # COUPONS
