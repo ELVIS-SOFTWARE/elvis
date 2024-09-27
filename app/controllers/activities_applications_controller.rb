@@ -5,48 +5,49 @@ class ActivitiesApplicationsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:new]
 
   def index
-    activities_applications = ActivityApplication.includes(:activity_refs).all
-    authorize! :read, activities_applications
-    @seasons = Season.all_seasons_cached
+    raise CanCan::AccessDenied unless current_user&.is_admin || current_user&.is_teacher
 
     season = Season.current_apps_season
+    @admins = User.admins.as_json only: %i[id first_name last_name full_name]
 
-    @admins = User.admins
+    if current_user.is_admin
+      @seasons = Season.all_seasons_cached
 
-    @adherent_count = Payment
-                        .joins(due_payment: :payment_schedule)
-                        .where({
-                                 payment_status_id: nil,
-                                 due_payments: {
-                                   number: 0,
-                                   payment_schedules: {
-                                     season_id: season&.id || 0,
+      @adherent_count = Payment
+                          .joins(due_payment: :payment_schedule)
+                          .where({
+                                   payment_status_id: nil,
+                                   due_payments: {
+                                     number: 0,
+                                     payment_schedules: {
+                                       season_id: season&.id || 0,
+                                     },
                                    },
-                                 },
-                               })
-                        .map(&:adjusted_amount)
-                        .compact
-                        .sum.to_i / 15
+                                 })
+                          .map(&:adjusted_amount)
+                          .compact
+                          .sum.to_i / 15
 
-    # User.joins(:activity_applications).where(activity_applications: { season_id: season.id }).uniq.count
-    @applications_count = ActivityApplication.where(season: season).count
-    @applications_to_process = ActivityApplication.where(season: season)
-                                                  .joins(:activity_application_status)
-                                                  .merge(
-                                                    ActivityApplicationStatus.where(id: ActivityApplicationStatus::TREATMENT_PENDING_ID)
-                                                  ).count
-    @processing_applications_count = ActivityApplication.where(season: season)
-                                                        .joins(:activity_application_status)
-                                                        .merge(
-                                                          # ActivityApplicationStatus.where("label != ? AND label != ? AND label != ?", "Cours attribué", "Arrêté",
-                                                          #                                 "En attente de traitement")
-                                                          ActivityApplicationStatus.where.not(id: [ActivityApplicationStatus::TREATMENT_PENDING_ID, ActivityApplicationStatus::STOPPED_ID, ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID])
-                                                        ).count
+      # User.joins(:activity_applications).where(activity_applications: { season_id: season.id }).uniq.count
+      @applications_count = ActivityApplication.where(season: season).count
+      @applications_to_process = ActivityApplication.where(season: season)
+                                                    .joins(:activity_application_status)
+                                                    .merge(
+                                                      ActivityApplicationStatus.where(id: ActivityApplicationStatus::TREATMENT_PENDING_ID)
+                                                    ).count
+      @processing_applications_count = ActivityApplication.where(season: season)
+                                                          .joins(:activity_application_status)
+                                                          .merge(
+                                                            # ActivityApplicationStatus.where("label != ? AND label != ? AND label != ?", "Cours attribué", "Arrêté",
+                                                            #                                 "En attente de traitement")
+                                                            ActivityApplicationStatus.where.not(id: [ActivityApplicationStatus::TREATMENT_PENDING_ID, ActivityApplicationStatus::STOPPED_ID, ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID])
+                                                          ).count
 
-    @processed_applications_count = ActivityApplication.where(season: season)
-                                                       .joins(:activity_application_status)
-                                                       .merge(ActivityApplicationStatus.where(id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::STOPPED_ID]))
-                                                       .count
+      @processed_applications_count = ActivityApplication.where(season: season)
+                                                         .joins(:activity_application_status)
+                                                         .merge(ActivityApplicationStatus.where(id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::STOPPED_ID]))
+                                                         .count
+    end
 
     # activity_refs = ActivityRef.all.reject { |ar| ar.activity_type == "child" || ar.activity_type == "cham" }.uniq(&:kind)
     # activity_refs << ActivityRef.all.select { |ar| ar.activity_type == "child" }
@@ -1328,36 +1329,6 @@ class ActivitiesApplicationsController < ApplicationController
     query = ActivityApplication.all
                                .includes(:activity_refs, :user, :season)
 
-    unless json_query[:sorted].nil?
-      order_string = nil
-      dir = json_query[:sorted][:desc] ? "desc" : "asc"
-
-      case json_query[:sorted][:id]
-      when "id"
-        order_string = "activity_applications.id #{dir}"
-      when "name"
-        order_string = "users.first_name || ' ' || users.last_name #{dir}"
-      when "date"
-        order_string = "activity_applications.created_at #{dir}"
-      when "adherent_number"
-        order_string = "users.adherent_number #{dir}"
-      when "age"
-        order_string = "extract(year from age(users.birthday)) #{dir}"
-        query = query.joins(:user)
-      when "level"
-        order_string = "(SELECT MIN(l.evaluation_level_ref_id) FROM levels l
-                WHERE l.user_id = users.id
-                AND l.activity_ref_id = activity_refs.id
-                AND l.season_id = activity_applications.season_id) #{dir}"
-        query = query.joins({ user: {}, activity_refs: {} })
-      when "referent_id"
-        order_string = "referent_id #{dir}"
-      end
-
-      order_sql = Arel.sql(order_string)
-      query = query.order(order_sql)
-    end
-
     json_query[:filtered].each do |filter|
       prop = filter[:id]
       val = filter[:value]
@@ -1425,6 +1396,46 @@ class ActivitiesApplicationsController < ApplicationController
       end
     end
 
+    unless current_user&.is_admin
+      user_activity_ref_ids = current_user.activity_refs.pluck(:id)
+
+      query = query.where(season_id: Season.current_apps_season.id)
+      query = query.joins(:desired_activities)
+                   .where(desired_activities: { activity_ref_id: user_activity_ref_ids })
+
+      #query = query.accessible_by(current_ability)
+    end
+
+    unless json_query[:sorted].nil?
+      order_string = nil
+      dir = json_query[:sorted][:desc] ? "desc" : "asc"
+
+      case json_query[:sorted][:id]
+      when "id"
+        order_string = "activity_applications.id #{dir}"
+      when "name"
+        order_string = "users.first_name || ' ' || users.last_name #{dir}"
+      when "date"
+        order_string = "activity_applications.created_at #{dir}"
+      when "adherent_number"
+        order_string = "users.adherent_number #{dir}"
+      when "age"
+        order_string = "extract(year from age(users.birthday)) #{dir}"
+        query = query.joins(:user)
+      when "level"
+        order_string = "(SELECT MIN(l.evaluation_level_ref_id) FROM levels l
+                WHERE l.user_id = users.id
+                AND l.activity_ref_id = activity_refs.id
+                AND l.season_id = activity_applications.season_id) #{dir}"
+        query = query.joins({ user: {}, activity_refs: {} })
+      when "referent_id"
+        order_string = "referent_id #{dir}"
+      end
+
+      order_sql = Arel.sql(order_string)
+      query = query.order(order_sql)
+    end
+
     query
   end
 
@@ -1436,7 +1447,14 @@ class ActivitiesApplicationsController < ApplicationController
               .per(filter[:pageSize])
 
     pages = query.total_pages
-    applications = query.as_json(include: {
+
+    activity_applications = query.to_a
+
+    activity_applications.each do |app|
+      raise Cancan::AccessDenied unless can? :read, app
+    end
+
+    applications = activity_applications.as_json(include: {
       activity_refs: {
         only: %i[id label kind],
       },
@@ -1460,7 +1478,6 @@ class ActivitiesApplicationsController < ApplicationController
       referent: {},
     },
                                  methods: :availabilities)
-    authorize! :read, applications
 
     {
       applications: applications,
@@ -1470,6 +1487,8 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def applications_list_csv(query)
+    authorize! :read, query.select(:id, :season_id, :desired_activity_id)
+
     CSV.generate nil, col_sep: ";" do |csv|
       csv << [
         "N° demande",

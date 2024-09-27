@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import _ from "lodash";
 import ReactTable from "react-table";
 import Select from "react-select";
@@ -321,7 +321,7 @@ class ActivitiesApplicationsList extends React.Component {
                 </div>
                 <div id="targets-actions">
                     {
-                        this.statusFilterContainsTerminalStatus() && <button
+                        this.props.currentUserIsAdmin && this.statusFilterContainsTerminalStatus() && <button
                             onClick={() => this.sendGroupConfirmationMail()}
                             className="btn btn-primary m-r-sm"
                             data-tippy-content="Envoi groupé mail confirmation"
@@ -339,21 +339,23 @@ class ActivitiesApplicationsList extends React.Component {
                         <i className="fas fa-edit m-r-xs"/>
                         Édition de masse
                     </a>
-                    <button
+                    {this.props.currentUserIsAdmin && <button
                         className="btn btn-danger"
                         onClick={this.handleBulkDelete.bind(this)}
                     >
                         Supprimer
-                    </button>
+                    </button>}
                 </div>
             </div>
         </div>;
     }
 
-    fetchData(filter) {
-        this.setState({loading: true, filter});
+    fetchData(filter)
+    {
+        this.setState({ loading: true, filter });
 
-        debounce(() => {
+        debounce(() =>
+        {
             requestData(
                 filter.pageSize,
                 filter.page,
@@ -645,7 +647,7 @@ class ActivitiesApplicationsList extends React.Component {
                         }} />
                 ),
             },
-            {
+            this.props.currentUserIsAdmin ? {
                 id: "season_id",
                 Header: "Saison",
                 width: 150,
@@ -665,7 +667,7 @@ class ActivitiesApplicationsList extends React.Component {
                         ))}
                     </select>
                 ),
-            },
+            } : null,
             {
                 id: "referent_id",
                 Header: "Référent.e",
@@ -680,7 +682,7 @@ class ActivitiesApplicationsList extends React.Component {
                     {_.sortBy(this.props.admins, "first_name").map(optionMapper(USER_OPTIONS_SHORT))}
                 </select>,
             },
-            {
+            this.props.currentUserIsAdmin ? {
                 id: "mail_sent",
                 Header: "Mail envoyé ?",
                 width: 75,
@@ -697,7 +699,7 @@ class ActivitiesApplicationsList extends React.Component {
                         <option value="false">Non</option>
                     </select>
                 ),
-            },
+            } : null,
             {
                 id: "activity_application_status_id",
                 Header: "Statut",
@@ -741,7 +743,7 @@ class ActivitiesApplicationsList extends React.Component {
                             }),
                         }} />,
             },
-        ];
+        ].filter(c => c);
 
         const withoutAvailabilityMode = this.state.filter.filtered.find(f => f.id === "nb_availabilities");
 
@@ -790,34 +792,36 @@ class ActivitiesApplicationsList extends React.Component {
                                         onChange={this.handleFileSelect.bind(this)}
                                         accept=".csv"
                                     />
-                                    <button
-                                        className="btn btn-primary m-r-sm"
-                                        data-tippy-content="Importer un fichier d'inscriptions"
-                                        onClick={() => this.fileInput.current.click()}>
-                                        {
-                                            this.state.importOngoing ?
-                                                <Loader
-                                                    type="Oval"
-                                                    color="white"
-                                                    height={15}
-                                                    width={15} /> :
-                                                <i className="fas fa-download" />
-                                        }
-                                    </button>
-                                    <button
-                                        className="btn btn-primary m-r-sm"
-                                        data-tippy-content="Exporter en CSV"
-                                        onClick={this.downloadExport.bind(this)}>
-                                        {
-                                            this.state.exportOngoing ?
-                                                <Loader
-                                                    type="Oval"
-                                                    color="white"
-                                                    height={15}
-                                                    width={15} /> :
-                                                <i className="fas fa-upload" />
-                                        }
-                                    </button>
+                                    {this.props.currentUserIsAdmin && <Fragment>
+                                        <button
+                                            className="btn btn-primary m-r-sm"
+                                            data-tippy-content="Importer un fichier d'inscriptions"
+                                            onClick={() => this.fileInput.current.click()}>
+                                            {
+                                                this.state.importOngoing ?
+                                                    <Loader
+                                                        type="Oval"
+                                                        color="white"
+                                                        height={15}
+                                                        width={15} /> :
+                                                    <i className="fas fa-download" />
+                                            }
+                                        </button>
+                                        <button
+                                            className="btn btn-primary m-r-sm"
+                                            data-tippy-content="Exporter en CSV"
+                                            onClick={this.downloadExport.bind(this)}>
+                                            {
+                                                this.state.exportOngoing ?
+                                                    <Loader
+                                                        type="Oval"
+                                                        color="white"
+                                                        height={15}
+                                                        width={15} /> :
+                                                    <i className="fas fa-upload" />
+                                            }
+                                        </button>
+                                    </Fragment>}
                                     <button
                                         onClick={e => this.handleToggleNoAvailabilityFilter()}
                                         data-tippy-content="Afficher les élèves sans disponibilités renseignées"
@@ -825,7 +829,7 @@ class ActivitiesApplicationsList extends React.Component {
                                         <strong><i className="fas fa-calendar-times"></i></strong>
                                     </button>
                                 </div>
-                                <div className="flex">
+                                {this.props.currentUserIsAdmin && <div className="flex">
                                     <ButtonModal
                                         modalProps={{
                                             style: {
@@ -843,7 +847,7 @@ class ActivitiesApplicationsList extends React.Component {
                                             {...this.props.dashboardInfos} />
                                     </ButtonModal>
                                     <StopList seasons={this.props.seasons} />
-                                </div>
+                                </div>}
                             </div>
                             {
                                 this.state.bulkTargets.length > 0 ?
@@ -862,8 +866,10 @@ class ActivitiesApplicationsList extends React.Component {
                             columns={filteredColumns}
                             defaultSorted={[{ id: "date", desc: true }]}
                             filterable={true}
-                            defaultFilterMethod={(filter, row) => {
-                                if (row[filter.id] !== null) {
+                            defaultFilterMethod={(filter, row) =>
+                            {
+                                if (row[filter.id] !== null)
+                                {
                                     return row[filter.id]
                                         .toString()
                                         .toLowerCase()
