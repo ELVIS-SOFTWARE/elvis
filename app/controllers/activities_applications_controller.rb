@@ -5,7 +5,9 @@ class ActivitiesApplicationsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:new]
 
   def index
-    raise CanCan::AccessDenied unless current_user&.is_admin || current_user&.is_teacher
+    authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
+
+    raise CanCan::AccessDenied unless authorize_teachers && (current_user&.is_admin || current_user&.is_teacher)
 
     season = Season.current_apps_season
     @admins = User.admins.as_json only: %i[id first_name last_name full_name]
@@ -953,6 +955,8 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def create_import_csv
+    raise CanCan::AccessDenied unless current_user&.is_admin
+
     handler_class_name = case Parameter.get_value('activity_applications.importer_name')
                          when 'tes_importer'
                            "ActivityApplications::TesImportHandler"
@@ -988,6 +992,10 @@ class ActivitiesApplicationsController < ApplicationController
                 ActivityApplication.where(id: params[:targets])
               end
 
+    entries.find_each(batch_size: 200) do |entry|
+      raise CanCan::AccessDenied unless can? :edit, entry
+    end
+
     edit_params = bulk_edit_application_params
 
     edit_params[:status_updated_at] = Time.now if edit_params[:activity_application_status_id]
@@ -1001,6 +1009,9 @@ class ActivitiesApplicationsController < ApplicationController
 
   def send_confirmation_mail
     application = ActivityApplication.find(params[:id])
+
+    authorize! :manage, application
+
     user = application.user
     activity = application.desired_activities.first.activity
 
@@ -1046,6 +1057,10 @@ class ActivitiesApplicationsController < ApplicationController
       mails_to_send = mails_to_send.where(mail_sent: false)
     end
 
+    mails_to_send.find_each(batch_size: 500) do |application|
+      raise CanCan::AccessDenied unless can? :manage, application
+    end
+
     if mails_to_send.length == 0
       render json: { success: false, message: "Les utilisateurs selectionnés ont déjà reçu le mail ou ne sont pas en cours attribué / cours proposé" }, status: 400 and return
     end
@@ -1066,6 +1081,8 @@ class ActivitiesApplicationsController < ApplicationController
                                         activity_ref_id: params[:activity_ref_id],
                                       },
                                     }).first
+
+    authorize! :edit, activity_application
 
     next_season = Season.next
     default_status = ActivityApplicationStatus.find(ActivityApplicationStatus::TREATMENT_PENDING_ID)
@@ -1115,6 +1132,9 @@ class ActivitiesApplicationsController < ApplicationController
 
   def destroy
     activity_application = ActivityApplication.find(params[:id])
+
+    authorize! :destroy, activity_application
+
     handle_related_records(activity_application)
     activity_application.destroy
   end
@@ -1126,12 +1146,16 @@ class ActivitiesApplicationsController < ApplicationController
       render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
     end
 
-    activities_application = ActivityApplication.where(id: targets)
-    activities_application.each do |activity_application|
-      handle_related_records(activity_application)
-    end
+    ActiveRecord::Base.transaction do
+      activities_application = ActivityApplication.where(id: targets)
+      activities_application.each do |activity_application|
+        raise CanCan::AccessDenied unless can? :destroy, activity_application
 
-    activities_application.destroy_all
+        handle_related_records(activity_application)
+      end
+
+      activities_application.destroy_all
+    end
   end
 
   def find_activity_suggestions
@@ -1145,6 +1169,9 @@ class ActivitiesApplicationsController < ApplicationController
 
   def add_comment
     application = ActivityApplication.includes(comments: [:user]).find(params[:id])
+
+    authorize! :edit, application
+
     content = params[:comment]
 
     application.comments << Comment.new(user_id: current_user.id, content: content)
@@ -1157,9 +1184,11 @@ class ActivitiesApplicationsController < ApplicationController
   def edit_comment
     content = params[:comment][:content]
 
-    Comment.find(params[:comment_id]).update(content: content)
-
     application = ActivityApplication.includes(comments: [:user]).find(params[:id])
+
+    authorize! :edit, application
+
+    Comment.find(params[:comment_id]).update(content: content)
 
     render json: application.comments, include: [:user]
   end
@@ -1168,6 +1197,8 @@ class ActivitiesApplicationsController < ApplicationController
     activity_ref_id = params[:activity_ref_id]
     activity_application = ActivityApplication.includes(:desired_activities).find(params[:id])
 
+    authorize! :edit, activity_application
+
     activity_application.add_activity(activity_ref_id)
 
     render json: activity_application.desired_activities
@@ -1175,6 +1206,8 @@ class ActivitiesApplicationsController < ApplicationController
 
   def add_activities
     activity_application = ActivityApplication.includes(:desired_activities).find(params[:id])
+
+    authorize! :edit, activity_application
 
     # Here, additionalStudents are indexed on their own id, because they already exists unless additional_students.nil?
 
@@ -1188,6 +1221,9 @@ class ActivitiesApplicationsController < ApplicationController
     activity_id = params[:activity_ref_id]
 
     activity_application = ActivityApplication.includes({ desired_activities: [:user] }).find(params[:id])
+
+    authorize! :edit, activity_application
+
     activity_application.remove_desired_activity_by_id(activity_id)
 
     render json: activity_application.desired_activities, include: [:user]
@@ -1195,6 +1231,8 @@ class ActivitiesApplicationsController < ApplicationController
 
   def update
     activity_application = ActivityApplication.find(params[:id])
+
+    authorize! :edit, activity_application
 
     ActivityApplication.transaction do
       p = application_update_params
@@ -1256,7 +1294,7 @@ class ActivitiesApplicationsController < ApplicationController
   def get_default_and_list_activity_application_statuses
     render json: {
       default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID),
-      list: ActivityApplicationStatus.all,
+      list: ActivityApplicationStatus.all.as_json(except: %i[created_at updated_at]),
     }
   end
 
@@ -1265,6 +1303,8 @@ class ActivitiesApplicationsController < ApplicationController
       label: "activityApplication.default_status",
       value_type: "integer"
     )
+
+    authorize! :edit, status
 
     status.value = params[:status_id]
     res = status.save
@@ -1397,6 +1437,7 @@ class ActivitiesApplicationsController < ApplicationController
     end
 
     unless current_user&.is_admin
+
       user_activity_ref_ids = current_user.activity_refs.pluck(:id)
 
       query = query.where(season_id: Season.current_apps_season.id)
