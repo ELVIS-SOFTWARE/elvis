@@ -1,35 +1,34 @@
 <div class="middle-box loginscreen">
+  <div>
     <div>
-        <div>
-            <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "media/images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen" />
-        </div>
+      <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "media/images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen"/>
+    </div>
 
 
-        <div class="ibox">
-            <div class="ibox-title">
-              <h5>Mot de Passe oublié ?</h5>
-            </div>
-            
-            <%= react_component("devise/password/New", {}) %>
+    <div class="ibox">
+      <div class="ibox-title">
+        <h5>Mot de Passe oublié ?</h5>
+      </div>
 
-            <div class="ibox-title">
-              <label>Réinitialisation par Email ou Numéro d'Adhérent</label>
-            </div>
-            <div class="ibox-content">
-    
-            <%= form_for(resource, as: resource_name, url: password_path(resource_name), class: "m-t", html: { method: :post }) do |f| %>
-                <%= devise_error_messages! %>
-                  <div class="form-group">
-                    <%= f.label "Courriel ou Numéro d'Adhérent" %><br />
-                    <%= f.text_field :login, autofocus: false, autocomplete: "email", class: "form-control" %>
-                  </div>
+      <div class="ibox-title">
+        <label>Réinitialisation par Email</label>
+      </div>
 
-                  <%= f.submit "Envoyer un mail de récupération", class: "btn btn-primary block full-width m-b" %>
+      <div class="ibox-content">
+        <%= form_for(resource, as: resource_name, url: password_path(resource_name), class: "m-t", html: { method: :post }) do |f| %>
+          <%= devise_error_messages! %>
+          <div class="form-group">
+            <%= f.label "Courriel" %><br/>
+            <%= f.text_field :login, autofocus: false, autocomplete: "email", class: "form-control" %>
+          </div>
 
-            <% end %>
-            </div>
-        </div> 
-        <div class="ibox-content">
-          <%= render "devise/shared/links" %>
-        </div>
+          <%= f.submit "Envoyer un mail de récupération", class: "btn btn-primary block full-width m-b" %>
+
+        <% end %>
+      </div>
+    </div>
+    <div class="ibox-content">
+      <%= render "devise/shared/links" %>
+    </div>
+  </div>
 </div>
