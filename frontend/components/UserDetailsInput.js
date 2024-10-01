@@ -12,6 +12,7 @@ export default function UserDetailsInput({errors = {}, onValidationError, recapt
         user: null,
         email: null
     });
+    const [isChecking, setIsChecking] = useState(false);
     let debounce
 
 
@@ -36,65 +37,22 @@ export default function UserDetailsInput({errors = {}, onValidationError, recapt
             } = details;
 
             if (firstName && lastName && birthday && email) {
-                checkUniqueness(firstName, lastName, birthday, email);
+                if (!recaptchaToken) {
+                    console.error("reCAPTCHA token is missing");
+                    return;
+                }
+                checkUniqueness(firstName, lastName, birthday, email, recaptchaToken);
             }
         }, 1000);
 
         return () => clearTimeout(debounce);
-    }, [details]);
+    }, [details, recaptchaToken]);
 
-
-    // useEffect(() => {
-    //     const { 'user[first_name]': firstName, 'user[last_name]': lastName, 'user[birthday]': birthday, 'user[email]': email } = details;
-    //
-    //     if (firstName && lastName && birthday) {
-    //         const checkUniqueness = async () => {
-    //             try {
-    //                 const response = await api.set()
-    //                     .success((res) => res)
-    //                     .error((res) => {
-    //                         console.log("error", res);
-    //                         throw new Error("API request failed");
-    //                     })
-    //                     .post("/check_uniqueness", {
-    //                         first_name: firstName,
-    //                         last_name: lastName,
-    //                         birthday: birthday,
-    //                         email: email
-    //                     });
-    //
-    //                 if (response.exists) {
-    //                     if (response.field === 'user') {
-    //                         setValidationErrors({
-    //                             user: response.message,
-    //                             email: null
-    //                         });
-    //                     } else if (response.field === 'email') {
-    //                         setValidationErrors({
-    //                             user: null,
-    //                             email: response.message
-    //                         });
-    //                     }
-    //                     if (onValidationError) onValidationError(response.message);
-    //                 } else {
-    //                     setValidationErrors({
-    //                         user: null,
-    //                         email: null
-    //                     });
-    //                 }
-    //             } catch (error) {
-    //                 console.error("Error checking uniqueness:", error);
-    //                 setValidationErrors({
-    //                     user: "Une erreur est survenue",
-    //                     email: null
-    //                 });
-    //             }
-    //         };
-    //         checkUniqueness();
-    //     }
-    // }, [details]);
 
     const checkUniqueness = async (firstName, lastName, birthday, email, recaptchaToken) => {
+        if (isChecking) return;
+        setIsChecking(true);
+
         try {
             const response = await api.set()
                 .success((res) => res)
@@ -128,6 +86,8 @@ export default function UserDetailsInput({errors = {}, onValidationError, recapt
                 user: "Une erreur est survenue",
                 email: null
             });
+        } finally {
+            setIsChecking(false);
         }
     };
 
