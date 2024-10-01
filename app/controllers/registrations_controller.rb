@@ -96,12 +96,23 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def check_uniqueness
-    user_exists = User.exists?(first_name: params[:first_name], last_name: params[:last_name], birthday: params[:birthday])
-    email_exists = User.exists?(email: params[:email])
+    unless request.user_agent =~ /Mozilla|Chrome|Safari/
+      render json: { error: 'Invalid request' }, status: :bad_request and return
+    end
 
+    user = User.where(first_name: params[:first_name], last_name: params[:last_name], birthday: params[:birthday])
+               .or(User.where(email: params[:email])).first
     errors = {}
-    errors[:user] = { field: 'user', message: "Un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance." } if user_exists
-    errors[:email] = { field: 'email', message: "Un compte existe déjà avec cet email." } if email_exists
+
+    # Vérifie s'il existe une combinaison prénom, nom, date de naissance
+    if user && user.first_name == params[:first_name] && user.last_name == params[:last_name] && user.birthday.to_s == params[:birthday]
+      errors[:user] = { field: 'user', message: "Un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance." }
+    end
+
+    # Vérifie si l'email existe
+    if user && user.email == params[:email]
+      errors[:email] = { field: 'email', message: "Un compte existe déjà avec cet email." }
+    end
 
     if errors.any?
       render json: { exists: true, errors: errors }
