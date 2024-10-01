@@ -16,6 +16,7 @@ import * as ActivityApplicationStatus from "../../utils/ActivityApplicationsStat
 import { isValidDate } from "@fullcalendar/react";
 import TimePreferencesStep from "../TimePreferencesStep";
 import { PLANNING_MODE } from "../TimePreferencesStep";
+import * as api from "../../../tools/api";
 
 const moment = require("moment");
 require("moment/locale/fr");
@@ -453,25 +454,26 @@ class Summary extends React.Component {
                 cancelButtonText: "<i class=\"fas fa-ban\"></i> annuler",
             }).then((res) => {
                 if (res.value) {
-                    fetch(`/destroy/activity_application/${this.state.application.id}`, {
-                        method: "DELETE",
-                        credentials: "same-origin",
-                        headers: {
-                            "x-csrf-token": csrfToken,
-                            "content-type": "application/json",
-                            accept: "application/json",
-                        },
-                    }).then(res => res.json()).then((data) => {
-                        if (data.success) {
-                            window.location.href = "/inscriptions";
-                        } else {
+                    api.set()
+                        .success(data => {
+                            if (data.success) {
+                                window.location.href = "/inscriptions";
+                            } else {
+                                swal.fire({
+                                    title: "Erreur",
+                                    html: data.message,
+                                    type: "error",
+                                });
+                            }
+                        })
+                        .error(error => {
                             swal.fire({
                                 title: "Erreur",
-                                html: data.message,
+                                html: error.message,
                                 type: "error",
                             });
-                        }
-                    });
+                        })
+                        .del(`/destroy/activity_application/${this.state.application.id}`, {});
                 }
             });
 
