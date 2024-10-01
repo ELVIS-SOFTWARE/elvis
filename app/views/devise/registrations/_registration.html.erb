@@ -35,4 +35,9 @@
   <%# end %>
 <!--</div>-->
 
-<%= react_component('RegistrationForm', { errors: resource.errors.to_hash, recaptcha_key: Recaptcha.configuration.site_key, additional_attr: {minLength: @minimum_password_length} }) %>
+<%= react_component('RegistrationForm', {
+  errors: resource.errors.to_hash,
+  recaptcha_key: Recaptcha.configuration.site_key,
+  recaptcha_v3: recaptcha_v3(action: "sign up"),
+  additional_attr: {minLength: @minimum_password_length} })
+%>

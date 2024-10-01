@@ -11,7 +11,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   def create
     recaptcha_token = params[:recaptcha_token]
-    valid = verify_recaptcha(response: recaptcha_token,  action: "sign_up")
+    valid = verify_recaptcha(response: recaptcha_token, action: "sign_up")
     score = if recaptcha_reply.present? # nil == recaptcha not configured
               (recaptcha_reply["score"] || 0)
             else
@@ -99,14 +99,15 @@ class RegistrationsController < Devise::RegistrationsController
     user_exists = User.exists?(first_name: params[:first_name], last_name: params[:last_name], birthday: params[:birthday])
     email_exists = User.exists?(email: params[:email])
 
-    if user_exists
-      render json: { exists: true, field: 'user', message: "Un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance." }
-    elsif email_exists
-      render json: { exists: true, field:'email', message: "Un compte existe déjà avec cet email." }
+    errors = {}
+    errors[:user] = { field: 'user', message: "Un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance." } if user_exists
+    errors[:email] = { field: 'email', message: "Un compte existe déjà avec cet email." } if email_exists
+
+    if errors.any?
+      render json: { exists: true, errors: errors }
     else
       render json: { exists: false }
     end
-
   end
 
   def update_resource(resource, params)
