@@ -1,6 +1,10 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {csrfToken} from "../utils";
 import Select from "react-select";
+import { Field } from "react-final-form";
+import { MESSAGES } from "../../tools/constants";
+import { required } from "../../tools/validators";
+import SelectMultiple from "../common/SelectMultiple";
 
 export default class ActivityRefTeachers extends React.Component
 {
@@ -34,20 +38,16 @@ export default class ActivityRefTeachers extends React.Component
     render()
     {
         return <div>
-            <Select
-                isMulti
+            {this.state.all_teachers.length > 0 && <SelectMultiple
+                title="Professeurs"
                 name="teachers"
-                options={this.state.all_teachers}
-                getOptionLabel={option => `${option.last_name} ${option.first_name}`}
-                getOptionValue={option => option.id}
-                value={this.state.teachers}
-                onChange={teachers => {
-                    if(this.props.onChange && typeof this.props.onChange === "function")
-                        this.props.onChange(teachers);
+                isMulti
+                all_features={this.state.all_teachers.map(t => [`${t.last_name} ${t.first_name}`, t.id])}
+                features={this.state.teachers}
+                mutators={this.props.mutators}
+            />}
 
-                    this.setState({ teachers });
-                }}
-            />
+
         </div>
     }
 }
