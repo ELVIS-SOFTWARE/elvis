@@ -8,6 +8,10 @@ export function changeUser([user], state, { changeValue }) {
     changeValue(state, "", () => user);
 }
 
+export function changeBirthDate([date], state, { changeValue }) {
+    changeValue(state, "birthday", () => date);
+}
+
 export function changeRelationshipDirection([fieldVal], state, { changeValue }) {
     changeValue(state, "is_inverse", () => fieldVal);
 }

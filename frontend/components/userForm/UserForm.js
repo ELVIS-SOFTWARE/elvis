@@ -18,7 +18,7 @@ import * as api from "../../tools/api";
 import ImageRight from "./ImageRight";
 
 import { modalStyle } from "../../tools/constants";
-import { findFamilyMemberById, selectPhoneType } from "../../tools/mutators";
+import { changeBirthDate, findFamilyMemberById, selectPhoneType } from "../../tools/mutators";
 import NewsLetter from "./NewsLetter";
 import { isRadioTrue } from "../utils";
 import { toRawPhoneNumber } from "../../tools/format";
@@ -70,6 +70,11 @@ class UserForm extends React.PureComponent {
 
         this.toggleModal = this.toggleModal.bind(this);
         this.selectFamilyMember = this.selectFamilyMember.bind(this);
+
+        setTimeout(() => {
+            console.log("UserForm componentDidUpdate");
+            loadUniversalDatePicker();
+        }, 1000);
     }
 
     selectFamilyMember(idx = -1, values = {}) {
@@ -291,16 +296,16 @@ class UserForm extends React.PureComponent {
 
                     <Form
                         onSubmit={this.submit.bind(this)}
-                        mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType }}
+                        mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType, changeBirthDate }}
                         initialValues={formattedInitialValues}
                         validate={this.validate.bind(this)}
                     >
-                        {({ handleSubmit, form, values }) => {
+                        {({ handleSubmit, form, values, errors }) => {
 
                             // Bind handle submit to trigger
                             // Submit inside isValidated()
                             this.handleSubmit = handleSubmit;
-                            this.mutators = form.mutators;
+                            this.mutators = form.mutators
 
                             return (
                                 <form
@@ -320,6 +325,9 @@ class UserForm extends React.PureComponent {
                                         birthday={values.birthday}
                                         organizationOptions={this.props.organizationOptions}
                                         userId={this.props.initialValues.id}
+                                        mutators={form.mutators}
+                                        formValues={values}
+                                        formErrors={errors}
                                     />
 
                                     {
