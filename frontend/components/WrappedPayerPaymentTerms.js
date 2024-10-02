@@ -8,6 +8,7 @@ import {MESSAGES} from "../tools/constants";
 import WysiwygViewer from "./utils/WysiwygViewer";
 import {isEmpty} from "../tools/validators";
 
+
 class WrappedPayerPaymentTerms extends React.Component {
     constructor(props) {
         super(props);
@@ -17,9 +18,9 @@ class WrappedPayerPaymentTerms extends React.Component {
                 day_for_collection: props.paymentTerms.day_for_collection,
                 payment_method_id: props.paymentTerms.payment_method_id,
             },
+            isMinor: props.user.birthday && (new Date().getFullYear() - new Date(props.user.birthday).getFullYear() - (new Date() < new Date(new Date(props.user.birthday).setFullYear(new Date().getFullYear())))) < 18
         };
     }
-
 
     isValidated() {
 
@@ -30,7 +31,8 @@ class WrappedPayerPaymentTerms extends React.Component {
 
         if (this.props.displayIdentificationNumber) {
             for (const familyMember of [...(this.props.family || []), this.props.user]) {
-                if (this.props.initialSelectedPayers.includes(familyMember.id) && isEmpty((familyMember.identification_number || "").replaceAll(/[_ ]/g, ""))) {
+                if (this.props.initialSelectedPayers.includes(familyMember.id) &&
+                    (this.state.isMinor && isEmpty((this.props.user.identification_number || "").replaceAll(/[_ ]/g, "")))) {
                     return false;
                 }
             }
@@ -103,7 +105,6 @@ class WrappedPayerPaymentTerms extends React.Component {
     }
 
     render() {
-
         return <div className="application-form" style={{margin: 0}}>
 
             <div className="row">
@@ -134,6 +135,7 @@ class WrappedPayerPaymentTerms extends React.Component {
                     onChangePayers={this.handleChangePayers.bind(this)}
                     displayIdentificationNumber={this.props.displayIdentificationNumber}
                     onChangeIdentificationNumber={this.props.onChangeIdentificationNumber}
+                    isMinor={this.state.isMinor}
                 />
             )
             }
