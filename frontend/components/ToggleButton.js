@@ -1,11 +1,15 @@
 import React, {useEffect, useState} from "react";
 
+const boxShadow = "0 0 2px 2px #0079bf"
+
 export default function ToggleButton({children, index, onClick, status, divStyle, divClasses}) {
     const [isActive, setIsActive] = useState(status ? status.active : false);
 
     const buttonStyles = {
         selected: {
-            boxShadow: "0 0 2px 2px #0079bf"
+            boxShadow: boxShadow,
+            WebkitBoxShadow: boxShadow,
+            MozBoxShadow: boxShadow
         },
         unselected: {
 
