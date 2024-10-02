@@ -98,7 +98,6 @@ const GeneralInfos = ({
 
             {displayBirthday && (
                 <div className="col-xs-12 col-md-6 pr-0">
-                    {console.log(birthday)}
                     <label className="small" style={{color: "#003E5C"}}>Date de naissance</label><br/>
                     <DatePicker
                         showIcon
