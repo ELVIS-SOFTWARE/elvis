@@ -1126,11 +1126,18 @@ class ActivitiesApplicationsController < ApplicationController
     end
 
     activities_application = ActivityApplication.where(id: targets)
+    restricted_statuses = [5, 17, 19]
+
     activities_application.each do |activity_application|
+      if restricted_statuses.include?(activity_application.activity_application_status_id)
+        render json: { error: "les demandes dont le statut sont : proposition acceptée, cours proposé et cours attribué, ne peuvent être supprimées." }, status: :forbidden and return
+      end
+
       handle_related_records(activity_application)
     end
 
     activities_application.destroy_all
+    render json: { success: true }, status: :ok
   end
 
   def find_activity_suggestions
