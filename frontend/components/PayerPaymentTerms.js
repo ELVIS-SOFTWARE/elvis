@@ -1,10 +1,10 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import PropTypes from "prop-types";
 import ToggleButtonGroup from "./ToggleButtonGroup";
 import Checkbox from "./common/Checkbox";
-import { composeValidators, isEmpty, isValidNN, required } from "../tools/validators";
+import {composeValidators, isEmpty, isValidNN, required} from "../tools/validators";
 import Input from "./common/Input";
-import { Field } from "react-final-form";
+import {Field} from "react-final-form";
 
 function PayersListEditor({
                               user,
@@ -14,13 +14,14 @@ function PayersListEditor({
                               onRemovePayer,
                               displayIdentificationNumber,
                               onChangeIdentificationNumber,
+                              isMinor
                           }) {
 
     const family_with_user = [...family, user];
     return <Fragment>
         {family_with_user.map(user => {
-            //console.log("selectedPayers", selectedPayers, "type", typeof selectedPayers);
-            //debugger
+                //console.log("selectedPayers", selectedPayers, "type", typeof selectedPayers);
+                //debugger
                 const isSelected = selectedPayers.includes(user.id);
 
                 return <div className="row" key={user.id}>
@@ -42,8 +43,9 @@ function PayersListEditor({
                         />
                     </div>
 
-                        {displayIdentificationNumber && isSelected && <div className="col-xs-12 col-md">
-                            <label className="small" style={{ color: "#003E5C" }}>Numéro national d'identification</label>
+                    {displayIdentificationNumber && isSelected && isMinor && (
+                        <div className="col-xs-12 col-md">
+                            <label className="small" style={{color: "#003E5C"}}>Numéro national d'identification</label>
                             <Input
                                 name={`identification_number_${user.id}`}
                                 type="text"
@@ -54,9 +56,13 @@ function PayersListEditor({
                                     value: user.identification_number,
                                     onChange: e => onChangeIdentificationNumber(user.id, e.target.value)
                                 }}
-                                meta={{ error: isSelected && isEmpty((user.identification_number || "").replaceAll(/[_ ]/g, "")) ? "err_required" : null, touched: true }}
+                                meta={{
+                                    error: isMinor && isSelected && isEmpty((user.identification_number || "").replaceAll(/[_ ]/g, "")) ? "err_required" : null,
+                                    touched: true
+                                }}
                             />
-                        </div>}
+                        </div>
+                    )}
 
                 </div>
             },
@@ -77,7 +83,8 @@ export default function PayerPaymentTerms({
                                               onChangePaymentMethod,
                                               onChangePayers,
                                               displayIdentificationNumber,
-                                              onChangeIdentificationNumber
+                                              onChangeIdentificationNumber,
+                                              isMinor
                                           }) {
 
     const [scheduleOptionChanged, setScheduleOptionChanged] = useState(paymentTerms.day_for_collection === undefined);
@@ -153,14 +160,14 @@ export default function PayerPaymentTerms({
                         <div className="d-sm-inline-flex justify-content-between w-100">
                             <div className="col-md-6 p-0">
                                 <div className="form-group">
-                                    <h3 className="mb-4" style={{ color: "#8AA4B1" }}>Modalités de
+                                    <h3 className="mb-4" style={{color: "#8AA4B1"}}>Modalités de
                                         paiement</h3>
                                     <select
                                         className="form-control"
                                         name="payment_schedule_options_id"
                                         onChange={handleScheduleOptionChange}
                                         value={selectedPaymentTermsId}
-                                        style={{ borderRadius: "8px", border: "0" }}
+                                        style={{borderRadius: "8px", border: "0"}}
                                     >
                                         <option key={-1} value="0">Choisissez une option</option>
                                         {availPaymentScheduleOptions.map(apt =>
@@ -172,7 +179,7 @@ export default function PayerPaymentTerms({
                             {selectedPaymentTerms &&
                                 <div className="col-md-5 p-0">
                                     <div className="form-group">
-                                        <h3 className="m-2" style={{ color: "#8AA4B1" }}>Date de
+                                        <h3 className="m-2" style={{color: "#8AA4B1"}}>Date de
                                             règlement</h3>
                                         <ToggleButtonGroup
                                             multiSelect={false}
@@ -184,7 +191,7 @@ export default function PayerPaymentTerms({
                                             }
                                             onChange={handleDayChange}
                                             buttonClasses="p-0"
-                                            buttonStyles={{ height: "35px", width: "35px", borderRadius: "8px" }}
+                                            buttonStyles={{height: "35px", width: "35px", borderRadius: "8px"}}
                                         />
                                     </div>
                                 </div>
@@ -196,13 +203,13 @@ export default function PayerPaymentTerms({
                         }
                         <div className="row ml-1 mb-4">
                             <div className="col-md-6 p-0 pr-3">
-                                <h3 className="" style={{ color: "#8AA4B1" }}>Moyens de paiement</h3>
+                                <h3 className="" style={{color: "#8AA4B1"}}>Moyens de paiement</h3>
                                 <select
                                     className="form-control"
                                     name="payment_method_id"
                                     onChange={handleSelectMethodChange}
                                     value={selectedPaymentMethodId}
-                                    style={{ borderRadius: "8px", border: "0" }}
+                                    style={{borderRadius: "8px", border: "0"}}
                                 >
                                     <option key={-1} value="0">Choisissez une option</option>
                                     {availPaymentMethods.map(apm =>
@@ -219,7 +226,7 @@ export default function PayerPaymentTerms({
             }
             <div className="row ml-1">
                 <div className="form-group m-t-md">
-                    <h3 style={{ color: "#8AA4B1" }}>Payeur(s)</h3>
+                    <h3 style={{color: "#8AA4B1"}}>Payeur(s)</h3>
                     <PayersListEditor
                         user={user}
                         selectedPayers={selectedPayers}
@@ -228,6 +235,7 @@ export default function PayerPaymentTerms({
                         onRemovePayer={handleRemovePayer}
                         displayIdentificationNumber={displayIdentificationNumber}
                         onChangeIdentificationNumber={onChangeIdentificationNumber}
+                        isMinor={isMinor}
                     />
                 </div>
 
