@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import * as api from '../tools/api';
+import {Field} from "react-final-form";
 
 export default function UserDetailsInput({errors = {}, onValidationError, recaptchaToken}) {
     const [details, setDetails] = useState({
@@ -37,10 +38,10 @@ export default function UserDetailsInput({errors = {}, onValidationError, recapt
             } = details;
 
             if (firstName && lastName && birthday && email) {
-                if (!recaptchaToken) {
-                    console.error("reCAPTCHA token is missing");
-                    return;
-                }
+                // if (!recaptchaToken) {
+                //     console.error("reCAPTCHA token is missing");
+                //     return;
+                // }
                 checkUniqueness(firstName, lastName, birthday, email, recaptchaToken);
             }
         }, 1000);
@@ -94,63 +95,72 @@ export default function UserDetailsInput({errors = {}, onValidationError, recapt
 
     return (
         <div>
-            <div className="form-group text-left">
-                <label htmlFor="last_name">Votre Nom</label><br/>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="last_name"
-                    name="user[last_name]"
-                    value={details['user[last_name]']}
-                    onChange={handleChange}
-                    required
-                />
-                {errors['user[last_name]'] && <div className="alert alert-danger">{errors['user[last_name]']}</div>}
-            </div>
+            <Field name="user[last_name]">
+                {({input, meta}) => (
+                    <div className="form-group text-left">
+                        <label htmlFor="last_name">Votre Nom</label><br/>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="last_name"
+                            {...input}
+                            required
+                        />
+                        {errors['user[last_name]'] &&
+                            <div className="alert alert-danger">{errors['user[last_name]']}</div>}
+                    </div>
+                )}
+            </Field>
 
-            <div className="form-group text-left">
-                <label htmlFor="first_name">Votre Prénom</label><br/>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="first_name"
-                    name="user[first_name]"
-                    value={details['user[first_name]']}
-                    onChange={handleChange}
-                    required
-                />
-                {errors['user[first_name]'] && <div className="alert alert-danger">{errors['user[first_name]']}</div>}
-            </div>
+            <Field name="user[first_name]">
+                {({input, meta}) => (
+                    <div className="form-group text-left">
+                        <label htmlFor="first_name">Votre Prénom</label><br/>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="first_name"
+                            {...input}
+                            required
+                        />
+                        {errors['user[first_name]'] &&
+                            <div className="alert alert-danger">{errors['user[first_name]']}</div>}
+                    </div>
+                )}
+            </Field>
 
-            <div className="form-group w-100 text-left">
-                <label htmlFor="birthday">Votre date de naissance</label><br/>
-                <input
-                    type="date"
-                    className="form-control"
-                    id="birthday"
-                    name="user[birthday]"
-                    value={details['user[birthday]']}
-                    onChange={handleChange}
-                    required
-                />
-                {errors['user[birthday]'] && <div className="alert alert-danger">{errors['user[birthday]']}</div>}
-                {validationErrors.user && <div className="alert alert-danger">{validationErrors.user}</div>}
-            </div>
+            <Field name="user[birthday]">
+                {({input, meta}) => (
+                    <div className="form-group w-100 text-left">
+                        <label htmlFor="birthday">Votre date de naissance</label><br/>
+                        <input
+                            type="date"
+                            className="form-control"
+                            id="birthday"
+                            {...input}
+                            required
+                        />
+                        {errors['user[birthday]'] &&
+                            <div className="alert alert-danger">{errors['user[birthday]']}</div>}
+                    </div>
+                )}
+            </Field>
 
-            <div className="form-group text-left">
-                <label htmlFor="email">Email</label><br/>
-                <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    name="user[email]"
-                    value={details['user[email]']}
-                    onChange={handleChange}
-                    required
-                />
-                {errors['user[email]'] && <div className="alert alert-danger">{errors['user[email]']}</div>}
-                {validationErrors.email && <div className="alert alert-danger">{validationErrors.email}</div>}
-            </div>
+            <Field name="user[email]">
+                {({input, meta}) => (
+                    <div className="form-group text-left">
+                        <label htmlFor="email">Email</label><br/>
+                        <input
+                            type="email"
+                            className="form-control"
+                            id="email"
+                            {...input}
+                            required
+                        />
+                        {errors['user[email]'] && <div className="alert alert-danger">{errors['user[email]']}</div>}
+                    </div>
+                )}
+            </Field>
         </div>
     );
 }
