@@ -5,10 +5,10 @@ import Select from "react-select";
 import Loader from "react-loader-spinner";
 import swal from "sweetalert2";
 
-import { age, levelDisplay } from "./planning/TimeIntervalHelpers";
-import { csrfToken, optionMapper, USER_OPTIONS_SHORT } from "./utils";
-import { makeDebounce } from "../tools/inputs";
-import { PRE_APPLICATION_ACTION_LABELS, PRE_APPLICATION_ACTIONS } from "../tools/constants";
+import {age, levelDisplay} from "./planning/TimeIntervalHelpers";
+import {csrfToken, optionMapper, USER_OPTIONS_SHORT} from "./utils";
+import {makeDebounce} from "../tools/inputs";
+import {PRE_APPLICATION_ACTION_LABELS, PRE_APPLICATION_ACTIONS} from "../tools/constants";
 import ListPreferences from "./common/ListPreferences";
 import StopList from "./StopList";
 import UserWithInfos from "./common/UserWithInfos";
@@ -22,6 +22,7 @@ import {
     ACTIVITY_PROPOSED_ID,
     PROPOSAL_ACCEPTED_ID,
 } from "./utils/ActivityApplicationsStatuses";
+import Swal from "sweetalert2";
 
 const moment = require("moment");
 require("moment/locale/fr");
@@ -52,7 +53,7 @@ const requestData = (pageSize, page, sorted, filtered, format) => {
 const defaultTableProps = () => ({
     page: 0,
     pageSize: 16,
-    sorted: [{ id: "date", desc: true }],
+    sorted: [{id: "date", desc: true}],
     filtered: [],
     resized: [],
     expanded: {},
@@ -94,7 +95,8 @@ class ActivitiesApplicationsList extends React.Component {
 
     showJobProgressModal(jobId) {
         const container = document.createElement('div');
-        ReactDOM.render(<JobProgress jobId={jobId} onError={(res) => swal({ title: "Erreur", text: res, type: "error" })} />, container);
+        ReactDOM.render(<JobProgress jobId={jobId}
+                                     onError={(res) => swal({title: "Erreur", text: res, type: "error"})}/>, container);
 
         swal.fire({
             title: 'Suivi de l\'exécution',
@@ -141,7 +143,7 @@ class ActivitiesApplicationsList extends React.Component {
         )
             .then(res => res.blob())
             .then(file => {
-                this.setState({ exportOngoing: false });
+                this.setState({exportOngoing: false});
 
                 const download = document.createElement("a");
                 download.download = `${moment().format("DD_MM_YYYY-HH_mm_ss")}.csv`;
@@ -235,12 +237,20 @@ class ActivitiesApplicationsList extends React.Component {
     }
 
     handleBulkDelete() {
-        swal({
-            title: "Confirmation",
-            text:
-                "Voulez-vous supprimer toutes les demandes d'inscription sélectionnées ?",
-            type: "question",
+        const selectedCount = this.state.bulkTargets.length;
+        const confirmationText = selectedCount === 1
+            ? "Voulez-vous supprimer la demande d'inscription sélectionnée ?"
+            : `Voulez-vous supprimer les ${selectedCount} demandes d'inscription sélectionnées ?`;
+
+        Swal.fire({
+            title: 'Suppression',
+            text: confirmationText,
+            type: "warning",
             showCancelButton: true,
+            cancelButtonText: "Annuler",
+            confirmButtonText: `<i class="fas fa-trash mr-2"></i>  Supprimer`,
+            confirmButtonColor: "#ec4758",
+            reverseButtons: true,
         }).then(r => {
             if (r.value) {
                 fetch("/inscriptions", {
@@ -259,12 +269,13 @@ class ActivitiesApplicationsList extends React.Component {
                             data: this.state.data.filter(
                                 d => !this.state.bulkTargets.includes(d.id)
                             ),
-                            targets: [],
+                            bulkTargets: [],
                         });
                     });
+            } else {
+                this.setState({ bulkTargets: [] });
             }
         });
-
     }
 
     resetFilters() {
@@ -272,7 +283,7 @@ class ActivitiesApplicationsList extends React.Component {
             FILTER_STORAGE_KEY,
             JSON.stringify(defaultTableProps()),
         );
-        this.setState({ filter: defaultTableProps() }, () => {
+        this.setState({filter: defaultTableProps()}, () => {
             this.fetchData(this.state.filter);
         });
     }
@@ -305,14 +316,14 @@ class ActivitiesApplicationsList extends React.Component {
     bulkAlert() {
         const count = this.state.bulkTargets === "all" && this.state.total || this.state.bulkTargets.length;
 
-        return <div className="alert alert-info m-t-sm" style={{ marginBottom: "0" }}>
+        return <div className="alert alert-info m-t-sm" style={{marginBottom: "0"}}>
             <div className="flex flex-space-between-justified flex-center-aligned">
                 <div id="targets-infos">
                     Vous avez sélectionné {count} demande(s) {
                     this.state.bulkTargets.length === this.state.data.length &&
                     Math.max(this.state.total - this.state.bulkTargets.length, 0) ?
                         <button
-                            onClick={() => this.setState({ bulkTargets: "all" })}
+                            onClick={() => this.setState({bulkTargets: "all"})}
                             className="btn btn-info m-l-sm">
                             Sélectionner les {this.state.total - this.state.bulkTargets.length} restantes
                         </button>
@@ -339,12 +350,14 @@ class ActivitiesApplicationsList extends React.Component {
                         <i className="fas fa-edit m-r-xs"/>
                         Édition de masse
                     </a>
-                    <button
-                        className="btn btn-danger"
-                        onClick={this.handleBulkDelete.bind(this)}
-                    >
-                        Supprimer
-                    </button>
+                    {!this.statusFilterContainsTerminalStatus() && (
+                        <button
+                            className="btn btn-danger"
+                            onClick={this.handleBulkDelete.bind(this)}
+                        >
+                            Supprimer
+                        </button>
+                    )}
                 </div>
             </div>
         </div>;
@@ -447,9 +460,7 @@ class ActivitiesApplicationsList extends React.Component {
         const statusFilter = [...this.state.data]
             .filter(f => (this.state.bulkTargets || []).includes(f.id))
             .map(f => f.activity_application_status_id);
-
         return statusFilter.some(s => [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s));
-
     }
 
 
@@ -494,12 +505,20 @@ class ActivitiesApplicationsList extends React.Component {
                 accessor: r => this.state.bulkTargets.includes(r.id),
                 Filter: () => <input
                     type="checkbox"
-                    defaultChecked={this.state.bulkTargets === "all" /*|| this.state.bulkTargets.length === this.state.data.length*/}
-                    onClick={e => e.target.checked ? this.setState({ bulkTargets: this.state.data.map(r => r.id) }) : this.setState({ bulkTargets: [] })} />,
+                    defaultChecked={this.state.bulkTargets === "all"}
+                    checked={this.state.bulkTargets.length === this.state.data.length}
+                    onChange={e => {
+                        if (e.target.checked) {
+                            this.setState({ bulkTargets: this.state.data.map(r => r.id) });
+                        } else {
+                            this.setState({ bulkTargets: [] });
+                        }
+                    }}
+                />,
                 Cell: d => <input
                     type="checkbox"
                     defaultChecked={this.state.bulkTargets === "all" || d.value}
-                    onClick={e => this.updateBulkTarget(d.original.id, e.target.checked)} />,
+                    onClick={e => this.updateBulkTarget(d.original.id, e.target.checked)}/>,
             },
             {
                 Header: "# Adhérent",
@@ -541,11 +560,11 @@ class ActivitiesApplicationsList extends React.Component {
                 id: "level",
                 Header: "Niveau",
                 width: 130,
-                Filter: ({ filter, onChange }) => (
+                Filter: ({filter, onChange}) => (
                     <select
                         onChange={e => onChange(e.target.value)}
                         value={filter ? filter.value : ""}>
-                        <option value="" />
+                        <option value=""/>
                         {this.props.evaluationLevelRefs.map(r => <option
                             key={r.id}
                             value={r.id}>
@@ -565,7 +584,7 @@ class ActivitiesApplicationsList extends React.Component {
                         .map(a => a.label)
                         .join(", ");
                 },
-                Filter: ({ filter, onChange }) =>
+                Filter: ({filter, onChange}) =>
                     <Select
                         options={activitiesFilterOptions}
                         isMulti={true}
@@ -581,7 +600,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 ...base,
                                 display: "none",
                             }),
-                        }} />,
+                        }}/>,
             },
             {
                 id: "activity_ref_kind_id",
@@ -594,7 +613,7 @@ class ActivitiesApplicationsList extends React.Component {
                         .filter(a => a != undefined)
                         .join(", ");
                 },
-                Filter: ({ filter, onChange }) =>
+                Filter: ({filter, onChange}) =>
                     <Select
                         options={activitiesKindsFilterOptions}
                         isMulti={true}
@@ -610,7 +629,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 ...base,
                                 display: "none",
                             }),
-                        }} />,
+                        }}/>,
             },
             {
                 Header: "Action",
@@ -626,7 +645,7 @@ class ActivitiesApplicationsList extends React.Component {
 
                     return PRE_APPLICATION_ACTION_LABELS[PRE_APPLICATION_ACTIONS.NEW];
                 },
-                Filter: ({ filter, onChange }) => (
+                Filter: ({filter, onChange}) => (
                     <Select
                         options={applicationActionsFilterOptions}
                         isMulti={true}
@@ -642,7 +661,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 ...base,
                                 display: "none",
                             }),
-                        }} />
+                        }}/>
                 ),
             },
             {
@@ -651,10 +670,10 @@ class ActivitiesApplicationsList extends React.Component {
                 width: 150,
                 accessor: d => (d.season ? d.season.label : "n/a"),
                 sortable: false,
-                Filter: ({ filter, onChange }) => (
+                Filter: ({filter, onChange}) => (
                     <select
                         onChange={event => onChange(event.target.value)}
-                        style={{ width: "100%" }}
+                        style={{width: "100%"}}
                         value={filter ? filter.value : "all"}
                     >
                         <option value="all">Toutes les saisons</option>
@@ -672,7 +691,7 @@ class ActivitiesApplicationsList extends React.Component {
                 width: 125,
                 accessor: d => d.referent,
                 Cell: c => c.value && `${c.value.first_name} ${c.value.last_name.charAt(0)}.` || "",
-                Filter: ({ filter, onChange }) => <select
+                Filter: ({filter, onChange}) => <select
                     className="form-control"
                     defaultValue={filter && filter.value || ""}
                     onChange={e => onChange(e.target.value)}>
@@ -686,10 +705,10 @@ class ActivitiesApplicationsList extends React.Component {
                 width: 75,
                 accessor: d => d.mail_sent === true ? "Oui" : "Non",
                 sortable: false,
-                Filter: ({ filter, onChange }) => (
+                Filter: ({filter, onChange}) => (
                     <select
                         onChange={event => onChange(event.target.value)}
-                        style={{ width: "100%" }}
+                        style={{width: "100%"}}
                         value={filter ? filter.value : "all"}
                     >
                         <option value="all">Tous</option>
@@ -723,7 +742,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 : ""}`)
                         || "??";
                 },
-                Filter: ({ filter, onChange }) =>
+                Filter: ({filter, onChange}) =>
                     <Select
                         options={applicationStatusesFilterOptions}
                         isMulti={true}
@@ -739,7 +758,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 ...base,
                                 display: "none",
                             }),
-                        }} />,
+                        }}/>,
             },
         ];
 
@@ -752,8 +771,8 @@ class ActivitiesApplicationsList extends React.Component {
                 columns[0],
                 // Only take enabled columns, and order them according to prefs order
                 ..._(columns)
-                    .filter(c => _.find(this.state.listPreferences, { id: c.id, disabled: false }))
-                    .sortBy(c => _.findIndex(this.state.listPreferences, { id: c.id }))
+                    .filter(c => _.find(this.state.listPreferences, {id: c.id, disabled: false}))
+                    .sortBy(c => _.findIndex(this.state.listPreferences, {id: c.id}))
                     .value(),
             ];
         }
@@ -770,7 +789,7 @@ class ActivitiesApplicationsList extends React.Component {
                                         preferences={this.state.listPreferences}
                                         columns={columns.slice(1)}
                                         className="m-r-sm"
-                                        onSubmit={prefs => this.handleUpdateListPreferences(prefs)} />
+                                        onSubmit={prefs => this.handleUpdateListPreferences(prefs)}/>
                                     <button
                                         className="btn btn-primary m-r-sm"
                                         data-tippy-content="Réinitialiser les filtres"
@@ -786,7 +805,7 @@ class ActivitiesApplicationsList extends React.Component {
                                     <input
                                         type="file"
                                         ref={this.fileInput}
-                                        style={{ display: "none" }}
+                                        style={{display: "none"}}
                                         onChange={this.handleFileSelect.bind(this)}
                                         accept=".csv"
                                     />
@@ -800,8 +819,8 @@ class ActivitiesApplicationsList extends React.Component {
                                                     type="Oval"
                                                     color="white"
                                                     height={15}
-                                                    width={15} /> :
-                                                <i className="fas fa-download" />
+                                                    width={15}/> :
+                                                <i className="fas fa-download"/>
                                         }
                                     </button>
                                     <button
@@ -814,8 +833,8 @@ class ActivitiesApplicationsList extends React.Component {
                                                     type="Oval"
                                                     color="white"
                                                     height={15}
-                                                    width={15} /> :
-                                                <i className="fas fa-upload" />
+                                                    width={15}/> :
+                                                <i className="fas fa-upload"/>
                                         }
                                     </button>
                                     <button
@@ -838,11 +857,11 @@ class ActivitiesApplicationsList extends React.Component {
                                         }}
                                         className="btn btn-primary m-r-sm"
                                         tooltip="Statistiques d'inscriptions"
-                                        label={<i className="fas fa-chart-pie" />}>
+                                        label={<i className="fas fa-chart-pie"/>}>
                                         <ActivitiesApplicationsDashboard
                                             {...this.props.dashboardInfos} />
                                     </ButtonModal>
-                                    <StopList seasons={this.props.seasons} />
+                                    <StopList seasons={this.props.seasons}/>
                                 </div>
                             </div>
                             {
@@ -860,7 +879,7 @@ class ActivitiesApplicationsList extends React.Component {
                             pages={this.state.pages}
                             loading={this.state.loading}
                             columns={filteredColumns}
-                            defaultSorted={[{ id: "date", desc: true }]}
+                            defaultSorted={[{id: "date", desc: true}]}
                             filterable={true}
                             defaultFilterMethod={(filter, row) => {
                                 if (row[filter.id] !== null) {
@@ -875,7 +894,7 @@ class ActivitiesApplicationsList extends React.Component {
                             sorted={this.state.filter.sorted}
                             filtered={this.state.filter.filtered}
                             onPageChange={page =>
-                                this.fetchData({ ...this.state.filter, page })
+                                this.fetchData({...this.state.filter, page})
                             }
                             onPageSizeChange={(pageSize, page) =>
                                 this.fetchData({
@@ -885,7 +904,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 })
                             }
                             onSortedChange={sorted =>
-                                this.fetchData({ ...this.state.filter, sorted })
+                                this.fetchData({...this.state.filter, sorted})
                             }
                             onFilteredChange={filtered =>
                                 this.fetchData({
@@ -932,13 +951,13 @@ class ActivitiesApplicationsList extends React.Component {
                     targets={this.state.bulkTargets}
                     state={this.state.bulkEdit}
                     onChange={(name, value) => this.handleUpdateBulkEdit(name, value)}
-                    onSave={() => this.handleBulkEdit()} />
+                    onSave={() => this.handleBulkEdit()}/>
             </div>
         );
     }
 }
 
-const BulkEditModal = ({ targets, state, statuses, onChange, onSave }) => <div
+const BulkEditModal = ({targets, state, statuses, onChange, onSave}) => <div
     id="applications-bulk-edit-modal"
     tabIndex="-1"
     role="dialog"
@@ -978,7 +997,7 @@ const BulkEditModal = ({ targets, state, statuses, onChange, onSave }) => <div
                     onClick={() => onSave()}
                     disabled={targets.length === 0}
                     className="btn btn-primary">
-                    <i className="fas fa-check m-r-xs" />
+                    <i className="fas fa-check m-r-xs"/>
                     Valider
                 </button>
             </div>
