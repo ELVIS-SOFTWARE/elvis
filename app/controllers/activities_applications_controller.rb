@@ -1118,27 +1118,38 @@ class ActivitiesApplicationsController < ApplicationController
     activity_application.destroy
   end
 
-  def bulk_delete
-    targets = params[:targets]
+def bulk_delete
+  targets = params[:targets]
 
-    if targets.blank? || !targets.is_a?(Array)
-      render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
-    end
+  if targets.blank? || !targets.is_a?(Array)
+    render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
+  end
 
-    activities_application = ActivityApplication.where(id: targets)
-    restricted_statuses = [5, 17, 19]
+  activities_application = ActivityApplication.where(id: targets)
+  restricted_statuses = [
+    ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID,
+    ActivityApplicationStatus::ACTIVITY_PROPOSED_ID,
+    ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID
+  ]
 
-    activities_application.each do |activity_application|
-      if restricted_statuses.include?(activity_application.activity_application_status_id)
-        render json: { error: "les demandes dont le statut sont : proposition acceptée, cours proposé et cours attribué, ne peuvent être supprimées." }, status: :forbidden and return
+  begin
+    ActiveRecord::Base.transaction do
+      activities_application.each do |activity_application|
+        if restricted_statuses.include?(activity_application.activity_application_status_id)
+          raise ActiveRecord::Rollback, "Les demandes dont le statut sont : proposition acceptée, cours proposé et cours attribué, ne peuvent être supprimées."
+        end
+
+        handle_related_records(activity_application)
       end
 
-      handle_related_records(activity_application)
+      activities_application.destroy_all
     end
 
-    activities_application.destroy_all
     render json: { success: true }, status: :ok
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message }, status: :forbidden
   end
+end
 
   def find_activity_suggestions
     desired_activity_id = params[:des_id]
