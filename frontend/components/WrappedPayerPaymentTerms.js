@@ -1,12 +1,13 @@
-import React, { Fragment } from "react";
+import React, {Fragment} from "react";
 import PayerPaymentTerms from "./PayerPaymentTerms";
 import PropTypes from "prop-types";
 import PayerPaymentTermsInfo from "./PayerPaymentTermsInfo";
-import { Editor, EditorState, convertFromRaw, ContentState } from "draft-js";
-import { toast } from "react-toastify";
-import { MESSAGES } from "../tools/constants";
+import {Editor, EditorState, convertFromRaw, ContentState} from "draft-js";
+import {toast} from "react-toastify";
+import {MESSAGES} from "../tools/constants";
 import WysiwygViewer from "./utils/WysiwygViewer";
-import { isEmpty } from "../tools/validators";
+import {isEmpty} from "../tools/validators";
+
 
 class WrappedPayerPaymentTerms extends React.Component {
     constructor(props) {
@@ -17,18 +18,21 @@ class WrappedPayerPaymentTerms extends React.Component {
                 day_for_collection: props.paymentTerms.day_for_collection,
                 payment_method_id: props.paymentTerms.payment_method_id,
             },
+            isMinor: props.user.birthday && (new Date().getFullYear() - new Date(props.user.birthday).getFullYear() - (new Date() < new Date(new Date(props.user.birthday).setFullYear(new Date().getFullYear())))) < 18
         };
     }
 
-
     isValidated() {
 
-        if(this.props.displayIdentificationNumber)
-        {
-            for (const familyMember of [...(this.props.family || []), this.props.user])
-            {
-                if(this.props.initialSelectedPayers.includes(familyMember.id) && isEmpty((familyMember.identification_number || "").replaceAll(/[_ ]/g, "")))
-                {
+        if (this.props.initialSelectedPayers.length === 0) {
+            toast.error(MESSAGES.err_must_have_payer, {autoClose: 3000});
+            return false;
+        }
+
+        if (this.props.displayIdentificationNumber) {
+            for (const familyMember of [...(this.props.family || []), this.props.user]) {
+                if (this.props.initialSelectedPayers.includes(familyMember.id) &&
+                    (this.state.isMinor && isEmpty((this.props.user.identification_number || "").replaceAll(/[_ ]/g, "")))) {
                     return false;
                 }
             }
@@ -48,9 +52,11 @@ class WrappedPayerPaymentTerms extends React.Component {
             !!this.state.paymentTerms.payment_method_id)
             return true;
         else {
-            toast.error(MESSAGES.err_must_select_payment_terms, { autoClose: 3000 });
+            toast.error(MESSAGES.err_must_select_payment_terms, {autoClose: 3000});
             return false;
         }
+
+
     }
 
     handleChangePaymentTerms(paymentScheduleOptionsId) {
@@ -99,13 +105,12 @@ class WrappedPayerPaymentTerms extends React.Component {
     }
 
     render() {
-
         return <div className="application-form" style={{margin: 0}}>
 
             <div className="row">
                 {this.props.paymentStepDisplayText && <WysiwygViewer
                     className="alert alert-info w-100 pre-wrap"
-                    style={{ border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF" }}
+                    style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}
                     wysiwygStrData={this.props.paymentStepDisplayText}
                 />}
             </div>
@@ -130,6 +135,7 @@ class WrappedPayerPaymentTerms extends React.Component {
                     onChangePayers={this.handleChangePayers.bind(this)}
                     displayIdentificationNumber={this.props.displayIdentificationNumber}
                     onChangeIdentificationNumber={this.props.onChangeIdentificationNumber}
+                    isMinor={this.state.isMinor}
                 />
             )
             }

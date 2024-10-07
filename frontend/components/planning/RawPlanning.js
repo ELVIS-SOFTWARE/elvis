@@ -165,7 +165,6 @@ class RawPlanning extends React.Component {
     render() {
         const {data} = this.props;
         const sortedData = Object.keys(data).sort();
-        sortedData.push(sortedData.shift()); // Dimanche en dernier jour
 
         return (
             <div className="m-t-sm">

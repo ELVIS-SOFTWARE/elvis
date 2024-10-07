@@ -11,6 +11,10 @@ export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, def
 
     const [active, setActive] = useState(defaultActiveTab);
 
+    const tmp = tabsProps.reduce((acc, tab) => ({ ...acc, [tab.id]: false }), {});
+
+    const [tabErrorState, setTabErrorState] = useState(tmp);
+
     const propsActivated = tabsProps.findIndex(t => t.active);
 
     useEffect(() => {
@@ -37,12 +41,16 @@ export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, def
                             style={{ height: "auto" }}
                             className={`${mode === "classic" ? "" : "btn btn-primary btn_slider"} ${active === i ? "active" : ""}`}
                             onClick={t.headerHandler || (() => {})}
+                            { ...(tabErrorState[t.id] || t.isInError ? { ["title"]: "Cet onglet n'est pas complêtement remplis" } : {})}
                         >
                             <a
                                 className={`${mode === "classic" ? "nav-link " : "text-"} ${active === i ? "active" : ""}`}
                                 data-toggle={!t.headerHandler && "tab"}
                                 onClick={() => handleTabClick(i)}
-                                style={t.headerStyle || {}}
+                                style={{
+                                    ...(t.headerStyle || {}),
+                                    backgroundColor: tabErrorState[t.id] || t.isInError ? "#ea4545" : "",
+                                }}
                                 href={`#${t.id}`}
                             >
                                 {t.header}
@@ -58,7 +66,7 @@ export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, def
                             className={`tab-pane ${active === i ? "active" : ""}`}
                             role="tabpanel">
                             <div className={`panel-body ${mode === "classic" ? "" : "no-padding"}`}>
-                                {active === i && t.body}
+                                {active === i && { ...t.body, props: { ...t.body.props, setTabError: isError => setTabErrorState(tabErrorState => ({ ...tabErrorState, [t.id]: isError })) } }}
                             </div>
                         </div>)
                     }
@@ -75,6 +83,7 @@ TabbedComponent.propTypes = {
         headerHandler: PropTypes.func,
         headerStyle: PropTypes.object,
         header: PropTypes.node.isRequired,
+        isInError: PropTypes.bool,
         body: PropTypes.node.isRequired,
     })),
 };

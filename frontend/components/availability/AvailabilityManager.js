@@ -1,10 +1,10 @@
-import React, { Fragment, PureComponent } from "react";
+import React, {Fragment, PureComponent} from "react";
 import * as api from "../../tools/api";
 import AvailabilityInput from "./AvailabilityInput";
 import AvailabilityList from "./AvailabilityList";
 import ErrorList from "../common/ErrorList";
 import WeekSelector from "./WeekSelector";
-import { INTERVAL_KINDS } from "../../tools/constants";
+import {INTERVAL_KINDS} from "../../tools/constants";
 import AvailabilityCommentModal from "./AvailabilityCommentModal";
 import moment from "moment";
 
@@ -46,15 +46,17 @@ class AvailabilityManager extends PureComponent {
     }
 
     toggleFetching() {
-        this.setState({ isFetching: !this.state.isFetching, errors: [] });
+        this.setState({isFetching: !this.state.isFetching, errors: []});
     }
 
-    handleAdd(interval)
-    {
-        if(this.props.planningId === undefined && this.props.disableLiveReload)
-        {
-            // new members in wizard mode
+    handleAdd(interval) {
+        const getNewTabId = (list) => list.length > 0
+            ? Math.max(...list.map(i => i.tabId !== undefined ? i.tabId : -1)) + 1
+            : 0;
 
+        if (this.props.planningId === undefined && this.props.disableLiveReload) {
+            // new members in wizard mode
+            const newTabId = getNewTabId(this.state.list);
             const newInterval = {
                 start: new Date(interval.from).toISOString(),
                 end: new Date(interval.to).toISOString(),
@@ -63,18 +65,16 @@ class AvailabilityManager extends PureComponent {
                 created_at: undefined,
                 updated_at: undefined,
                 id: undefined,
-                tabId: (this.state.list || []).length,
+                tabId: newTabId
             }
 
-            this.setState({
-                list: this.state.list.concat([newInterval]),
+            this.setState(prevState => ({
+                list: prevState.list.concat([newInterval]),
                 isFetching: false,
+            }), () => {
+                this.props.onAdd([newInterval]);
             });
-
-            this.props.onAdd([newInterval]);
-        }
-        else
-        {
+        } else {
             api.set()
                 .before(this.toggleFetching)
                 .success(data => {
@@ -82,12 +82,15 @@ class AvailabilityManager extends PureComponent {
                         this.props.onAdd(data.intervals);
                     }
 
-                    this.setState({
-                        list: this.state.list.concat(data.intervals).map(interval => ({...interval, tabId: interval.id})),
+                    this.setState(prevState => ({
+                        list: prevState.list.concat(data.intervals.map(interval => ({
+                            ...interval,
+                            tabId: interval.id || getNewTabId(prevState.list),
+                        }))),
                         isFetching: false,
-                    });
+                    }));
                 })
-                .error(errors => this.setState({ errors, isFetching: false }))
+                .error(errors => this.setState({errors, isFetching: false}))
                 .patch(addToken(`/plannings/availabilities/${this.props.planningId}${this.props.disableLiveReload ? "/can_update" : ""}`, this.props.authToken), {
                     ...interval,
                     season_id: this.props.seasonId,
@@ -100,22 +103,19 @@ class AvailabilityManager extends PureComponent {
 
         const intervalIds = Array.isArray(ids) ? ids : [ids];
 
-        if(this.props.disableLiveReload)
-        {
+        if (this.props.disableLiveReload) {
             const list = [...this.state.list];
 
             intervalIds.forEach(id => {
-                list.splice(
-                    list.findIndex(interval => interval.tabId === id),
-                    1
-                );
+                const index = list.findIndex(interval => interval.tabId === id);
+                if (index !== -1) {
+                    list.splice(index, 1);
+                }
             });
 
             this.props.onDelete(list);
-            this.setState({ list, isFetching: false });
-        }
-        else
-        {
+            this.setState({list, isFetching: false});
+        } else {
             Promise.all(
                 intervalIds.map(id => api.del(addToken(`/time_intervals/${id}`, this.props.authToken)))
             ).then(responses => {
@@ -137,13 +137,13 @@ class AvailabilityManager extends PureComponent {
                 });
 
                 if (errors.length) {
-                    this.setState({ errors, list, isFetching: false });
+                    this.setState({errors, list, isFetching: false});
                 } else {
                     if (this.props.onDelete) {
                         this.props.onDelete(list);
                     }
 
-                    this.setState({ list, isFetching: false });
+                    this.setState({list, isFetching: false});
                 }
             });
         }
@@ -158,7 +158,7 @@ class AvailabilityManager extends PureComponent {
     updateInterval(newInterval) {
         const newList = _.keyBy(this.state.list, "id");
         newList[newInterval.id] = newInterval;
-        
+
         this.setState({
             list: _.values(newList),
             selectedIntervalIdForComment: null,
@@ -177,13 +177,13 @@ class AvailabilityManager extends PureComponent {
             kinds,
         } = this.props;
 
-        const { list, errors, isFetching, selectedIntervalIdForComment } = this.state;
+        const {list, errors, isFetching, selectedIntervalIdForComment} = this.state;
 
         const selectedIntervalForComment = selectedIntervalIdForComment && this.state.list.find(i => i.id === selectedIntervalIdForComment);
-        
+
         return (
             <Fragment>
-                <ErrorList errors={errors} />
+                <ErrorList errors={errors}/>
 
                 <div className="p-xs">
                     {!locked ? (
@@ -215,7 +215,7 @@ class AvailabilityManager extends PureComponent {
                                     disabled={isFetching}
                                     showDates={!this.props.forSeason}
                                     kinds={kinds}
-                                    showComment={isTeacher} />
+                                    showComment={isTeacher}/>
                             </div>
                         </div>
                     ) : null}
@@ -241,7 +241,7 @@ class AvailabilityManager extends PureComponent {
                         user={user}
                         availability={selectedIntervalForComment}
                         onClose={() => this.updateCommentIntervalId(null)}
-                        onSaved={i => this.updateInterval(i)} />}
+                        onSaved={i => this.updateInterval(i)}/>}
                 </div>
             </Fragment>
         );

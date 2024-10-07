@@ -9,6 +9,7 @@ import {Form, Field, FormSpy} from "react-final-form";
 import * as api from "../../tools/api.js";
 import {redirectTo} from "../../tools/url";
 import ActivityRefTeachers from "./ActivityRefTeachers";
+import arrayMutators from "final-form-arrays";
 
 
 export default class ActivityRefContainer extends React.Component {
@@ -25,6 +26,7 @@ export default class ActivityRefContainer extends React.Component {
                     "false" :
                     this.props.activityRef.allows_timeslot_selection.toString(),
             nextCycles: this.props.nextCycles,
+            teachers: this.props.teachers.map(t => t.id),
         };
 
         this.instruments = _(props.activityInstruments)
@@ -147,7 +149,7 @@ export default class ActivityRefContainer extends React.Component {
             substitutable: values.substitutable === "true",
             is_work_group: values.activityRef.is_work_group,
             instruments: this.instruments,
-            users: (this.teachers || []).map(t => t.id),
+            users: values.teachers,
             pricings: this.state.pricingCategoriesToSave,
             duration: values.activityRef.duration,
         };
@@ -185,13 +187,25 @@ export default class ActivityRefContainer extends React.Component {
     }
 
     onValidate(values) {
-        const errors = {activityRef: {}};
+
+        const errors = {};
 
         if (isIntStrInf(values.activityRef.occupation_hard_limit, values.activityRef.occupation_limit))
+        {
+            errors.activityRef = errors.activityRef || {};
+
             errors.activityRef.occupation_hard_limit = "doit être supérieur au nombre de places";
+        }
 
         if (isIntStrInf(values.activityRef.to_age, values.activityRef.from_age))
+        {
+            errors.activityRef = errors.activityRef || {};
+
             errors.activityRef.to_age = "doit être supérieur à l'âge min";
+        }
+
+        if(!values.teachers || values.teachers.length === 0)
+            errors.teachers = "doit être renseigné";
 
         return errors;
     }
@@ -206,10 +220,12 @@ export default class ActivityRefContainer extends React.Component {
             <div className="col-lg-12 page-reglement">
                 <Form
                     onSubmit={this.onSubmit.bind(this)}
-                    validate={this.onValidate}
+                    validate={this.onValidate.bind(this)}
+                    mutators={{ ...arrayMutators }}
                     initialValues={this.initialValues}
 
-                    render={({handleSubmit}) => (
+
+                    render={({handleSubmit, errors, form, values}) => (
                         <form onSubmit={handleSubmit}>
 
                             <TabbedComponent tabs={[
@@ -218,6 +234,7 @@ export default class ActivityRefContainer extends React.Component {
                                 {
                                     id: "activity_ref_basics",
                                     header: "Activité",
+                                    isInError: !!errors.activityRef,
                                     body: <ActivityRefBasics
                                         activityRef={this.props.activityRef}
                                         activityTypes={this.props.activityTypes}
@@ -255,9 +272,10 @@ export default class ActivityRefContainer extends React.Component {
                                 {
                                     id: "activity_ref_teachers",
                                     header: "Professeurs",
+                                    isInError: !!errors.teachers,
                                     body: <ActivityRefTeachers
-                                        teachers={this.props.teachers}
-                                        onChange={this.onTeachersChange.bind(this)}
+                                        teachers={values.teachers}
+                                        mutators={form.mutators}
                                     />,
                                 },
 
