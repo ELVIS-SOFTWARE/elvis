@@ -70,11 +70,6 @@ class UserForm extends React.PureComponent {
 
         this.toggleModal = this.toggleModal.bind(this);
         this.selectFamilyMember = this.selectFamilyMember.bind(this);
-
-        setTimeout(() => {
-            console.log("UserForm componentDidUpdate");
-            loadUniversalDatePicker();
-        }, 1000);
     }
 
     selectFamilyMember(idx = -1, values = {}) {

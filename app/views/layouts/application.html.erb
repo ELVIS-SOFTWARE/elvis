@@ -258,38 +258,6 @@
         }), 500);
 
     });
-
-    const loadUniversalDatePicker = () =>
-    {
-        const element = document.querySelector(dateClass);
-
-        if (element && element.type !== 'date')
-        {
-            console.log('loading universal datepicker');
-
-            var oCSS = document.createElement('link');
-            oCSS.type='text/css'; oCSS.rel='stylesheet';
-            oCSS.href='//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/base/jquery-ui.css';
-            oCSS.onload=function()
-            {
-                var oJS = document.createElement('script');
-                oJS.type='text/javascript';
-                oJS.src='//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js';
-                oJS.onload=function()
-                {
-                    $(dateClass).datepicker();
-                }
-                document.body.appendChild(oJS);
-            }
-            document.body.appendChild(oCSS);
-        }
-    }
-
-    var dateClass='.datechk';
-    $(document).ready(function ()
-    {
-        loadUniversalDatePicker();
-    });
 </script>
 <%= react_component("utils/SwalBackEndModal", { swal_props: { title: 'Message', type: 'info', text: '3 saisons ont été créées par défault en fonction de la date actuelle' } }) if @base_season_created %>
 </body>
