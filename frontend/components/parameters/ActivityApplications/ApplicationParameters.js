@@ -8,12 +8,14 @@ export default function ApplicationParameters() {
     const [isLoading, setIsLoading] = useState(true);
     const [parameters, setParameters] = useState([]);
     const [selectedParameter, setSelectedParameter] = useState(0);
+    const [permitTeacherActivities, setPermitTeacherActivities] = useState(false);
 
     useEffect(() => {
         api.set()
             .success((data) => {
-                setSelectedParameter((data.default || {}).id || 0);
-                setParameters(data.list);
+                setSelectedParameter((data.defaultActivityApplicationStatus || {}).id || 0);
+                setParameters(data.activityApplicationStatusList);
+                setPermitTeacherActivities(data.permitTeacherActivities);
                 setIsLoading(false);
             })
             .error(() => {
@@ -22,11 +24,12 @@ export default function ApplicationParameters() {
                     type: "error",
                 });
             })
-            .get("/get_default_and_list_activity_application_statuses", {});
+            .get("/get_activity_application_parameters", {});
     }, []);
 
     const onSubmit = () => {
         api.set()
+            .useLoading()
             .success(() => {
                 swal({
                     title: "Sauvegarde effectuée",
@@ -39,8 +42,9 @@ export default function ApplicationParameters() {
                     type: "error",
                 });
             })
-            .post("/set_default_activity_application_status", {
-                status_id: selectedParameter,
+            .post("/set_activity_application_parameters", {
+                default_status_id: selectedParameter,
+                permit_teacher_activities: permitTeacherActivities
             }, {});
     }
 
@@ -63,7 +67,21 @@ export default function ApplicationParameters() {
                         </select>
                         <p className="mt-3">Le statut sélectionné sera le statut par défaut pour les nouvelles inscriptions.</p>
                     </div>
+                </div>
+            </div>
 
+            <hr />
+
+            <div className="row">
+                <div className="col-md-5">
+                    <input type="checkbox" id="check" checked={permitTeacherActivities} onChange={() => setPermitTeacherActivities(!permitTeacherActivities)} />
+                    &nbsp;
+                    <label className="ml-2 font-normal" htmlFor="check">Permettre aux professeurs de gérer les demandes d'inscriptions qui leur sont liées</label>
+                </div>
+            </div>
+
+            <div className="row mt-3">
+                <div className="col-md-5">
                     <button className="btn btn-success pull-right mt-5" onClick={onSubmit}>Valider</button>
                 </div>
             </div>

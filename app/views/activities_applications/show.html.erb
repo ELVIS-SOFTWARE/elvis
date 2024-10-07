@@ -2,7 +2,7 @@
 <%= react_component("activityApplications/summary/Summary", {
     application: @activity_application,
     student_evaluations: @student_evaluations,
-    admins: User.admins,
+    admins: User.admins.as_json(only: [:id, :first_name, :last_name]),
     activityRefs: @activity_refs,
     isAdmin: current_user.admin?,
     statuses: @statuses,

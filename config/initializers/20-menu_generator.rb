@@ -230,11 +230,18 @@ module MenuGenerator
       { caption: "Mon planning", icon: "fa-calendar", user_role: "!!teacher", position: 0 }
     )
 
+    teacher_inscriptions = Elvis::MenuManager::MenuItem.new(
+      :teachers_activities_applications,
+      "activities_applications",
+      "index",
+      { caption: "Demandes d'inscription", icon: "fa-table", user_role: "!!teacher", position: 1 }
+    )
+
     attendences = Elvis::MenuManager::MenuItem.new(
       :users,
       "users",
       "presence_sheet",
-      { caption: "Présences", icon: "fa-check", user_role: "!!teacher", position: 1 }
+      { caption: "Présences", icon: "fa-check", user_role: "!!teacher", position: 2 }
     ) do
       { id: current_user&.id, date: Date.today.strftime("%F") }
     end
@@ -267,6 +274,7 @@ module MenuGenerator
 
 
     Elvis::MenuManager.prepend_menu_item :side_menu, planning
+    Elvis::MenuManager.prepend_menu_item :side_menu, teacher_inscriptions if Parameter.get_value("activity_applications.authorize_teachers", default: false)
     Elvis::MenuManager.prepend_menu_item :side_menu, attendences
     Elvis::MenuManager.prepend_menu_item :side_menu, disponibility
     Elvis::MenuManager.prepend_menu_item :side_menu, evaluation
