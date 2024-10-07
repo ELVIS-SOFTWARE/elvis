@@ -8,22 +8,16 @@ import Modal from "react-modal";
 import GeneralInfos from "./GeneralInfos";
 import ContactInfos from "./ContactInfos";
 import HandicapInfos from "./HandicapInfos";
-import GDPR from "./GDPR";
 
 import { MESSAGES } from "../../tools/constants";
-import { isEmpty } from "../../tools/validators";
 import ContactForm from "./ContactForm";
 
 import * as api from "../../tools/api";
-import ImageRight from "./ImageRight";
+
 
 import { modalStyle } from "../../tools/constants";
 import { changeBirthDate, findFamilyMemberById, selectPhoneType } from "../../tools/mutators";
-import NewsLetter from "./NewsLetter";
-import { isRadioTrue } from "../utils";
 import { toRawPhoneNumber } from "../../tools/format";
-import Input from "../common/Input";
-import AlertCheckbox from "../common/AlertCheckbox";
 import ConsentDocItem from "./ConsentDocItem";
 import Payers from "./Payers";
 

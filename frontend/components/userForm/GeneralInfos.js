@@ -6,12 +6,7 @@ import InputSelect from "../common/InputSelect";
 import {toBirthday, toAge} from "../../tools/format";
 import CreateOrganizationModal from "./CreateOrganizationModal";
 import { MESSAGES } from "../../tools/constants";
-import { DATE } from "../utils/validation/checkers";
-import { DateComponent } from "@fullcalendar/core";
-import DateRangePicker from "../utils/DateRangePicker";
-import DateRangePickerLib from "@wojtekmaj/react-daterange-picker";
 import DatePicker from "react-datepicker";
-import { changeBirthDate } from "../../tools/mutators";
 import moment from "moment";
 
 const genders = [
