@@ -8,22 +8,16 @@ import Modal from "react-modal";
 import GeneralInfos from "./GeneralInfos";
 import ContactInfos from "./ContactInfos";
 import HandicapInfos from "./HandicapInfos";
-import GDPR from "./GDPR";
 
 import { MESSAGES } from "../../tools/constants";
-import { isEmpty } from "../../tools/validators";
 import ContactForm from "./ContactForm";
 
 import * as api from "../../tools/api";
-import ImageRight from "./ImageRight";
+
 
 import { modalStyle } from "../../tools/constants";
-import { findFamilyMemberById, selectPhoneType } from "../../tools/mutators";
-import NewsLetter from "./NewsLetter";
-import { isRadioTrue } from "../utils";
+import { changeBirthDate, findFamilyMemberById, selectPhoneType } from "../../tools/mutators";
 import { toRawPhoneNumber } from "../../tools/format";
-import Input from "../common/Input";
-import AlertCheckbox from "../common/AlertCheckbox";
 import ConsentDocItem from "./ConsentDocItem";
 import Payers from "./Payers";
 
@@ -291,16 +285,16 @@ class UserForm extends React.PureComponent {
 
                     <Form
                         onSubmit={this.submit.bind(this)}
-                        mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType }}
+                        mutators={{ ...arrayMutators, findFamilyMemberById, selectPhoneType, changeBirthDate }}
                         initialValues={formattedInitialValues}
                         validate={this.validate.bind(this)}
                     >
-                        {({ handleSubmit, form, values }) => {
+                        {({ handleSubmit, form, values, errors }) => {
 
                             // Bind handle submit to trigger
                             // Submit inside isValidated()
                             this.handleSubmit = handleSubmit;
-                            this.mutators = form.mutators;
+                            this.mutators = form.mutators
 
                             return (
                                 <form
@@ -320,6 +314,9 @@ class UserForm extends React.PureComponent {
                                         birthday={values.birthday}
                                         organizationOptions={this.props.organizationOptions}
                                         userId={this.props.initialValues.id}
+                                        mutators={form.mutators}
+                                        formValues={values}
+                                        formErrors={errors}
                                     />
 
                                     {

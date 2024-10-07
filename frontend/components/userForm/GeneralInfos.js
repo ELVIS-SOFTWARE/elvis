@@ -6,6 +6,8 @@ import InputSelect from "../common/InputSelect";
 import {toBirthday, toAge} from "../../tools/format";
 import CreateOrganizationModal from "./CreateOrganizationModal";
 import { MESSAGES } from "../../tools/constants";
+import DatePicker from "react-datepicker";
+import moment from "moment";
 
 const genders = [
     {value: "F", label: "Madame"},
@@ -21,7 +23,10 @@ const GeneralInfos = ({
                           birthday,
                           ignoreValidate,
                           organizationOptions,
-                          userId
+                          userId,
+                          mutators,
+                          formValues,
+                          formErrors,
                       }) => (
     <Fragment>
         <div className="row">
@@ -89,15 +94,23 @@ const GeneralInfos = ({
             {displayBirthday && (
                 <div className="col-xs-12 col-md-6 pr-0">
                     <label className="small" style={{color: "#003E5C"}}>Date de naissance</label><br/>
-                    <Field
-                        name="birthday"
-                        type="date"
-                        validate={!ignoreValidate && composeValidators(required, isValidAge)}
+                    <DatePicker
+                        showIcon
+                        dateFormat="dd/MM/yyyy"
                         required
-                        render={Input}
-                        format={toBirthday}
-                        help={birthday ? toAge(birthday) : undefined}
+                        selected={birthday ? moment(birthday, "YYYY/MM/DD").toDate() : new Date()}
+                        onChange={date => {
+                            if(date && date instanceof Date && !isNaN(date))
+                                mutators.changeBirthDate(`${moment(date).format("YYYY/MM/DD")}`);
+                            else
+                                mutators.changeBirthDate(null);
+                        }}
+                        className="form-control"
                     />
+
+                    {birthday && <p className="help-block">{toAge(birthday)}</p>}
+
+                    {formErrors.birthday && <span className="text-danger">{MESSAGES[formErrors.birthday]}</span>}
                 </div>
             )}
 

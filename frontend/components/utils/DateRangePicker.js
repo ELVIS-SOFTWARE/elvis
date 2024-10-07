@@ -34,7 +34,7 @@ export default function DateRangePicker({defaultStart, defaultEnd, onChange})
             if(values[1])
                 end = values[1];
 
-            if(start && end)
+            if(start && end && onChange)
                 onChange({ start, end });
         }}
          />
