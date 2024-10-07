@@ -1146,9 +1146,19 @@ class ActivitiesApplicationsController < ApplicationController
       render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
     end
 
+    restricted_statuses = [
+      ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID,
+      ActivityApplicationStatus::ACTIVITY_PROPOSED_ID,
+      ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID
+    ]
+
     ActiveRecord::Base.transaction do
       activities_application = ActivityApplication.where(id: targets)
       activities_application.each do |activity_application|
+        if restricted_statuses.include?(activity_application.activity_application_status_id)
+          raise ActiveRecord::Rollback, "Les demandes dont le statut sont : proposition acceptée, cours proposé et cours attribué, ne peuvent être supprimées."
+        end
+
         raise CanCan::AccessDenied unless can? :destroy, activity_application
 
         handle_related_records(activity_application)
@@ -1156,6 +1166,10 @@ class ActivitiesApplicationsController < ApplicationController
 
       activities_application.destroy_all
     end
+
+    render json: { success: true }, status: :ok
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message }, status: :forbidden
   end
 
   def find_activity_suggestions
