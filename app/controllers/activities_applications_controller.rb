@@ -7,7 +7,9 @@ class ActivitiesApplicationsController < ApplicationController
   def index
     authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
 
-    raise CanCan::AccessDenied unless authorize_teachers && (current_user&.is_admin || current_user&.is_teacher)
+    if authorize_teachers
+      raise CanCan::AccessDenied unless  current_user&.is_admin || current_user&.is_teacher
+    end
 
     season = Season.current_apps_season
     @admins = User.admins.as_json only: %i[id first_name last_name full_name]
