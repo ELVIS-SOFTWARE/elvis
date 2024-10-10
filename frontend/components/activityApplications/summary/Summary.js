@@ -21,8 +21,10 @@ import * as api from "../../../tools/api";
 const moment = require("moment");
 require("moment/locale/fr");
 
-class Summary extends React.Component {
-    constructor(props) {
+class Summary extends React.Component
+{
+    constructor(props)
+    {
         super(props);
 
         this.stopDateInput = React.createRef();
@@ -69,15 +71,18 @@ class Summary extends React.Component {
         };
     }
 
-    componentDidMount() {
+    componentDidMount()
+    {
         this.loadData();
     }
 
-    loadData() {
+    loadData()
+    {
         this.handleAlertProposal();
     }
 
-    isAlreadyBusy(timeInterval) {
+    isAlreadyBusy(timeInterval)
+    {
         return _.chain(this.state.suggestions)
             .reduce((result, value, key) => _.concat(result, value), [])
             .filter(act =>
@@ -95,13 +100,15 @@ class Summary extends React.Component {
             .value();
     }
 
-    handleChangeStatus(evt) {
+    handleChangeStatus(evt)
+    {
         const statusId = evt.target.value;
 
         this.setState({ status_id: statusId });
     }
 
-    handleSaveStatus() {
+    handleSaveStatus()
+    {
         const isStopping = findAndGet(
             this.props.statuses,
             (s) => parseInt(s.id, 10) === parseInt(this.state.status_id, 10),
@@ -113,7 +120,8 @@ class Summary extends React.Component {
             : null;
 
         // Make the stop date required is is stopping status selected
-        if (isStopping && !stoppedAt) {
+        if (isStopping && !stoppedAt)
+        {
             toast(
                 "Pour arrêter une inscription, veuillez renseigner une date d'arrêt.",
                 {
@@ -132,9 +140,11 @@ class Summary extends React.Component {
         });
     }
 
-    handleUpdateBeginAt(begin_at) {
+    handleUpdateBeginAt(begin_at)
+    {
         // Avertissement si l'inscription est validée
-        if (this.state.desiredActivities[0].is_validated && isValidDate(new Date(begin_at))) {
+        if (this.state.desiredActivities[0].is_validated && isValidDate(new Date(begin_at)))
+        {
             const title = "<h5>Voulez-vous modifier la date d'inscription ?</h5>";
             const htmltext = "<p>La modification de la date d'inscription va entraîner une mise à jour des inscriptions aux séances du cours.</p>" +
                 "<p>Le montant à régler pour l'élève risque donc d'être affecté.</p>";
@@ -147,21 +157,28 @@ class Summary extends React.Component {
                 showCancelButton: true,
                 confirmButtonText: confirmtext,
                 cancelButtonText: "<i class=\"fas fa-ban\"></i> annuler",
-            }).then((res) => {
-                if (res.value) {
+            }).then((res) =>
+            {
+                if (res.value)
+                {
                     this.updateApplication({ begin_at });
-                } else {
+                }
+                else
+                {
                     this.setState({ begin_at: this.state.old_begin_at || this.state.begin_at });
                 }
             });
 
             // Si l'inscription n'est pas validée, on peut librement modifier la date de début
-        } else {
+        }
+        else
+        {
             this.updateApplication({ begin_at });
         }
     }
 
-    updateApplication(updateObject) {
+    updateApplication(updateObject)
+    {
         this.handleAlertProposal();
         patch(`/inscriptions/${this.state.application.id}`, { application: updateObject })
             .then(({ data: app }) => this.setState({
@@ -175,33 +192,39 @@ class Summary extends React.Component {
             }));
     }
 
-    handleSelectEvaluation(id) {
+    handleSelectEvaluation(id)
+    {
         this.setState({
             studentEvaluationId: parseInt(id) || "",
         });
     }
 
-    handleSelectApplicationChangeQuestionnaire(id) {
+    handleSelectApplicationChangeQuestionnaire(id)
+    {
         this.setState({
             applicationChangeQuestionnaireId: parseInt(id) || "",
         });
     }
 
-    handleSelectNewStudentLevelQuestionnaire(id) {
+    handleSelectNewStudentLevelQuestionnaire(id)
+    {
         this.setState({
             newStudentLevelQuestionnaireId: parseInt(id) || "",
         });
     }
 
-    handleAddSuggestions(id, suggestions) {
-        return new Promise(res => {
+    handleAddSuggestions(id, suggestions)
+    {
+        return new Promise(res =>
+        {
             const suggs = this.state.suggestions;
             suggs[id] = suggestions;
             this.setState({ suggestions: suggs }, res);
         });
     }
 
-    async handleSelectSuggestion(activityId, desiredActivityId, activityRefId) {
+    async handleSelectSuggestion(activityId, desiredActivityId, activityRefId)
+    {
         const suggestions = this.state.suggestions[activityRefId];
         const desiredActivities = this.state.desiredActivities;
 
@@ -235,10 +258,13 @@ class Summary extends React.Component {
 
         suggestions[index] = activity;
 
-        if (!error) {
+        if (!error)
+        {
             desiredActivity.is_validated = true;
             desiredActivity.activity_id = activity.id;
-        } else {
+        }
+        else
+        {
             swal({
                 title: "Erreur",
                 text: error,
@@ -247,7 +273,8 @@ class Summary extends React.Component {
         }
 
         desiredActivity.options = [];
-        suggestions.forEach(s => {
+        suggestions.forEach(s =>
+        {
             s.options = [];
         });
 
@@ -263,7 +290,8 @@ class Summary extends React.Component {
         });
     }
 
-    handleSelectSuggestionOption(activityId, desiredActivityId) {
+    handleSelectSuggestionOption(activityId, desiredActivityId)
+    {
         const desiredActivities = this.state.desiredActivities;
 
         fetch(`/activity/${activityId}/desired_option/${desiredActivityId}`, {
@@ -276,7 +304,8 @@ class Summary extends React.Component {
             },
         })
             .then(response => response.json())
-            .then(desiredActivity => {
+            .then(desiredActivity =>
+            {
                 const indexDesired = _.findKey(
                     desiredActivities,
                     da => da.id == desiredActivity.id,
@@ -287,7 +316,8 @@ class Summary extends React.Component {
                     ];
 
                 // Update state's suggestions with new data
-                _.forEach(desiredActivity.options, o => {
+                _.forEach(desiredActivity.options, o =>
+                {
                     const index = _.findIndex(
                         suggestions,
                         s => s.id == o.activity_id,
@@ -314,7 +344,8 @@ class Summary extends React.Component {
             });
     }
 
-    handleRemoveSuggestionOption(suggestionId, desiredActivity) {
+    handleRemoveSuggestionOption(suggestionId, desiredActivity)
+    {
         const desiredActivities = this.state.desiredActivities;
         const suggestion = _.find(
             this.state.suggestions[desiredActivity.activity_ref_id],
@@ -334,7 +365,8 @@ class Summary extends React.Component {
             },
         )
             .then(response => response.json())
-            .then(desiredActivity => {
+            .then(desiredActivity =>
+            {
                 const indexDesired = _.findKey(
                     desiredActivities,
                     da => da.id == desiredActivity.id,
@@ -366,7 +398,8 @@ class Summary extends React.Component {
             });
     }
 
-    async handleRemoveStudent(activityId, desiredActivityId, activityRefId) {
+    async handleRemoveStudent(activityId, desiredActivityId, activityRefId)
+    {
         const suggestions = this.state.suggestions[activityRefId];
         const desiredActivities = this.state.desiredActivities;
 
@@ -411,7 +444,8 @@ class Summary extends React.Component {
         });
     }
 
-    handleRemoveDesiredActivity(id) {
+    handleRemoveDesiredActivity(id)
+    {
         fetch(`/inscriptions/${this.state.application.id}/add_activity/${id}`, {
             method: "DELETE",
             credentials: "same-origin",
@@ -422,17 +456,20 @@ class Summary extends React.Component {
             },
         })
             .then(response => response.json())
-            .then(desired_activities => {
+            .then(desired_activities =>
+            {
                 this.setState({ desiredActivities: desired_activities });
             });
     }
 
-    handleRemoveActivityApplication(e) {
+    handleRemoveActivityApplication(e)
+    {
         const isOneDesiredActivityValidated = Object.values(
             this.state.desiredActivities,
         ).reduce((acc, d) => acc || d.is_validated, false);
 
-        if (isOneDesiredActivityValidated) {
+        if (isOneDesiredActivityValidated)
+        {
             toast(
                 "Les activités doivent toutes être retirées pour pouvoir supprimer cette demande",
                 {
@@ -440,7 +477,9 @@ class Summary extends React.Component {
                     type: "warning",
                 },
             );
-        } else {
+        }
+        else
+        {
 
             let title = "<h5>Voulez-vous supprimer cette demande d'inscription ?</h5>";
             let htmltext = "<p>La demande de " + this.props.application.user.first_name + " " + this.props.application.user.last_name + " sera définitivement supprimé</p>";
@@ -452,13 +491,19 @@ class Summary extends React.Component {
                 showCancelButton: true,
                 confirmButtonText: confirmtext,
                 cancelButtonText: "<i class=\"fas fa-ban\"></i> annuler",
-            }).then((res) => {
-                if (res.value) {
+            }).then((res) =>
+            {
+                if (res.value)
+                {
                     api.set()
-                        .success(data => {
-                            if (data.success) {
+                        .success(data =>
+                        {
+                            if (data.success)
+                            {
                                 window.location.href = "/inscriptions";
-                            } else {
+                            }
+                            else
+                            {
                                 swal.fire({
                                     title: "Erreur",
                                     html: data.message,
@@ -466,7 +511,8 @@ class Summary extends React.Component {
                                 });
                             }
                         })
-                        .error(error => {
+                        .error(error =>
+                        {
                             swal.fire({
                                 title: "Erreur",
                                 html: error.message,
@@ -480,14 +526,17 @@ class Summary extends React.Component {
         }
     }
 
-    sendConfirmationMail() {
+    sendConfirmationMail()
+    {
         swal({
             title: "Envoi mail confirmation",
             text: "Êtes-vous sûr ?",
             type: "question",
             showCancelButton: true,
-        }).then(v => {
-            if (v.value) {
+        }).then(v =>
+        {
+            if (v.value)
+            {
                 this.setState({ sendingMail: true });
 
                 fetch(
@@ -505,7 +554,8 @@ class Summary extends React.Component {
                             application_status: parseInt(this.state.status_id),
                         }),
                     },
-                ).then(() => {
+                ).then(() =>
+                {
                     this.setState({ mail_sent: true, sendingMail: false });
                 });
             }
@@ -513,16 +563,19 @@ class Summary extends React.Component {
     }
 
     // COMMENT HANDLERS
-    handleCommentEdition(comment_id) {
+    handleCommentEdition(comment_id)
+    {
         const comment = _.find(this.state.comments, c => c.id == comment_id);
         this.setState({ editedComment: comment });
     }
 
-    handleUpdateNewCommentContent(e) {
+    handleUpdateNewCommentContent(e)
+    {
         this.setState({ newComment: e.target.value });
     }
 
-    handleUpdateEditedCommentContent(e) {
+    handleUpdateEditedCommentContent(e)
+    {
         this.setState({
             editedComment: {
                 ...this.state.editedComment,
@@ -531,7 +584,8 @@ class Summary extends React.Component {
         });
     }
 
-    handleSaveComment() {
+    handleSaveComment()
+    {
         fetch("/comments", {
             method: "POST",
             credentials: "same-origin",
@@ -559,7 +613,8 @@ class Summary extends React.Component {
             );
     }
 
-    handleSaveCommentEdition() {
+    handleSaveCommentEdition()
+    {
         fetch(`/comments/${this.state.editedComment.id}`, {
             method: "PATCH",
             credentials: "same-origin",
@@ -574,12 +629,14 @@ class Summary extends React.Component {
             }),
         })
             .then(response => response.json())
-            .then(comments => {
+            .then(comments =>
+            {
                 this.setState({ comments, editedComment: null });
             });
     }
 
-    handleChangeDesiredActivity(desiredId, activity_ref_id) {
+    handleChangeDesiredActivity(desiredId, activity_ref_id)
+    {
         const oldDesiredIndex = Object.values(this.state.desiredActivities).findIndex(d => d.id === desiredId);
 
         swal({
@@ -589,8 +646,10 @@ class Summary extends React.Component {
             showConfirmButton: true,
             showCancelButton: true,
         })
-            .then(res => {
-                if (oldDesiredIndex !== -1 && res.value) {
+            .then(res =>
+            {
+                if (oldDesiredIndex !== -1 && res.value)
+                {
                     const newDesired = {
                         ...this.state.desiredActivities[oldDesiredIndex],
                         activity_ref_id,
@@ -607,7 +666,8 @@ class Summary extends React.Component {
                         }),
                     })
                         .then(res => res.json())
-                        .then(desired => {
+                        .then(desired =>
+                        {
                             const newDesiredActivities = Array.isArray(this.state.desiredActivities)
                                 ? [...this.state.desiredActivities] : [...Object.values(this.state.desiredActivities)];
 
@@ -622,7 +682,8 @@ class Summary extends React.Component {
 
     }
 
-    handleUpdateStudentLevel(level) {
+    handleUpdateStudentLevel(level)
+    {
         const newApplication = {
             ...this.state.application,
             user: {
@@ -646,7 +707,8 @@ class Summary extends React.Component {
         this.setState({ application: newApplication });
     }
 
-    handleDeleteStudentLevel(seasonId, activityRefId) {
+    handleDeleteStudentLevel(seasonId, activityRefId)
+    {
         const application = {
             ...this.state.application,
             user: {
@@ -666,7 +728,8 @@ class Summary extends React.Component {
         this.setState({ application });
     }
 
-    handleUpdateSuggestion(suggestion) {
+    handleUpdateSuggestion(suggestion)
+    {
         const desiredActivities = [...this.state.desiredActivities];
 
         const desiredIdx = desiredActivities.findIndex(da => da.activity_ref.activity_ref_kind_id === suggestion.activity_ref.activity_ref_kind_id);
@@ -681,7 +744,8 @@ class Summary extends React.Component {
         const isUserAssignedToSuggestion = desiredActivity.activity_id === suggestion.id;
 
         // Validate desired_activity if current user is in activity
-        if (isUserInSuggestion) {
+        if (isUserInSuggestion)
+        {
             desiredActivity.activity_id = suggestion.id;
             desiredActivity.is_validated = true;
         }
@@ -714,24 +778,31 @@ class Summary extends React.Component {
         return newState;
     }
 
-    handleAlertProposal() {
-        if (this.state.status_id == ActivityApplicationStatus.PROPOSAL_REFUSED_ID) {
+    handleAlertProposal()
+    {
+        if (this.state.status_id == ActivityApplicationStatus.PROPOSAL_REFUSED_ID)
+        {
             this.state.alertProposal = <div className={"alert alert-danger"}>
                 <h4><i className="fa fa-exclamation-triangle" aria-hidden="true" /><strong className={"ml-2"}>Proposition
                     refusée</strong></h4>
                 <strong>Raison du refus : </strong><span>{this.props.application.reason_of_refusal}</span>
             </div>;
-        } else if (this.state.status_id == ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID) {
+        }
+        else if (this.state.status_id == ActivityApplicationStatus.PROPOSAL_ACCEPTED_ID)
+        {
             this.state.alertProposal = <div className={"alert alert-success"}>
                 <p><i className="fa fa-check" aria-hidden="true" /><strong className={"ml-2"}>Proposition
                     Acceptée</strong></p>
             </div>;
-        } else {
+        }
+        else
+        {
             this.state.alertProposal = "";
         }
     }
 
-    render() {
+    render()
+    {
         const {
             activityRefs,
             isAdmin,
@@ -761,7 +832,8 @@ class Summary extends React.Component {
 
         const suggestions = _.reduce(
             this.state.desiredActivities,
-            (acc, da) => {
+            (acc, da) =>
+            {
                 const val =
                     _.uniq(
                         _.map(
@@ -790,7 +862,8 @@ class Summary extends React.Component {
 
         const activitiesDisplay = _.chain(this.state.desiredActivities)
             .sortBy(da => da.activity_ref_id)
-            .map(da => {
+            .map(da =>
+            {
                 const detectedEvaluation = this.props
                     .student_evaluations
                     .forms
@@ -882,7 +955,8 @@ class Summary extends React.Component {
         // Status handling
         const generateStatusSelection = _(statuses)
             .filter(s => s.is_active)
-            .map((s, i) => {
+            .map((s, i) =>
+            {
                 return (
                     <div key={i} className="radio radio-primary">
                         <input
@@ -894,7 +968,8 @@ class Summary extends React.Component {
                                 !_.reduce(this.state.desiredActivities, (acc, d) => acc && d.is_validated, true,
                                 )}
                             checked={this.state.status_id == s.id}
-                            onChange={e => {
+                            onChange={e =>
+                            {
                                 this.handleChangeStatus(e);
                             }}
                             id={s.id}
@@ -949,7 +1024,8 @@ class Summary extends React.Component {
             </p>
         );
 
-        if (this.state.application.user.activity_applications) {
+        if (this.state.application.user.activity_applications)
+        {
             let applications = _.filter(
                 this.state.application.user.activity_applications,
                 aa =>
@@ -957,12 +1033,16 @@ class Summary extends React.Component {
                     aa.id !== this.state.application.id,
             );
 
-            otherApplications = _.map(applications, (a, i) => {
+            otherApplications = _.map(applications, (a, i) =>
+            {
                 const activityRef = _.head(a.desired_activities).activity_ref;
                 let actionLabel = "Nouvelle demande";
-                if (a.pre_application_activity) {
+                if (a.pre_application_activity)
+                {
                     actionLabel = PRE_APPLICATION_ACTION_LABELS[a.pre_application_activity.action];
-                } else if (a.pre_application_desired_activity) {
+                }
+                else if (a.pre_application_desired_activity)
+                {
                     actionLabel = PRE_APPLICATION_ACTION_LABELS[a.pre_application_desired_activity.action];
                 }
 
@@ -1007,7 +1087,7 @@ class Summary extends React.Component {
 
                             <div className="vertical-hr md" />
 
-                            <ButtonModal
+                            {otherApplications.length > 0 && <ButtonModal
                                 modalProps={{ style: { content: { position: "static" } } }}
                                 count={otherApplications.length}
                                 label="Autres demandes"
@@ -1019,7 +1099,7 @@ class Summary extends React.Component {
                                         otherApplications :
                                         <h4>Aucune autre demande.</h4>}
                                 </div>
-                            </ButtonModal>
+                            </ButtonModal>}
                         </div>
 
                         <div className="flex flex-center-aligned">
@@ -1071,7 +1151,7 @@ class Summary extends React.Component {
                                 className="btn btn-primary m-r-sm">
                                 <i className="fas fa-user" />
                             </a>
-                            {Boolean(this.props.payer) &&
+                            {Boolean(this.props.payer) && this.props.isAdmin &&
                                 <a
                                     href={paymentLink}
                                     data-tippy-content="Règlements"
@@ -1103,17 +1183,21 @@ class Summary extends React.Component {
                                         className="form-control"
                                         name="begin_at"
                                         value={moment(this.state.begin_at).format(ISO_DATE_FORMAT)}
-                                        onKeyDown={(e) => {
+                                        onKeyDown={(e) =>
+                                        {
                                             this.useDateChangedTimeout = true;
                                         }}
-                                        onChange={(e) => {
-                                            if (this.changeDateTimeout) {
+                                        onChange={(e) =>
+                                        {
+                                            if (this.changeDateTimeout)
+                                            {
                                                 clearTimeout(this.changeDateTimeout);
                                             }
 
                                             const value = e.target.value;
 
-                                            this.changeDateTimeout = setTimeout(() => {
+                                            this.changeDateTimeout = setTimeout(() =>
+                                            {
                                                 this.handleUpdateBeginAt(value);
                                             }, this.useDateChangedTimeout ? 1000 : 100);
 
@@ -1377,60 +1461,58 @@ class Summary extends React.Component {
                             </button>
                         </div>
 
-                        {isAdmin ? (
-                            <div
-                                className="modal inmodal"
-                                id="statusModal"
-                                tabIndex="-1"
-                                role="dialog"
-                                aria-hidden="true"
-                            >
-                                <div className="modal-dialog">
-                                    <div className="modal-content animated">
-                                        <div className="modal-header">
-                                            <p>Statut de la demande</p>
-                                        </div>
-                                        <div className="modal-body">
-                                            {generateStatusSelection}
+                        <div
+                            className="modal inmodal"
+                            id="statusModal"
+                            tabIndex="-1"
+                            role="dialog"
+                            aria-hidden="true"
+                        >
+                            <div className="modal-dialog">
+                                <div className="modal-content animated">
+                                    <div className="modal-header">
+                                        <p>Statut de la demande</p>
+                                    </div>
+                                    <div className="modal-body">
+                                        {generateStatusSelection}
 
-                                            {isStopping ?
-                                                (
-                                                    <div className="form-group">
-                                                        <label>Date d'arrêt de l'activité</label>
-                                                        <input
-                                                            className={`form-control ${!this.state.stoppedAt ? "invalid" : ""}`}
-                                                            type="date"
-                                                            name="stop_date"
-                                                            ref={this.stopDateInput}
-                                                            defaultValue={this.state.stopped_at && moment(this.state.stopped_at).format("YYYY-MM-DD") || ""}
-                                                            min={moment(this.state.begin_at).format(ISO_DATE_FORMAT)}
-                                                            max={moment(this.state.application.season.end).format(ISO_DATE_FORMAT)}
-                                                        />
-                                                    </div>
-                                                )
-                                                : null}
-                                        </div>
-                                        <div className="modal-footer flex flex-space-between-justified">
-                                            <button className="btn" style={{ marginRight: "auto" }} type="button"
-                                                    data-dismiss="modal">
-                                                <i className="fas fa-times m-r-sm" />
-                                                Annuler
-                                            </button>
+                                        {isStopping ?
+                                            (
+                                                <div className="form-group">
+                                                    <label>Date d'arrêt de l'activité</label>
+                                                    <input
+                                                        className={`form-control ${!this.state.stoppedAt ? "invalid" : ""}`}
+                                                        type="date"
+                                                        name="stop_date"
+                                                        ref={this.stopDateInput}
+                                                        defaultValue={this.state.stopped_at && moment(this.state.stopped_at).format("YYYY-MM-DD") || ""}
+                                                        min={moment(this.state.begin_at).format(ISO_DATE_FORMAT)}
+                                                        max={moment(this.state.application.season.end).format(ISO_DATE_FORMAT)}
+                                                    />
+                                                </div>
+                                            )
+                                            : null}
+                                    </div>
+                                    <div className="modal-footer flex flex-space-between-justified">
+                                        <button className="btn" style={{ marginRight: "auto" }} type="button"
+                                                data-dismiss="modal">
+                                            <i className="fas fa-times m-r-sm" />
+                                            Annuler
+                                        </button>
 
-                                            <button
-                                                className="btn btn-primary"
-                                                data-dismiss="modal"
-                                                onClick={() =>
-                                                    this.handleSaveStatus()
-                                                }>
-                                                <i className="fas fa-check m-r-sm" />
-                                                Valider
-                                            </button>
-                                        </div>
+                                        <button
+                                            className="btn btn-primary"
+                                            data-dismiss="modal"
+                                            onClick={() =>
+                                                this.handleSaveStatus()
+                                            }>
+                                            <i className="fas fa-check m-r-sm" />
+                                            Valider
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                        ) : null}
+                        </div>
                     </div>
 
                     {activitiesDisplay}
@@ -1439,9 +1521,11 @@ class Summary extends React.Component {
         );
     }
 
-    static filterTimeIntervals(time_intervals, season) {
+    static filterTimeIntervals(time_intervals, season)
+    {
         return _.chain(time_intervals)
-            .filter(ti => {
+            .filter(ti =>
+                {
                     return ti.kind === "p" &&
                         moment(ti.start).isBetween(
                             moment(season.start).startOf("week"),
@@ -1452,12 +1536,14 @@ class Summary extends React.Component {
     }
 }
 
-function renderEvaluationForm(forms, questions, formId) {
+function renderEvaluationForm(forms, questions, formId)
+{
     const form = forms
         .forms
         .find(e => e.form.id === formId);
 
-    if (form) {
+    if (form)
+    {
         const answers = getAnswersObject(form.form.answers);
 
         return <EvaluationForm
@@ -1468,7 +1554,8 @@ function renderEvaluationForm(forms, questions, formId) {
                 ...form.contextual_reference_data,
             }}
             answers={answers} />;
-    } else
+    }
+    else
         return <h4>Echec du rendu : cette évaluation n'existe pas</h4>;
 }
 

@@ -131,6 +131,15 @@ class ActivitiesApplicationsController < ApplicationController
       activity_application.update!(begin_at: new_start_date)
     end
 
+    activity_application.user.activity_applications = activity_application
+                                                         .user
+                                                         .activity_applications
+                                                         .where(season_id: Season.current_apps_season&.id)
+                                                         .to_a
+                                                         .filter{|a|
+                                                           Abilities::ActivityApplicationAbilities.is_activity_application_concern_any_activity_ref?(a, current_user.activity_refs.pluck(:id))
+                                                         }
+
     @activity_application = activity_application.as_json({
                                                            include: {
                                                              user: {
@@ -1012,7 +1021,7 @@ class ActivitiesApplicationsController < ApplicationController
   def send_confirmation_mail
     application = ActivityApplication.find(params[:id])
 
-    authorize! :manage, application
+    authorize! :edit, application
 
     user = application.user
     activity = application.desired_activities.first.activity

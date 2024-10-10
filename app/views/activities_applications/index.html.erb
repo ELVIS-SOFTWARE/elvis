@@ -3,7 +3,7 @@
       Demandes d'inscription
       <%= link_to new_activities_application_path, class: "btn btn-sm btn-primary pull-right" do %>
           <i class="fas fa-plus"></i> Créer une inscription
-      <% end %>
+      <% end if current_user&.is_admin %>
   </h2>
 </div>
 
