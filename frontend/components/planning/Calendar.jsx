@@ -2,7 +2,7 @@ import React from "react";
 import util from "tui-code-snippet";
 import Calendar from "tui-calendar";
 
-import * as TimeIntervalHelpers from "./TimeIntervalHelpers.js";
+import * as TimeIntervalHelpers from "./TimeIntervalHelpers";
 import { getHoursString } from "../utils/DateUtils";
 
 import moment from "moment-timezone";

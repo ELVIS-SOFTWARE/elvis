@@ -3,8 +3,8 @@ import FullCalendar from "@fullcalendar/react";
 import interactionPlugin from "@fullcalendar/interaction";
 import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import Modal from "react-modal";
-import PracticeMultiViewModal from "./PracticeMultiViewModel.js";
-import PracticeHandleSessions from "./PracticeHandleSessions.js";
+import PracticeMultiViewModal from "./PracticeMultiViewModel";
+import PracticeHandleSessions from "./PracticeHandleSessions";
 import {csrfToken} from "../../utils";
 import * as api from "../../../tools/api";
 

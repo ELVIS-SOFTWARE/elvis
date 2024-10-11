@@ -1,6 +1,6 @@
 import React from "react";
 import { fullname } from "../../tools/format";
-import ContactInfos from "./ContactInfos.js";
+import ContactInfos from "./ContactInfos";
 
 class FamilyMemberUser extends React.Component {
     constructor(props) {

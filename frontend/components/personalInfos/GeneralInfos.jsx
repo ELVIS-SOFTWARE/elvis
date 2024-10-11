@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 
-import NamePicker from "./NamePicker.js";
+import NamePicker from "./NamePicker";
 
 const moment = require("moment");
 require("moment/locale/fr");

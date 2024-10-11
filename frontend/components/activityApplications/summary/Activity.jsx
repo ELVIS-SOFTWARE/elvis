@@ -8,9 +8,9 @@ import ReactModal from "react-modal";
 import ReactTable from "react-table";
 
 import * as api from "../../../tools/api";
-import * as TimeIntervalHelpers from "../../planning/TimeIntervalHelpers.js";
+import * as TimeIntervalHelpers from "../../planning/TimeIntervalHelpers";
 import {csrfToken, FR_DATE_FORMAT, findAndGet, optionMapper} from "../../utils";
-import {radioValue} from "../../evaluation/question/radio_question.js";
+import {radioValue} from "../../evaluation/question/radio_question";
 import {PRE_APPLICATION_ACTION_LABELS, modalStyle, WEEKDAYS} from "../../../tools/constants.js";
 import {displayActivityRef, formatActivityHeadcount, occupationInfos, toAge} from "../../../tools/format";
 import WorkGroupEditor from "./WorkGroupEditor";

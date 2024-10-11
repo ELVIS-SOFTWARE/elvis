@@ -9,7 +9,7 @@ import {
     findAndGet,
     optionMapper,
     reactOptionMapper,
-} from "../utils/index.js";
+} from "../utils";
 
 require("moment/locale/fr");
 

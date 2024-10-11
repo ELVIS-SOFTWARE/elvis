@@ -3,7 +3,7 @@ import { array, object } from "prop-types";
 import moment from "moment";
 import _ from "lodash";
 
-import * as TimeIntervalHelpers from "./TimeIntervalHelpers.js";
+import * as TimeIntervalHelpers from "./TimeIntervalHelpers";
 import {
     fullnameWithAge,
     fullname,
@@ -14,7 +14,7 @@ import {
 import * as api from "../../tools/api";
 import { WEEKDAYS, INTERVAL_KINDS } from "../../tools/constants";
 import { makeDebounce } from "../../tools/inputs";
-import KindLegend from "../common/KindLegend.js";
+import KindLegend from "../common/KindLegend";
 import QuestionnaireModal from "./QuestionnaireModal";
 import SelectTeachers from "./SelectTeachers";
 

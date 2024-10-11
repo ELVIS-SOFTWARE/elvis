@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
-import Planning from "../planning/Planning.js";
+import Planning from "../planning/Planning";
 import moment from "moment";
 
 const TimePreferences = ({

@@ -1,6 +1,5 @@
-import _, {isDate} from "lodash";
+import _ from "lodash";
 import React from "react";
-import Select from "react-select";
 import ReactTableFullScreen from "../ReactTableFullScreen";
 import swal from "sweetalert2";
 import {makeDebounce} from "../../tools/inputs";
@@ -9,25 +8,28 @@ import {
     findAndGet,
     optionMapper,
     reactOptionMapper,
-} from "../utils/index.js";
-import BulkEditModal from "./BulkEditModal.js";
-import MessageModal from "./MessageModal.js";
-import SubPaymentList from "./SubPaymentList.js";
-import DateRangePicker from "../utils/DateRangePicker.js";
+} from "../utils";
+import MessageModal from "./MessageModal";
+import DateRangePicker from "../utils/DateRangePicker";
 import * as api from "../../tools/api";
-import * as DuePaymentStatus from '../utils/DuePaymentStatuses.js'
-import {UNPAID_ID} from "../utils/DuePaymentStatuses.js";
-
+import * as PaymentStatus from "../utils/PaymentStatuses";
 
 const moment = require("moment");
 require("moment/locale/fr");
 
-const FILTER_STORAGE_KEY = "general_due_payments_list_filters";
+const FILTER_STORAGE_KEY = "general_payments_list_filters";
+
+const PAYMENT_STATUS = {
+    VALIDATED: 1,
+    FAILED: 2,
+    PENDING: 3,
+    UNPAID: 4
+};
 
 const defaultTableProps = () => ({
     page: 0,
-    pageSize: 12,
-    sorted: [{id: "previsional_date"}],
+    pageSize: 11,
+    sorted: [{id: "cashing_date"}],
     filtered: [],
     resized: [],
     expanded: {},
@@ -35,12 +37,13 @@ const defaultTableProps = () => ({
 
 const NB_DISPLAYED_RECIPIENTS = 3;
 const MESSAGE_MODAL_ID = "messagesModal";
-const BULK_MODAL_ID = "bulkEditModal";
 
 const debounce = makeDebounce();
 
+const pageSizeOptions = [5, 10, 11, 15, 20, 50, 100];
+
 const requestData = (pageSize, page, sorted, filtered, format) => {
-    return fetch(`/due_payments/list${format ? `.${format}` : ""}`, {
+    return fetch(`/payments/list${format ? `.${format}` : ""}`, {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -67,8 +70,7 @@ const requestData = (pageSize, page, sorted, filtered, format) => {
                     data: data.payments,
                     pages: data.pages,
                     rowsCount: data.rowsCount,
-                    totalAmount: data.totalDueAmount,
-                    totalPaidAmount: data.totalPaidAmount,
+                    totalAmount: data.totalAmount,
                 };
             } else {
                 return data;
@@ -76,7 +78,7 @@ const requestData = (pageSize, page, sorted, filtered, format) => {
         });
 };
 
-class DuePaymentList extends React.Component {
+class PaymentList extends React.Component {
     constructor(props) {
         super(props);
 
@@ -86,13 +88,6 @@ class DuePaymentList extends React.Component {
                 ? JSON.parse(localStorageValue)
                 : defaultTableProps();
 
-        const duePaymentMethodsOptions = [
-            {
-                label: "Sans mode de règlement",
-                value: "null",
-            },
-            ..._.map(this.props.paymentMethods, reactOptionMapper()),
-        ];
 
         const columns = [
             {
@@ -111,8 +106,8 @@ class DuePaymentList extends React.Component {
                             e.target.checked
                                 ? this.setState({
                                     targets: this.state.data.map(r => r.id),
-                                    targetStatus: (this.state.data.filter(r => {return r.due_payment_status_id === DuePaymentStatus.UNPAID_ID})
-                                                                  .map(r => r.id)),
+                                    targetStatus: (this.state.data.filter(r => {return r.payment_status_id === PaymentStatus.UNPAID_ID})
+                                        .map(r => r.id)),
                                 })
                                 : this.setState({
                                     targets: [],
@@ -121,92 +116,15 @@ class DuePaymentList extends React.Component {
                         }
                     />
                 ),
-                Cell: d => (
-                    <input
-                        type="checkbox"
-                        checked={this.state.targets === "all" || this.state.targets.includes(d.original.id)}
-                        onChange={e => {
-                                this.updateTarget(d.original.id, e.target.checked, d.original.due_payment_status_id)
+                Cell: d => <input
+                            type="checkbox"
+                            checked={this.state.targets === "all" || this.state.targets.includes(d.original.id)}
+                            onChange={e => {
+                                    console.log(d);
+                                    this.updateTarget(d.original.id, e.target.checked, d.original.payment_status_id)
+                                }
                             }
-                        }
-                    />
-                ),
-            },
-            {
-                Header: "Validité",
-                id: "validity",
-                maxWidth: 50,
-                accessor: d => this.state.validityMap[d.id],
-                sortable: false,
-                Filter: ({filter, onChange}) => {
-                    const options = [
-                        {value: null, color: "white"},
-                        {value: "N", color: "#ff2e00"},
-                        {value: "NE", color: "#ffbf00"},
-                        {value: "E", color: "#57d500"},
-                    ];
-
-                    const value = options.find(
-                        o => o.value == (filter && filter.value)
-                    );
-
-                    return (
-                        <Select
-                            options={options}
-                            defaultValue={options[0]}
-                            value={value}
-                            onChange={v => onChange(v.value)}
-                            isSearchable={false}
-                            isMulti={false}
-                            getOptionLabel={() => "●"}
-                            styles={{
-                                option: (styles, {data}) => {
-                                    return {
-                                        ...styles,
-                                        color: data.color,
-                                        fontSize: "25px",
-                                    };
-                                },
-                                singleValue: (styles, {data}) => ({
-                                    ...styles,
-                                    color: data.color,
-                                    fontSize: "25px",
-                                }),
-                                dropdownIndicator: styles => ({
-                                    ...styles,
-                                    display: "none",
-                                }),
-                                indicatorSeparator: styles => ({
-                                    ...styles,
-                                    display: "none",
-                                }),
-                            }}
-                        />
-                    );
-                },
-                Cell: row => {
-                    let color = "";
-
-                    switch (row.value) {
-                        case "N":
-                            color = "#ff2e00";
-                            break;
-                        case "NE":
-                            color = "#ffbf00";
-                            break;
-                        case "E":
-                            color = "#57d500";
-                            break;
-                    }
-
-                    return (
-                        <div className="flex flex-center-start flex-center-justified">
-                            <span style={{color, fontSize: "25px"}}>
-                                &#x25cf;
-                            </span>
-                        </div>
-                    );
-                },
+                        />,
             },
             {
                 Header: "N°",
@@ -252,19 +170,24 @@ class DuePaymentList extends React.Component {
             },
             {
                 Header: "Statut",
-                id: "due_payment_status_id",
-                maxWidth: 100,
+                id: "payment_status_id",
+                maxWidth: 75,
                 className: "flex flex-center-justified",
-                accessor: d => d.due_payment_status_id,
+                accessor: d => d.payment_status_id,
                 Cell: c => this.renderStatus(c),
+                //filterable: true,
                 Filter: ({filter, onChange}) => (
                     <select
-                        onChange={event => onChange(event.target.value)}
+                        onChange={event => {
+                            console.log("Selected value:", event.target.value);
+                            onChange(event.target.value)
+                        }}
                         style={{width: "100%"}}
                         value={filter ? filter.value : ""}
                     >
-                        <option value=""/>
-                        {this.props.statuses.map(method => (
+                        <option value="all">Tous</option>
+                        <option value={0}>Aucun</option>
+                        {this.props.paymentStatuses.map(method => (
                             <option key={method.id} value={method.id}>
                                 {method.label}
                             </option>
@@ -273,14 +196,16 @@ class DuePaymentList extends React.Component {
                 ),
             },
             {
-                Header: "Date prévisionnelle",
-                id: "previsional_date",
-                width: 250,
-                accessor: d => moment(d.previsional_date).format("DD/MM/YYYY"),
+                Header: "Date encaissement",
+                id: "cashing_date",
+                width: 320,
+                accessor: p =>
+                    moment(p.cashing_date)
+                        .local()
+                        .format("DD/MM/YYYY"),
                 Filter: ({filter, onChange}) => {
-
-                    let start = _.get(filter, "value.start");
-                    let end = _.get(filter, "value.end");
+                    const start = _.get(filter, "value.start");
+                    const end = _.get(filter, "value.end");
 
                     return (
                         <React.Fragment>
@@ -294,51 +219,47 @@ class DuePaymentList extends React.Component {
                 },
             },
             {
-                Header: "Mode règlement échéance",
+                Header: "Mode règlement",
                 id: "payment_method_id",
-                maxWidth: 300,
-                accessor: d => {
+                sortable: false,
+                accessor: p => {
                     const pm = _.find(
                         this.props.paymentMethods,
-                        pm => pm.id == d.payment_method_id
+                        pm => pm.id == p.payment_method_id
                     );
-                    return pm ? pm.label : "#";
+
+                    return pm ? pm.label : `Aucun mode de règlement renseigné`;
                 },
-                sortable: false,
                 Filter: ({filter, onChange}) => (
-                    <Select
-                        options={duePaymentMethodsOptions}
-                        isMulti={true}
-                        isClearable={true}
-                        defaultValue={
-                            filter &&
-                            filter.value &&
-                            duePaymentMethodsOptions.filter(o =>
-                                filter.value.includes(o.value)
-                            )
-                        }
-                        onChange={v =>
-                            onChange((v.length && v.map(v => v.value)) || "")
-                        }
-                        styles={{
-                            option: base => ({
-                                ...base,
-                                textAlign: "left",
-                            }),
-                            dropdownIndicator: base => ({
-                                ...base,
-                                display: "none",
-                            }),
-                        }}
-                    />
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        style={{width: "100%"}}
+                        value={filter ? filter.value : ""}
+                    >
+                        <option key={-2} value=""/>
+                        <option key={-1} value="null">
+                            Sans mode de règlement
+                        </option>
+                        {_.orderBy(
+                            this.props.paymentMethods,
+                            pm => pm.label
+                        ).map(method => (
+                            <option key={method.id} value={method.id}>
+                                {method.label}
+                            </option>
+                        ))}
+                    </select>
                 ),
             },
             {
                 Header: "Payeur",
                 maxWidth: 175,
-                id: "payer_name",
+                id: "users.last_name",
                 Cell: props => {
-                    const user = _.get(props.original, "payment_schedule.user");
+                    const user = _.get(
+                        props.original,
+                        "due_payment.payment_schedule.user"
+                    );
                     return (
                         (user && (
                             <a href={`/payments/summary/${user.id}`}>
@@ -381,19 +302,19 @@ class DuePaymentList extends React.Component {
                     textAlign: "right",
                 },
                 accessor: d => `${d.amount || "?"} €`,
-                filterable: false,
+                filterable: true,
                 sortable: false,
             },
-            /* Retiré car plus utilisé */
+            // n'est plus utilisé depuis la mise en place de la nouvelle interface d'envoi de mail
             // {
             //     Header: "Actions",
             //     maxWidth: 75,
             //     id: "actions",
             //     filterable: false,
             //     sortable: false,
-            //     accessor: d => ({
-            //         userId: d.payment_schedule.payable_id,
-            //         mail: this.state.validityMap[d.id] !== "E",
+            //     accessor: p => ({
+            //         userId: p.due_payment.payment_schedule.payable_id,
+            //         mail: p.payment_status_id !== PAYMENT_STATUS.VALIDATED,
             //     }),
             //     Cell: d => (
             //         <div className="flex">
@@ -429,7 +350,6 @@ class DuePaymentList extends React.Component {
             page: 0,
             filter,
             loading: true,
-            validityMap: {},
             rowsCount: 0,
             totalAmount: 0,
             targets: [],
@@ -475,39 +395,9 @@ class DuePaymentList extends React.Component {
                 "json"
             ).then(res => {
                 if (!this.mounted) return;
-                const validityMap = _.reduce(
-                    res.data,
-                    (acc, due) => {
-                        let result = "N";
-
-                        if (due.payments.length) {
-                            const total = due.payments.reduce(
-                                (n, p) => parseFloat(p.adjusted_amount) + n,
-                                0
-                            );
-
-                            const difference = Math.abs(
-                                parseFloat(due.adjusted_amount) - total
-                            );
-
-                            if (difference >= 0.01) {
-                                result = "NE";
-                            } else {
-                                result = "E";
-                            }
-                        }
-
-                        return {
-                            ...acc,
-                            [due.id]: result,
-                        };
-                    },
-                    {}
-                );
 
                 this.setState({
                     ...res,
-                    validityMap,
                     loading: false,
                 });
             });
@@ -560,7 +450,7 @@ class DuePaymentList extends React.Component {
         document.body.removeChild(download);
     }
 
-     onCsvExport() {
+    onCsvExport() {
         this.setState({csv_export_loading: true})
         const filter = this.state.filter.filtered;
         let ids = [];
@@ -588,7 +478,7 @@ class DuePaymentList extends React.Component {
             });
         }
 
-        const url = `/due_payments/export?${searchParams.toString()}`
+        const url = `/payments/export?${searchParams.toString()}`
         fetch(url, {
             method: "GET",
             credentials: "same-origin",
@@ -605,9 +495,9 @@ class DuePaymentList extends React.Component {
         const to = _.uniq(
             this.state.data
                 .filter(
-                    ({id}) =>
+                    ({id, payment_status_id}) =>
                         this.state.targets.includes(id) &&
-                        this.state.validityMap[id] === "N"
+                        (payment_status_id === PAYMENT_STATUS.UNPAID || payment_status_id === PAYMENT_STATUS.PENDING)
                 )
                 .map(d => _.get(d, "payment_schedule.user.id"))
                 .filter(id => id)
@@ -660,7 +550,7 @@ class DuePaymentList extends React.Component {
     sendPaymentMail() {
         swal({
             title: "Envoyer un mail de relance",
-            text: "Voulez vous envoyer un mail de relance pour les paiements sélectionnés ?",
+            text: "Voulez vous envoyer un mail de relance pour les règlements sélectionnés ?",
             type: "question",
             showCancelButton: true,
             cancelButtonText: "Annuler",
@@ -679,7 +569,7 @@ class DuePaymentList extends React.Component {
                         });
                     })
                     .post(
-                        `/due_payments/send_payment_mail`,{
+                        `/payments/send_reglement_mail`,{
                             targets: this.state.targetStatus,
                         }
                     );
@@ -744,7 +634,7 @@ class DuePaymentList extends React.Component {
         }).then(res => {
             const newStatusId = res.value;
             if (newStatusId) {
-                fetch("/due_payments/edit_status", {
+                fetch("/payments/edit_status", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -755,17 +645,17 @@ class DuePaymentList extends React.Component {
                     if (!res.ok) swal("Echec", "", "error");
                     else
                         this.setState({
-                            data: this.state.data.map(dp => {
-                                if (dp.id === id) {
+                            data: this.state.data.map(p => {
+                                if (p.id == id) {
                                     return {
-                                        ...dp,
-                                        due_payment_status_id: parseInt(
+                                        ...p,
+                                        payment_status_id: parseInt(
                                             newStatusId
                                         ),
                                     };
                                 }
 
-                                return dp;
+                                return p;
                             }),
                         });
                 });
@@ -774,26 +664,23 @@ class DuePaymentList extends React.Component {
     }
 
     renderStatus(cell) {
-        if (cell.value) {
-            let status = this.props.statuses.find(s => s.id === cell.value);
-            let dueId = cell.original.id;
+        let status = this.props.paymentStatuses.find(s => s.id === cell.value);
+        let paymentId = cell.original.id;
 
-            return status ? (
-                <div
-                    className="badge"
-                    value={status.id}
-                    style={{
-                        background: status.color,
-                        color: "white",
-                        cursor: "pointer",
-                    }}
-                    onClick={e => this.promptStatusEdit(dueId, status.id)}
-                >
-                    {status.label}
-                </div>
-            ) : null;
-        }
-        return null;
+        return (
+            <div
+                className="badge"
+                value={status ? status.id : 0}
+                style={{
+                    background: status ? status.color : "grey",
+                    color: "white",
+                    cursor: "pointer",
+                }}
+                onClick={e => this.promptStatusEdit(paymentId, status.id)}
+            >
+                {status ? status.label : "Aucun"}
+            </div>
+        );
     }
 
     updateTarget(id, checked, status) {
@@ -803,7 +690,7 @@ class DuePaymentList extends React.Component {
                 targets: [...this.state.targets, id]
             });
 
-            if (status === DuePaymentStatus.UNPAID_ID)
+            if (status === PaymentStatus.UNPAID_ID)
                 this.setState({targetStatus: [...this.state.targetStatus, id]});
 
         } else {
@@ -821,21 +708,6 @@ class DuePaymentList extends React.Component {
         }
     }
 
-    updateStatusTarget(id, checked, status) {
-        if (checked) {
-            this.setState({
-                targetStatus: {
-                    ...this.state.targetStatus,
-                    [id]: status
-                }
-            })
-        } else {
-            this.setState({
-                targetStatus: _.omit(this.state.targetStatus, id)
-            })
-        }
-    }
-
     //Goto ActivitiesApplicationsList#bulkAlert
     targetsAlert() {
         const count =
@@ -846,7 +718,7 @@ class DuePaymentList extends React.Component {
             <div className="alert alert-info m-t-sm" style={{width: "100%"}}>
                 <div className="flex flex-space-between-justified flex-center-aligned">
                     <div id="targets-infos">
-                        Vous avez sélectionné {count} échéance(s){" "}
+                        Vous avez sélectionné {count} règlement(s){" "}
                         {this.state.targets.length === this.state.data.length &&
                         Math.max(
                             this.state.rowsCount - this.state.targets.length,
@@ -873,16 +745,9 @@ class DuePaymentList extends React.Component {
                                 data-toggle="modal"
                                 onClick={() => this.sendPaymentMail()}
                             >
-                                Envoyer un mail de relance aux paiements impayés
+                                Envoyer un mail de relance aux règlements impayés
                             </button>
                         ) : ""}
-                        <button
-                            className="btn btn-sm btn-primary m-r"
-                            data-toggle="modal"
-                            data-target={`#${BULK_MODAL_ID}`}
-                        >
-                            Édition de masse
-                        </button>
                         <button
                             className="btn btn-danger btn-sm"
                             onClick={this.bulkDelete.bind(this)}
@@ -899,12 +764,13 @@ class DuePaymentList extends React.Component {
         swal({
             title: "Confirmation",
             text:
-                "Voulez-vous supprimer toutes les échéances sélectionnées et les paiements associés ?",
+                "Voulez-vous supprimer tous les paiements sélectionnés ?",
             type: "question",
             showCancelButton: true,
+            cancelButtonText: "Annuler",
         }).then(r => {
             if (r.value) {
-                fetch("/due_payments/bulkdelete", {
+                fetch("/payments/bulkdelete", {
                     method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",
@@ -915,6 +781,7 @@ class DuePaymentList extends React.Component {
                     }),
                 })
                     .catch(res => console.error(res))
+                    .then(res => res.json())
                     .then(res => {
                         this.setState({
                             data: this.state.data.filter(
@@ -927,14 +794,90 @@ class DuePaymentList extends React.Component {
         });
     }
 
+    handleFilesDropped(files) {
+        const body = new FormData();
+        body.append("file", files[0]);
+
+        fetch("/payments/import_file", {
+            headers: {
+                "X-CSRF-Token": csrfToken,
+            },
+            method: "POST",
+            body,
+        })
+            .then(res => res.json())
+            .then(res => {
+                swal({
+                    type: "info",
+                    title: "Résultats",
+                    text: `Réussites : ${res.inserted}, Échecs : ${res.failed}, Ignorés : ${res.ignored}`,
+                }).then(() =>
+                    this.setState({
+                        failedCount: this.state.failedCount + res.failed,
+                    })
+                );
+            });
+    }
+
+    promptStatusEdit(id, statusId) {
+        swal({
+            title: "Édition du statut",
+            type: "warning",
+            confirmButtonText: "Valider",
+            input: "select",
+            inputOptions: _.zipObject(
+                this.props.statuses.map(status => status.id),
+                this.props.statuses.map(status => status.label)
+            ),
+            inputClass: "form-control",
+            inputValue: statusId,
+            showCancelButton: true,
+            cancelButtonText: "Annuler",
+        }).then(res => {
+            const newStatusId = res.value;
+            if (newStatusId) {
+                fetch("/payments/edit_status", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": csrfToken,
+                    },
+                    body: JSON.stringify({id, status: res.value}),
+                }).then(res => {
+                    if (!res.ok) swal("Echec", "", "error");
+                    else
+                        this.setState({
+                            data: this.state.data.map(p => {
+                                if (p.id === id) {
+                                    return {
+                                        ...p,
+                                        payment_status_id: parseInt(newStatusId),
+                                    };
+                                }
+
+                                return p;
+                            }),
+                        });
+                });
+            }
+        });
+    }
+
     render() {
         const {data, pages, loading} = this.state;
 
+        const duePaymentMethodsOptions = [
+            {
+                label: "Sans mode de règlement",
+                value: "null",
+            },
+            ..._.map(this.props.paymentMethods, reactOptionMapper()),
+        ];
 
         const totalRecipients = _.chain(this.state.data)
             .filter(
                 d =>
-                    this.state.validityMap[d.id] === "N" &&
+                    (d.payment_status_id === PAYMENT_STATUS.UNPAID || d.payment_status_id === PAYMENT_STATUS.PENDING) &&
                     (this.state.targets === "all" ||
                         this.state.targets.includes(d.id))
             )
@@ -967,17 +910,17 @@ class DuePaymentList extends React.Component {
                 "value"
             ) || "";
 
-        const events = []
+        const events = [];
 
         return (
             <div>
                 <div
-                    className="flex flex-space-between-justified flex-start-aligned reglement-table-header m-b-sm"
+                    className="flex flex-space-between-justified flex-center-aligned reglement-table-header m-b-sm"
                     style={{width: "100%"}}
                 >
                     <div className="flex flex-center-aligned">
                         <h2 className="m-r">
-                            {this.state.rowsCount} échéances
+                            {this.state.rowsCount} règlements
                         </h2>
                         <button
                             className="btn btn-primary m-r-sm"
@@ -988,7 +931,7 @@ class DuePaymentList extends React.Component {
                         </button>
                         <button
                             data-tippy-content="Réinitialiser les filtres"
-                            className="btn btn-primary m-r-sm"
+                            className="btn btn-primary m-r"
                             onClick={() => this.resetFilters()}
                         >
                             <i className="fas fa-times"></i>
@@ -1003,7 +946,6 @@ class DuePaymentList extends React.Component {
                         </button>
 
                         <select
-                            style={{width: "auto"}}
                             onChange={e =>
                                 this.handleChangeSeason(e.target.value)
                             }
@@ -1022,23 +964,28 @@ class DuePaymentList extends React.Component {
                         >
                             {this.state.csv_export_loading ? <i className="fas fa-circle-notch fa-spin"/> : <i className="fas fa-upload"/>}
                         </button>
+
+                        {/*todo: restore import functionnality... so do not delete */}
+                        {/*<a*/}
+                        {/*    href="/payments/failed_imports"*/}
+                        {/*    className="btn btn-primary"*/}
+                        {/*    data-tippy-content="Imports ratés"*/}
+                        {/*    style={{height: "100%"}}*/}
+                        {/*>*/}
+                        {/*    <i className="fas fa-eye m-r-sm"/>*/}
+                        {/*    {this.state.failedCount > 100*/}
+                        {/*        ? "100+"*/}
+                        {/*        : this.state.failedCount || "0"}*/}
+                        {/*</a>*/}
                     </div>
 
                     <div className="ibox-title-right">
-                        <span>
-                            Total échéances:{" "}
-                            {new Intl.NumberFormat("fr-FR", {
-                                style: "currency",
-                                currency: "EUR",
-                            }).format(this.state.totalAmount)}
-                        </span>
-
                         <span>
                             Total paiements:{" "}
                             {new Intl.NumberFormat("fr-FR", {
                                 style: "currency",
                                 currency: "EUR",
-                            }).format(this.state.totalPaidAmount)}
+                            }).format(this.state.totalAmount)}
                         </span>
                     </div>
                 </div>
@@ -1052,7 +999,7 @@ class DuePaymentList extends React.Component {
                         pages={pages}
                         loading={loading}
                         columns={this.state.columns}
-                        pageSizeOptions={[10, 12, 15, 20, 50, 100]}
+                        pageSizeOptions={pageSizeOptions}
                         page={
                             this.state.filter.page <= this.state.pages
                                 ? this.state.filter.page
@@ -1089,25 +1036,14 @@ class DuePaymentList extends React.Component {
                         pageText="Page"
                         ofText="sur"
                         rowsText="résultats"
-                        minRows={10}
+                        minRows={8}
                         SubComponent={row => {
-                            if (row.original.payments.length > 0) {
-                                return (
-                                    <SubPaymentList
-                                        data={row.original.payments}
-                                        original={row.original}
-                                        paymentMethods={
-                                            this.props.paymentMethods
-                                        }
-                                        locations={this.props.locations}
-                                        minYear={this.props.minYear}
-                                        maxYear={this.props.maxYear}
-                                        statuses={this.props.paymentStatuses}
-                                    />
-                                );
-                            }
-
-                            return null;
+                            return (
+                                <SubDuePayment
+                                    data={row.original.due_payment}
+                                    paymentMethods={this.props.paymentMethods}
+                                />
+                            );
                         }}
                     />
                 </div>
@@ -1125,21 +1061,36 @@ class DuePaymentList extends React.Component {
                     }
                     onSend={() => this.sendReminderMail()}
                 />
-                <BulkEditModal
-                    id={BULK_MODAL_ID}
-                    onChange={(k, v) =>
-                        this.setState({
-                            bulkEdit: {
-                                ...this.state.bulkEdit,
-                                [k]: v,
-                            },
-                        })
-                    }
-                    onSubmit={() => this.submitBulkEdit()}
-                />
             </div>
         );
     }
 }
 
-export default DuePaymentList;
+function SubDuePayment({data, paymentMethods}) {
+    const paymentMethod = paymentMethods.find(
+        pm => pm.id === data.payment_method_id
+    );
+
+    return (
+        <table className="table table-striped">
+            <thead>
+            <tr>
+                <th>Numéro</th>
+                <th>Date prévisionnelle</th>
+                <th>Mode règlement</th>
+                <th>Montant</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{data.number}</td>
+                <td>{data.previsional_date}</td>
+                <td>{paymentMethod && paymentMethod.label}</td>
+                <td>{data.adjusted_amount}</td>
+            </tr>
+            </tbody>
+        </table>
+    );
+}
+
+export default PaymentList;

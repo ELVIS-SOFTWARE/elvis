@@ -2,7 +2,7 @@ import React, {Fragment} from "react";
 import {array, bool, object} from "prop-types";
 import _ from "lodash";
 
-import * as TimeIntervalHelpers from "./TimeIntervalHelpers.js";
+import * as TimeIntervalHelpers from "./TimeIntervalHelpers";
 import {
     fullnameWithAge,
     fullname,

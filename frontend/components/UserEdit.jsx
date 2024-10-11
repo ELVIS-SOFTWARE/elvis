@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
-import LevelInfos from "./personalInfos/LevelInfos.js";
+import LevelInfos from "./personalInfos/LevelInfos";
 import UserForm from "./userForm/UserForm";
 import TabbedComponent from "./utils/ui/tabs";
 import * as api from "../tools/api.js";

@@ -2,8 +2,8 @@ import React, {Fragment} from "react";
 import {useState} from "react";
 import _ from "lodash";
 
-import AdditionalStudentSelection from "./../AdditionalStudentSelection.js";
-import {frenchEnumeration} from "../utils/index.js";
+import AdditionalStudentSelection from "./../AdditionalStudentSelection";
+import {frenchEnumeration} from "../utils";
 import {Editor, EditorState, convertFromRaw, ContentState} from "draft-js";
 import WysiwygViewer from "../utils/WysiwygViewer";
 

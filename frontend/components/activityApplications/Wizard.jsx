@@ -6,9 +6,9 @@ require("moment/locale/fr");
 
 import StepZilla from "react-stepzilla";
 
-import ActivityChoice from "./ActivityChoice.js";
-import Evaluation from "./Evaluation.js";
-import Validation from "./Validation.js";
+import ActivityChoice from "./ActivityChoice";
+import Evaluation from "./Evaluation";
+import Validation from "./Validation";
 
 import UserForm from "../userForm/UserForm";
 
@@ -17,13 +17,13 @@ import TimePreferencesStep, {
     PLANNING_AND_PREFERENCES_MODE,
     PLANNING_MODE,
     PREFERENCES_MODE,
-} from "./TimePreferencesStep.js";
-import EvaluationIntervalChoice from "./EvaluationIntervalChoice.js";
+} from "./TimePreferencesStep";
+import EvaluationIntervalChoice from "./EvaluationIntervalChoice";
 import * as api from "../../tools/api.js";
 import {generateUserInfos, infosFromUser} from "../../tools/obj";
 import {toast} from "react-toastify";
-import ApplicationChangeQuestionnaire from "./ApplicationChangeQuestionnaire.js";
-import UserSearch from "./UserSearch.js";
+import ApplicationChangeQuestionnaire from "./ApplicationChangeQuestionnaire";
+import UserSearch from "./UserSearch";
 import {PRE_APPLICATION_ACTIONS} from "../../tools/constants";
 import Select from "react-select";
 import Swal from 'sweetalert2'

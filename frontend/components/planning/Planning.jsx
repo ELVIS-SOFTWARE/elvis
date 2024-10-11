@@ -9,20 +9,20 @@ import * as api from "../../tools/api";
 const moment = require("moment-timezone");
 require("moment/locale/fr");
 
-import ActivityDetailsModal from "./ActivityDetailsModal.js";
+import ActivityDetailsModal from "./ActivityDetailsModal";
 import SelectActivity from "./SelectActivity";
 
-import CustomCalendar from "./Calendar.js";
+import CustomCalendar from "./Calendar";
 import Modal from "react-modal";
-import RawPlanning from "./RawPlanning.js";
+import RawPlanning from "./RawPlanning";
 
 import Select from "react-select";
 
-import * as TimeIntervalHelpers from "./TimeIntervalHelpers.js";
-import MultiViewModal from "./MultiViewModal.js";
+import * as TimeIntervalHelpers from "./TimeIntervalHelpers";
+import MultiViewModal from "./MultiViewModal";
 import {csrfToken} from "../utils";
 import EvaluationModal from "./EvaluationModal";
-import CreateIntervalModal from "./CreateActivityModal.js";
+import CreateIntervalModal from "./CreateActivityModal";
 import RoomActivitiesListModal from "./RoomActivitiesListModal";
 
 const idGenerator = (function* () {

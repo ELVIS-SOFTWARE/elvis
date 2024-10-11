@@ -2,9 +2,9 @@ import React, {Fragment} from "react";
 import _, {toInteger} from "lodash";
 import Select from "react-select";
 import ErrorList from "../common/ErrorList";
-import * as TimeIntervalHelpers from "./TimeIntervalHelpers.js";
+import * as TimeIntervalHelpers from "./TimeIntervalHelpers";
 import {csrfToken, findAndGet, ISO_DATE_FORMAT, optionMapper, USER_OPTIONS} from "../utils";
-import YearlyCalendar from "./YearlyCalendar.js";
+import YearlyCalendar from "./YearlyCalendar";
 import TabbedComponent from "../utils/ui/tabs";
 import * as api from "../../tools/api";
 import {AttendanceControl} from '../PresenceSheet'
