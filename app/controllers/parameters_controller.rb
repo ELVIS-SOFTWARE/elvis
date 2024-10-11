@@ -283,6 +283,27 @@ class ParametersController < ApplicationController
     end
   end
 
+  def teachers_parameters_edit
+    @authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
+    @teacher_can_edit_planning = Parameter.get_value("planning.teacher_can_edit_planning", default: false)
+  end
+
+  def teachers_parameters_update
+    authorize_teachers = Parameter.find_or_create_by label: "activity_applications.authorize_teachers", value_type: "boolean"
+    authorize_teachers.value = (params[:authorize_teachers]&.to_s == "true").to_s
+    res = authorize_teachers.save
+
+    teacher_can_edit_planning = Parameter.find_or_create_by label: "planning.teacher_can_edit_planning", value_type: "boolean"
+    teacher_can_edit_planning.value = (params[:teacher_can_edit_planning]&.to_s == "true").to_s
+    teacher_can_edit_planning.save!
+
+    if res
+      MenuGenerator.regenerate_menus
+    end
+
+    render json: { success: res }
+  end
+
   private
 
   def set_base_parameters
@@ -297,21 +318,28 @@ class ParametersController < ApplicationController
                                     link: url_for(action: :school_parameters_edit, only_path: true)
                                   })
 
-    @parameters[:personnalisation].prepend({
-                                             title: "Emails",
-                                             text: "Paramétrez votre serveur d'envoi de mails, l'adresse de l'expéditeur et vos destinataires.",
-                                             link: url_for(action: :mails_parameters_edit, only_path: true)
-                                           },
-                                           {
-                                             title: "Exports CSV",
-                                             text: "Paramétrez vos exports CSV.",
-                                             link: url_for(action: :csv_parameters_edit, only_path: true)
-                                           },
-                                           {
-                                             title: "Notifications",
-                                             text: "Paramétrez et modifiez vos templates emails.",
-                                             link: url_for(controller: 'notification_templates', action: 'index', only_path: true)
-                                           })
+    @parameters[:personnalisation].prepend(
+      {
+        title: "Emails",
+        text: "Paramétrez votre serveur d'envoi de mails, l'adresse de l'expéditeur et vos destinataires.",
+        link: url_for(action: :mails_parameters_edit, only_path: true)
+      },
+      {
+        title: "Exports CSV",
+        text: "Paramétrez vos exports CSV.",
+        link: url_for(action: :csv_parameters_edit, only_path: true)
+      },
+      {
+        title: "Notifications",
+        text: "Paramétrez et modifiez vos templates emails.",
+        link: url_for(controller: 'notification_templates', action: 'index', only_path: true)
+      },
+      {
+        title: "Professeurs",
+        text: "Gérez les permissions au planning et les informations affichées à l'élève.",
+        link: url_for(action: :teachers_parameters_edit, only_path: true)
+      }
+    )
 
   end
 end

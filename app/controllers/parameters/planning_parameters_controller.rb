@@ -6,13 +6,7 @@ class Parameters::PlanningParametersController < ApplicationController
       value_type: "boolean"
     )
 
-    teacher_can_edit_planning = Parameter.find_or_create_by(
-      label: "planning.teacher_can_edit_planning",
-      value_type: "boolean"
-    )
-
     @show_availabilities = show_availabilities.parse
-    @teacher_can_edit_planning = teacher_can_edit_planning.parse
     @school = School.first
 
     if @school.planning.nil?
@@ -48,16 +42,9 @@ class Parameters::PlanningParametersController < ApplicationController
       value_type: "boolean"
     )
 
-    teacher_can_edit_planning = Parameter.find_or_create_by(
-      label: "planning.teacher_can_edit_planning",
-      value_type: "boolean"
-    )
-
     show_availabilities.value = (params[:show_availabilities] == "1").to_s
-    teacher_can_edit_planning.value = (params[:teacher_edit] == "1").to_s
 
     show_availabilities.save
-    teacher_can_edit_planning.save
 
     respond_to do |format|
       format.html { redirect_to parameters_planning_parameters_path }

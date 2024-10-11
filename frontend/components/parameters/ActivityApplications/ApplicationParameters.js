@@ -8,14 +8,12 @@ export default function ApplicationParameters() {
     const [isLoading, setIsLoading] = useState(true);
     const [parameters, setParameters] = useState([]);
     const [selectedParameter, setSelectedParameter] = useState(0);
-    const [permitTeacherActivities, setPermitTeacherActivities] = useState(false);
 
     useEffect(() => {
         api.set()
             .success((data) => {
                 setSelectedParameter((data.defaultActivityApplicationStatus || {}).id || 0);
                 setParameters(data.activityApplicationStatusList);
-                setPermitTeacherActivities(data.permitTeacherActivities);
                 setIsLoading(false);
             })
             .error(() => {
@@ -43,8 +41,7 @@ export default function ApplicationParameters() {
                 });
             })
             .post("/set_activity_application_parameters", {
-                default_status_id: selectedParameter,
-                permit_teacher_activities: permitTeacherActivities
+                default_status_id: selectedParameter
             }, {});
     }
 
@@ -67,16 +64,6 @@ export default function ApplicationParameters() {
                         </select>
                         <p className="mt-3">Le statut sélectionné sera le statut par défaut pour les nouvelles inscriptions.</p>
                     </div>
-                </div>
-            </div>
-
-            <hr />
-
-            <div className="row">
-                <div className="col-md-5">
-                    <input type="checkbox" id="check" checked={permitTeacherActivities} onChange={() => setPermitTeacherActivities(!permitTeacherActivities)} />
-                    &nbsp;
-                    <label className="ml-2 font-normal" htmlFor="check">Permettre aux professeurs de gérer les demandes d'inscriptions qui leur sont liées</label>
                 </div>
             </div>
 

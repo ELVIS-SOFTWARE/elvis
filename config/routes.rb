@@ -537,9 +537,6 @@ Rails.application.routes.draw do
   post "/consent_documents/:id/has_consented", to: "consent_documents#has_consented"
 
 
-  namespace :parameters do
-  end
-
   get "/parameters", to: "parameters#index"
   get "/parameters/school", to: "parameters#school_parameters_edit"
   post "/parameters/school", to: "parameters#school_parameters_update"
@@ -549,6 +546,8 @@ Rails.application.routes.draw do
   post "/parameters/rules_of_procedure", to: "parameters#rules_parameters_update"
   get "/parameters/csv_export", to: "parameters#csv_parameters_edit"
   post "/parameters/csv_export", to: "parameters#csv_parameters_update"
+  get "/parameters/teachers", to: "parameters#teachers_parameters_edit"
+  post "/parameters/teachers", to: "parameters#teachers_parameters_update"
 
   get "/cgu", to: "cgu#index"
 
