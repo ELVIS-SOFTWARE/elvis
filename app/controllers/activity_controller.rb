@@ -20,6 +20,8 @@ class ActivityController < ApplicationController
   def list
     query = get_query_from_params
 
+    authorize! :manager, query
+
     respond_to do |format|
       format.json { render json: activities_list_json(query) }
       format.csv { render plain: activities_list_csv(query), content_type: "text/csv" }
@@ -28,6 +30,8 @@ class ActivityController < ApplicationController
 
   def update
     activity = Activity.find(params[:activity][:id])
+
+    authorize! :edit, activity
 
     Activity.transaction do
       activity.update!(activity_update_params)
@@ -101,6 +105,14 @@ class ActivityController < ApplicationController
     to_date = params[:toDate]
     intervals = []
 
+    authorize! :create, Activity.new(
+      time_interval: interval,
+      activity_ref: activity_ref,
+      room: room,
+      location: location,
+      instruments: activity_ref.instruments,
+      )
+
     # on cherche le jour du 1er cours de la saison 
     # on convertit d'abord le 1er jour de la saison (s.start, objet Time) en objet Date
     # start_date = Date.parse(season.start.to_s)
@@ -171,9 +183,13 @@ class ActivityController < ApplicationController
     activity_id = params[:id]
     desired_activity_id = params[:desired_activity_id]
 
-    activity = Activity.includes(:activity_ref).find(activity_id)
     desired_activity = DesiredActivity.includes({ activity_application: { user: [:adhesions] },
                                                   user: {} }).find(desired_activity_id)
+
+    authorize! :edit, desired_activity&.activity_application
+
+    activity = Activity.includes(:activity_ref).find(activity_id)
+
 
     error = nil
     user = desired_activity.activity_application.user
@@ -278,8 +294,11 @@ class ActivityController < ApplicationController
     activity_id = params[:id]
     desired_activity_id = params[:desired_activity_id]
 
-    activity = Activity.find(activity_id)
     desired_activity = DesiredActivity.find(desired_activity_id)
+
+    authorize! :edit, desired_activity&.activity_application
+
+    activity = Activity.find(activity_id)
 
     activity.remove_student(desired_activity_id)
 
@@ -294,11 +313,16 @@ class ActivityController < ApplicationController
     activity_id = params[:id]
     desired_activity_id = params[:desired_activity_id]
 
+    desired_activity = DesiredActivity.includes(:activity_application, :options).find(desired_activity_id)
+
+    authorize! :edit, desired_activity&.activity_application
+
     activity = Activity.includes(activity_instances: :time_interval).find(activity_id)
+
     Activities::AddStudent
       .new(activity_id, desired_activity_id, true)
       .execute
-    desired_activity = DesiredActivity.includes(:activity_application, :options).find(desired_activity_id)
+
 
     # Créating adhesion if non-existing
     user = desired_activity.activity_application.user
@@ -339,9 +363,12 @@ class ActivityController < ApplicationController
     activity_id = params[:id]
     desired_activity_id = params[:desired_activity_id]
 
+    desired_activity = DesiredActivity.includes(:options).find(desired_activity_id)
+
+    authorize! :edit, desired_activity&.activity_application
+
     activity = Activity.includes(activity_instances: :time_interval).find(activity_id)
     activity.remove_student(desired_activity_id, true)
-    desired_activity = DesiredActivity.includes(:options).find(desired_activity_id)
 
     render json: desired_activity, include: {
       options: {
@@ -361,6 +388,8 @@ class ActivityController < ApplicationController
 
   def update_instances
     @activity_ref = Activity.includes({ activity_instances: :time_interval }).find(params[:id])
+
+    authorize! :edit, @activity_ref
 
     date_format = "%F"
 
@@ -431,6 +460,9 @@ class ActivityController < ApplicationController
 
   def change_teacher
     @activity_ref = Activity.find(params[:id])
+
+    authorize! :edit, @activity_ref
+
     Activity.transaction do
       teachers_activity = @activity_ref.teachers_activities.where(user_id: params[:teacher_id]).first
       was_main = teachers_activity ? teachers_activity.is_main : false
@@ -441,6 +473,9 @@ class ActivityController < ApplicationController
 
   def change_is_main
     @activity_ref = Activity.find(params[:id])
+
+    authorize! :edit, @activity_ref
+
     Activity.transaction do
       teachers_activity = @activity_ref.teachers_activities.where(user_id: params[:teacher_id]).first
       teachers_activity.update(is_main: params[:teacher][:is_main])
@@ -451,6 +486,9 @@ class ActivityController < ApplicationController
 
   def add_teacher
     @activity_ref = Activity.find(params[:id])
+
+    authorize! :edit, @activity_ref
+
     Activity.transaction do
       new_teacher = @activity_ref.add_teacher(params[:teacher_id], false)
       @new_teacher = new_teacher.as_json
@@ -460,6 +498,9 @@ class ActivityController < ApplicationController
 
   def remove_teacher
     @activity_ref = Activity.find(params[:id])
+
+    authorize! :edit, @activity_ref
+
     Activity.transaction do
       @activity_ref.remove_teacher(params[:teacher_id])
     end
@@ -467,6 +508,8 @@ class ActivityController < ApplicationController
 
   def delete
     activity = Activity.includes(:time_interval).find(params[:id])
+
+    authorize! :destroy, activity
 
     teacher = activity.teacher
     season = Season.from_interval(activity.time_interval).first
@@ -499,6 +542,8 @@ class ActivityController < ApplicationController
 
   def users_list
     activity = Activity.find(params[:id])
+
+    authorize! :read, activity
 
     users = (activity.students + activity.options).map(&:user).compact.uniq
 
