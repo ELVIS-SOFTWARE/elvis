@@ -176,7 +176,7 @@ class ActivityRef < ApplicationRecord
 
     base_params.merge({
                         ignore_references: [ActivityRefKind],
-                        auto_deletable_references: [ActivityRefPricing],
+                        auto_deletable_references: [ActivityRefPricing, TeachersActivityRef],
                         success_message: success_message
                       })
   end
