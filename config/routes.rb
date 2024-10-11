@@ -62,6 +62,7 @@ Rails.application.routes.draw do
              controllers: { sessions: "sessions", registrations: "registrations", confirmations: "confirmations", passwords: "passwords" }, path: "u"
   devise_scope :user do
     get "/sign_up" => "registrations#new"
+    post "/check_uniqueness" => "registrations#check_uniqueness"
     patch "/confirm" => "confirmations#confirm"
     get "/confirm" => "confirmations#confirm"
     get "/pick_user/:id" => "sessions#pick_user"
