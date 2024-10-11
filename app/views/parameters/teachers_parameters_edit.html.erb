@@ -1,0 +1,21 @@
+<style>
+    .param {
+        margin-bottom: 5rem;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+  <h2>Paramétrage des droits des professeurs</h2>
+</div>
+
+<br/>
+
+<%=
+  react_component(
+    "editParameters/TeachersParameters",
+    {
+      teacher_can_edit_planning: @teacher_can_edit_planning,
+      authorize_teachers: @authorize_teachers
+    }
+  )
+%>
