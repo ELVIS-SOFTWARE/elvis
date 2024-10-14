@@ -131,14 +131,14 @@ class ActivitiesApplicationsController < ApplicationController
       activity_application.update!(begin_at: new_start_date)
     end
 
-    activity_application.user.activity_applications = activity_application
-                                                         .user
-                                                         .activity_applications
-                                                         .where(season_id: Season.current_apps_season&.id)
-                                                         .to_a
-                                                         .filter{|a|
-                                                           Abilities::ActivityApplicationAbilities.is_activity_application_concern_any_activity_ref?(a, current_user.activity_refs.pluck(:id))
-                                                         }
+    tmp_activities_applications = activity_application
+                                    .user
+                                    .activity_applications
+                                    .where(season_id: Season.current_apps_season&.id)
+                                    .to_a
+                                    .filter{|a|
+                                      Abilities::ActivityApplicationAbilities.is_activity_application_concern_any_activity_ref?(a, current_user.activity_refs.pluck(:id))
+                                    }
 
     @activity_application = activity_application.as_json({
                                                            include: {
@@ -155,26 +155,6 @@ class ActivitiesApplicationsController < ApplicationController
                                                                  },
                                                                  instruments: {},
                                                                  adhesions: {},
-                                                                 activity_applications: {
-                                                                   include: {
-                                                                     pre_application_activity: {},
-                                                                     pre_application_desired_activity: {},
-                                                                     activity_application_status: {},
-                                                                     desired_activities: {
-                                                                       include: {
-                                                                         activity_ref: { include: [:activity_ref_kind] },
-                                                                         activity: {
-                                                                           include: {
-                                                                             time_interval: {},
-                                                                             teacher: {},
-                                                                             activity_ref: {},
-                                                                           },
-                                                                         },
-                                                                       },
-                                                                     },
-                                                                     season: {},
-                                                                   },
-                                                                 },
                                                                },
                                                              },
                                                              activity_refs: { include: [:activity_ref_kind] },
@@ -210,6 +190,28 @@ class ActivitiesApplicationsController < ApplicationController
     @activity_application["user"]["family_links_with_user"] = activity_application
                                                                 .user
                                                                 .family_links_with_user(activity_application.season)
+
+    @activity_application["user"]["activity_applications"] = tmp_activities_applications.as_json({
+                                                                                                   include: {
+                                                                                                     pre_application_activity: {},
+                                                                                                     pre_application_desired_activity: {},
+                                                                                                     activity_application_status: {},
+                                                                                                     desired_activities: {
+                                                                                                       include: {
+                                                                                                         activity_ref: { include: [:activity_ref_kind] },
+                                                                                                         activity: {
+                                                                                                           include: {
+                                                                                                             time_interval: {},
+                                                                                                             teacher: {},
+                                                                                                             activity_ref: {},
+                                                                                                           },
+                                                                                                         },
+                                                                                                       },
+                                                                                                     },
+                                                                                                     season: {},
+                                                                                                   },
+                                                                                                 }
+                                                                                               )
 
     respond_to do |format|
       format.html do
