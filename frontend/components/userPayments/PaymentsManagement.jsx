@@ -1267,6 +1267,41 @@ class PaymentsManagement extends React.Component {
         });
     }
 
+    sendUpcominPayment()
+    {
+        swal({
+            type: "question",
+            title: "Êtes-vous sûr ?",
+            text: "Envoyer les paiements à venir par email ?",
+            showCancelButton: true,
+            confirmButtonText: "Envoyer",
+            cancelButtonText: "Annuler",
+        })
+            .then((res) =>
+            {
+                if (res.value)
+                {
+                    swal.showLoading();
+
+                    api.set()
+                        .success(() =>
+                        {
+                            swal("Mail envoyé", "Le mail a bien été envoyé", "success");
+                        })
+                        .error((e) =>
+                        {
+                            console.error(e)
+
+                            swal("Erreur", "Une erreur est survenue", "error");
+                        })
+                        .post("/payments/send_upcoming_payment_mail", {
+                            season_id: this.state.season,
+                            user_id: this.props.user.id
+                        }, {});
+                }
+            });
+    }
+
     render() {
         const itemsForPayment = generateDataForPaymentSummaryTable({
             activities: this.state.activities,
@@ -1503,10 +1538,9 @@ class PaymentsManagement extends React.Component {
                 <div className="payment-page">
                     <div className="row wrapper border-bottom white-bg page-heading">
                         <div className="col-sm-12">
-                            <h2>Règlements
-                                concernant {this.props.user.first_name + " " + this.props.user.last_name}</h2>
+                            <h2>Règlements concernant {this.props.user.first_name + " " + this.props.user.last_name}</h2>
                             <div className="flex flex-space-between-justified">
-                                <div className="flex flex-column">
+                                <div className="flex flex-row">
                                     <button
                                         className="btn btn-primary m-t-sm"
                                         onClick={() => window.print()}
@@ -1514,6 +1548,16 @@ class PaymentsManagement extends React.Component {
                                         <i className="fas fa-print m-r-xs"/>
                                         Imprimer
                                     </button>
+
+                                    {
+                                        this.props.is_upcoming_payment_defined && itemsForPayment.every(i => i.pricingCategoryId != undefined || i.adhesionPriceId != undefined) && <button
+                                            className="btn btn-primary m-t-sm m-l-sm"
+                                            onClick={this.sendUpcominPayment.bind(this)}
+                                        >
+                                            <i className="fas fa-paper-plane m-r-xs"/>
+                                            Envoyer
+                                        </button>
+                                    }
                                 </div>
                                 <div>
                                     <p>

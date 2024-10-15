@@ -3,22 +3,17 @@ require_relative 'liquid_drops/activity_drop'
 class UpcomingPaymentMailer < ApplicationMailer
   prepend_view_path NotificationTemplate.resolver
 
-  def upcoming_payment(record, token, application)
+  # @param [User] user
+  # @param [Array] generatedDataForPaymentSummary
+  def upcoming_payment(user, season, generatedDataForPaymentSummary)
     name = School.first.name
-    @user = record
-    @confirmation_token = token
-    @application = LiquidDrops::ApplicationDrop.new(application.as_json(include: {
-      user: {
-        include: {
-          payment_schedules: {
-            include: {
-              due_payments: {}
-            }
-          }
-        }
-      },
-      season: {}
-    }))
+    @user = user
+    @confirmation_token = user.confirmation_token
+    @season_label = season.label
+
+    @total_due = generatedDataForPaymentSummary
+                  .reduce(0.0) { |acc, d| acc + Float(d[:due_total]) }
+                  .round(2)
 
     mail(to: @user.email, subject: "#{name} - Paiement à venir")
   end
@@ -29,8 +24,13 @@ class UpcomingPaymentMailer < ApplicationMailer
       'first_name' => @user.first_name.capitalize,
       'last_name' => @user.last_name.capitalize,
       'school_link' => get_button_school_link,
-      'activity' => @activity,
-      'application' => @application
+      'total_due' => @total_due,
+      'season_label' => @season_label,
+      # for compatibility with the old template
+      'application' => {
+        'season_label' => @season_label,
+        'total_all_due_payments' => @total_due,
+      },
     }
   end
 

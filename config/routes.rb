@@ -294,6 +294,7 @@ Rails.application.routes.draw do
   post "/payments/bulkedit", to: "payments#bulkedit"
   post "/payments/import_file", to: "payments#import_file"
   post "/payments/send_reglement_mail", to: "payments#send_reglement_mail"
+  post "/payments/send_upcoming_payment_mail", to: "payments#send_upcoming_payment_mail"
 
   post "/due_payments", to: "due_payment#create"
   post "/due_payments/bulkedit/:mode", to: "due_payment#bulkedit"
