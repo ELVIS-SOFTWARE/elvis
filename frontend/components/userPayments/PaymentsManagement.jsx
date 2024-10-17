@@ -228,7 +228,7 @@ function generateDataForPaymentSummaryTable({
 
     if ((packs || []).length > 0)
     {
-        const userPacks = packs.filter(p => p.user_id === user.id)
+        const userPacks = packs.filter(p => p)
 
         if (userPacks.length > 0)
         {
