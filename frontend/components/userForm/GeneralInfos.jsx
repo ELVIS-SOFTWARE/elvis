@@ -110,7 +110,7 @@ const GeneralInfos = ({
 
                     {birthday && <p className="help-block">{toAge(birthday)}</p>}
 
-                    {formErrors.birthday && <span className="text-danger">{MESSAGES[formErrors.birthday]}</span>}
+                    {(formErrors || {}).birthday && <span className="text-danger">{MESSAGES[formErrors.birthday]}</span>}
                 </div>
             )}
 

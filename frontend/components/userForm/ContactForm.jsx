@@ -234,7 +234,7 @@ class ContactForm extends React.PureComponent {
                     mutators={{ ...arrayMutators, changeUser, selectPhoneType, changeRelationshipDirection}}
                     initialValues={formattedInitialValues || {}}
                 >
-                    {({ handleSubmit, form }) => {
+                    {({ handleSubmit, form , errors}) => {
                         this.mutators = form.mutators
 
                         return <form onSubmit={handleSubmit} className="user-form">
@@ -244,6 +244,7 @@ class ContactForm extends React.PureComponent {
 
                             <GeneralInfos
                                 ignoreValidate={false}
+                                formErrors={errors}
                                 // displayGender
                                 displayBirthday />
 
