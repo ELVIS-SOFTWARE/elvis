@@ -1437,6 +1437,7 @@ class Planning extends React.Component {
                 {/* CALENDAR */}
                 <CustomCalendar
                     selectedPlannings={this.state.selectedPlannings}
+                    show_activity_code={this.props.show_activity_code}
                     intervals={intervals}
                     generic={this.props.generic}
                     user={this.props.user}

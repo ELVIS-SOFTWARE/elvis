@@ -78,4 +78,23 @@ class Parameters::PlanningParametersController < ApplicationController
       format.json { render json: { hours: hours } }
     end
   end
+
+  def show_activity_code
+    render json: { show_activity_code: Parameter.get_value("planning.show_activity_code", default: false) }
+  end
+
+  def update_show_activity_code
+    show_activity_code = Parameter.find_or_create_by(
+      label: "planning.show_activity_code",
+      value_type: "boolean"
+    )
+
+    show_activity_code.value = (params[:show_activity_code]&.to_s == "true").to_s
+
+    saved = show_activity_code.save!
+
+    respond_to do |format|
+      format.json { render json: { success: saved } }
+    end
+  end
 end

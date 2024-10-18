@@ -17,12 +17,12 @@ const EVENT_TYPES = [
     "clickSchedule",
 ];
 
-function getTimeTemplate(schedule, isMultiView, {isAllDay=false, isRoomCalendar=false, seasons=[], user=null,}) {
+function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=false, isRoomCalendar=false, seasons=[], user=null,}) {
     const html = [];
     const start = day(schedule.start.toUTCString());
 
     if (!isAllDay) {
-        if (schedule.activity && schedule.activity.group_name) {
+        if (schedule.activity && schedule.activity.group_name && show_activity_code ) {
             html.push(`<span>${schedule.activity.group_name}</span><br \>`)
         }
 
@@ -210,6 +210,7 @@ class CustomCalendar extends React.Component {
                     return getTimeTemplate(
                         schedule,
                         isMultiView,
+                        this.props.show_activity_code,
                         {
                             isAllDay:false,
                             isRoomCalendar: props.isRoomCalendar,
