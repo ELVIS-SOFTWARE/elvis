@@ -12,7 +12,7 @@ import InputSelect from "../common/InputSelect";
 import * as api from "../../tools/api";
 import {required} from "../../tools/validators";
 import {fullname, toLocaleDate, toDate} from "../../tools/format";
-import {changeUser, selectPhoneType, changeRelationshipDirection} from "../../tools/mutators";
+import { changeUser, selectPhoneType, changeRelationshipDirection, changeBirthDate } from "../../tools/mutators";
 import InlineYesNoRadio from "../common/InlineYesNoRadio";
 import Checkbox from "../common/Checkbox";
 
@@ -208,10 +208,10 @@ class WizardContactForm extends React.PureComponent {
                 <hr/>
                 <Form
                     onSubmit={onSubmit}
-                    mutators={{...arrayMutators, changeUser, selectPhoneType, changeRelationshipDirection}}
+                    mutators={{...arrayMutators, changeUser, selectPhoneType, changeRelationshipDirection, changeBirthDate}}
                     initialValues={formattedInitialValues || {}}
                 >
-                    {({handleSubmit, form, errors}) => {
+                    {({handleSubmit, form, errors, values}) => {
                         this.mutators = form.mutators
 
                         return <form onSubmit={handleSubmit} className="user-form">
@@ -222,6 +222,8 @@ class WizardContactForm extends React.PureComponent {
                             <GeneralInfos
                                 ignoreValidate={false}
                                 formErrors={errors}
+                                mutators={form.mutators}
+                                birthday={values.birthday}
                                 displayBirthday/>
 
                             <hr/>
