@@ -18,15 +18,22 @@ const EVENT_TYPES = [
 ];
 
 function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=false, isRoomCalendar=false, seasons=[], user=null,}) {
-    const html = [];
+    let html = [];
     const start = day(schedule.start.toUTCString());
 
+    // construct lines
+
+    let groupDisplayLine = ""; // groups
+    let hourDateDisplayLine = ""; // title
+    let locationTeacherDisplayLine = "<span class='ti-second-line'>"; // location
+    let studentTeacherDisplayLine = "<span class='ti-third-line'>"; // students
+
     if (!isAllDay) {
-        if (schedule.activity && schedule.activity.group_name && show_activity_code ) {
-            html.push(`<span>${schedule.activity.group_name}</span><br \>`)
+        if (schedule.activity && schedule.activity.group_name) {
+            groupDisplayLine += `<span>${schedule.activity.group_name}</span>`;
         }
 
-        html.push("<span>" + start.format("HH:mm") + "</span>");
+        hourDateDisplayLine += "<span>" + start.format("HH:mm") + "</span>";
     }
 
     let pattern = "";
@@ -39,39 +46,40 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
     }
 
     if(pattern)
-        html.push(`<div class="${pattern}"></div>`);
+        locationTeacherDisplayLine += `<div class="${pattern}"></div>`;
 
     if (schedule.isPrivate)
     {
-        html.push('<span class="calendar-font-icon ic-lock-b"></span>');
-        html.push(" Private");
+        locationTeacherDisplayLine += '<span class="calendar-font-icon ic-lock-b"></span>';
+        locationTeacherDisplayLine += " Private";
     }
     else
     {
         if (schedule.isReadOnly) {
-            html.push('<span class="calendar-font-icon ic-readonly-b"></span>');
+            locationTeacherDisplayLine += '<span class="calendar-font-icon ic-readonly-b"></span>';
         } else if (schedule.recurrenceRule) {
-            html.push('<span class="calendar-font-icon ic-repeat-b"></span>');
+            locationTeacherDisplayLine += '<span class="calendar-font-icon ic-repeat-b"></span>';
         } else if (schedule.attendees.length > 0) {
-            html.push('<span class="calendar-font-icon ic-user-b"></span>');
+            locationTeacherDisplayLine += '<span class="calendar-font-icon ic-user-b"></span>';
         } else if (schedule.location) {
-            html.push('<span class="calendar-font-icon ic-location-b"></span>');
+            locationTeacherDisplayLine += '<span class="calendar-font-icon ic-location-b"></span>';
         }
         const teacherName =
             schedule.teacher.first_name + " " + schedule.teacher.last_name;
         const roomName = schedule.location;
-        let secondLineDisplay = isRoomCalendar ? teacherName : roomName;
+
+        locationTeacherDisplayLine += isRoomCalendar ? teacherName : roomName;
+
         const seasonForLevel = TimeIntervalHelpers.getSeasonFromDate(
             schedule.start.toDate(),
             seasons
         );
 
-        let thirdLineDisplay = "";
         if (schedule.activity && schedule.activityInstance)
         {
             const students = TimeIntervalHelpers.omitInactiveStudents(schedule.activity.users, schedule.activityInstance.inactive_students);
             
-            thirdLineDisplay = (students.length === 1 ? `${students[0].first_name} ${students[0].last_name}` : students.length +
+            studentTeacherDisplayLine += (students.length === 1 ? `${students[0].first_name} ${students[0].last_name}` : students.length +
                     "/" +
                     schedule.activity.activity_ref.occupation_limit +
                     " - " +
@@ -103,34 +111,47 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
         if(schedule.raw.comment)
             title += '<i class="m-l-xs fa fa-comment"></i>';
 
+        hourDateDisplayLine += " - " + title;
+
         const coverTeacher = _.get(schedule.raw.activity_instance, "cover_teacher");
         if(coverTeacher)
         {
             const teacher = _.get(schedule.activity, "teacher");
 
             if(teacher && teacher.id === user.id) {
-                thirdLineDisplay = `Remplacé par <a style="color:inherit;font-weight:bold;" href="/users/${coverTeacher.id}">${coverTeacher.first_name} ${coverTeacher.last_name}</a>`;
+                studentTeacherDisplayLine += `Remplacé par <a style="color:inherit;font-weight:bold;" href="/users/${coverTeacher.id}">${coverTeacher.first_name} ${coverTeacher.last_name}</a>`;
             } else if(teacher && coverTeacher.id === user.id) {
-                thirdLineDisplay = `Remplaçant de <a style="color:inherit;font-weight:bold;" href="/users/${teacher.id}">${teacher.first_name} ${teacher.last_name}</a>`
+                studentTeacherDisplayLine = `Remplaçant de <a style="color:inherit;font-weight:bold;" href="/users/${teacher.id}">${teacher.first_name} ${teacher.last_name}</a>`
             }
-        }
-    
-        if (!isMultiView) {
-            html.push(
-                " - " +
-                    title +
-                    "</br><span class='ti-second-line'>" +
-                    secondLineDisplay +
-                    "</span></br><span class='ti-third-line'>" +
-                    thirdLineDisplay +
-                    "</span>"
-            );
-        } else {
-            html.push(" - " + title);
         }
     }
 
-    return html.join("");
+    locationTeacherDisplayLine += "</span>";
+    studentTeacherDisplayLine += "</span>";
+
+    // add lines to html
+
+    if(show_activity_code)
+        html.push(groupDisplayLine);
+
+    html.push(hourDateDisplayLine);
+
+    if(!isMultiView)
+    {
+        html.push(locationTeacherDisplayLine);
+
+        if(_.get(schedule, "activity.activity_ref.occupation_limit") === 1)
+        {
+            // append studentTeacherDisplayLine to first element of html tab
+            html = [studentTeacherDisplayLine, ...html];
+        }
+        else
+        {
+            html.push(studentTeacherDisplayLine);
+        }
+    }
+
+    return html.join("<br />");
 }
 
 class CustomCalendar extends React.Component {
