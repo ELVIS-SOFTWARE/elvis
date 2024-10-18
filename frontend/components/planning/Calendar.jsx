@@ -41,10 +41,13 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
     if(pattern)
         html.push(`<div class="${pattern}"></div>`);
 
-    if (schedule.isPrivate) {
+    if (schedule.isPrivate)
+    {
         html.push('<span class="calendar-font-icon ic-lock-b"></span>');
         html.push(" Private");
-    } else {
+    }
+    else
+    {
         if (schedule.isReadOnly) {
             html.push('<span class="calendar-font-icon ic-readonly-b"></span>');
         } else if (schedule.recurrenceRule) {
@@ -67,8 +70,6 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
         if (schedule.activity && schedule.activityInstance)
         {
             const students = TimeIntervalHelpers.omitInactiveStudents(schedule.activity.users, schedule.activityInstance.inactive_students);
-
-            console.log(students);
             
             thirdLineDisplay = (students.length === 1 ? `${students[0].first_name} ${students[0].last_name}` : students.length +
                     "/" +
@@ -103,7 +104,8 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
             title += '<i class="m-l-xs fa fa-comment"></i>';
 
         const coverTeacher = _.get(schedule.raw.activity_instance, "cover_teacher");
-        if(coverTeacher) {
+        if(coverTeacher)
+        {
             const teacher = _.get(schedule.activity, "teacher");
 
             if(teacher && teacher.id === user.id) {
