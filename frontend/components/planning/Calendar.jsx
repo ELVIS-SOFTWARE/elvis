@@ -20,6 +20,9 @@ const EVENT_TYPES = [
 function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=false, isRoomCalendar=false, seasons=[], user=null,}) {
     let html = [];
     const start = day(schedule.start.toUTCString());
+    const end = day(schedule.end.toUTCString());
+
+    const duration = end.diff(start, "minutes");
 
     // construct lines
 
@@ -140,7 +143,7 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
     {
         html.push(locationTeacherDisplayLine);
 
-        if(_.get(schedule, "activity.activity_ref.occupation_limit") === 1)
+        if(_.get(schedule, "activity.activity_ref.occupation_limit") === 1 && duration < 60)
         {
             // append studentTeacherDisplayLine to first element of html tab
             html = [studentTeacherDisplayLine, ...html];
