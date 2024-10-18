@@ -64,18 +64,21 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
         );
 
         let thirdLineDisplay = "";
-        if (schedule.activity && schedule.activityInstance) {
+        if (schedule.activity && schedule.activityInstance)
+        {
             const students = TimeIntervalHelpers.omitInactiveStudents(schedule.activity.users, schedule.activityInstance.inactive_students);
+
+            console.log(students);
             
-            thirdLineDisplay = students.length +
-                "/" +
-                schedule.activity.activity_ref.occupation_limit +
-                " - " +
-                TimeIntervalHelpers.levelDisplay(
-                    students,
-                    schedule.activity.activity_ref.id,
-                    seasonForLevel ? seasonForLevel.id : 0
-                ) +
+            thirdLineDisplay = (students.length === 1 ? `${students[0].first_name} ${students[0].last_name}` : students.length +
+                    "/" +
+                    schedule.activity.activity_ref.occupation_limit +
+                    " - " +
+                    TimeIntervalHelpers.levelDisplay(
+                        students,
+                        schedule.activity.activity_ref.id,
+                        seasonForLevel ? seasonForLevel.id : 0
+                    )) +
                 " - " +
                 TimeIntervalHelpers.averageAgeDisplay(TimeIntervalHelpers.averageAge(students));
         }
