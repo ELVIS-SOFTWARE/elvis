@@ -80,12 +80,12 @@ class Parameters::PlanningParametersController < ApplicationController
   end
 
   def show_activity_code
-    render json: { show_activity_code: Parameter.get_value("planning.show_activity_code", default: false) }
+    render json: { show_activity_code: Parameter.get_value("planning.card.show_activity_code", default: false) }
   end
 
   def update_show_activity_code
     show_activity_code = Parameter.find_or_create_by(
-      label: "planning.show_activity_code",
+      label: "planning.card.show_activity_code",
       value_type: "boolean"
     )
 
