@@ -184,7 +184,7 @@ class RawPlanning extends React.Component {
                                 className="col-lg-2 col-md-3 col-sm-6 col-xs-12"
                             >
                                 <h4 className="text-center bg-primary p-xs sticked">
-                                    {WEEKDAYS[day]}
+                                    {WEEKDAYS[parseInt(day) === 6 ? 0 : parseInt(day) + 1]}
                                 </h4>
 
                                 {this.renderDayColumns(data[day])}

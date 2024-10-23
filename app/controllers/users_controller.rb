@@ -281,7 +281,8 @@ class UsersController < ApplicationController
                                    addresses: { only: %i[id street_address country department postcode city] },
                                    levels: { include: %i[evaluation_level_ref activity_ref] }
                                  },
-                                 methods: :family_links_with_user
+                                 methods: :family_links_with_user,
+                                 except: %i[authentication_token]
                                })
     authorize! :read, @user
 

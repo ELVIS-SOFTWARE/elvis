@@ -39,7 +39,8 @@ module Activities
                         :levels => {
                             :include => :evaluation_level_ref,
                         }
-                    }
+                    },
+                    except: %i[authentication_token]
                 }
 
                 # Inactives

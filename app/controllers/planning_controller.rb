@@ -78,10 +78,11 @@ class PlanningController < ApplicationController
     redirect_to planning_path(current_user.planning.id) if Parameter.get_value("planning.teacher_can_edit_planning") == true
 
     @current_planning_id = User.find(current_user.id).planning.id
-    @teachers = User.teachers.order(:last_name, :first_name).includes(:teachers_activity_refs,
-                                                                      :planning).as_json(include: %i[
-                                                                                           teachers_activity_refs planning
-                                                                                          ])
+    @teachers = User
+                  .teachers
+                  .order(:last_name, :first_name)
+                  .includes(:teachers_activity_refs, :planning)
+                  .as_json(only: %i[id first_name last_name], include: %i[teachers_activity_refs planning])
 
     if params['id'].nil? || params['id'].to_i === current_user.planning.id
       planning = Plannings::GetSimplePlanning.new(current_user, params[:day]).execute

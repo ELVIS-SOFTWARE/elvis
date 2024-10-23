@@ -327,10 +327,10 @@ class SimplePlanning extends React.Component {
             questionnaire,
         } = this.state;
         const sortedData = Object.keys(data).sort();
-        sortedData.length > 0 ? sortedData.push(sortedData.shift()) : null
+        //sortedData.length > 0 ? sortedData.push(sortedData.shift()) : null
 
         const momentDay = moment(day);
-        const weekDay = moment(day).format("YYYY-MM-DD");;
+        const weekDay = moment(day).format("YYYY-MM-DD");
 
         const endOfWeek = moment(day).add(6, "d");
         const prevWeek = moment(day)

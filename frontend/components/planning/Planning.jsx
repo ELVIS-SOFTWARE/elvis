@@ -1508,7 +1508,11 @@ class Planning extends React.Component {
                             seasons={this.props.seasons}
                             evaluations_level_refs={this.props.evaluation_level_refs}
                             data={this.state.selectedIntervals.reduce((acc, i) => {
-                                const k = moment(i.start).isoWeekday() % 7;
+                                let k = moment(i.start).isoWeekday() % 7;
+
+                                // decale k of 1 to have monday as first day
+                                k = k === 0 ? 6 : k - 1;
+
                                 return {
                                     ...acc,
                                     [k]: (acc[k] && [...acc[k], i]) || [i],
