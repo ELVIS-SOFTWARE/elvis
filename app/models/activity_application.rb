@@ -59,12 +59,23 @@ class ActivityApplication < ApplicationRecord
 
   scope :for_activity_id, ->(activity_id) { joins(:desired_activities).where(desired_activities: { activity_id: activity_id }) }
 
+  attribute :mail_sent, :boolean
+
   def self.display_class_name(singular = true)
     singular ? "demande d'inscription" : "demandes d'inscription"
   end
 
   def self.class_name_gender
     return :F
+  end
+
+  def mail_sent
+    !mail_sent_at.nil?
+  end
+  def mail_sent=(value)
+    self.mail_sent_at = value ? Time.zone.now : nil
+
+    value
   end
 
   def add_activity(activity_ref_id, additional_student = nil)

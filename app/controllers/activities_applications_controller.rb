@@ -1067,7 +1067,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     force_resend = params[:forceResend] == 1
     unless force_resend
-      mails_to_send = mails_to_send.where(mail_sent: false)
+      mails_to_send = mails_to_send.where(mail_sent_at: nil)
     end
 
     mails_to_send.find_each(batch_size: 500) do |application|
@@ -1458,7 +1458,7 @@ class ActivitiesApplicationsController < ApplicationController
         )
       elsif prop == "mail_sent"
         if val != "all"
-          query = query.where(mail_sent: val)
+          query = val ? query.where.not(mail_sent_at: nil) : query.where(mail_sent_at: nil)
         end
       end
     end
