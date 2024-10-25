@@ -2,7 +2,7 @@ class ChangeMailSentFromBooleanToDate < ActiveRecord::Migration[6.1]
   def up
     add_column :activity_applications, :mail_sent_at, :datetime, default: nil
 
-    ActivityApplication.where(mail_sent: true).update_all(mail_sent_at: Time.zone.now)
+    ActivityApplication.where(mail_sent: true).update_all(mail_sent_at: Time.zone.at(0))
 
     remove_column :activity_applications, :mail_sent
   end

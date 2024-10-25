@@ -1,5 +1,5 @@
 import _ from "lodash";
-import React from "react";
+import React, { Fragment } from "react";
 import CommentSection from "./../../CommentSection";
 import Activity from "./Activity";
 import { toast } from "react-toastify";
@@ -56,6 +56,7 @@ class Summary extends React.Component
             referent: this.props.application.referent_id && _.find(this.props.admins, u => u.id == this.props.application.referent_id),
             suggestions: {},
             mail_sent: this.props.application.mail_sent,
+            mail_sent_at: this.props.application.mail_sent_at ? new Date(this.props.application.mail_sent_at) : null,
             sendingMail: false,
             desiredActivities: this.props.application.desired_activities,
             addedSelectedActivities: [],
@@ -556,7 +557,7 @@ class Summary extends React.Component
                     },
                 ).then(() =>
                 {
-                    this.setState({ mail_sent: true, sendingMail: false });
+                    this.setState({ mail_sent: true, mail_sent_at: new Date(), sendingMail: false });
                 });
             }
         });
@@ -1171,6 +1172,9 @@ class Summary extends React.Component
                                     {this.state.mail_sent
                                         ? "Mail envoyé"
                                         : "Pas envoyé"}
+                                    {
+                                        this.state.mail_sent_at && this.state.mail_sent_at.getFullYear() > 1970 && <Fragment><br/>le {this.state.mail_sent_at.toLocaleDateString()}</Fragment>
+                                    }
                                 </i>
                             </small>
                             <div style={{ minWidth: "175px" }} className="flex-column m-r-md">

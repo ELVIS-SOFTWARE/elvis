@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_24_141831) do
+ActiveRecord::Schema.define(version: 2024_10_23_094501) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -82,12 +82,12 @@ ActiveRecord::Schema.define(version: 2024_09_24_141831) do
     t.bigint "activity_application_status_id"
     t.datetime "deleted_at"
     t.bigint "season_id"
-    t.boolean "mail_sent", default: false
     t.datetime "status_updated_at"
     t.bigint "referent_id"
     t.datetime "stopped_at"
     t.datetime "begin_at"
     t.string "reason_of_refusal"
+    t.datetime "mail_sent_at"
     t.index ["activity_application_status_id"], name: "index_activity_applications_on_activity_application_status_id"
     t.index ["deleted_at"], name: "index_activity_applications_on_deleted_at"
     t.index ["user_id"], name: "index_activity_applications_on_user_id"
