@@ -78,5 +78,15 @@ class NotificationListener < BaseListener
       #   end
       # end
     end
+
+    event_ids << EventHandler.notification.upcoming_payment.subscribe(true) do |sender:, args:|
+      user = args[:user]
+      season = args[:season]
+      generatedDataForPaymentSummary = args[:generatedDataForPaymentSummary]
+
+      UpcomingPaymentMailer.upcoming_payment(user, season, generatedDataForPaymentSummary).deliver_later
+
+    end
+
   end
 end

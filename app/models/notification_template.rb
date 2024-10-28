@@ -18,4 +18,8 @@
 #
 class NotificationTemplate < ApplicationRecord
   store_templates
+
+  def self.find_by_path(path)
+    find_by path: path
+  end
 end

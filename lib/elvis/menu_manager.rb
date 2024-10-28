@@ -40,7 +40,35 @@ module Elvis
     # @param [String] role
     # @return [Array<Elvis::MenuManager::MenuItem>]
     def self.get_menu_with_role(menu, role)
-      get_menu(menu)&.select { |item| role.blank? || item.user_role == role || item.user_role.blank? }&.sort_by(&:position) || []
+      get_menu(menu)&.select { |item| role.blank? || "#{item.user_role}".include?(role) || item.user_role.blank? }&.sort_by(&:position) || []
+    end
+
+    def self.get_menu_with_roles(menu, roles)
+      get_menu(menu)&.map{|i| i.dup}&.select do |item|
+
+        item.instance_variable_set "@children", item.children.dup
+
+        item.each do |child|
+          unless menu_is_allowed?(roles, child.user_role)
+            item.remove!(child)
+          end
+        end
+
+        item.user_role.blank? || menu_is_allowed?(roles, item.user_role)
+      end
+        &.sort_by(&:position) || []
+    end
+
+    def self.menu_is_allowed?(roles, user_role)
+      return true if user_role.blank?
+
+      if user_role.start_with? "!!"
+        return false if roles.length != 1
+
+        return roles[0] == user_role[2..]
+      end
+
+      return roles.include?(user_role)
     end
 
     # search plugin item in all menu
@@ -129,8 +157,11 @@ module Elvis
       end
 
       def each(&block)
-        yield self
-        children { |child| child.each(&block) }
+        children do |child|
+          yield child
+
+          child.each(&block)
+        end
       end
 
       # Adds a child at first position

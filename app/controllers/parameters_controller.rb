@@ -142,7 +142,7 @@ class ParametersController < ApplicationController
     }
 
     ssl_tls = Parameter.get_value("app.email.ssl_tls")
-    @mail_settings['sslTls'] = true if ssl_tls=="true"
+    @mail_settings['sslTls'] = true if ssl_tls == "true"
 
   end
 
@@ -150,23 +150,23 @@ class ParametersController < ApplicationController
     settings = params[:mail_settings]
 
     user_name = Parameter.find_or_create_by label: "app.email.username", value_type: "string"
-    password  = Parameter.find_or_create_by label: "app.email.password", value_type: "string"
-    domain    = Parameter.find_or_create_by label: "app.email.domain"  , value_type: "string"
-    port      = Parameter.find_or_create_by label: "app.email.port"    , value_type: "integer"
-    redirect  = Parameter.find_or_create_by label: "app.email.redirect", value_type: "json"
-    from      = Parameter.find_or_create_by label: "app.application_mailer.default_from", value_type: "string"
+    password = Parameter.find_or_create_by label: "app.email.password", value_type: "string"
+    domain = Parameter.find_or_create_by label: "app.email.domain", value_type: "string"
+    port = Parameter.find_or_create_by label: "app.email.port", value_type: "integer"
+    redirect = Parameter.find_or_create_by label: "app.email.redirect", value_type: "json"
+    from = Parameter.find_or_create_by label: "app.application_mailer.default_from", value_type: "string"
     address = Parameter.find_or_create_by label: "app.email.address", value_type: "string"
     authentication = Parameter.find_or_create_by label: "app.email.authentication", value_type: "string"
     ssl_tls = Parameter.find_or_create_by label: "app.email.ssl_tls", value_type: "string"
 
-    user_name.value       = settings[:user_name]
-    domain.value          = settings[:domain]
-    port.value            = settings[:port]
-    redirect.value        = (settings[:redirect] || []).to_a.map(&:to_s).filter(&:present?).to_json
-    from.value            = settings[:from]
-    address.value         = settings[:address]
-    authentication.value  = settings[:authentication]
-    ssl_tls.value         = settings[:ssl_tls] ? "true" : "false"
+    user_name.value = settings[:user_name]
+    domain.value = settings[:domain]
+    port.value = settings[:port]
+    redirect.value = (settings[:redirect] || []).to_a.map(&:to_s).filter(&:present?).to_json
+    from.value = settings[:from]
+    address.value = settings[:address]
+    authentication.value = settings[:authentication]
+    ssl_tls.value = settings[:ssl_tls] ? "true" : "false"
 
     password.value = settings[:password].to_s.encrypt if settings.has_key?(:password) && !settings[:password].blank?
 
@@ -270,17 +270,38 @@ class ParametersController < ApplicationController
     settings = params[:csv_settings]
 
     separator = Parameter.find_or_create_by label: "app.csv_export.col_sep", value_type: "string"
-    separator.value  = settings[:col_sep]
+    separator.value = settings[:col_sep]
     separator.save!
 
     encoding = Parameter.find_or_create_by label: "app.csv_export.encoding", value_type: "string"
-    encoding.value   = settings[:encoding]
+    encoding.value = settings[:encoding]
     if Setting::ENCODINGS.include?(encoding.value)
       encoding.save!
       render json: { success: true }
     else
-      render status:500, json: { success: false }
+      render status: 500, json: { success: false }
     end
+  end
+
+  def teachers_parameters_edit
+    @authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
+    @teacher_can_edit_planning = Parameter.get_value("planning.teacher_can_edit_planning", default: false)
+  end
+
+  def teachers_parameters_update
+    authorize_teachers = Parameter.find_or_create_by label: "activity_applications.authorize_teachers", value_type: "boolean"
+    authorize_teachers.value = (params[:authorize_teachers]&.to_s == "true").to_s
+    res = authorize_teachers.save
+
+    teacher_can_edit_planning = Parameter.find_or_create_by label: "planning.teacher_can_edit_planning", value_type: "boolean"
+    teacher_can_edit_planning.value = (params[:teacher_can_edit_planning]&.to_s == "true").to_s
+    teacher_can_edit_planning.save!
+
+    if res
+      MenuGenerator.regenerate_menus
+    end
+
+    render json: { success: res }
   end
 
   private
@@ -297,15 +318,28 @@ class ParametersController < ApplicationController
                                     link: url_for(action: :school_parameters_edit, only_path: true)
                                   })
 
-    @parameters[:personnalisation].prepend({
-                                             title: "Emails",
-                                             text: "Paramétrez votre serveur d'envoi de mails, l'adresse de l'expéditeur et vos destinataires.",
-                                             link: url_for(action: :mails_parameters_edit, only_path: true)
-                                           },
-                                           {
-                                             title: "Exports CSV",
-                                             text: "Paramétrez vos exports CSV.",
-                                             link: url_for(action: :csv_parameters_edit, only_path: true)
-                                           })
+    @parameters[:personnalisation].prepend(
+      {
+        title: "Emails",
+        text: "Paramétrez votre serveur d'envoi de mails, l'adresse de l'expéditeur et vos destinataires.",
+        link: url_for(action: :mails_parameters_edit, only_path: true)
+      },
+      {
+        title: "Exports CSV",
+        text: "Paramétrez vos exports CSV.",
+        link: url_for(action: :csv_parameters_edit, only_path: true)
+      },
+      {
+        title: "Notifications",
+        text: "Paramétrez et modifiez vos templates emails.",
+        link: url_for(controller: 'notification_templates', action: 'index', only_path: true)
+      },
+      {
+        title: "Professeurs",
+        text: "Gérez les permissions au planning et les informations affichées à l'élève.",
+        link: url_for(action: :teachers_parameters_edit, only_path: true)
+      }
+    )
+
   end
 end

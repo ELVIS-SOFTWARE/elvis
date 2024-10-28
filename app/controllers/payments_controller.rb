@@ -32,57 +32,7 @@ class PaymentsController < ApplicationController
 
     user = User.find(params[:id])
 
-    @user = user
-
-    @desired_activities = {}
-    @activities = []
-
-    payers_by_season = get_payers_by_seasons_and_fill_desired_and_activities(user)
-
-    @activities.uniq!
-
-    @desired_activities = @desired_activities.transform_values do |des|
-      des.as_json({
-                    include: {
-                      pricing_category: {},
-                      discount: {
-                        only: :coupon,
-                        include: {
-                          coupon: {
-                            only: %i[id percent_off label]
-                          } } },
-                      activity_ref: {
-                        include: {
-                          activity_ref_pricing: {
-                            include: {
-                              to_season: {},
-                              from_season: {}
-                            }
-                          }
-                        }
-                      },
-                      activity_application: {
-                        include: {
-                          user: {
-                            include: {
-                              adhesions: {
-                                include: {
-                                  discount: {
-                                    only: :coupon,
-                                    include: {
-                                      coupon: {
-                                        only: %i[id percent_off label]
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          },
-                          season: {} } }
-                    }
-                  })
-    end.as_json
+    payers_by_season = generate_activities_data_for_action(user)
 
     include_payer_json = {
       methods: %i[class_name address phone_number]
@@ -111,46 +61,6 @@ class PaymentsController < ApplicationController
 
       updated_season_payer_info
     end
-
-    @activities = @activities
-    @options = user.get_list_of_options.as_json({
-                                                  include: {
-                                                    activity: {
-                                                      include: [:activity_ref],
-                                                      methods: :intended_nb_lessons
-                                                    },
-                                                    desired_activity: {
-                                                      include: {
-                                                        activity_application: {
-                                                          include: {
-                                                            user: { include: { adhesions: [] } }
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-                                                  }
-                                                })
-
-    @activities_json = @activities.as_json({
-                                             include: {
-                                               user: {},
-                                               activity: {
-                                                 include: {
-                                                   activity_ref: {
-                                                     include: {
-                                                       activity_ref_pricing: {
-                                                         include: {
-                                                           to_season: {},
-                                                           from_season: {}
-                                                         }
-                                                       }
-                                                     }
-                                                   }
-                                                 },
-                                                 methods: :intended_nb_lessons
-                                               }
-                                             }
-                                           })
 
     @schedule_statuses = PaymentScheduleStatus.all
     @schedules = {}
@@ -202,33 +112,6 @@ class PaymentsController < ApplicationController
     @payment_statuses = PaymentStatus.all.select(:id, :label, :color)
     @due_payment_statuses = DuePaymentStatus.all.select(:id, :label, :color)
 
-    # Récupérer tous les utilisateurs de toutes les @desired_activities
-    desired_activities_users = @desired_activities
-                                 .values
-                                 .flatten
-                                 .map { |da| da["activity_application"]["user"] }
-                                 .uniq
-
-    # récupérer les adhésions de tous ces utilisateurs
-    @adhesions = Adhesion.where(user_id: desired_activities_users.pluck('id'))
-                         .includes(user: {}, discount: { coupon: {} })
-                         .uniq
-                         .as_json({
-                                    include: {
-                                      user: {
-                                        only: %i[id first_name last_name]
-                                      },
-                                      discount: {
-                                        only: :coupon,
-                                        include: {
-                                          coupon: {
-                                            only: %i[id percent_off label]
-                                          }
-                                        }
-                                      }
-                                    }
-                                  })
-
     @adhesion_enabled = Adhesion.enabled
     @adhesion_prices = AdhesionPrice.all.as_json
 
@@ -269,6 +152,8 @@ class PaymentsController < ApplicationController
         }
       })
     end
+
+    @is_upcoming_payment_defined = NotificationTemplate.where(path: "upcoming_payment_mailer/upcoming_payment").any?
 
     respond_to do |format|
       format.html
@@ -985,6 +870,30 @@ class PaymentsController < ApplicationController
     end
   end
 
+  def send_upcoming_payment_mail
+    user = User.find(params[:user_id])
+    season = Season.find_by(id: params[:season_id]) || Season.current
+
+    generate_activities_data_for_action(user)
+
+    data = generate_data_for_payment_summary_table(season.id)
+
+    EventHandler.notification.upcoming_payment.trigger(
+                                                         sender: {
+                                                           controller_name: self.class.name,
+                                                         },
+                                                         args: {
+                                                           user: user,
+                                                           season: season,
+                                                           generatedDataForPaymentSummary: data
+                                                         }
+                                                       )
+
+    render json: {
+      status: "success"
+    }
+  end
+
   private
 
   # get all payers of family by seasons and add old payers who have due_payments
@@ -1247,5 +1156,128 @@ class PaymentsController < ApplicationController
     end
 
     data
+  end
+
+  def generate_activities_data_for_action(user)
+
+    @user = user
+
+    @desired_activities = {}
+    @activities = []
+
+    payers_by_season = get_payers_by_seasons_and_fill_desired_and_activities(user)
+
+    @activities.uniq!
+
+    @desired_activities = @desired_activities.transform_values do |des|
+      des.as_json({
+                    include: {
+                      pricing_category: {},
+                      discount: {
+                        only: :coupon,
+                        include: {
+                          coupon: {
+                            only: %i[id percent_off label]
+                          } } },
+                      activity_ref: {
+                        include: {
+                          activity_ref_pricing: {
+                            include: {
+                              to_season: {},
+                              from_season: {}
+                            }
+                          }
+                        }
+                      },
+                      activity_application: {
+                        include: {
+                          user: {
+                            include: {
+                              adhesions: {
+                                include: {
+                                  discount: {
+                                    only: :coupon,
+                                    include: {
+                                      coupon: {
+                                        only: %i[id percent_off label]
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          season: {} } }
+                    }
+                  })
+    end.as_json
+
+    @options = user.get_list_of_options.as_json({
+                                                  include: {
+                                                    activity: {
+                                                      include: [:activity_ref],
+                                                      methods: :intended_nb_lessons
+                                                    },
+                                                    desired_activity: {
+                                                      include: {
+                                                        activity_application: {
+                                                          include: {
+                                                            user: { include: { adhesions: [] } }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                })
+
+    @activities_json = @activities.as_json({
+                                             include: {
+                                               user: {},
+                                               activity: {
+                                                 include: {
+                                                   activity_ref: {
+                                                     include: {
+                                                       activity_ref_pricing: {
+                                                         include: {
+                                                           to_season: {},
+                                                           from_season: {}
+                                                         }
+                                                       }
+                                                     }
+                                                   }
+                                                 },
+                                                 methods: :intended_nb_lessons
+                                               }
+                                             }
+                                           })
+
+    # Récupérer tous les utilisateurs de toutes les @desired_activities
+    desired_activities_users = @desired_activities
+                                 .values
+                                 .flatten
+                                 .map { |da| da["activity_application"]["user"] }
+                                 .uniq
+
+    # récupérer les adhésions de tous ces utilisateurs
+    @adhesions = Adhesion.where(user_id: desired_activities_users.pluck('id'))
+                         .includes(user: {}, discount: { coupon: {} })
+                         .uniq
+                         .as_json({
+                                    include: {
+                                      user: {
+                                        only: %i[id first_name last_name]
+                                      },
+                                      discount: {
+                                        only: :coupon,
+                                        include: {
+                                          coupon: {
+                                            only: %i[id percent_off label]
+                                          }
+                                        }
+                                      }
+                                    }
+                                  })
+
+    payers_by_season
   end
 end

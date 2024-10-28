@@ -1,7 +1,8 @@
 <% @room_plannings.each do |room_id, time_intervals| %>
     <div class="clearfix">
         <h2><%= @rooms.select {|r| r.id == room_id.to_i}.first.label %></h2>
-        <%= react_component("planning/Planning", { room: @rooms.select {|r| r.id == room_id}.first, isTeacher: current_user.teacher?, isAdmin:  current_user.admin?, displayOnly: true, intervals: time_intervals, rooms: @rooms, modal: false, levels: @levels, locations: @locations, room_refs: @rooms, isRoom: true, planning: time_intervals, activity_refs: @activity_refs, teachers: @teachers}) %>
+        <%= react_component("planning/Planning", { show_activity_code: @show_activity_code, room: @rooms.select {|r| r.id == room_id}.first, isTeacher: current_user.teacher?, isAdmin:  current_user.admin?, displayOnly: true, intervals: time_intervals, rooms: @rooms, modal: false, levels: @levels, locations: @locations, room_refs: @rooms, isRoom: true, planning: time_intervals, activity_refs: @activity_refs, teachers: @teachers,
+                                                   currentUserId: current_user&.id}) %>
     </div>
 <% end %>
 

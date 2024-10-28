@@ -36,9 +36,8 @@ class Parameter < ApplicationRecord
   def self.get_value(label, default: nil)
     Rails.cache.fetch("parameter_#{label}", expires_in: 1.hour) do
       p = Parameter.find_by(label: label)
-      return default unless p
 
-      p.parse || default
-    end
+      p.nil? ? nil : p.parse
+    end || default
   end
 end

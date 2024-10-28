@@ -35,13 +35,14 @@ module ActivityApplications
         matches = Elvis::CacheUtils.cache_block_if_enabled("find_custom_suggestions_#{desired_activity.id}") do
           self.find_custom_suggestions(desired_activity)
         end
+
       end
 
       desired_activity = desired_activity || DesiredActivity.find(@desired_activity_id)
 
       application = desired_activity.activity_application
 
-      matches = matches&.to_a || []
+      matches = (matches&.to_a || []).compact
 
       # return with or without active/inactive students
       !@do_format ?
@@ -205,7 +206,7 @@ module ActivityApplications
         activities = sort_by_day_prev(activities, application)
       end
 
-      (activities + [desired_activity.activity]).uniq!
+      (activities + [desired_activity.activity]).uniq
     end
 
     def sort_by_teacher_prev(suggestions, application)
@@ -215,7 +216,7 @@ module ActivityApplications
         return suggestions
       else
         ordered_results = suggestions.sort_by do |s|
-          (s.is_a? Activity ? s : s.activity).teacher.id == prev_teacher.id ? -1 : 0
+          (s.is_a?(Activity) ? s : s.activity).teacher.id == prev_teacher.id ? -1 : 0
         end
 
         return ordered_results
@@ -229,7 +230,7 @@ module ActivityApplications
         return suggestions
       else
         ordered_results = suggestions.sort_by do |s|
-          (s.is_a? Activity ? s : s.activity).time_interval.start.strftime("%A") == prev_day ? -1 : 0
+          (s.is_a?(Activity) ? s : s.activity).time_interval.start.strftime("%A") == prev_day ? -1 : 0
         end
 
         return ordered_results

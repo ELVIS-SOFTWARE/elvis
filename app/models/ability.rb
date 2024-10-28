@@ -53,5 +53,9 @@ class Ability
     can :manage, ActivityApplication, user_id: attached_account_ids
     can :create, ActivityApplication, user_id: 0
     can :read, Planning, user: user
+
+    if user.is_teacher && Parameter.get_value("activity_applications.authorize_teachers", default: false)
+      Abilities::ActivityApplicationAbilities.teacher_can_edit_assigned_for_current_season(self, user)
+    end
   end
 end

@@ -141,7 +141,7 @@ class ActivityRef < ApplicationRecord
 
   def display_price(season = Season.current_apps_season || Season.current)
     Elvis::CacheUtils.cache_block_if_enabled("activity_ref_#{id}_price_#{season.id}", expires_in: Parameter.get_value("app.cache.max_price.duration") || 5.minutes) do
-      substitutable ? activity_ref_kind.max_prices.find_by(season_id: season.id)&.price : max_prices.find_by(season_id: season.id)&.price
+      (substitutable ? activity_ref_kind.max_prices.find_by(season_id: season.id)&.price : max_prices.find_by(season_id: season.id)&.price) || 0
     end
   end
 
@@ -176,7 +176,7 @@ class ActivityRef < ApplicationRecord
 
     base_params.merge({
                         ignore_references: [ActivityRefKind],
-                        auto_deletable_references: [ActivityRefPricing],
+                        auto_deletable_references: [ActivityRefPricing, TeachersActivityRef],
                         success_message: success_message
                       })
   end

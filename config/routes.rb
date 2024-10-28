@@ -53,6 +53,9 @@ Rails.application.routes.draw do
     get "planning_parameters", to: "planning_parameters#index"
     post "planning_parameters", to: "planning_parameters#update"
 
+    get "show_activity_code", to: "planning_parameters#show_activity_code"
+    post "show_activity_code", to: "planning_parameters#update_show_activity_code"
+
     get "hours_before_cancelling_activity", to: "planning_parameters#get_hours_before_cancelling_activity"
     post "hours_before_cancelling_activity", to: "planning_parameters#save_hours_before_cancelling_activity"
 
@@ -101,8 +104,8 @@ Rails.application.routes.draw do
   resources :activities_applications, path: "inscriptions"
   post "/inscriptions/create_import_csv", to: "activities_applications#create_import_csv"
   
-  get "/get_default_and_list_activity_application_statuses", to: "activities_applications#get_default_and_list_activity_application_statuses"
-  post "/set_default_activity_application_status", to: "activities_applications#set_default_activity_application_status"
+  get "/get_activity_application_parameters", to: "activities_applications#get_activity_application_parameters"
+  post "/set_activity_application_parameters", to: "activities_applications#set_activity_application_parameters"
 
   # ==================
   # COUPONS
@@ -167,6 +170,7 @@ Rails.application.routes.draw do
   patch "/inscriptions/:id/add_activities", to: "activities_applications#add_activities"
   post "/inscriptions/list", to: "activities_applications#list"
   post "/inscriptions/bulk", to: "activities_applications#bulk_update"
+  delete "/inscriptions", to: "activities_applications#bulk_delete"
 
   post "/inscriptions/:id/comment", to: "activities_applications#add_comment"
   patch "/inscriptions/:id/comment/edit/:comment_id", to: "activities_applications#edit_comment"
@@ -294,6 +298,7 @@ Rails.application.routes.draw do
   post "/payments/bulkedit", to: "payments#bulkedit"
   post "/payments/import_file", to: "payments#import_file"
   post "/payments/send_reglement_mail", to: "payments#send_reglement_mail"
+  post "/payments/send_upcoming_payment_mail", to: "payments#send_upcoming_payment_mail"
 
   post "/due_payments", to: "due_payment#create"
   post "/due_payments/bulkedit/:mode", to: "due_payment#bulkedit"
@@ -537,9 +542,6 @@ Rails.application.routes.draw do
   post "/consent_documents/:id/has_consented", to: "consent_documents#has_consented"
 
 
-  namespace :parameters do
-  end
-
   get "/parameters", to: "parameters#index"
   get "/parameters/school", to: "parameters#school_parameters_edit"
   post "/parameters/school", to: "parameters#school_parameters_update"
@@ -549,6 +551,8 @@ Rails.application.routes.draw do
   post "/parameters/rules_of_procedure", to: "parameters#rules_parameters_update"
   get "/parameters/csv_export", to: "parameters#csv_parameters_edit"
   post "/parameters/csv_export", to: "parameters#csv_parameters_update"
+  get "/parameters/teachers", to: "parameters#teachers_parameters_edit"
+  post "/parameters/teachers", to: "parameters#teachers_parameters_update"
 
   get "/cgu", to: "cgu#index"
 

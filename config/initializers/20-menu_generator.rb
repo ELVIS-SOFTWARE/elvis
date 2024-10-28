@@ -71,6 +71,21 @@ module MenuGenerator
       "",
       { caption: "Plannings", icon: "fa-calendar", user_role: "admin", position: 2 }
     )
+
+    #----------------------------------------------------------------------------------------
+
+    plannings.add(Elvis::MenuManager::MenuItem.new(
+      :admin_presence_sheet,
+      "users",
+      "presence_sheet",
+      { caption: "Présences", icon: "fa-check", user_role: "teacher", position: 1 }
+    ) do
+      { id: current_user&.id, date: Date.today.strftime("%F") }
+    end)
+
+    #----------------------------------------------------------------------------------------
+
+
     plannings.add(Elvis::MenuManager::MenuItem.new(
       :seasons,
       "seasons",
@@ -212,14 +227,21 @@ module MenuGenerator
       :planning,
       "planning",
       "show_simple",
-      { caption: "Mon planning", icon: "fa-calendar", user_role: "teacher", position: 0 }
+      { caption: "Mon planning", icon: "fa-calendar", user_role: "!!teacher", position: 0 }
+    )
+
+    teacher_inscriptions = Elvis::MenuManager::MenuItem.new(
+      :teachers_activities_applications,
+      "activities_applications",
+      "index",
+      { caption: "Demandes d'inscription", icon: "fa-table", user_role: "!!teacher", position: 1 }
     )
 
     attendences = Elvis::MenuManager::MenuItem.new(
       :users,
       "users",
       "presence_sheet",
-      { caption: "Présences", icon: "fa-check", user_role: "teacher", position: 1 }
+      { caption: "Présences", icon: "fa-check", user_role: "!!teacher", position: 2 }
     ) do
       { id: current_user&.id, date: Date.today.strftime("%F") }
     end
@@ -228,14 +250,14 @@ module MenuGenerator
       :plannings,
       "planning",
       "show_availabilities",
-      { caption: "Mes disponibilités", icon: "fa-calendar-check", user_role: "teacher", position: 3 }
+      { caption: "Mes disponibilités", icon: "fa-calendar-check", user_role: "!!teacher", position: 3 }
     )
 
     evaluation = Elvis::MenuManager::MenuItem.new(
       :evaluations,
       "users",
       "season_activities",
-      { caption: "Mes évaluations", icon: "fa-graduation-cap", user_role: "teacher", position: 4 }
+      { caption: "Mes évaluations", icon: "fa-graduation-cap", user_role: "!!teacher", position: 4 }
     ) do
       { id: current_user&.id }
     end
@@ -245,13 +267,14 @@ module MenuGenerator
       :planning_simulation,
       "users",
       "previsional_groups",
-      { caption: "Simulation de planning", icon: "fa-users", user_role: "teacher", position: 5 }
+      { caption: "Simulation de planning", icon: "fa-users", user_role: "!!teacher", position: 5 }
     ) do
       { id: current_user&.id }
     end
 
 
     Elvis::MenuManager.prepend_menu_item :side_menu, planning
+    Elvis::MenuManager.prepend_menu_item :side_menu, teacher_inscriptions if Parameter.get_value("activity_applications.authorize_teachers", default: false)
     Elvis::MenuManager.prepend_menu_item :side_menu, attendences
     Elvis::MenuManager.prepend_menu_item :side_menu, disponibility
     Elvis::MenuManager.prepend_menu_item :side_menu, evaluation

@@ -5,48 +5,53 @@ class ActivitiesApplicationsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:new]
 
   def index
-    activities_applications = ActivityApplication.includes(:activity_refs).all
-    authorize! :read, activities_applications
-    @seasons = Season.all_seasons_cached
+    authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
+
+    if authorize_teachers
+      raise CanCan::AccessDenied unless  current_user&.is_admin || current_user&.is_teacher
+    end
 
     season = Season.current_apps_season
+    @admins = User.admins.as_json only: %i[id first_name last_name full_name]
 
-    @admins = User.admins
+    if current_user.is_admin
+      @seasons = Season.all_seasons_cached
 
-    @adherent_count = Payment
-                        .joins(due_payment: :payment_schedule)
-                        .where({
-                                 payment_status_id: nil,
-                                 due_payments: {
-                                   number: 0,
-                                   payment_schedules: {
-                                     season_id: season&.id || 0,
+      @adherent_count = Payment
+                          .joins(due_payment: :payment_schedule)
+                          .where({
+                                   payment_status_id: nil,
+                                   due_payments: {
+                                     number: 0,
+                                     payment_schedules: {
+                                       season_id: season&.id || 0,
+                                     },
                                    },
-                                 },
-                               })
-                        .map(&:adjusted_amount)
-                        .compact
-                        .sum.to_i / 15
+                                 })
+                          .map(&:adjusted_amount)
+                          .compact
+                          .sum.to_i / 15
 
-    # User.joins(:activity_applications).where(activity_applications: { season_id: season.id }).uniq.count
-    @applications_count = ActivityApplication.where(season: season).count
-    @applications_to_process = ActivityApplication.where(season: season)
-                                                  .joins(:activity_application_status)
-                                                  .merge(
-                                                    ActivityApplicationStatus.where(id: ActivityApplicationStatus::TREATMENT_PENDING_ID)
-                                                  ).count
-    @processing_applications_count = ActivityApplication.where(season: season)
-                                                        .joins(:activity_application_status)
-                                                        .merge(
-                                                          # ActivityApplicationStatus.where("label != ? AND label != ? AND label != ?", "Cours attribué", "Arrêté",
-                                                          #                                 "En attente de traitement")
-                                                          ActivityApplicationStatus.where.not(id: [ActivityApplicationStatus::TREATMENT_PENDING_ID, ActivityApplicationStatus::STOPPED_ID, ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID])
-                                                        ).count
+      # User.joins(:activity_applications).where(activity_applications: { season_id: season.id }).uniq.count
+      @applications_count = ActivityApplication.where(season: season).count
+      @applications_to_process = ActivityApplication.where(season: season)
+                                                    .joins(:activity_application_status)
+                                                    .merge(
+                                                      ActivityApplicationStatus.where(id: ActivityApplicationStatus::TREATMENT_PENDING_ID)
+                                                    ).count
+      @processing_applications_count = ActivityApplication.where(season: season)
+                                                          .joins(:activity_application_status)
+                                                          .merge(
+                                                            # ActivityApplicationStatus.where("label != ? AND label != ? AND label != ?", "Cours attribué", "Arrêté",
+                                                            #                                 "En attente de traitement")
+                                                            ActivityApplicationStatus.where.not(id: [ActivityApplicationStatus::TREATMENT_PENDING_ID, ActivityApplicationStatus::STOPPED_ID, ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID])
+                                                          ).count
 
-    @processed_applications_count = ActivityApplication.where(season: season)
-                                                       .joins(:activity_application_status)
-                                                       .merge(ActivityApplicationStatus.where(id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::STOPPED_ID]))
-                                                       .count
+      @processed_applications_count = ActivityApplication.where(season: season)
+                                                         .joins(:activity_application_status)
+                                                         .merge(ActivityApplicationStatus.where(id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID, ActivityApplicationStatus::STOPPED_ID]))
+                                                         .count
+    end
 
     # activity_refs = ActivityRef.all.reject { |ar| ar.activity_type == "child" || ar.activity_type == "cham" }.uniq(&:kind)
     # activity_refs << ActivityRef.all.select { |ar| ar.activity_type == "child" }
@@ -126,6 +131,15 @@ class ActivitiesApplicationsController < ApplicationController
       activity_application.update!(begin_at: new_start_date)
     end
 
+    tmp_activities_applications = activity_application
+                                    .user
+                                    .activity_applications
+                                    .where(season_id: Season.current_apps_season&.id)
+                                    .to_a
+                                    .filter{|a|
+                                      Abilities::ActivityApplicationAbilities.is_activity_application_concern_any_activity_ref?(a, current_user.activity_refs.pluck(:id))
+                                    }
+
     @activity_application = activity_application.as_json({
                                                            include: {
                                                              user: {
@@ -141,26 +155,6 @@ class ActivitiesApplicationsController < ApplicationController
                                                                  },
                                                                  instruments: {},
                                                                  adhesions: {},
-                                                                 activity_applications: {
-                                                                   include: {
-                                                                     pre_application_activity: {},
-                                                                     pre_application_desired_activity: {},
-                                                                     activity_application_status: {},
-                                                                     desired_activities: {
-                                                                       include: {
-                                                                         activity_ref: { include: [:activity_ref_kind] },
-                                                                         activity: {
-                                                                           include: {
-                                                                             time_interval: {},
-                                                                             teacher: {},
-                                                                             activity_ref: {},
-                                                                           },
-                                                                         },
-                                                                       },
-                                                                     },
-                                                                     season: {},
-                                                                   },
-                                                                 },
                                                                },
                                                              },
                                                              activity_refs: { include: [:activity_ref_kind] },
@@ -196,6 +190,28 @@ class ActivitiesApplicationsController < ApplicationController
     @activity_application["user"]["family_links_with_user"] = activity_application
                                                                 .user
                                                                 .family_links_with_user(activity_application.season)
+
+    @activity_application["user"]["activity_applications"] = tmp_activities_applications.as_json({
+                                                                                                   include: {
+                                                                                                     pre_application_activity: {},
+                                                                                                     pre_application_desired_activity: {},
+                                                                                                     activity_application_status: {},
+                                                                                                     desired_activities: {
+                                                                                                       include: {
+                                                                                                         activity_ref: { include: [:activity_ref_kind] },
+                                                                                                         activity: {
+                                                                                                           include: {
+                                                                                                             time_interval: {},
+                                                                                                             teacher: {},
+                                                                                                             activity_ref: {},
+                                                                                                           },
+                                                                                                         },
+                                                                                                       },
+                                                                                                     },
+                                                                                                     season: {},
+                                                                                                   },
+                                                                                                 }
+                                                                                               )
 
     respond_to do |format|
       format.html do
@@ -951,14 +967,15 @@ class ActivitiesApplicationsController < ApplicationController
     end
   end
 
-
   def create_import_csv
+    raise CanCan::AccessDenied unless current_user&.is_admin
+
     handler_class_name = case Parameter.get_value('activity_applications.importer_name')
-               when 'tes_importer'
-                  "ActivityApplications::TesImportHandler"
-               else
-                 nil
-               end
+                         when 'tes_importer'
+                           "ActivityApplications::TesImportHandler"
+                         else
+                           nil
+                         end
 
     render json: { error: "L'import de fichier d'inscriptions est désactivé" }, status: :unprocessable_entity and return if handler_class_name.nil?
 
@@ -988,6 +1005,10 @@ class ActivitiesApplicationsController < ApplicationController
                 ActivityApplication.where(id: params[:targets])
               end
 
+    entries.find_each(batch_size: 200) do |entry|
+      raise CanCan::AccessDenied unless can? :edit, entry
+    end
+
     edit_params = bulk_edit_application_params
 
     edit_params[:status_updated_at] = Time.now if edit_params[:activity_application_status_id]
@@ -1001,6 +1022,9 @@ class ActivitiesApplicationsController < ApplicationController
 
   def send_confirmation_mail
     application = ActivityApplication.find(params[:id])
+
+    authorize! :edit, application
+
     user = application.user
     activity = application.desired_activities.first.activity
 
@@ -1043,7 +1067,11 @@ class ActivitiesApplicationsController < ApplicationController
 
     force_resend = params[:forceResend] == 1
     unless force_resend
-      mails_to_send = mails_to_send.where(mail_sent: false)
+      mails_to_send = mails_to_send.where(mail_sent_at: nil)
+    end
+
+    mails_to_send.find_each(batch_size: 500) do |application|
+      raise CanCan::AccessDenied unless can? :manage, application
     end
 
     if mails_to_send.length == 0
@@ -1066,6 +1094,8 @@ class ActivitiesApplicationsController < ApplicationController
                                         activity_ref_id: params[:activity_ref_id],
                                       },
                                     }).first
+
+    authorize! :edit, activity_application
 
     next_season = Season.next
     default_status = ActivityApplicationStatus.find(ActivityApplicationStatus::TREATMENT_PENDING_ID)
@@ -1115,14 +1145,44 @@ class ActivitiesApplicationsController < ApplicationController
 
   def destroy
     activity_application = ActivityApplication.find(params[:id])
-    activity_application.desired_activities.each do |da|
-      Activity.find(da.activity_id).remove_student(da.id) if da.is_validated
-      additional_student = AdditionalStudent.find_by(desired_activity_id: da.id)
-      additional_student&.delete
-    end
-    activity_application.pre_application_activity ? activity_application.pre_application_activity.reset : nil
 
+    authorize! :destroy, activity_application
+
+    handle_related_records(activity_application)
     activity_application.destroy
+  end
+
+  def bulk_delete
+    targets = params[:targets]
+
+    if targets.blank? || !targets.is_a?(Array)
+      render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
+    end
+
+    restricted_statuses = [
+      ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID,
+      ActivityApplicationStatus::ACTIVITY_PROPOSED_ID,
+      ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID
+    ]
+
+    ActiveRecord::Base.transaction do
+      activities_application = ActivityApplication.where(id: targets)
+      activities_application.each do |activity_application|
+        if restricted_statuses.include?(activity_application.activity_application_status_id)
+          raise ActiveRecord::Rollback, "Les demandes dont le statut sont : proposition acceptée, cours proposé et cours attribué, ne peuvent être supprimées."
+        end
+
+        raise CanCan::AccessDenied unless can? :destroy, activity_application
+
+        handle_related_records(activity_application)
+      end
+
+      activities_application.destroy_all
+    end
+
+    render json: { success: true }, status: :ok
+  rescue ActiveRecord::Rollback => e
+    render json: { error: e.message }, status: :forbidden
   end
 
   def find_activity_suggestions
@@ -1136,6 +1196,9 @@ class ActivitiesApplicationsController < ApplicationController
 
   def add_comment
     application = ActivityApplication.includes(comments: [:user]).find(params[:id])
+
+    authorize! :edit, application
+
     content = params[:comment]
 
     application.comments << Comment.new(user_id: current_user.id, content: content)
@@ -1148,9 +1211,11 @@ class ActivitiesApplicationsController < ApplicationController
   def edit_comment
     content = params[:comment][:content]
 
-    Comment.find(params[:comment_id]).update(content: content)
-
     application = ActivityApplication.includes(comments: [:user]).find(params[:id])
+
+    authorize! :edit, application
+
+    Comment.find(params[:comment_id]).update(content: content)
 
     render json: application.comments, include: [:user]
   end
@@ -1159,6 +1224,8 @@ class ActivitiesApplicationsController < ApplicationController
     activity_ref_id = params[:activity_ref_id]
     activity_application = ActivityApplication.includes(:desired_activities).find(params[:id])
 
+    authorize! :edit, activity_application
+
     activity_application.add_activity(activity_ref_id)
 
     render json: activity_application.desired_activities
@@ -1166,6 +1233,8 @@ class ActivitiesApplicationsController < ApplicationController
 
   def add_activities
     activity_application = ActivityApplication.includes(:desired_activities).find(params[:id])
+
+    authorize! :edit, activity_application
 
     # Here, additionalStudents are indexed on their own id, because they already exists unless additional_students.nil?
 
@@ -1179,6 +1248,9 @@ class ActivitiesApplicationsController < ApplicationController
     activity_id = params[:activity_ref_id]
 
     activity_application = ActivityApplication.includes({ desired_activities: [:user] }).find(params[:id])
+
+    authorize! :edit, activity_application
+
     activity_application.remove_desired_activity_by_id(activity_id)
 
     render json: activity_application.desired_activities, include: [:user]
@@ -1186,6 +1258,8 @@ class ActivitiesApplicationsController < ApplicationController
 
   def update
     activity_application = ActivityApplication.find(params[:id])
+
+    authorize! :edit, activity_application
 
     ActivityApplication.transaction do
       p = application_update_params
@@ -1244,20 +1318,22 @@ class ActivitiesApplicationsController < ApplicationController
     })
   end
 
-  def get_default_and_list_activity_application_statuses
+  def get_activity_application_parameters
     render json: {
-      default: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID),
-      list: ActivityApplicationStatus.all,
+      defaultActivityApplicationStatus: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID),
+      activityApplicationStatusList: ActivityApplicationStatus.all.as_json(except: %i[created_at updated_at]),
     }
   end
 
-  def set_default_activity_application_status
+  def set_activity_application_parameters
     status = Parameter.find_or_create_by(
       label: "activityApplication.default_status",
       value_type: "integer"
     )
 
-    status.value = params[:status_id]
+    authorize! :edit, status
+
+    status.value = params[:default_status_id]
     res = status.save
 
     respond_to do |format|
@@ -1266,6 +1342,16 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   private
+
+  def handle_related_records(activity_application)
+    activity_application.desired_activities.each do |da|
+      Activity.find(da.activity_id).remove_student(da.id) if da.is_validated
+      additional_student = AdditionalStudent.find_by(desired_activity_id: da.id)
+      additional_student&.delete
+    end
+
+    activity_application.pre_application_activity&.reset
+  end
 
   def application_update_params
     params.require(:application).permit(:activity_application_status_id, :referent_id, :stopped_at, :begin_at)
@@ -1309,36 +1395,6 @@ class ActivitiesApplicationsController < ApplicationController
   def get_query_from_params(json_query = params)
     query = ActivityApplication.all
                                .includes(:activity_refs, :user, :season)
-
-    unless json_query[:sorted].nil?
-      order_string = nil
-      dir = json_query[:sorted][:desc] ? "desc" : "asc"
-
-      case json_query[:sorted][:id]
-      when "id"
-        order_string = "activity_applications.id #{dir}"
-      when "name"
-        order_string = "users.first_name || ' ' || users.last_name #{dir}"
-      when "date"
-        order_string = "activity_applications.created_at #{dir}"
-      when "adherent_number"
-        order_string = "users.adherent_number #{dir}"
-      when "age"
-        order_string = "extract(year from age(users.birthday)) #{dir}"
-        query = query.joins(:user)
-      when "level"
-        order_string = "(SELECT MIN(l.evaluation_level_ref_id) FROM levels l
-                WHERE l.user_id = users.id
-                AND l.activity_ref_id = activity_refs.id
-                AND l.season_id = activity_applications.season_id) #{dir}"
-        query = query.joins({ user: {}, activity_refs: {} })
-      when "referent_id"
-        order_string = "referent_id #{dir}"
-      end
-
-      order_sql = Arel.sql(order_string)
-      query = query.order(order_sql)
-    end
 
     json_query[:filtered].each do |filter|
       prop = filter[:id]
@@ -1402,9 +1458,50 @@ class ActivitiesApplicationsController < ApplicationController
         )
       elsif prop == "mail_sent"
         if val != "all"
-          query = query.where(mail_sent: val)
+          query = val ? query.where.not(mail_sent_at: nil) : query.where(mail_sent_at: nil)
         end
       end
+    end
+
+    unless current_user&.is_admin
+
+      user_activity_ref_ids = current_user.activity_refs.pluck(:id)
+
+      query = query.where(season_id: Season.current_apps_season.id)
+      query = query.joins(:desired_activities)
+                   .where(desired_activities: { activity_ref_id: user_activity_ref_ids })
+
+      #query = query.accessible_by(current_ability)
+    end
+
+    unless json_query[:sorted].nil?
+      order_string = nil
+      dir = json_query[:sorted][:desc] ? "desc" : "asc"
+
+      case json_query[:sorted][:id]
+      when "id"
+        order_string = "activity_applications.id #{dir}"
+      when "name"
+        order_string = "users.first_name || ' ' || users.last_name #{dir}"
+      when "date"
+        order_string = "activity_applications.created_at #{dir}"
+      when "adherent_number"
+        order_string = "users.adherent_number #{dir}"
+      when "age"
+        order_string = "extract(year from age(users.birthday)) #{dir}"
+        query = query.joins(:user)
+      when "level"
+        order_string = "(SELECT MIN(l.evaluation_level_ref_id) FROM levels l
+                WHERE l.user_id = users.id
+                AND l.activity_ref_id = activity_refs.id
+                AND l.season_id = activity_applications.season_id) #{dir}"
+        query = query.joins({ user: {}, activity_refs: {} })
+      when "referent_id"
+        order_string = "referent_id #{dir}"
+      end
+
+      order_sql = Arel.sql(order_string)
+      query = query.order(order_sql)
     end
 
     query
@@ -1418,7 +1515,14 @@ class ActivitiesApplicationsController < ApplicationController
               .per(filter[:pageSize])
 
     pages = query.total_pages
-    applications = query.as_json(include: {
+
+    activity_applications = query.to_a
+
+    activity_applications.each do |app|
+      raise Cancan::AccessDenied unless can? :read, app
+    end
+
+    applications = activity_applications.as_json(include: {
       activity_refs: {
         only: %i[id label kind],
       },
@@ -1442,7 +1546,6 @@ class ActivitiesApplicationsController < ApplicationController
       referent: {},
     },
                                  methods: :availabilities)
-    authorize! :read, applications
 
     {
       applications: applications,
@@ -1452,6 +1555,8 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def applications_list_csv(query)
+    authorize! :read, query.select(:id, :season_id, :desired_activity_id)
+
     CSV.generate nil, col_sep: ";" do |csv|
       csv << [
         "N° demande",
