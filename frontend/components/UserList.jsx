@@ -4,8 +4,8 @@ import _ from "lodash";
 const moment = require("moment");
 require("moment/locale/fr");
 
-import { csrfToken } from "./utils";
-import { makeDebounce } from "../tools/inputs";
+import {csrfToken} from "./utils";
+import {makeDebounce} from "../tools/inputs";
 import ReactTableFullScreen from "./ReactTableFullScreen";
 import * as api from "../tools/api";
 import swal from "sweetalert2";
@@ -72,7 +72,7 @@ class UserList extends React.Component {
     }
 
     fetchData(state, instance) {
-        this.setState({ loading: true, filter: state });
+        this.setState({loading: true, filter: state});
 
         debounce(() => {
             requestData(
@@ -156,20 +156,16 @@ class UserList extends React.Component {
             });
     }
 
-    sendConfirmationMail()
-    {
+    sendConfirmationMail() {
         api.set()
             .success((datas) => {
-                if(!datas || datas.length === 0)
-                {
+                if (!datas || datas.length === 0) {
                     swal({
                         title: `Tous les utilisateurs ${this.state.selected.length > 0 ? "sélectionnés" : ""} ont déjà confirmé leur compte`,
                         type: "warning",
                         confirmButtonText: "Ok"
                     });
-                }
-                else
-                {
+                } else {
                     swal({
                         title: `Les utilisateurs suivants ont reçu un mail de confirmation :`,
                         html: "<ul>" + datas.map(d => `<li>${d}</li>`).join("") + "</ul>",
@@ -188,8 +184,38 @@ class UserList extends React.Component {
             .post('/users/resend_confirmation', {ids: this.state.selected.length > 0 ? this.state.selected : this.state.data.map(d => d.id)});
     }
 
+    handleDeleteUser = () => {
+        api.set()
+            .success((data) => {
+                if (data.success) {
+                    swal({
+                        title: "Utilisateur supprimé",
+                        type: "success",
+                        confirmButtonText: "Ok"
+                    });
+                    this.fetchData(this.state.filter);
+                } else {
+                    swal({
+                        title: "Une erreur est survenue",
+                        type: "error",
+                        confirmButtonText: "Ok"
+                    });
+                }
+            })
+            .error((data) => {
+                swal({
+                    title: "Une erreur est survenue",
+                    type: "error",
+                    confirmButtonText: "Ok"
+                });
+            }
+            )
+            .del(`/destroy/User/${this.state.selected}`, {ids: this.state.selected});
+    };
+
+
     render() {
-        const { data, pages, loading } = this.state;
+        const {data, pages, loading} = this.state;
 
         const columns = [
             {
@@ -289,10 +315,10 @@ class UserList extends React.Component {
                 },
                 sortable: false,
                 filterable: !this.props.nofilter,
-                Filter: ({ filter, onChange }) => (
+                Filter: ({filter, onChange}) => (
                     <select
                         onChange={event => onChange(event.target.value)}
-                        style={{ width: "100%" }}
+                        style={{width: "100%"}}
                         value={filter ? filter.value : "all"}
                     >
                         <option value="all">Tous les utilisateurs</option>
@@ -309,10 +335,10 @@ class UserList extends React.Component {
                 Header: "Type de compte",
                 sortable: false,
                 filterable: true,
-                Filter: ({ filter, onChange }) => (
+                Filter: ({filter, onChange}) => (
                     <select
                         onChange={event => onChange(event.target.value)}
-                        style={{ width: "100%" }}
+                        style={{width: "100%"}}
                         value={filter ? filter.value : "all"}
                     >
                         <option value="">Tous les comptes</option>
@@ -364,7 +390,7 @@ class UserList extends React.Component {
                         );
                     }
 
-                    return <p />;
+                    return <p/>;
                 },
                 filterable: false,
             },
@@ -386,7 +412,7 @@ class UserList extends React.Component {
                                         href={`/planning/${props.original.planning.id}`}
                                         className="btn btn-xs btn-primary m-b-sm"
                                     >
-                                        <i className="fas fa-calendar" />
+                                        <i className="fas fa-calendar"/>
                                         &nbsp; Planning
                                     </a>
                                 ) : null}
@@ -401,16 +427,16 @@ class UserList extends React.Component {
                                 {
                                     anyActive(props.original.adhesions)
                                     || props.original['any_users_self_is_paying_for?'] ? (
-                                    <a
-                                        href={`/payments/summary/${props.original.id}`}
-                                        className="btn btn-xs btn-primary m-r-sm m-b-sm"
-                                    >
-                                        <i className="fas fa-euro-sign" />
-                                        &nbsp; Paiements
-                                    </a>
-                                ) : (
-                                    ""
-                                )}
+                                        <a
+                                            href={`/payments/summary/${props.original.id}`}
+                                            className="btn btn-xs btn-primary m-r-sm m-b-sm"
+                                        >
+                                            <i className="fas fa-euro-sign"/>
+                                            &nbsp; Paiements
+                                        </a>
+                                    ) : (
+                                        ""
+                                    )}
                             </div>
                         </div>
                     );
@@ -429,7 +455,7 @@ class UserList extends React.Component {
                         className="btn btn-primary m-r"
                         onClick={() => this.onCsvExport()}
                     >
-                        <i className="fas fa-upload m-r-sm" />
+                        <i className="fas fa-upload m-r-sm"/>
                         Exporter en CSV
                     </button>
 
@@ -437,7 +463,8 @@ class UserList extends React.Component {
                         Fusionner des doublons
                     </a>
 
-                    <button className="btn btn-primary m-r" href="/users/new" onClick={() => this.setState({showAttachAccountModal: true})}>
+                    <button className="btn btn-primary m-r" href="/users/new"
+                            onClick={() => this.setState({showAttachAccountModal: true})}>
                         <i className="fas fa-bezier-curve"></i>&nbsp;
                         Rattacher des utilisateurs
                     </button>
@@ -445,9 +472,18 @@ class UserList extends React.Component {
 
                     <button
                         data-tippy-content="Envoyer le mail de confirmation"
-                    className="btn btn-warning" onClick={this.sendConfirmationMail}>
-                        <i className="fas fa-envelope" />
+                        className="btn btn-warning m-r" onClick={this.sendConfirmationMail}>
+                        <i className="fas fa-envelope"/>
                     </button>
+
+                    {this.state.selected.length > 0 ? (
+                        <button
+                            data-tippy-content="Supprimer l'utilisateur sélectionné"
+                            className={"btn btn-danger m-r"} onClick={this.handleDeleteUser}>
+                            <i className="fas fa-trash"/>
+                        </button>
+                    ) : null}
+
                 </div>
 
                 <ReactTableFullScreen
@@ -459,9 +495,9 @@ class UserList extends React.Component {
                     loading={loading}
                     onFetchData={this.fetchData}
                     columns={columns}
-                    defaultSorted={[{ id: "adherent_number", desc: true }]}
+                    defaultSorted={[{id: "adherent_number", desc: true}]}
                     filterable
-                    defaultFiltered={[{ id: "role", value: this.props.filter }]}
+                    defaultFiltered={[{id: "role", value: this.props.filter}]}
                     defaultFilterMethod={(filter, row) => {
                         if (row[filter.id] != null) {
                             return row[filter.id]
@@ -492,7 +528,7 @@ class UserList extends React.Component {
                     <AttachAccount onSucess={() => {
                         this.setState({showAttachAccountModal: false});
                         this.fetchData(this.state.filter)
-                    }} />
+                    }}/>
                 </Modal>
             </div>
         );
