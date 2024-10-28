@@ -184,34 +184,56 @@ class UserList extends React.Component {
             .post('/users/resend_confirmation', {ids: this.state.selected.length > 0 ? this.state.selected : this.state.data.map(d => d.id)});
     }
 
-    handleDeleteUser = () => {
-        api.set()
-            .success((data) => {
-                if (data.success) {
-                    swal({
-                        title: "Utilisateur supprimé",
-                        type: "success",
-                        confirmButtonText: "Ok"
-                    });
-                    this.fetchData(this.state.filter);
-                } else {
-                    swal({
-                        title: "Une erreur est survenue",
-                        type: "error",
-                        confirmButtonText: "Ok"
-                    });
-                }
-            })
-            .error((data) => {
+   handleDeleteUser = () => {
+    const selectedUserIds = this.state.selected;
+    let successCount = 0;
+    let errorCount = 0;
+    const isSingleUser = selectedUserIds.length === 1;
+
+    swal({
+        title: `Supprimer ${isSingleUser ? "l'utilisateur sélectionné" : "les utilisateurs sélectionnés"}`,
+        html: `<h4>Cela supprimera ${isSingleUser ? "l'utilisateur, ses liens familiaux ainsi que son adhésion" : "les utilisateurs, leurs liens familiaux ainsi que leurs adhésions"}. Êtes-vous sûr ?</h4></br>
+               <p>Les utilisateurs associés seront détachés, et un email leur sera envoyé pour créer un mot de passe (si leur email est différent de celui de ce compte).</p>`,
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler"
+    }).then((result) => {
+        if (result.value) {
+            Promise.all(
+                selectedUserIds.map((id) =>
+                    api.set()
+                        .success(() => { successCount += 1; })
+                        .error(() => { errorCount += 1; })
+                        .del(`/destroy/User/${id}`)
+                )
+            ).then(() => {
+                const successMessage = successCount === 1 ?
+                    "1 utilisateur supprimé avec succès." :
+                    `${successCount} utilisateurs supprimés avec succès.`;
+                const errorMessage = errorCount > 0 ?
+                    `<p>${errorCount} erreur(s) rencontrée(s).</p>` :
+                    "";
+
                 swal({
-                    title: "Une erreur est survenue",
+                    title: "Suppression terminée",
+                    html: `<p>${successMessage}</p>${errorMessage}`,
+                    type: successCount > 0 ? "success" : "error",
+                    confirmButtonText: "Ok"
+                });
+                this.fetchData(this.state.filter);
+                this.setState({ selected: [] });
+            }).catch(() => {
+                swal({
+                    title: "Erreur",
+                    text: "Une erreur est survenue lors de la suppression de masse.",
                     type: "error",
                     confirmButtonText: "Ok"
                 });
-            }
-            )
-            .del(`/destroy/User/${this.state.selected}`, {ids: this.state.selected});
-    };
+            });
+        }
+    });
+};
 
 
     render() {
