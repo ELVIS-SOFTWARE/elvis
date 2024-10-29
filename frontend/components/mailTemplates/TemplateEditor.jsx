@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, {useState, useEffect, Fragment} from 'react';
 import ElvisEditor from "./ElvisEditor";
 import * as MergeTags from './MergeTags';
 import * as api from "../../tools/api";
@@ -90,12 +90,13 @@ export default function TemplateEditor() {
             ...MergeTags.APPLICATION_TAGS,
             ...MergeTags.PAYMENT_TAGS,
             ...MergeTags.REGLEMENTS_TAGS,
-            ...MergeTags.UTILS_TAGS
+            ...MergeTags.UTILS_TAGS,
+            ...MergeTags.SCHOOL_LOGO_TAGS,
         });
     }, [template]);
 
     if (loading) {
-        return <Fragment />;
+        return <Fragment/>;
     }
 
     return (
