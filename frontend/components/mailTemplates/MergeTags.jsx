@@ -12,27 +12,15 @@ export const APPLICATION_TAGS = {
     },
 
     applicationId: {
-        name: "ID de L'application",
+        name: "ID de la demande d'inscription",
         value: "{{application.id}}",
-        sample: "ID de l'application"
+        sample: "ID de la demande d'inscription"
     },
-
-    application_first_name: {
-        name: "Prénom de l'application",
-        value: "{{application.first_name}}",
-        sample: "Prénom de l'application"
-    },
-
-    application_last_name: {
-        name: "Nom de l'application",
-        value: "{{application.last_name}}",
-        sample: "Nom de l'application"
-    },
-
+    
     application_season_label: {
-        name: "Saison de l'application",
+        name: "Saison de la demande d'inscription",
         value: "{{application.season_label}}",
-        sample: "Saison de l'application"
+        sample: "Saison de la demande d'inscription"
     },
 
     application_total_all_due_payments: {
