@@ -8,6 +8,7 @@ export default function TemplateEditor()  {
     const [mergeTags, setMergeTags] = useState(null);
     const [loading, setLoading] = useState(true);
     const [template, setTemplate] = useState(null);
+    const [templateName, setTemplateName] = useState(null);
     const [event, setEvent] = useState(null);
 
     const fetchData = async () => {
@@ -17,6 +18,7 @@ export default function TemplateEditor()  {
                 setTemplate(res.template);
                 setEvent(res.event);
                 setLoading(false);
+                setTemplateName(res.template.name);
             })
             .error(res => {
                 swal("Une erreur est survenue lors de la récupération des templates", res.error, "error");
@@ -50,7 +52,7 @@ export default function TemplateEditor()  {
         return (
             <Fragment>
                 <div className="row wrapper border-bottom white-bg page-heading">
-                    <h1>Édition de templates</h1>
+                    <h1>{templateName}</h1>
                 </div>
 
                 <div className="col-lg-12 col-sm-12">
