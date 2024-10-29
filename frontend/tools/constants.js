@@ -112,6 +112,7 @@ export const MESSAGES = {
     err_at_least_one_address: "Pour continuer l'inscription, vous devez renseigner au moins une adresse postale.",
     err_postal_code: "Le code postal est invalide.",
     err_must_select_user: "Veuillez sélectionner un utilisateur avant de continuer.",
+    err_at_least_one_parent: "Pour continuer l'inscription, vous devez ajouter au moins un réprésentant légal.",
     err_must_choose_slot:"Veuillez choisir un créneau avant de continuer.",
     err_must_choose_activity:"Veuillez choisir une activité avant de continuer.",
     err_must_choose_teacher:"Veuillez choisir un professeur avant de continuer.",

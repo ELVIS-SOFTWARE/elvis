@@ -13,6 +13,8 @@ import {required} from "../../tools/validators";
 import arrayMutators from "final-form-arrays";
 import UserAvatar from "../UserAvatar";
 import WizardContactForm from "../userForm/WizardContactForm";
+import {toast} from "react-toastify";
+import {MESSAGES} from "../../tools/constants";
 
 /**
  * Class used because stepzilla doesn't support functional components for validation
@@ -67,8 +69,7 @@ export default class WizardUserSelectMember extends React.Component {
             this.updateMembersData();
     }
 
-    onAddMember(values)
-    {
+    onAddMember(values) {
         const newMembers = _.cloneDeep(this.state.members);
 
         const userToAdd = {
@@ -82,7 +83,7 @@ export default class WizardUserSelectMember extends React.Component {
         };
 
         // add the new member if it doesn't exist
-        if(newMembers.filter(m => (m.id != undefined && m.id === userToAdd.id) || (m.first_name === userToAdd.first_name && m.last_name === userToAdd.last_name && m.birthday === userToAdd.birthday)).length === 0)
+        if (newMembers.filter(m => (m.id != undefined && m.id === userToAdd.id) || (m.first_name === userToAdd.first_name && m.last_name === userToAdd.last_name && m.birthday === userToAdd.birthday)).length === 0)
             newMembers.push(userToAdd);
 
         this.setState({
@@ -125,6 +126,17 @@ export default class WizardUserSelectMember extends React.Component {
      * called by stepzilla to check if the form is validated
      * @returns {boolean}
      */
+
+    isUserAloneAndMinor() {
+        const {user} = this.props;
+        const {members} = this.state;
+
+        const isMinor = new Date().getFullYear() - new Date(user.birthday).getFullYear() < 18;
+        const isAlone = members.length === 1;
+
+        return isMinor && isAlone;
+    }
+
     isValidated() {
         const error = this.getErrors();
 
@@ -133,10 +145,17 @@ export default class WizardUserSelectMember extends React.Component {
             return false;
         }
 
+        if (this.isUserAloneAndMinor()) {
+            toast.error(MESSAGES.err_at_least_one_parent, {autoClose: 3000});
+            return false;
+        }
+
         this.props.onSelect(this.state.members[this.state.selected])
 
         return true;
     }
+
+
 
     completeUserWithOther(user, otherUser) {
         user.id = otherUser.id;
@@ -202,6 +221,8 @@ export default class WizardUserSelectMember extends React.Component {
             }
         });
 
+        const isSelectedMinor = members[selected] && (new Date().getFullYear() - new Date(members[selected].birthday).getFullYear() < 18);
+
         return <Fragment>
             <div className="application-form" style={{margin: 0}}>
                 <div className="row">
@@ -239,7 +260,7 @@ export default class WizardUserSelectMember extends React.Component {
                 </div>
 
                 {this.state.showError && this.state.error.members && <div className="row">
-                        <p className="text-danger">{this.state.error.members}</p>
+                    <p className="text-danger">{this.state.error.members}</p>
                 </div>}
 
                 <div className="row mb-4">
@@ -266,19 +287,20 @@ export default class WizardUserSelectMember extends React.Component {
                     />
                 </div>
 
-                {members.length > 0 && members[selected].id !== user.id && <Fragment>
+                {members.length > 1 && isSelectedMinor && <Fragment>
                     <div className="row">
                         <div className="col-md-6 p-0">
 
                             <div className="mb-4">
-                                <label style={{ color: "#003E5C" }}>Représentant légal <span className="text-danger">*</span></label>
+                                <label style={{color: "#003E5C"}}>Représentant légal <span
+                                    className="text-danger">*</span></label>
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}
                                     isMulti
                                     fieldForSelection="is_legal_referent"
                                     onChange={this.onFamilyLinkSelectorChange}
                                 />
-                                {this.state.showError && this.state.error.legal_referent && <div className="row">
+                                {this.state.showError && this.state.error.legal_referent && <div>
                                     <p className="text-danger">{this.state.error.legal_referent}</p>
                                 </div>}
                             </div>
@@ -291,7 +313,7 @@ export default class WizardUserSelectMember extends React.Component {
                                     onChange={this.onFamilyLinkSelectorChange}
                                 />
                                 {this.state.showError && this.state.error.to_call && <div className="row">
-                                        <p className="text-danger">{this.state.error.to_call}</p>
+                                    <p className="text-danger">{this.state.error.to_call}</p>
                                 </div>}
                             </div>
 
@@ -303,7 +325,7 @@ export default class WizardUserSelectMember extends React.Component {
                                     onChange={this.onFamilyLinkSelectorChange}
                                 />
                                 {this.state.showError && this.state.error.accompanying && <div className="row">
-                                        <p className="text-danger">{this.state.error.accompanying}</p>
+                                    <p className="text-danger">{this.state.error.accompanying}</p>
                                 </div>}
                             </div>
                         </div>
