@@ -61,7 +61,7 @@ class RemoveController < ApplicationController
           message: event.data[:args][:message],
           status: event.data[:args][:status]
         }
-      } if params[:ids].include?(obj_id)
+      } if ids.include?(obj_id)
     end
 
     while endedDestroyElements.size < elements.size
@@ -70,7 +70,7 @@ class RemoveController < ApplicationController
 
     render json: {
       message: "Suppression terminée",
-      success: endedDestroyElements.all? { |el| el[:data][:success] }.map { |el| el[:id] },
+      success: endedDestroyElements.filter { |el| el[:data][:success] }.map { |el| el[:id] },
       failed: endedDestroyElements.filter { |el| !el[:data][:success] },
     }
   end
