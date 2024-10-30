@@ -119,18 +119,18 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                 />
             )}
 
-                <div className="row  mb-4">
-                    <div className="col-xs-12 col-md-5 col-xl-6 pr-0">
-                        <Field
-                            label={"Adresse"}
-                            name={`${field}.street_address`}
-                            render={Input}
-                            validate={!ignoreValidate && required}
-                            required
-                        />
-                    </div>
-
-                    <div className="col-xs-12 col-md-2 col-sm-3 pr-0">
+            <div className="row  mb-4">
+                <div className="col-xs-12 col-md-6 pr-0">
+                    <Field
+                        label={"Adresse"}
+                        name={`${field}.street_address`}
+                        render={Input}
+                        validate={!ignoreValidate && required}
+                        required
+                    />
+                </div>
+                <div className="col-xs-12 col-md-6 pl-0">
+                    <div className="col-md-6 pr-0">
                         <Field
                             label={"Code Postal"}
                             name={`${field}.postcode`}
@@ -141,7 +141,7 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                         />
                     </div>
 
-                    <div className="col-xs-12 col-sm-4 col-md-3 col-xl-2">
+                    <div className="col-md-6">
                         <Field
                             label={"Ville"}
                             name={`${field}.city`}
@@ -150,18 +150,20 @@ export const AddressFields = ({ignoreValidate, fields, setSameAs, family, curren
                             required
                         />
                     </div>
-                    {fields.length > 1 ? (
-                        <div className="col-sm-12 col-lg-2 text-right" style={{marginTop: "2rem!important"}}>
-                            <button
-                                type="button"
-                                className="btn btn-sm btn-warning"
-                                onClick={() => fields.remove(i)}
-                            >
-                                <i className="fas fa-trash"/>
-                                {" Supprimer"}
-                            </button>
-                        </div>
-                    ) : null}
                 </div>
+
+                {fields.length > 1 ? (
+                    <div className="col-sm-12 col-lg-2 text-right" style={{marginTop: "2rem!important"}}>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-warning"
+                            onClick={() => fields.remove(i)}
+                        >
+                            <i className="fas fa-trash"/>
+                            {" Supprimer"}
+                        </button>
+                    </div>
+                ) : null}
+            </div>
         </div>
     ));

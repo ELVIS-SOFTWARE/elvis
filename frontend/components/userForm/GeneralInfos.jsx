@@ -15,17 +15,6 @@ const genders = [
     {value: "A", label: "Autre"},
 ];
 
-const CustomDateInput = ({ value, onClick }) => (
-    <input
-        type="text"
-        className="form-control"
-        style={{ backgroundColor: "white", borderRadius: "8px", color: "#00283B" }}
-        onClick={onClick}
-        value={value}
-        readOnly
-    />
-);
-
 const GeneralInfos = ({
                           displayBirthday,
                           displayGender,
@@ -115,7 +104,7 @@ const GeneralInfos = ({
                             else
                                 mutators.changeBirthDate(null);
                         }}
-                        customInput={<CustomDateInput />}
+                        className="form-control"
                         wrapperClassName="w-100"
                     />
 
