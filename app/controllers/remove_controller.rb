@@ -33,10 +33,12 @@ class RemoveController < ApplicationController
   def destroy_multiple
     ids = params[:ids] || []
 
+    # transform string to array if needed
     if ids.is_a?(String)
       ids = ids.split(',')
     end
 
+    # get all elements to destroy if authorized
     # @type [Array<ApplicationRecord>]
     elements = ids.length > 0 ? @classname.where(id: ids).accessible_by(current_ability, :destroy).to_a : []
 
@@ -44,6 +46,7 @@ class RemoveController < ApplicationController
 
     EventHandler.send("#{@classname.name}").destroy_ended
 
+    # update ids with only elements that are accessible
     ids = elements.map(&:id)
 
     endedDestroyElements = []
@@ -65,8 +68,14 @@ class RemoveController < ApplicationController
       } if ids.include?(obj_id)
     end
 
-    while endedDestroyElements.size < elements.size
+    wait_count = 0
+    wait_timeout = 600 # 60s (600 * 0.1s)
+
+    # wait for all elements to be destroyed (if asynclly destroyed)
+    while endedDestroyElements.size < elements.size && wait_count < wait_timeout
       sleep(0.1)
+
+      wait_count += 1
     end
 
     render json: {
