@@ -567,6 +567,7 @@ Rails.application.routes.draw do
 
   # destroy generic route
   delete "/destroy/:classname/:id", to: "remove#destroy", as: "generic_destroy"
+  delete "/destroy/:classname", to: "remove#destroy_multiple", as: "generic_destroy_multiple"
   get "/references/:classname/:id", to: "remove#get_references"
 
   # ==================
