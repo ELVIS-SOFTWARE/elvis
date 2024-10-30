@@ -44,6 +44,7 @@ class RemoveController < ApplicationController
 
     EventHandler.send("#{@classname.name}").destroy_ended
 
+    ids = elements.map(&:id)
 
     endedDestroyElements = []
 
