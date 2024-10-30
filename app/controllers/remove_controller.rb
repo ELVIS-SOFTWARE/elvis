@@ -71,7 +71,7 @@ class RemoveController < ApplicationController
     wait_count = 0
     wait_timeout = 600 # 60s (600 * 0.1s)
 
-    # wait for all elements to be destroyed (if asynclly destroyed)
+    # wait for all elements to be destroyed (if asynclly destroyed) or timeout
     while endedDestroyElements.size < elements.size && wait_count < wait_timeout
       sleep(0.1)
 
