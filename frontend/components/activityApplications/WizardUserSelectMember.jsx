@@ -106,8 +106,9 @@ export default class WizardUserSelectMember extends React.Component {
     getErrors() {
         const error = {};
 
-        if (this.state.members.length === 0 || this.state.selected === undefined || this.state.members[this.state.selected] === undefined)
-            error.members = "Veuilez sélectionner un membre";
+        if (this.state.members.length === 0 || this.state.selected === undefined || this.state.members[this.state.selected] === undefined) {
+            error.members = "Veuillez sélectionner un membre";
+        }
 
         if (Object.keys(error).length === 0 && this.state.members[this.state.selected].id === this.props.user.id)
             return {};
@@ -118,6 +119,16 @@ export default class WizardUserSelectMember extends React.Component {
 
         if (familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
             error.legal_referent = "Veuillez sélectionner un représentant légal";
+
+        // const selectedMember = this.state.members[this.state.selected];
+        // const isSelectedMinor = selectedMember && (new Date().getFullYear() - new Date(selectedMember.birthday).getFullYear() < 18);
+
+        // if (isSelectedMinor) {
+        //     const familyMemberUserOptionForSelection = selectedMember.family_links_with_user.map(this.familyLinkWithUserToOption);
+        //     if (familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0) {
+        //         error.legal_referent = "Veuillez sélectionner un représentant légal";
+        //     }
+        // }
 
         return error;
     }
@@ -139,22 +150,16 @@ export default class WizardUserSelectMember extends React.Component {
 
     isValidated() {
         const error = this.getErrors();
-
         if (Object.keys(error).length > 0) {
             this.setState({error, showError: true});
             return false;
         }
 
-        if (this.isUserAloneAndMinor()) {
-            toast.error(MESSAGES.err_at_least_one_parent, {autoClose: 3000});
-            return false;
-        }
 
         this.props.onSelect(this.state.members[this.state.selected])
 
         return true;
     }
-
 
 
     completeUserWithOther(user, otherUser) {
@@ -292,8 +297,8 @@ export default class WizardUserSelectMember extends React.Component {
                         <div className="col-md-6 p-0">
 
                             <div className="mb-4">
-                                <label style={{color: "#003E5C"}}>Représentant légal <span
-                                    className="text-danger">*</span></label>
+                                <label style={{color: "#003E5C"}}>Représentant légal </label>
+                                    {/*{isSelectedMinor && <span className="text-danger">*</span>}</label>*/}
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}
                                     isMulti
