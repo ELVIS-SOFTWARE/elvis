@@ -287,7 +287,7 @@ export default class WizardUserSelectMember extends React.Component {
                     />
                 </div>
 
-                {members.length > 1 && isSelectedMinor && <Fragment>
+                {members.length > 0 && members[selected].id !== user.id && <Fragment>
                     <div className="row">
                         <div className="col-md-6 p-0">
 
