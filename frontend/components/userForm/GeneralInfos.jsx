@@ -15,6 +15,17 @@ const genders = [
     {value: "A", label: "Autre"},
 ];
 
+const CustomDateInput = ({ value, onClick }) => (
+    <input
+        type="text"
+        className="form-control"
+        style={{ backgroundColor: "white", borderRadius: "8px", color: "#00283B" }}
+        onClick={onClick}
+        value={value}
+        readOnly
+    />
+);
+
 const GeneralInfos = ({
                           displayBirthday,
                           displayGender,
@@ -78,7 +89,7 @@ const GeneralInfos = ({
                     />
                 </div>
 
-                <div className="col-xs-12 col-md-6 pl-0 pl-md-5 pr-0">
+                <div className="col-xs-12 col-md-6">
                     <label className="small" style={{color: "#003E5C"}}>Prénom</label><br/>
                     <Field
                         name="first_name"
@@ -95,7 +106,6 @@ const GeneralInfos = ({
                 <div className="col-xs-12 col-md-6 pr-0">
                     <label className="small" style={{color: "#003E5C"}}>Date de naissance</label><br/>
                     <DatePicker
-                        showIcon
                         dateFormat="dd/MM/yyyy"
                         required
                         selected={birthday ? moment(birthday, "YYYY/MM/DD").toDate() : new Date()}
@@ -105,7 +115,8 @@ const GeneralInfos = ({
                             else
                                 mutators.changeBirthDate(null);
                         }}
-                        className="form-control"
+                        customInput={<CustomDateInput />}
+                        wrapperClassName="w-100"
                     />
 
                     {birthday && <p className="help-block">{toAge(birthday)}</p>}
