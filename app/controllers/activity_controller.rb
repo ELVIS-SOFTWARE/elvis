@@ -507,20 +507,29 @@ class ActivityController < ApplicationController
   end
 
   def delete
+    # @type [Activity]
     activity = Activity.includes(:time_interval).find(params[:id])
 
     authorize! :destroy, activity
 
+    time_interval = activity.time_interval
+
+    if time_interval.nil?
+      time_interval = activity.activity_instances.joins(:time_interval).order("time_intervals.start").first&.time_interval
+    end
+
     teacher = activity.teacher
-    season = Season.from_interval(activity.time_interval).first
+    season = time_interval.nil? ? nil : Season.from_interval(time_interval).first
 
     Activities::DestroyActivitiesAndTimeIntervals
       .new(activity)
       .execute
 
-    Activities::AssignGroupsNames
-      .new(teacher, season)
-      .execute
+    unless season.nil?
+      Activities::AssignGroupsNames
+        .new(teacher, season)
+        .execute
+    end
 
     render json: activity.time_interval
   end
