@@ -531,7 +531,7 @@ class ActivityController < ApplicationController
         .execute
     end
 
-    render json: activity.time_interval
+    render json: time_interval
   end
 
   def get_availabilities
