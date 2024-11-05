@@ -94,7 +94,7 @@ class Wizard extends React.Component {
     componentDidMount() {
         if (!this.props.season) return;
 
-        if (this.props.preSelectedUser && !this.props.currentUserIsAdmin) {
+        if (this.props.preSelectedUser) {
             api.post("/users/search?auth_token=" + this.props.user.authentication_token,
                 {
                     first_name: this.props.preSelectedUser.first_name,
@@ -112,7 +112,7 @@ class Wizard extends React.Component {
                     this.handleSelectUser(user)
                 }
             })
-        } else if (!this.props.currentUserIsAdmin && this.props.user) {
+        } else if (this.props.user) {
             api.post("/users/search?auth_token=" + this.props.user.authentication_token,
                 {
                     first_name: this.props.user.first_name,
