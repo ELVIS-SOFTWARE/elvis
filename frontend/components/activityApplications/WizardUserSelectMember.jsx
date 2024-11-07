@@ -108,8 +108,7 @@ export default class WizardUserSelectMember extends React.Component {
 
         if (this.state.members.length === 0 || this.state.selected === undefined || this.state.members[this.state.selected] === undefined)
             error.members = "Veuilez sélectionner un membre";
-
-        if (this.state.members[this.state.selected] && userIsMinor(this.state.members[this.state.selected]))
+        else if (userIsMinor(this.state.members[this.state.selected]))
         {
             if (this.state.members[this.state.selected].family_links_with_user.filter(fl => fl.is_legal_referent).length === 0)
                 error.legal_referent = "Veuillez sélectionner un représentant légal";
