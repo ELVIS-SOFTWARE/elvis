@@ -95,13 +95,13 @@ class WrappedPayerPaymentTerms extends React.Component {
         this.props.onChangePaymentMethod && this.props.onChangePaymentMethod(paymentMethodId);
     }
 
-    handleChangePayers(payers) {
+    handleChangePayers(payers, eventUser) {
         this.setState(prevState => {
             return {
                 payers: payers,
             };
         });
-        this.props.onChangePayers && this.props.onChangePayers(payers);
+        this.props.onChangePayers && this.props.onChangePayers(payers, eventUser);
     }
 
     render() {

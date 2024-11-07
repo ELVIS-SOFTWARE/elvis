@@ -611,12 +611,23 @@ class Wizard extends React.Component {
         });
     }
 
-    handleChangePayers(payers) {
+    handleChangePayers(payers, eventUser) {
+        const isEventUserSelected = payers.includes(eventUser.id);
+
         this.setState({
             infos: {
                 ...this.state.infos,
                 payers: payers || [],
                 is_paying: payers.includes(this.state.infos.id),
+                family_links_with_user: this.state.infos.family_links_with_user.map(user =>
+                {
+                    if(this.userEquals(user, eventUser))
+                        user.is_paying_for = isEventUserSelected;
+                    else
+                        user.is_paying_for = payers.includes(user.id);
+
+                    return user;
+                })
             }
         });
     }

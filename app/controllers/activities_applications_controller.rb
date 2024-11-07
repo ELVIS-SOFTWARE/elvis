@@ -752,6 +752,11 @@ class ActivitiesApplicationsController < ApplicationController
           family_link[:is_to_call] = !!family_link[:is_to_call]
           family_link[:is_accompanying] = !!family_link[:is_accompanying]
           family_link[:is_legal_referent] = !!family_link[:is_legal_referent]
+          family_link[:is_paying_for] = !!family_link[:is_paying_for]
+
+          if family_link[:is_paying_for]
+            payers << family_link[:id]
+          end
 
           is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
             [family_link],

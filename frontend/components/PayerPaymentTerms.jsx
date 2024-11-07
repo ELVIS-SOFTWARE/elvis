@@ -124,13 +124,13 @@ export default function PayerPaymentTerms({
     function handleAddPayer(newSelectedPayers) {
         const payers = _.uniq([...selectedPayers, newSelectedPayers.id]);
         setSelectedPayers(payers);
-        onChangePayers && onChangePayers(payers);
+        onChangePayers && onChangePayers(payers, newSelectedPayers);
     }
 
     function handleRemovePayer(newSelectedPayers) {
         const payers = selectedPayers.filter(payer => payer !== newSelectedPayers.id);
         setSelectedPayers(payers);
-        onChangePayers && onChangePayers(payers);
+        onChangePayers && onChangePayers(payers, newSelectedPayers);
     }
 
     useEffect(() => {
