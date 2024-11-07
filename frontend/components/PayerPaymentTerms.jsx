@@ -34,9 +34,9 @@ function PayersListEditor({
                                 checked: isSelected,
                                 onChange: e => {
                                     if (isSelected) {
-                                        onRemovePayer(user.id);
+                                        onRemovePayer(user);
                                     } else {
-                                        onAddPayer(user.id);
+                                        onAddPayer(user);
                                     }
                                 },
                             }}
@@ -54,7 +54,7 @@ function PayersListEditor({
                                 mask="99 99 99 999 99"
                                 htmlOptions={{
                                     value: user.identification_number,
-                                    onChange: e => onChangeIdentificationNumber(user.id, e.target.value)
+                                    onChange: e => onChangeIdentificationNumber(user, e.target.value)
                                 }}
                                 meta={{
                                     error: isMinor && isSelected && isEmpty((user.identification_number || "").replaceAll(/[_ ]/g, "")) ? "err_required" : null,
@@ -122,13 +122,13 @@ export default function PayerPaymentTerms({
     }
 
     function handleAddPayer(newSelectedPayers) {
-        const payers = _.uniq([...selectedPayers, newSelectedPayers]);
+        const payers = _.uniq([...selectedPayers, newSelectedPayers.id]);
         setSelectedPayers(payers);
         onChangePayers && onChangePayers(payers);
     }
 
     function handleRemovePayer(newSelectedPayers) {
-        const payers = selectedPayers.filter(payer => payer !== newSelectedPayers);
+        const payers = selectedPayers.filter(payer => payer !== newSelectedPayers.id);
         setSelectedPayers(payers);
         onChangePayers && onChangePayers(payers);
     }

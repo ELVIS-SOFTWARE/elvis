@@ -674,6 +674,7 @@ class ActivitiesApplicationsController < ApplicationController
         @user.checked_image_right = params[:application][:infos][:checked_image_right]
         @user.checked_newsletter = params[:application][:infos][:checked_newsletter]
         @user.is_paying = params[:application][:infos][:is_paying]
+        @user.identification_number = params[:application][:infos][:identification_number]
         @user.instruments = Instrument.where(id: params.dig(:application, :infos, :instruments)&.map do |i|
           i[:id]
         end || [])
@@ -724,7 +725,26 @@ class ActivitiesApplicationsController < ApplicationController
             addresses: {}
           })
 
-          next if family_link_member.nil?
+          if family_link_member.nil?
+            tmp_user = User.new(
+              first_name: family_link[:first_name],
+              last_name: family_link[:last_name],
+              email: family_link[:email],
+              birthday: family_link[:birthday],
+              attached_to_id: @user.id,
+            )
+
+            next unless tmp_user.save
+
+            family_link[:id] = tmp_user.id
+
+            tmp_user.planning = Planning.new if tmp_user.planning.nil?
+
+            family_link_member = tmp_user.as_json(include: {
+              telephones: {},
+              addresses: {}
+            })
+          end
 
           family_link.merge!(family_link_member: family_link_member)
 

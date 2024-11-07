@@ -13,6 +13,7 @@ import {required} from "../../tools/validators";
 import arrayMutators from "final-form-arrays";
 import UserAvatar from "../UserAvatar";
 import WizardContactForm from "../userForm/WizardContactForm";
+import { userIsMinor } from "../../tools/utils";
 
 /**
  * Class used because stepzilla doesn't support functional components for validation
@@ -189,7 +190,7 @@ export default class WizardUserSelectMember extends React.Component {
         const {user} = this.props;
         const {members, selected, isModalOpen} = this.state;
 
-        const virtualFamilyLinks = members.filter(m => m.id && m.id !== (members[selected] || {}).id).map(m => {
+        const virtualFamilyLinks = members.filter(m => m.id !== (members[selected] || {}).id).map(m => {
             const familyLinkToUse = ((members[selected] || {}).family_links_with_user || []).find(fl => fl.member_id === m.id);
 
             return {
@@ -266,7 +267,7 @@ export default class WizardUserSelectMember extends React.Component {
                     />
                 </div>
 
-                {members.length > 0 && members[selected].id !== user.id && <Fragment>
+                {members.length > 0 && (members[selected].id !== user.id || userIsMinor(user.birthday)) && <Fragment>
                     <div className="row">
                         <div className="col-md-6 p-0">
 
