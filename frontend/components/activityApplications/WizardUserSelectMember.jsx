@@ -107,21 +107,19 @@ export default class WizardUserSelectMember extends React.Component {
         const error = {};
 
         if (this.state.members.length === 0 || this.state.selected === undefined || this.state.members[this.state.selected] === undefined)
-            error.members = "Veuilez sélectionner un membre";
-        else if (userIsMinor(this.state.members[this.state.selected]))
         {
-            if (this.state.members[this.state.selected].family_links_with_user.filter(fl => fl.is_legal_referent).length === 0)
-                error.legal_referent = "Veuillez sélectionner un représentant légal";
+            error.members = "Veuilez sélectionner un membre";
+
+            // if no member selected, no need to check the rest
+            return error;
         }
 
-        if (Object.keys(error).length === 0 && this.state.members[this.state.selected].id === this.props.user.id)
-            return {};
-
-        const familyMemberUserOptionForSelection = this.state.members && this.state.members.length > 0 && this.state.members[this.state.selected] ? this.state.members[this.state.selected]
+        const familyMemberUserOptionForSelection = this.state.members && this.state.members.length > 0 && this.state.members[this.state.selected] ?
+            this.state.members[this.state.selected]
             .family_links_with_user
             .map(this.familyLinkWithUserToOption) : [];
 
-        if (familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
+        if ((userIsMinor(this.state.members[this.state.selected].birthday) || this.state.members[this.state.selected].id !== this.props.user.id) && familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
             error.legal_referent = "Veuillez sélectionner un représentant légal";
 
         return error;
@@ -277,7 +275,10 @@ export default class WizardUserSelectMember extends React.Component {
                         <div className="col-md-6 p-0">
 
                             <div className="mb-4">
-                                <label style={{ color: "#003E5C" }}>Représentant légal <span className="text-danger">*</span></label>
+                                <label style={{ color: "#003E5C" }}>
+                                    Représentant légal
+                                    {userIsMinor(members[this.state.selected].birthday) || members[this.state.selected].id !== user.id ? <span className="text-danger">*</span> : ""}
+                                </label>
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}
                                     isMulti
