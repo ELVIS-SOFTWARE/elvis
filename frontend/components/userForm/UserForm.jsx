@@ -20,7 +20,7 @@ import { changeBirthDate, findFamilyMemberById, selectPhoneType } from "../../to
 import { toRawPhoneNumber } from "../../tools/format";
 import ConsentDocItem from "./ConsentDocItem";
 import Payers from "./Payers";
-import { calculateAge, userIsMinor } from "../../tools/utils";
+import { calculateAge, birthdayIsUnder18 } from "../../tools/utils";
 
 const YES_NO_FIELDS = ["checked_image_right", "checked_newsletter"];
 
@@ -247,7 +247,7 @@ class UserForm extends React.PureComponent {
         });
 
         this.setState({
-            requireIdentificationNumber: this.props.displayIdentificationNumber && (values.is_paying || userIsMinor(values.birthday)),
+            requireIdentificationNumber: this.props.displayIdentificationNumber && (values.is_paying || birthdayIsUnder18(values.birthday)),
         });
     }
 

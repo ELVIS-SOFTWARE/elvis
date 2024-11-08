@@ -5,6 +5,16 @@ export function calculateAge(birthday) {
     return (today - birthDate) / millisecondsPerYear;
 }
 
-export function userIsMinor(birthday) {
+export function birthdayIsUnder18(birthday) {
     return calculateAge(birthday) < 18;
+}
+
+/**
+ *
+ * @param {{birthday: Date|string}} user
+ * @returns {boolean}
+ * @constructor
+ */
+export function userIsMinor(user) {
+    return user.birthday && birthdayIsUnder18(user.birthday);
 }

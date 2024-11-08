@@ -119,7 +119,7 @@ export default class WizardUserSelectMember extends React.Component {
             .family_links_with_user
             .map(this.familyLinkWithUserToOption) : [];
 
-        if ((userIsMinor(this.state.members[this.state.selected].birthday) || this.state.members[this.state.selected].id !== this.props.user.id) && familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
+        if ((userIsMinor(this.state.members[this.state.selected]) || this.state.members[this.state.selected].id !== this.props.user.id) && familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
             error.legal_referent = "Veuillez sélectionner un représentant légal";
 
         return error;
@@ -270,14 +270,14 @@ export default class WizardUserSelectMember extends React.Component {
                     />
                 </div>
 
-                {members.length > 0 && (members[selected].id !== user.id || userIsMinor(user.birthday)) && <Fragment>
+                {members.length > 0 && (members[selected].id !== user.id || userIsMinor(user)) && <Fragment>
                     <div className="row">
                         <div className="col-md-6 p-0">
 
                             <div className="mb-4">
                                 <label style={{ color: "#003E5C" }}>
                                     Représentant légal
-                                    {userIsMinor(members[this.state.selected].birthday) || members[this.state.selected].id !== user.id ? <span className="text-danger">*</span> : ""}
+                                    {userIsMinor(members[this.state.selected]) || members[this.state.selected].id !== user.id ? <span className="text-danger">*</span> : ""}
                                 </label>
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}
