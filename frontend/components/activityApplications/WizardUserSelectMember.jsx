@@ -114,13 +114,17 @@ export default class WizardUserSelectMember extends React.Component {
             return error;
         }
 
-        const familyMemberUserOptionForSelection = this.state.members && this.state.members.length > 0 && this.state.members[this.state.selected] ?
-            this.state.members[this.state.selected]
-            .family_links_with_user
-            .map(this.familyLinkWithUserToOption) : [];
+        const memberSelected = this.state.members[this.state.selected];
+        const familyMemberUserForSelection = memberSelected.family_links_with_user || [];
 
-        if ((userIsMinor(this.state.members[this.state.selected]) || this.state.members[this.state.selected].id !== this.props.user.id) && familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
-            error.legal_referent = "Veuillez sélectionner un représentant légal";
+        if (userIsMinor(memberSelected) || memberSelected.id !== this.props.user.id)
+        {
+            if(familyMemberUserForSelection.filter(fl => fl.is_legal_referent).length === 0)
+                error.legal_referent = "Veuillez sélectionner un représentant légal";
+            else if(familyMemberUserForSelection.filter(fl => fl.is_legal_referent && !userIsMinor(fl)).length === 0)
+                error.legal_referent = "Le représentant légal doit être majeur";
+        }
+
 
         return error;
     }
