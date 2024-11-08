@@ -623,7 +623,7 @@ class ActivitiesApplicationsController < ApplicationController
 
         levels = []
 
-        params[:application][:personalLevels].each do |activity_ref_id, level_param|
+        params[:application][:personalLevels]&.each do |activity_ref_id, level_param|
           existing_level = Level.find_by(
             season_id: params[:application][:season_id],
             activity_ref_id: activity_ref_id,
