@@ -89,6 +89,15 @@ namespace :elvis do
     end
   end
 
+  task fix_activities_ti: %i[environment] do
+    sidekiq_redis_url = ENV['SIDEKIQ_REDIS_URL'] || ENV['REDIS_URL']
+    if ENV["USE_SIDEKIQ"] == "true" && !sidekiq_redis_url.nil?
+      ActivityTiCorrectorJob.perform_later
+    else
+      ActivityTiCorrectorJob.perform_now
+    end
+  end
+
   namespace :plugins do
 
     task :logged do

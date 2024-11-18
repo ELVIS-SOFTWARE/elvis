@@ -22,3 +22,7 @@
 every 1.day, at: '4:30 am' do
   rake 'elvis:clean_big_tables'
 end
+
+every 1.day, at: '7:30 am' do
+  rake 'elvis:fix_activities_ti'
+end
