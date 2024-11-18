@@ -119,6 +119,8 @@ ENV RAILS_ENV=kubernetes
 ENV RAILS_LOG_TO_STDOUT=true
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
 
+RUN useradd -ms /bin/bash elvis
+
 # ~18mb
 RUN apt update
 
@@ -138,7 +140,13 @@ COPY --from=build /usr/local/bundle /usr/local/bundle
 # ~ 50mb => because of bootsnap precompile. It is bigger for more speed
 COPY --from=build $RAILS_ROOT $RAILS_ROOT
 
+RUN chown -R elvis:elvis $RAILS_ROOT
+
+USER elvis
+
 EXPOSE 80
+
 RUN chmod +x /Elvis/entrypoints/init.sh
 RUN chmod +x /Elvis/entrypoints/start.sh
+
 ENTRYPOINT ["/Elvis/entrypoints/start.sh"]

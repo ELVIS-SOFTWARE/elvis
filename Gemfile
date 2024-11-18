@@ -65,6 +65,7 @@ gem "money"
 gem "phony_rails"
 
 # Profiling
+gem 'redis-namespace'
 gem 'rails_performance'
 gem 'rack-mini-profiler', require: false
 gem 'memory_profiler' # For memory profiling
