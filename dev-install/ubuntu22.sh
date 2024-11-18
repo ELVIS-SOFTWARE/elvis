@@ -74,7 +74,7 @@ echo ""
 rvm autolibs disable
 rvm requirements
 sudo apt install -y libssl1.0-dev openssl1.0
-rvm install 3.3.2 --with-openssl-dir="$HOME"/.rvm/usr
+rvm install 3.3.6 --with-openssl-dir="$HOME"/.rvm/usr
 source /etc/profile.d/rvm.sh
 
 sleep 1

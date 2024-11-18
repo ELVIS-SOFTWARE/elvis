@@ -7,6 +7,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
+gem "base64"
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem "rails", "6.1.7.8"
 gem "rails_event_store"
