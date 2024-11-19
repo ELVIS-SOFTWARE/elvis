@@ -69,8 +69,10 @@
     "normalize.css": "^7.0.0",
     "popper.js": "^1.16.1",
     "postcss": "^8.4.49",
+    "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-loader": "^8.1.1",
     "postcss-nested": "^3.0.0",
+    "postcss-preset-env": "^10.1.1",
     "prop-types": "^15.6.0",
     "rc-time-picker": "^3.7.3",
     "react": "^16.14.0",
@@ -98,7 +100,7 @@
     "react-yearly-calendar": "SIXMON/react-yearly-calendar",
     "react_ujs": "^2.4.3",
     "sass-loader": "^16.0.3",
-    "shakapacker": "8.0.0",
+    "shakapacker": "8.0.2",
     "style-loader": "^4.0.0",
     "sweetalert2": "^7.26.11",
     "terser-webpack-plugin": "5",
@@ -118,6 +120,7 @@
   "version": "0.1.0",
   "babel": {
     "presets": [
+      "./node_modules/shakapacker/package/babel/preset.js",
       "./node_modules/shakapacker/package/babel/preset.js"
     ]
   },

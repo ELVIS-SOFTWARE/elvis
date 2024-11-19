@@ -26,6 +26,7 @@
   <%= stylesheet_pack_tag 'application_print', media: "print" %>
 
   <%= call_hook :view_layouts_application_html_head %>
+    <%= javascript_pack_tag "application" %>
 </head>
 
 <body class="pace-done <%= @current_user.first_connection ? "mini-navbar" : "" %> <%= @hide_navigation && "hide-navigation" %>">

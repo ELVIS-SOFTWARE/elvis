@@ -1,5 +1,5 @@
 Rails.application.configure do
-  config.webpacker.check_yarn_integrity = false  # Settings specified here will take precedence over those in config/application.rb.
+  #config.webpacker.check_yarn_integrity = false  # Settings specified here will take precedence over those in config/application.rb.
 
   config.web_console.permissions = "0.0.0.0/0"
   # In the development environment your application's code is reloaded on
