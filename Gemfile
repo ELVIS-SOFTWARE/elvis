@@ -126,3 +126,5 @@ PluginGemUtils.get_plugins_to_install(include_libraries: true).each do |plugin|
   end
 end
 
+
+gem "shakapacker", "= 8.0"
