@@ -216,7 +216,7 @@ class ActivitiesApplicationsController < ApplicationController
     respond_to do |format|
       format.html do
         payer = activity_application.user.get_first_paying_family_member
-        @payer = payer.as_json
+        @payer = payer.as_json(except: %i[created_at updated_at authentication_token])
         @payer[:kind] = payer.class.to_s unless @payer.nil?
 
         @activity_refs = ActivityRef.all.as_json(methods: [:display_name])
