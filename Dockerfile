@@ -37,7 +37,7 @@ RUN npm install -g yarn
 
 RUN apt-get install -y --no-install-recommends libjemalloc2
 
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 RUN gem install bundler
 
@@ -72,9 +72,9 @@ COPY app/assets /Elvis/app/assets
 COPY babel.config.js postcss.config.js /Elvis/
 
 # ignore error when precompiling assets
-RUN NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile
 ENV RAILS_ENV=kubernetes
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
+RUN NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile
 
 # copy app components/routes/initializers
 COPY config/routes.rb /Elvis/config/routes.rb
@@ -129,7 +129,7 @@ RUN apt-get install -y --no-install-recommends libjemalloc2 curl shared-mime-inf
 
 COPY --from=build /usr/bin/node /usr/bin/
 
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT
@@ -146,7 +146,6 @@ USER elvis
 
 EXPOSE 80
 
-RUN chmod +x /Elvis/entrypoints/init.sh
-RUN chmod +x /Elvis/entrypoints/start.sh
+RUN chmod u+x /Elvis/entrypoints/*.sh
 
 ENTRYPOINT ["/Elvis/entrypoints/start.sh"]
