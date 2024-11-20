@@ -18,7 +18,7 @@ gem "pg"
 gem "puma"
 gem "bootsnap"
 gem "mutex_m"
-# Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
+
 gem "react-rails"
 gem "shakapacker"
 
