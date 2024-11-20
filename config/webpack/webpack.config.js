@@ -5,14 +5,7 @@ const webpack = require("webpack");
 const options = {
     resolve: {
         extensions: ['.css', '.scss', '.js', '.jsx'],
-        plugins: [
-            new webpack.ProvidePlugin({
-                $: "jquery",
-                jQuery: "jquery",
-                jquery: "jquery",
-                "window.jQuery": "jquery",
-            })
-        ]
+
     }
 }
 
