@@ -26,7 +26,6 @@
   <%= stylesheet_pack_tag 'application_print', media: "print" %>
 
   <%= call_hook :view_layouts_application_html_head %>
-    <%= javascript_pack_tag "application" %>
 </head>
 
 <body class="pace-done <%= @current_user.first_connection ? "mini-navbar" : "" %> <%= @hide_navigation && "hide-navigation" %>">
@@ -132,7 +131,7 @@
                   <% if @current_user.avatar.attached? %>
                     <img alt="image" class="img-circle m-t-none" src="<%= url_for(@current_user.avatar) %>" width="30" height="30"/>
                   <% else %>
-                    <img alt="image" class="img-circle m-t-none" src="<%= asset_pack_path 'media/images/default_avatar.png' %>" width="30" height="30"/>
+                    <img alt="image" class="img-circle m-t-none" src="<%= asset_pack_path 'static/images/default_avatar.png' %>" width="30" height="30"/>
                   <% end %>
 
                   <span class="text-dark text-center m-r-sm" style="font-size: 15px; vertical-align: text-top"><%= @current_user.last_name %> <%= @current_user.first_name %></span>

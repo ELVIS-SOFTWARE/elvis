@@ -19,7 +19,7 @@
       <div class="middle-box loginscreen">
         <div>
           <div>
-            <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "media/images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen" />
+            <img src="<%= @school_informations&.logo&.attached? ? url_for(@school_informations.logo) : (asset_pack_path "static/images/logo_elvis_a.png") %>" width="150" height="150" class="picto-loginscreen" />
           </div>
         </div>
       </div>
@@ -40,7 +40,7 @@
                                         <% if u.avatar.attached? %>
                                             <img alt="profile" style="width: 35px; height: 35px;" class="img-circle m-r-sm" src="<%= url_for(u.avatar) %>" />
                                         <% else %>
-                                            <img alt="profile" style="width: 35px; height: 35px;" class="img-circle m-r-sm" src="<%= asset_pack_path 'media/images/default_avatar.png' %>" />
+                                            <img alt="profile" style="width: 35px; height: 35px;" class="img-circle m-r-sm" src="<%= asset_pack_path 'static/images/default_avatar.png' %>" />
                                         <% end %>
                                         <div>
                                             <h3><b><%= u.adherent_number %></b> <%= u.first_name %> <%= u.last_name %></h3>
