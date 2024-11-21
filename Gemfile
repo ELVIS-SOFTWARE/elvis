@@ -18,9 +18,9 @@ gem "pg"
 gem "puma"
 gem "bootsnap"
 gem "mutex_m"
-# Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
-gem "react-rails", "~> 3.2.1"
-gem "webpacker", "~> 5.4.4"
+
+gem "react-rails"
+gem "shakapacker"
 
 gem "irb"
 gem "i18n"
@@ -125,4 +125,3 @@ PluginGemUtils.get_plugins_to_install(include_libraries: true).each do |plugin|
     gem plugin.name, git: plugin.full_url, branch: plugin.branch
   end
 end
-

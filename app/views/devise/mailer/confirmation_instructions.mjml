@@ -19,9 +19,9 @@
   <mj-body>
     <mj-column>
       <mj-raw>
-        <!-- <mj-image src="<%= asset_pack_path 'media/images/picto-ziggy.svg' %>" alt="" width="150" height="150" class="picto-loginscreen"/> -->
+        <!-- <mj-image src="<%= asset_pack_path 'static/images/picto-ziggy.svg' %>" alt="" width="150" height="150" class="picto-loginscreen"/> -->
       </mj-raw>
-      <mj-image width="100px" src="<%= asset_pack_path 'media/images/logo.jpg' %>"></mj-image>
+      <mj-image width="100px" src="<%= asset_pack_path 'static/images/logo.jpg' %>"></mj-image>
       <mj-divider border-color="#d63031"></mj-divider>
       <mj-text>Bienvenue <b>
           <%= @resource.first_name %>
