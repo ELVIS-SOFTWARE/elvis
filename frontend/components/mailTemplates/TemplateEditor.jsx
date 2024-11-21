@@ -12,7 +12,8 @@ export default function TemplateEditor() {
     const [event, setEvent] = useState(null);
 
     const fetchData = async () => {
-        try {
+        try
+        {
             await api.set()
                 .success(res =>
                 {
@@ -21,11 +22,13 @@ export default function TemplateEditor() {
                     setLoading(false);
                     setTemplateName(res.template.name);
                 })
-                .error(res => {
+                .error(res =>
+                {
                     swal("Une erreur est survenue lors de la récupération des templates", res.error, "error");
                 })
-                .get( window.location.pathname + "", {});
-        } catch (error) {
+                .get(window.location.pathname + "", {});
+        }
+        catch (error) {
             swal("Erreur", "Impossible de récupérer les templates.", "error");
         }
     }
