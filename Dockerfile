@@ -1,4 +1,4 @@
-FROM ruby:3.3.6-slim AS build
+FROM ruby:3.3.6-alpine AS build
 
 # Sets the path where the app is going to be installed
 ENV RAILS_ROOT /Elvis
@@ -18,26 +18,21 @@ RUN mkdir -p $RAILS_ROOT
 # all the contents are going to be stored.
 WORKDIR $RAILS_ROOT
 
-RUN apt-get update
+RUN apk update
 
-RUN apt-get install -y \
+RUN apk add --no-interactive \
   curl \
   python3 \
-  build-essential \
+  build-base \
   libpq-dev postgresql-client \
   git \
-  shared-mime-info
+  shared-mime-info \
+    nodejs \
+    yarn \
+    jemalloc \
+    py3-setuptools
 
-RUN curl -sL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
-RUN bash /tmp/nodesource_setup.sh
-
-RUN apt-get install -y nodejs
-
-RUN npm install -g yarn
-
-RUN apt-get install -y --no-install-recommends libjemalloc2
-
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 RUN gem install bundler
 
@@ -112,24 +107,24 @@ RUN rm -r /usr/local/bundle/cache
 
 
 
-FROM ruby:3.3.6-slim
+FROM ruby:3.3.6-alpine
 
 ENV RAILS_ROOT /Elvis
 ENV RAILS_ENV=kubernetes
 ENV RAILS_LOG_TO_STDOUT=true
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
 
-RUN useradd -ms /bin/bash elvis
+RUN adduser -Ds /bin/sh elvis
 
 # ~18mb
-RUN apt update
+RUN apk update
 
 # ~ 63mb => pdf generation
-RUN apt-get install -y --no-install-recommends libjemalloc2 curl shared-mime-info postgresql-client libfontconfig1 libxrender1 libxtst6 libxi6 libpng16-16 libjpeg62 cron
+RUN apk add --no-interactive bash jemalloc curl shared-mime-info postgresql-client fontconfig libxrender libxtst libxi libpng libjpeg
 
 COPY --from=build /usr/bin/node /usr/bin/
 
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 
 RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT

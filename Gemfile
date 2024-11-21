@@ -63,6 +63,7 @@ gem "recaptcha", require: "recaptcha/rails"
 gem "countries"
 gem "money"
 gem "phony_rails"
+gem "tzinfo-data"
 
 # Profiling
 gem 'redis-namespace'
