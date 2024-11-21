@@ -333,7 +333,7 @@ class ActivitiesApplicationsController < ApplicationController
     # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
 
     if MaxActivityRefPriceForSeason.all.empty?
-      MaxPricesCalculatorJob.perform_now(nil)
+      ActivityRefMaxPricesCalculatorJob.perform_now(nil)
     end
 
     @all_activity_refs = ActivityRef.all.includes(:activity_ref_kind, :max_prices).as_json(

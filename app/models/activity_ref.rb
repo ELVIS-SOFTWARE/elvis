@@ -110,6 +110,9 @@ class ActivityRef < ApplicationRecord
   has_many :room_activities, dependent: :destroy
   has_many :teachers_activity_refs, dependent: :destroy
 
+  has_many :formule_items, as: :item, dependent: :destroy
+  has_many :formules, through: :formule_items
+
   has_many :users, through: :teachers_activity_refs
 
   belongs_to :activity_ref_kind, required: false

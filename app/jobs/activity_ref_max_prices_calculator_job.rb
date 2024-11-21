@@ -3,7 +3,7 @@
 
 # Service qui calcule les tarifs max pour toutes les activités et les familles d'activités et les stocke en cache (durée 5 minutes)
 #  Ce service est créé dans un objectif de performance : il évite de faire des requêtes SQL à chaque fois que l'on veut afficher un tarif
-class MaxPricesCalculatorJob < ApplicationJob
+class ActivityRefMaxPricesCalculatorJob < ApplicationJob
   queue_as :default
 
   def perform(*_args)

@@ -18,6 +18,9 @@ class ActivityRefKind < ApplicationRecord
 
   has_many :activity_refs
 
+  has_many :formule_items, as: :item, dependent: :destroy
+  has_many :formules, through: :formule_items
+
   belongs_to :default_activity_ref, class_name: "ActivityRef", optional: true
 
   validate :verify_default_activity_ref_is_for_same_activity_ref_kind
