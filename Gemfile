@@ -7,6 +7,8 @@ git_source(:github) do |repo_name|
   "https://github.com/#{repo_name}.git"
 end
 
+gem "base64"
+
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem "rails", "6.1.7.8"
 gem "rails_event_store"
@@ -16,9 +18,9 @@ gem "pg"
 gem "puma"
 gem "bootsnap"
 gem "mutex_m"
-# Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
-gem "react-rails", "~> 3.2.1"
-gem "webpacker", "~> 5.4.4"
+
+gem "react-rails"
+gem "shakapacker"
 
 gem "irb"
 gem "i18n"
@@ -63,6 +65,7 @@ gem "money"
 gem "phony_rails"
 
 # Profiling
+gem 'redis-namespace'
 gem 'rails_performance'
 gem 'rack-mini-profiler', require: false
 gem 'memory_profiler' # For memory profiling
@@ -122,4 +125,3 @@ PluginGemUtils.get_plugins_to_install(include_libraries: true).each do |plugin|
     gem plugin.name, git: plugin.full_url, branch: plugin.branch
   end
 end
-

@@ -33,6 +33,7 @@ module Utils
                            : 0
 
         result["closest_lesson"] = instance&.time_interval&.start
+        result["closest_lesson_end"] = instance&.time_interval&.end
 
         instance_users = activity.users&.includes({
                                                     levels: {

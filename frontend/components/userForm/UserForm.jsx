@@ -20,6 +20,7 @@ import { changeBirthDate, findFamilyMemberById, selectPhoneType } from "../../to
 import { toRawPhoneNumber } from "../../tools/format";
 import ConsentDocItem from "./ConsentDocItem";
 import Payers from "./Payers";
+import { calculateAge, birthdayIsUnder18 } from "../../tools/utils";
 
 const YES_NO_FIELDS = ["checked_image_right", "checked_newsletter"];
 
@@ -32,17 +33,6 @@ function formatRadioValue(v) {
         default:
             return v;
     }
-}
-
-function calculateAge(birthday) {
-    const today = new Date();
-    const birthDate = new Date(birthday);
-    const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25;
-    return (today - birthDate) / millisecondsPerYear;
-}
-
-function userIsMinor(birthday) {
-    return calculateAge(birthday) < 18;
 }
 
 class UserForm extends React.PureComponent {
@@ -257,7 +247,7 @@ class UserForm extends React.PureComponent {
         });
 
         this.setState({
-            requireIdentificationNumber: this.props.displayIdentificationNumber && (values.is_paying || userIsMinor(values.birthday)),
+            requireIdentificationNumber: this.props.displayIdentificationNumber && (values.is_paying || birthdayIsUnder18(values.birthday)),
         });
     }
 

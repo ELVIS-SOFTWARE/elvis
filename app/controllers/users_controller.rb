@@ -13,7 +13,7 @@ class UsersController < ApplicationController
     # cf config/routes.rb
 
     if current_user.teacher?
-      redirect_to user_path(current_user.id)
+      redirect_to planning_simple_path
     elsif can? :manage, :all
       redirect_to users_path
     else

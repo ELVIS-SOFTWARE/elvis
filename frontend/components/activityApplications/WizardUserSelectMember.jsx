@@ -13,6 +13,7 @@ import {required} from "../../tools/validators";
 import arrayMutators from "final-form-arrays";
 import UserAvatar from "../UserAvatar";
 import WizardContactForm from "../userForm/WizardContactForm";
+import { userIsMinor } from "../../tools/utils";
 
 /**
  * Class used because stepzilla doesn't support functional components for validation
@@ -106,17 +107,24 @@ export default class WizardUserSelectMember extends React.Component {
         const error = {};
 
         if (this.state.members.length === 0 || this.state.selected === undefined || this.state.members[this.state.selected] === undefined)
+        {
             error.members = "Veuilez sélectionner un membre";
 
-        if (Object.keys(error).length === 0 && this.state.members[this.state.selected].id === this.props.user.id)
-            return {};
+            // if no member selected, no need to check the rest
+            return error;
+        }
 
-        const familyMemberUserOptionForSelection = this.state.members && this.state.members.length > 0 && this.state.members[this.state.selected] ? this.state.members[this.state.selected]
-            .family_links_with_user
-            .map(this.familyLinkWithUserToOption) : [];
+        const memberSelected = this.state.members[this.state.selected];
+        const familyMemberUserForSelection = memberSelected.family_links_with_user || [];
 
-        if (familyMemberUserOptionForSelection.filter(fl => fl.is_legal_referent).length === 0)
-            error.legal_referent = "Veuillez sélectionner un représentant légal";
+        if (userIsMinor(memberSelected) || memberSelected.id !== this.props.user.id)
+        {
+            if(familyMemberUserForSelection.filter(fl => fl.is_legal_referent).length === 0)
+                error.legal_referent = "Veuillez sélectionner un représentant légal";
+            else if(familyMemberUserForSelection.filter(fl => fl.is_legal_referent && !userIsMinor(fl)).length === 0)
+                error.legal_referent = "Le représentant légal doit être majeur";
+        }
+
 
         return error;
     }
@@ -189,7 +197,7 @@ export default class WizardUserSelectMember extends React.Component {
         const {user} = this.props;
         const {members, selected, isModalOpen} = this.state;
 
-        const virtualFamilyLinks = members.filter(m => m.id && m.id !== (members[selected] || {}).id).map(m => {
+        const virtualFamilyLinks = members.filter(m => m.id !== (members[selected] || {}).id).map(m => {
             const familyLinkToUse = ((members[selected] || {}).family_links_with_user || []).find(fl => fl.member_id === m.id);
 
             return {
@@ -266,12 +274,15 @@ export default class WizardUserSelectMember extends React.Component {
                     />
                 </div>
 
-                {members.length > 0 && members[selected].id !== user.id && <Fragment>
+                {members.length > 0 && (members[selected].id !== user.id || userIsMinor(user)) && <Fragment>
                     <div className="row">
                         <div className="col-md-6 p-0">
 
                             <div className="mb-4">
-                                <label style={{ color: "#003E5C" }}>Représentant légal <span className="text-danger">*</span></label>
+                                <label style={{ color: "#003E5C" }}>
+                                    Représentant légal
+                                    {userIsMinor(members[this.state.selected]) || members[this.state.selected].id !== user.id ? <span className="text-danger">*</span> : ""}
+                                </label>
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}
                                     isMulti

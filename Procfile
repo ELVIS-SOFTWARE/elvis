@@ -1,3 +1,3 @@
 server: bin/rails server -b 0.0.0.0
-assets: bin/webpack-dev-server
+assets: bin/shakapacker-dev-server
 

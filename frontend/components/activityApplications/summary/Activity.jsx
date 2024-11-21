@@ -379,8 +379,8 @@ class Activity extends React.Component {
                     return res;
                 },
                 accessor: s => ({
-                    start: s.time_interval.start,
-                    end: s.time_interval.end,
+                    start: s.closest_lesson || s.time_interval.start,
+                    end: s.closest_lesson_end || s.time_interval.end,
                 }),
                 Cell: ({value: v}) => `${moment(v.start).format("HH:mm")} ~> ${moment(v.end).format("HH:mm")}`,
             },

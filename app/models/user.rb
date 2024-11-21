@@ -346,10 +346,13 @@ class User < ApplicationRecord
       .map do |fm|
       is_inverse = fm.member == self
       member = is_inverse ? fm.user : fm.member
-      res = member.as_json(include: {
-        telephones: {},
-        addresses: {}
-      })
+      res = member.as_json(
+        include: {
+          telephones: {},
+          addresses: {}
+        },
+        except: %i[authentication_token reset_password_token confirmation_token]
+      )
       res = res.merge(fm.as_json)
       res[:is_inverse] = is_inverse
       res[:id] = member.id

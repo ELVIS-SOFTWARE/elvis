@@ -120,7 +120,8 @@ class DestroyJob < ApplicationJob
 
     EventHandler.send("#{@classname.name}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data
+      args: data,
+      objId: @object&.id
     )
 
     return data
@@ -129,7 +130,8 @@ class DestroyJob < ApplicationJob
   rescue DestroyEndError => e
     EventHandler.send("#{@classname.name}").destroy_ended.trigger(
       sender: self.class.name,
-      args: e.data
+      args: e.data,
+      objId: @object&.id
     )
 
     return e.data
@@ -146,7 +148,8 @@ class DestroyJob < ApplicationJob
 
     EventHandler.send("#{params&.first&.fetch(:classname, "Inconnue")}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data
+      args: data,
+      objId: @object&.id
     )
 
     return data
@@ -163,7 +166,8 @@ class DestroyJob < ApplicationJob
 
     EventHandler.send("#{@classname.name}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data
+      args: data,
+      objId: @object&.id
     )
 
     return data
@@ -180,7 +184,8 @@ class DestroyJob < ApplicationJob
 
     EventHandler.send("#{@classname&.name || params&.first&.fetch(:classname, "notFound")}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data
+      args: data,
+      objId: @object&.id
     )
 
     return data
@@ -196,7 +201,7 @@ class DestroyJob < ApplicationJob
     @destroy_params = @classname.destroy_params
 
     # @type [ApplicationRecord]
-    @object = @classname.find(params[:id])
+    @object = params[:object] || @classname.find(params[:id])
 
     begin
       # @type [Array<Class<ApplicationRecord>>]

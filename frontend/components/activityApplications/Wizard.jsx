@@ -94,7 +94,7 @@ class Wizard extends React.Component {
     componentDidMount() {
         if (!this.props.season) return;
 
-        if (this.props.preSelectedUser && !this.props.currentUserIsAdmin) {
+        if (this.props.preSelectedUser) {
             api.post("/users/search?auth_token=" + this.props.user.authentication_token,
                 {
                     first_name: this.props.preSelectedUser.first_name,
@@ -112,7 +112,7 @@ class Wizard extends React.Component {
                     this.handleSelectUser(user)
                 }
             })
-        } else if (!this.props.currentUserIsAdmin && this.props.user) {
+        } else if (this.props.user) {
             api.post("/users/search?auth_token=" + this.props.user.authentication_token,
                 {
                     first_name: this.props.user.first_name,
@@ -611,12 +611,23 @@ class Wizard extends React.Component {
         });
     }
 
-    handleChangePayers(payers) {
+    handleChangePayers(payers, eventUser) {
+        const isEventUserSelected = payers.includes(eventUser.id);
+
         this.setState({
             infos: {
                 ...this.state.infos,
                 payers: payers || [],
                 is_paying: payers.includes(this.state.infos.id),
+                family_links_with_user: this.state.infos.family_links_with_user.map(user =>
+                {
+                    if(this.userEquals(user, eventUser))
+                        user.is_paying_for = isEventUserSelected;
+                    else
+                        user.is_paying_for = payers.includes(user.id);
+
+                    return user;
+                })
             }
         });
     }
@@ -659,16 +670,22 @@ class Wizard extends React.Component {
         return moment().isBetween(moment(dateToUse), moment(season.closing_date_for_applications));
     }
 
-    onChangeIdentificationNumber(user_id, identification_number) {
+    userEquals(user1, user2) {
+        return (user1.id != undefined && user2.id != undefined && user1.id == user2.id) || user1.first_name === user2.first_name &&
+            user1.last_name === user2.last_name &&
+            user1.birthday === user2.birthday;
+    }
+
+    onChangeIdentificationNumber(user, identification_number) {
         this.setState({
             infos: {
                 ...this.state.infos,
-                identification_number: user_id === this.state.infos.id ? identification_number : this.state.infos.identification_number,
-                family_links_with_user: this.state.infos.family_links_with_user.map(user => {
-                    if (user.id === user_id) {
-                        user.identification_number = identification_number;
+                identification_number: this.userEquals(user, this.state.infos) ? identification_number : this.state.infos.identification_number,
+                family_links_with_user: this.state.infos.family_links_with_user.map(u => {
+                    if (this.userEquals(u, user)) {
+                        u.identification_number = identification_number;
                     }
-                    return user;
+                    return u;
                 })
             }
         })

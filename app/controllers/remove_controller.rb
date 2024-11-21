@@ -30,6 +30,61 @@ class RemoveController < ApplicationController
       .call
   end
 
+  def destroy_multiple
+    ids = params[:ids] || []
+
+    # transform string to array if needed
+    if ids.is_a?(String)
+      ids = ids.split(',')
+    end
+
+    # get all elements to destroy if authorized
+    # @type [Array<ApplicationRecord>]
+    elements = ids.length > 0 ? @classname.where(id: ids).accessible_by(current_ability, :destroy).to_a : []
+
+    return render json: { message: "Aucun élément à supprimer", success: false }, status: :not_found if elements.empty?
+
+    EventHandler.send("#{@classname.name}").destroy_ended
+
+    # update ids with only elements that are accessible
+    ids = elements.map(&:id)
+
+    endedDestroyElements = []
+
+    Rails.configuration.event_store.within do
+      elements.each do |element|
+        DestroyJob.perform_now(classname: @classname.name, object: element, selected_dep_to_destroy: params[:selected_dep_to_destroy])
+      end
+    end.subscribe(to: ["Event#{@classname.name}DestroyEnded".constantize]) do |event|
+      obj_id = event.data[:objId]
+
+      endedDestroyElements << {
+        id: obj_id,
+        data: {
+          success: event.data[:args][:success],
+          message: event.data[:args][:message],
+          status: event.data[:args][:status]
+        }
+      } if ids.include?(obj_id)
+    end
+
+    wait_count = 0
+    wait_timeout = 600 # 60s (600 * 0.1s)
+
+    # wait for all elements to be destroyed (if asynclly destroyed) or timeout
+    while endedDestroyElements.size < elements.size && wait_count < wait_timeout
+      sleep(0.1)
+
+      wait_count += 1
+    end
+
+    render json: {
+      message: "Suppression terminée",
+      success: endedDestroyElements.filter { |el| el[:data][:success] }.map { |el| el[:id] },
+      failed: endedDestroyElements.filter { |el| !el[:data][:success] },
+    }
+  end
+
   def get_references
     references = @object.objects_that_reference_me
                         .filter {|ref| !@destroy_params[:auto_deletable_references].include?(ref.class) }
@@ -56,7 +111,7 @@ class RemoveController < ApplicationController
     @destroy_params = @classname.destroy_params
 
     # @type [ApplicationRecord]
-    @object = @classname.find(params[:id])
+    @object = @classname.find(params[:id]) if params[:id]
 
     begin
       # @type [Array<Class<ApplicationRecord>>]

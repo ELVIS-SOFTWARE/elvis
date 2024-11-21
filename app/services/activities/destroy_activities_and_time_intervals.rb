@@ -18,7 +18,7 @@ module Activities
         @activity.destroy!
 
         instances.each do |instance|
-          instance.time_interval.destroy!
+          instance.time_interval&.destroy!
           instance.destroy!
         end
       end

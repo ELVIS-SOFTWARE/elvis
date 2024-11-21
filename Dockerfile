@@ -1,4 +1,4 @@
-FROM ruby:3.3.5-slim AS build
+FROM ruby:3.3.6-slim AS build
 
 # Sets the path where the app is going to be installed
 ENV RAILS_ROOT /Elvis
@@ -72,9 +72,9 @@ COPY app/assets /Elvis/app/assets
 COPY babel.config.js postcss.config.js /Elvis/
 
 # ignore error when precompiling assets
-RUN NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile
 ENV RAILS_ENV=kubernetes
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
+RUN NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile
 
 # copy app components/routes/initializers
 COPY config/routes.rb /Elvis/config/routes.rb
@@ -112,12 +112,14 @@ RUN rm -r /usr/local/bundle/cache
 
 
 
-FROM ruby:3.3.5-slim AS release
+FROM ruby:3.3.6-slim
 
 ENV RAILS_ROOT /Elvis
 ENV RAILS_ENV=kubernetes
 ENV RAILS_LOG_TO_STDOUT=true
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
+
+RUN useradd -ms /bin/bash elvis
 
 # ~18mb
 RUN apt update
@@ -138,7 +140,12 @@ COPY --from=build /usr/local/bundle /usr/local/bundle
 # ~ 50mb => because of bootsnap precompile. It is bigger for more speed
 COPY --from=build $RAILS_ROOT $RAILS_ROOT
 
+RUN chown -R elvis:elvis $RAILS_ROOT
+
+USER elvis
+
 EXPOSE 80
-RUN chmod +x /Elvis/entrypoints/init.sh
-RUN chmod +x /Elvis/entrypoints/start.sh
+
+RUN chmod u+x /Elvis/entrypoints/*.sh
+
 ENTRYPOINT ["/Elvis/entrypoints/start.sh"]

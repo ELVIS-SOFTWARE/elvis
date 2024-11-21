@@ -47,7 +47,7 @@ echo ""
 echo "-----------------------------------------------"
 echo ""
 brew install openssl1.1
-PKG_CONFIG_PATH=$(brew --prefix openssl@1.1)/lib/pkgconfig rvm install 3.3.2 --with-openssl-dir=$(brew --prefix openssl@1.1)
+PKG_CONFIG_PATH=$(brew --prefix openssl@1.1)/lib/pkgconfig rvm install 3.3.6 --with-openssl-dir=$(brew --prefix openssl@1.1)
 source "$HOME"/.rvm/scripts/rvm
 
 sleep 1

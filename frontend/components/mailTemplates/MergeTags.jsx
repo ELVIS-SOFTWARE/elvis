@@ -12,27 +12,15 @@ export const APPLICATION_TAGS = {
     },
 
     applicationId: {
-        name: "ID de L'application",
+        name: "ID de la demande d'inscription",
         value: "{{application.id}}",
-        sample: "ID de l'application"
+        sample: "ID de la demande d'inscription"
     },
-
-    application_first_name: {
-        name: "Prénom de l'application",
-        value: "{{application.first_name}}",
-        sample: "Prénom de l'application"
-    },
-
-    application_last_name: {
-        name: "Nom de l'application",
-        value: "{{application.last_name}}",
-        sample: "Nom de l'application"
-    },
-
+    
     application_season_label: {
-        name: "Saison de l'application",
+        name: "Saison de la demande d'inscription",
         value: "{{application.season_label}}",
-        sample: "Saison de l'application"
+        sample: "Saison de la demande d'inscription"
     },
 
     application_total_all_due_payments: {
@@ -132,11 +120,11 @@ export const ACTIVITY_INSTANCE_TAGS = {
 
 export const PAYMENT_TAGS = {
 
-    payment_schedule_id: {
-        name: "payment_schedule_id",
-        value: "{{payments.payment_schedule_id}}",
-        sample: "payment_schedule_id"
-    },
+    // payment_schedule_id: {
+    //     name: "payment_schedule_id",
+    //     value: "{{payments.payment_schedule_id}}",
+    //     sample: "payment_schedule_id"
+    // },
 
     season_label: {
         name: "Saison du paiement",
@@ -175,41 +163,41 @@ export const PAYMENT_TAGS = {
 }
 
 export const REGLEMENTS_TAGS = {
-
-    reglement_id: {
-        name: "reglement_id",
-        value: "{{reglements.reglement_id}}",
-        sample: "reglement_id"
-    },
-
-    reglement_payable_id: {
-        name: "reglement_payable_id",
-        value: "{{reglements.reglement_payable_id}}",
-        sample: "reglement_payable_id"
-    },
+    //
+    // reglement_id: {
+    //     name: "reglement_id",
+    //     value: "{{reglements.reglement_id}}",
+    //     sample: "reglement_id"
+    // },
+    //
+    // reglement_payable_id: {
+    //     name: "reglement_payable_id",
+    //     value: "{{reglements.reglement_payable_id}}",
+    //     sample: "reglement_payable_id"
+    // },
 
     reglement_reception_date: {
-        name: "reglement_reception_date",
+        name: "Date de réception du règlement",
         value: "{{reglements.reglement_reception_date}}",
-        sample: "reglement_reception_date"
+        sample: "Date de réception du règlement"
     },
 
     reglement_cashing_date: {
-        name: "reglement_cashing_date",
+        name: "Date d'encaissement du règlement",
         value: "{{reglement.['cashing_date']}}",
-        sample: "reglement_cashing_date"
+        sample: "Date d'encaissement du règlement"
     },
 
     reglement_amount: {
-        name: "reglement_amount",
+        name: "Montant du règlement",
         value: "{{reglement['amount']}}",
-        sample: "reglement_amount"
+        sample: "Montant du règlement"
     },
 
     reglement_status: {
-        name: "reglement_status",
+        name: "Statut du règlement",
         value: "{{reglement['status']}}",
-        sample: "reglement_status"
+        sample: "Statut du règlement"
     },
 
     reglementsLoop: {
@@ -230,7 +218,9 @@ export const UTILS_TAGS = {
         value: "{{school_link}}",
         sample: "Bouton vers le site de l'école"
     },
+}
 
+export const SCHOOL_LOGO_TAGS = {
     img_school_logo: {
         name: "Logo de l'école",
         value: "{{school_logo}}",

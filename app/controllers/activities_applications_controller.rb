@@ -216,7 +216,7 @@ class ActivitiesApplicationsController < ApplicationController
     respond_to do |format|
       format.html do
         payer = activity_application.user.get_first_paying_family_member
-        @payer = payer.as_json
+        @payer = payer.as_json(except: %i[created_at updated_at authentication_token])
         @payer[:kind] = payer.class.to_s unless @payer.nil?
 
         @activity_refs = ActivityRef.all.as_json(methods: [:display_name])
@@ -623,7 +623,7 @@ class ActivitiesApplicationsController < ApplicationController
 
         levels = []
 
-        params[:application][:personalLevels].each do |activity_ref_id, level_param|
+        params[:application][:personalLevels]&.each do |activity_ref_id, level_param|
           existing_level = Level.find_by(
             season_id: params[:application][:season_id],
             activity_ref_id: activity_ref_id,
@@ -674,6 +674,7 @@ class ActivitiesApplicationsController < ApplicationController
         @user.checked_image_right = params[:application][:infos][:checked_image_right]
         @user.checked_newsletter = params[:application][:infos][:checked_newsletter]
         @user.is_paying = params[:application][:infos][:is_paying]
+        @user.identification_number = params[:application][:infos][:identification_number]
         @user.instruments = Instrument.where(id: params.dig(:application, :infos, :instruments)&.map do |i|
           i[:id]
         end || [])
@@ -724,7 +725,26 @@ class ActivitiesApplicationsController < ApplicationController
             addresses: {}
           })
 
-          next if family_link_member.nil?
+          if family_link_member.nil?
+            tmp_user = User.new(
+              first_name: family_link[:first_name],
+              last_name: family_link[:last_name],
+              email: family_link[:email],
+              birthday: family_link[:birthday],
+              attached_to_id: @user.id,
+            )
+
+            next unless tmp_user.save
+
+            family_link[:id] = tmp_user.id
+
+            tmp_user.planning = Planning.new if tmp_user.planning.nil?
+
+            family_link_member = tmp_user.as_json(include: {
+              telephones: {},
+              addresses: {}
+            })
+          end
 
           family_link.merge!(family_link_member: family_link_member)
 
@@ -732,6 +752,11 @@ class ActivitiesApplicationsController < ApplicationController
           family_link[:is_to_call] = !!family_link[:is_to_call]
           family_link[:is_accompanying] = !!family_link[:is_accompanying]
           family_link[:is_legal_referent] = !!family_link[:is_legal_referent]
+          family_link[:is_paying_for] = !!family_link[:is_paying_for]
+
+          if family_link[:is_paying_for]
+            payers << family_link[:id]
+          end
 
           is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
             [family_link],
