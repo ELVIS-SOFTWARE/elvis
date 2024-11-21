@@ -115,12 +115,6 @@ export default function ElvisEditor(props) {
                 >
                     Modifier le template
                 </button>
-                <button
-                    onClick={handleDeleteProcess}
-                    className="btn btn-danger pull-right mt-3 mr-2"
-                >
-                    Supprimer le template
-                </button>
             </div>
         </div>
     );

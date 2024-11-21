@@ -64,38 +64,38 @@ class TemplateIndex extends Component {
             });
     }
 
-    handleDeleteProcess(e, id) {
-        e.preventDefault();
-        swal({
-            title: "Êtes vous sûr de supprimer ce template ?",
-            type: "warning",
-            confirmButtonText: "Oui !",
-            cancelButtonText: "Annuler",
-            showCancelButton: true,
-        }).then(a => {
-            if (a.value) {
-                fetch(`/notification_templates/` + id,
-                    {
-                        method: "DELETE",
-                        credentials: "same-origin",
-                        headers: {
-                            "X-CSRF-Token": csrfToken,
-                            "Content-Type": "application/json",
-                        },
-
-                        body: JSON.stringify({
-                            id: id,
-                        }),
-                    }).then(response => {
-                    if (!response.ok)
-                        swal("Erreur", "Erreur lors de l'acheminement", "error")
-
-                    this.fetchData(this.state.filter);
-                    swal("Réussite", "Template supprimé", "success");
-                })
-            }
-        })
-    }
+    // handleDeleteProcess(e, id) {
+    //     e.preventDefault();
+    //     swal({
+    //         title: "Êtes vous sûr de supprimer ce template ?",
+    //         type: "warning",
+    //         confirmButtonText: "Oui !",
+    //         cancelButtonText: "Annuler",
+    //         showCancelButton: true,
+    //     }).then(a => {
+    //         if (a.value) {
+    //             fetch(`/notification_templates/` + id,
+    //                 {
+    //                     method: "DELETE",
+    //                     credentials: "same-origin",
+    //                     headers: {
+    //                         "X-CSRF-Token": csrfToken,
+    //                         "Content-Type": "application/json",
+    //                     },
+    //
+    //                     body: JSON.stringify({
+    //                         id: id,
+    //                     }),
+    //                 }).then(response => {
+    //                 if (!response.ok)
+    //                     swal("Erreur", "Erreur lors de l'acheminement", "error")
+    //
+    //                 this.fetchData(this.state.filter);
+    //                 swal("Réussite", "Template supprimé", "success");
+    //             })
+    //         }
+    //     })
+    // }
 
     render () {
         const { data, pages, loading } = this.state;
@@ -126,13 +126,6 @@ class TemplateIndex extends Component {
                             >
                                 <i className="fas fa-edit" />
                             </a>
-
-                            <a
-                                className="btn-sm btn-warning"
-                                onClick={(e) => this.handleDeleteProcess(e, props.original.path)}
-                            >
-                                <i className="fas fa-trash" />
-                            </a>
                         </div>
                 },
                 sortable: false,
@@ -143,8 +136,8 @@ class TemplateIndex extends Component {
 
         return (
             <Fragment>
-                <div className="row wrapper border-bottom white-bg page-heading">
-                    <h1>  Edition de templates  </h1>
+                <div className="row wrapper border-bottom white-bg page-heading mb-5">
+                    <h1>Édition des templates emails</h1>
                 </div>
 
 
@@ -152,22 +145,14 @@ class TemplateIndex extends Component {
                     <div className="row">
                         <div className="col-12">
                             <div className="mb-3 pl-4 pr-4">
-                                <h2>Selectionner un template à modifier </h2>
                                 <ReactTable
                                     id="templateTable"
                                     data={data}
                                     manual
                                     loading={loading}
                                     onFetchData={this.fetchData}
-                                    // defaultSorted={[{ id: "active", desc: true }]}
+                                    defaultSorted={[{ id: "label", desc: false }]}
                                     columns={columns}
-                                    defaultFilterMethod={(filter, row) => {
-                                        if (row[filter.id] != null) {
-                                            return row[filter.id]
-                                                .toLowerCase()
-                                                .startsWith(filter.value.toLowerCase());
-                                        }
-                                    }}
                                     resizable={false}
                                     showPagination={false}
                                     previousText="Précédent"
@@ -179,16 +164,6 @@ class TemplateIndex extends Component {
                                     rowsText="résultats"
                                     minRows={1}
                                 />
-                            </div>
-                        </div>
-                        <div className="col-12">
-                            <div className="text-center">
-                                <a
-                                    href="/notification_templates/new"
-                                    className="btn btn-primary mt-4"
-                                >
-                                    Créer un nouveau template
-                                </a>
                             </div>
                         </div>
                     </div>
