@@ -121,8 +121,10 @@ RUN adduser -Ds /bin/sh elvis
 RUN apk update
 
 # ~ 34mb => pdf generation
-RUN apk add --no-interactive libpq libcap bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
+RUN apk add --no-interactive libpq libcap dcron bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
 RUN setcap 'cap_net_bind_service=+ep' /usr/local/bin/ruby
+RUN setcap cap_setgid=ep /usr/sbin/crond && setcap cap_setuid=ep /usr/local/bin/ruby
+RUN chown elvis:elvis /usr/sbin/crond /usr/bin/crontab /etc/crontabs/
 
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 
@@ -133,9 +135,7 @@ WORKDIR $RAILS_ROOT
 COPY --from=build /usr/local/bundle /usr/local/bundle
 
 # ~ 50mb => because of bootsnap precompile. It is bigger for more speed
-COPY --from=build $RAILS_ROOT $RAILS_ROOT
-
-RUN chown -R elvis:elvis $RAILS_ROOT
+COPY --from=build --chown=elvis:elvis $RAILS_ROOT $RAILS_ROOT
 
 USER elvis
 
