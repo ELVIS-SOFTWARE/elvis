@@ -122,8 +122,8 @@ RUN apk update
 
 # ~ 34mb => pdf generation
 RUN apk add --no-interactive libpq libcap dcron bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
-RUN setcap 'cap_net_bind_service=+ep' /usr/local/bin/ruby
-RUN setcap cap_setgid=ep /usr/sbin/crond && setcap cap_setuid=ep /usr/local/bin/ruby
+RUN setcap 'cap_net_bind_service=+ep cap_setuid=+ep' /usr/local/bin/ruby
+RUN setcap cap_setgid=+ep /usr/sbin/crond
 RUN chown elvis:elvis /usr/sbin/crond /usr/bin/crontab /etc/crontabs/
 
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
