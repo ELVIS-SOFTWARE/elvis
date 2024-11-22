@@ -1046,20 +1046,24 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def send_confirmation_mail
-    application = ActivityApplication.find(params[:id])
+    application = ActivityApplication.includes(desired_activities: :activity).find(params[:id])
 
     authorize! :edit, application
 
     user = application.user
-    activity = application.desired_activities.first.activity
 
-    # mail
-    case params[:application_status]
-    when ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID
-      ActivityAssignedMailer.activity_assigned(user, user.confirmation_token, application, activity).deliver_later
-    when ActivityApplicationStatus::ACTIVITY_PROPOSED_ID
-      ActivityProposedMailer.activity_proposed(user, user.confirmation_token, application, activity).deliver_later
+    application.desired_activities.each do |da|
+      activity = da.activity
+
+      # mail
+      case params[:application_status]
+      when ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID
+        ActivityAssignedMailer.activity_assigned(user, user.confirmation_token, application, activity).deliver_later
+      when ActivityApplicationStatus::ACTIVITY_PROPOSED_ID
+        ActivityProposedMailer.activity_proposed(user, user.confirmation_token, application, activity).deliver_later
+      end
     end
+
 
     application.mail_sent = true
     application.save
@@ -1293,44 +1297,51 @@ class ActivitiesApplicationsController < ApplicationController
       activity_application.update(p)
       activity_application.save!
 
-      # si l'inscription est validée et qu'on a décalé la date de début d'inscription, il faut mettre à jour les participations aux séances
-      des = activity_application.desired_activities.first
-      if des&.is_validated && p[:begin_at]
+      if p[:begin_at]
         if activity_application.begin_at > old_begin_at
           unregisterer = ActivityApplications::UnregisterStudentFromActivityInstances.new(activity_application, old_begin_at, activity_application.begin_at - 1.day)
           unregisterer.execute
-
-        else
-          registerer = Activities::RegisterStudentToActivityInstances.new(des.activity.id, des.id, false, activity_application.begin_at, old_begin_at.to_date - 1.day)
-          registerer.execute
         end
       end
-      # On supprime les participations aux séances si l'inscription prend fin
-      DuePayments::StopActivity.new(activity_application).execute if activity_application.stopped_at
 
-      if des.activity
-        # Enfin, on actualise le nombre de séances dues par l'utilisateur (parce qu'il n'a pas commencé en début de saison/terminé en fin de saison)
-        user_id = activity_application.user.id
-        des.update(
-          prorata: des.activity.calculate_prorata_for_student(user_id)
-        )
+      # si l'inscription est validée et qu'on a décalé la date de début d'inscription, il faut mettre à jour les participations aux séances
+      activity_application.desired_activities.each do |des|
+        if des&.is_validated && p[:begin_at]
+          if activity_application.begin_at <= old_begin_at
+            registerer = Activities::RegisterStudentToActivityInstances.new(des.activity.id, des.id, false, activity_application.begin_at, old_begin_at.to_date - 1.day)
+            registerer.execute
+          end
+        end
+        # On supprime les participations aux séances si l'inscription prend fin
+        DuePayments::StopActivity.new(activity_application).execute if activity_application.stopped_at
+
+        if des.activity
+          # Enfin, on actualise le nombre de séances dues par l'utilisateur (parce qu'il n'a pas commencé en début de saison/terminé en fin de saison)
+          user_id = activity_application.user.id
+          des.update(
+            prorata: des.activity.calculate_prorata_for_student(user_id)
+          )
+        end
       end
     end
 
     # Création du trigger d'envoi de mail lorsque le statut de l'inscription passe à "Proposition acceptée"
     if activity_application.activity_application_status_id == ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID
-      da_id = ActivityApplication.find(activity_application.id).desired_activities.first
-      da = DesiredActivity.find(da_id.id)
+      desired_activities = ActivityApplication.find(activity_application.id).desired_activities
 
-      EventHandler.notification.activity_accepted.trigger(
-        sender: {
-          controller_name: self.class.name,
-        },
-        args: {
-          user: User.find(activity_application.user.id),
-          activity: da.activity
-        }
-      )
+      desired_activities.each do |da|
+
+        EventHandler.notification.activity_accepted.trigger(
+          sender: {
+            controller_name: self.class.name,
+          },
+          args: {
+            user: User.find(activity_application.user.id),
+            activity: da.activity
+          }
+        )
+      end
+
     end
 
     activity_application.reason_of_refusal = params[:reason_of_refusal]
