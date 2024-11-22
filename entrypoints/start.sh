@@ -8,4 +8,4 @@ fi
 
 export kube_env=start
 
-bundle exec rails s -b 0.0.0.0 -p 80
+bundle exec rails s -b 0.0.0.0

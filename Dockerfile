@@ -121,7 +121,8 @@ RUN adduser -Ds /bin/sh elvis
 RUN apk update
 
 # ~ 34mb => pdf generation
-RUN apk add --no-interactive libpq bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
+RUN apk add --no-interactive libpq libcap bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
+RUN setcap 'cap_net_bind_service=+ep' /usr/local/bin/ruby
 
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 
