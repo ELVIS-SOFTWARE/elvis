@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_11_21_140118) do
+ActiveRecord::Schema.define(version: 2024_11_22_085825) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -88,6 +88,7 @@ ActiveRecord::Schema.define(version: 2024_11_21_140118) do
     t.datetime "begin_at"
     t.string "reason_of_refusal"
     t.datetime "mail_sent_at"
+    t.integer "formule_id"
     t.index ["activity_application_status_id"], name: "index_activity_applications_on_activity_application_status_id"
     t.index ["deleted_at"], name: "index_activity_applications_on_deleted_at"
     t.index ["user_id"], name: "index_activity_applications_on_user_id"
@@ -1293,6 +1294,7 @@ ActiveRecord::Schema.define(version: 2024_11_21_140118) do
   end
 
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activity_applications", "formules"
   add_foreign_key "activity_instances", "activities"
   add_foreign_key "activity_instances", "locations"
   add_foreign_key "activity_instances", "rooms"

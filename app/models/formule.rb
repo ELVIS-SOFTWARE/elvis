@@ -3,6 +3,7 @@ class Formule < ApplicationRecord
 
   has_many :formule_pricings, dependent: :destroy
   has_many :formule_items, dependent: :destroy
+  has_many :activity_applications
 
   has_many :activity_refs, through: :formule_items, source: :item, source_type: "ActivityRef"
   has_many :activity_ref_kinds, through: :formule_items, source: :item, source_type: "ActivityRefKind"

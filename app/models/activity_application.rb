@@ -61,6 +61,8 @@ class ActivityApplication < ApplicationRecord
 
   attribute :mail_sent, :boolean
 
+  belongs_to :formule, optional: true
+
   def self.display_class_name(singular = true)
     singular ? "demande d'inscription" : "demandes d'inscription"
   end
