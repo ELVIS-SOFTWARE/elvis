@@ -45,7 +45,8 @@ class CurrentActivityItem extends React.Component {
     // Pour les enfants, renvoie les activités suivantes parmi celles qui sont possibles
     // @return un tableau d'activités (ActivityRef)
     getChildActivityNextCycles() {
-        return this.props.current_activity_application.desired_activities[0].activity_ref.next_cycles;
+        const desired_activities = this.props.current_activity_application.desired_activities;
+        return (desired_activities.find(d => d.id === this.props.data.id) || desired_activities[0]).activity_ref.next_cycles;
     }
 
     // Pour les enfants, renvoie l'activité suivante pour l'année prochaine (s'il n'y en a qu'une possible)
