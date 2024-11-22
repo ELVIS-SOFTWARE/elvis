@@ -12,5 +12,5 @@ do
   DOCKER_BUILD_ARGS="$DOCKER_BUILD_ARGS --build-arg ${VAR#dockerhub_}"
 done
 
-docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN $DOCKER_BUILD_ARGS -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+docker build --provenance=mode=min --build-arg GITHUB_TOKEN=$GITHUB_TOKEN $DOCKER_BUILD_ARGS -f $DOCKERFILE_PATH -t $IMAGE_NAME .
 
