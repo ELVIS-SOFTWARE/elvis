@@ -141,6 +141,8 @@ USER elvis
 
 EXPOSE 80
 
+MAINTAINER "Elvis Team"
+
 RUN chmod u+x /Elvis/entrypoints/*.sh
 
 ENTRYPOINT ["/Elvis/entrypoints/start.sh"]
