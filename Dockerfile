@@ -32,7 +32,7 @@ RUN apk add --no-interactive \
     jemalloc \
     py3-setuptools
 
-#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 
 RUN gem install bundler
 
@@ -123,14 +123,12 @@ RUN apk update
 # ~ 34mb => pdf generation
 RUN apk add --no-interactive libpq bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
 
-COPY --from=build /usr/bin/node /usr/bin/
-
-#ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 
 RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT
 
-# ~ 560mb => too big ?
+# ~ 560mb => with 450mb for wkhtmltopdf-binary
 COPY --from=build /usr/local/bundle /usr/local/bundle
 
 # ~ 50mb => because of bootsnap precompile. It is bigger for more speed
