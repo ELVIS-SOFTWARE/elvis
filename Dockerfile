@@ -42,7 +42,10 @@ RUN bundle config set force_ruby_platform true
 COPY Gemfile /Elvis/
 COPY lib /Elvis/lib
 
-RUN PLUGINS_LIST_DOWNLOAD_URL=$PLUGINS_LIST_DOWNLOAD_URL RAILS_ENV=kubernetes bundle install
+ENV RAILS_ENV=kubernetes
+ENV SECRET_KEY_BASE $(bundle exec rails secret)
+
+RUN PLUGINS_LIST_DOWNLOAD_URL=$PLUGINS_LIST_DOWNLOAD_URL bundle install
 
 COPY package.json yarn.lock Gemfile Rakefile /Elvis/
 COPY config /Elvis/config
@@ -67,8 +70,6 @@ COPY app/assets /Elvis/app/assets
 COPY babel.config.js postcss.config.js /Elvis/
 
 # ignore error when precompiling assets
-ENV RAILS_ENV=kubernetes
-ENV SECRET_KEY_BASE $(bundle exec rails secret)
 RUN NODE_OPTIONS=--openssl-legacy-provider rails assets:precompile
 
 # copy app components/routes/initializers
@@ -116,11 +117,11 @@ ENV SECRET_KEY_BASE $(bundle exec rails secret)
 
 RUN adduser -Ds /bin/sh elvis
 
-# ~18mb
+# ~2mb
 RUN apk update
 
-# ~ 63mb => pdf generation
-RUN apk add --no-interactive bash jemalloc curl shared-mime-info postgresql-client fontconfig libxrender libxtst libxi libpng libjpeg
+# ~ 34mb => pdf generation
+RUN apk add --no-interactive libpq bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
 
 COPY --from=build /usr/bin/node /usr/bin/
 
@@ -129,7 +130,7 @@ COPY --from=build /usr/bin/node /usr/bin/
 RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT
 
-# ~ 760mb => too big ?
+# ~ 560mb => too big ?
 COPY --from=build /usr/local/bundle /usr/local/bundle
 
 # ~ 50mb => because of bootsnap precompile. It is bigger for more speed
