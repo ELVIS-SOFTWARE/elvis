@@ -105,7 +105,9 @@ const GeneralInfos = ({
                             else
                                 mutators.changeBirthDate(null);
                         }}
-                        className="form-control"
+                        className="form-control datepicker"
+                        wrapperClassName="w-100"
+
                     />
 
                     {birthday && <p className="help-block">{toAge(birthday)}</p>}
