@@ -630,4 +630,11 @@ Rails.application.routes.draw do
   put "/activity_ref_pricings/:id", to: "activity_ref_pricing#update"
   delete "/activity_ref_pricings/:id", to: "activity_ref_pricing#destroy"
 
+  #  ===================
+  # FORMULES
+  #  ===================
+
+  resources :formules
+
+
 end
