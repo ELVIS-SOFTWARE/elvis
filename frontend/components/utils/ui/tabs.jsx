@@ -49,11 +49,10 @@ export default function TabbedComponent({ tabs: tabsProps , mode: modeProps, def
                                 onClick={() => handleTabClick(i)}
                                 style={{
                                     ...(t.headerStyle || {}),
-                                    backgroundColor: tabErrorState[t.id] || t.isInError ? "#ea4545" : "",
                                 }}
                                 href={`#${t.id}`}
                             >
-                                {t.header}
+                                {t.header} {tabErrorState[t.id] || t.isInError ? <i className="fa fa-exclamation-circle text-danger" /> : <i className=" fa fa-check-circle text-success" />}
                             </a>
                         </li>
                     ))}
