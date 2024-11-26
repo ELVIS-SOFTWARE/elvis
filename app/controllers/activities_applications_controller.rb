@@ -136,9 +136,12 @@ class ActivitiesApplicationsController < ApplicationController
                                     .activity_applications
                                     .where(season_id: Season.current_apps_season&.id)
                                     .to_a
-                                    .filter{|a|
-                                      Abilities::ActivityApplicationAbilities.is_activity_application_concern_any_activity_ref?(a, current_user.activity_refs.pluck(:id))
-                                    }
+
+    unless current_user.is_admin
+      tmp_activities_applications = tmp_activities_applications.filter{|a|
+               Abilities::ActivityApplicationAbilities.is_activity_application_concern_any_activity_ref?(a, current_user.activity_refs.pluck(:id))
+             }
+    end
 
     @activity_application = activity_application.as_json({
                                                            include: {
