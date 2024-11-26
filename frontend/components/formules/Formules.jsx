@@ -71,11 +71,13 @@ export default function Formules() {
         <div>
             <p>Vous pouvez créer des formules pour proposer un prix pour plusieurs activités.</p>
             <div className="text-right">
-                <button className="btn btn-primary"><i className="fa fa-plus mr-2"></i>Créer une formule</button>
+                <a className="btn btn-sm btn-primary" href={"/formules/new"}>
+                    <i className="fa fa-plus mr-2"></i>Créer une formule
+                </a>
             </div>
 
             <div className="ibox mt-5">
-                <div className="ibox-content">
+                <div className="ibox-content p-5">
                     <ReactTable
                         columns={columns()}
                         data={data}
