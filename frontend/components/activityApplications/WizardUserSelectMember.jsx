@@ -117,7 +117,7 @@ export default class WizardUserSelectMember extends React.Component {
         const memberSelected = this.state.members[this.state.selected];
         const familyMemberUserForSelection = memberSelected.family_links_with_user || [];
 
-        if (userIsMinor(memberSelected) || memberSelected.id !== this.props.user.id)
+        if (userIsMinor(memberSelected))
         {
             if(familyMemberUserForSelection.filter(fl => fl.is_legal_referent).length === 0)
                 error.legal_referent = "Veuillez sélectionner un représentant légal";
@@ -231,23 +231,20 @@ export default class WizardUserSelectMember extends React.Component {
                     </div>
                 </div>
 
-                <div className="row mb-3">
+                {this.state.showError && Object.keys(this.state.error).length && <div className="row mb-3">
                     <div className="alert alert-info d-inline-flex align-items-center pt-4 pb-4"
-                         style={{border: "1px solid #0079BF", borderRadius: "12px", color: "#0079BF"}}>
+                         style={{ border: "1px solid #0079BF", borderRadius: "12px", color: "#0079BF" }}>
                         <div className="col-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
                         </div>
                         <div className="col pl-0 h5">
-                            Si le payeur n'est pas renseigné ci-dessous, ajoutez le en tant que
-                            membre. Vous
-                            pourrez ensuite
-                            l'indiquer comme payeur dans l'étape du paiement.
+                            Si la personne est mineur, ajouter un nouveau membre
                         </div>
                     </div>
-                </div>
+                </div>}
 
                 {this.state.showError && this.state.error.members && <div className="row">
-                        <p className="text-danger">{this.state.error.members}</p>
+                    <p className="text-danger">{this.state.error.members}</p>
                 </div>}
 
                 <div className="row mb-4">
@@ -255,7 +252,7 @@ export default class WizardUserSelectMember extends React.Component {
                         maxSelected={1}
                         childrenContent={members.map((member, i) => renderUserItem(user.id, member, i, selected === i))}
                         selected={[selected]}
-                        onChange={selecteds => selecteds.length > 0 ? this.setState({selected: selecteds[0]}) : 0}
+                        onChange={selecteds => selecteds.length > 0 ? this.setState({ selected: selecteds[0] }) : 0}
                         buttonStyles={{
                             maxWidth: "200px", // max width unset by toggle-button-w-100-sm css class in small screens
                             width: "100%",
@@ -281,7 +278,7 @@ export default class WizardUserSelectMember extends React.Component {
                             <div className="mb-4">
                                 <label style={{ color: "#003E5C" }}>
                                     Représentant légal
-                                    {userIsMinor(members[this.state.selected]) || members[this.state.selected].id !== user.id ? <span className="text-danger">*</span> : ""}
+                                    {userIsMinor(members[this.state.selected]) ? <span className="text-danger">*</span> : ""}
                                 </label>
                                 <FamilyLinkSelector
                                     familyLinks={virtualFamilyLinks}

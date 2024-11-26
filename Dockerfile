@@ -141,7 +141,7 @@ USER elvis
 
 EXPOSE 80
 
-MAINTAINER "Elvis Team"
+LABEL maintainer="Elvis Team"
 
 RUN chmod u+x /Elvis/entrypoints/*.sh
 
