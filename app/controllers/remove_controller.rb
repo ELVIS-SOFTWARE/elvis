@@ -56,7 +56,7 @@ class RemoveController < ApplicationController
         DestroyJob.perform_now(classname: @classname.name, object: element, selected_dep_to_destroy: params[:selected_dep_to_destroy])
       end
     end.subscribe(to: ["Event#{@classname.name}DestroyEnded".constantize]) do |event|
-      obj_id = event.data[:objId]
+      obj_id = event.data[:args][:objId]
 
       endedDestroyElements << {
         id: obj_id,
