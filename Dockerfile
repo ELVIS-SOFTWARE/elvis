@@ -92,6 +92,7 @@ RUN rm -rf .git
 
 COPY entrypoints /Elvis/entrypoints
 COPY config.ru /Elvis/
+COPY storage /Elvis/storage
 
 RUN rm -r /usr/local/bundle/cache
 
