@@ -222,10 +222,16 @@ body {
 
 .form-control-small {
     min-width: 100px;
+    border-radius: 8px;
 }
 
 .form-control-medium {
     min-width: 150px;
+    border-radius: 8px;
+}
+
+.form-control{
+    border-radius: 8px;
 }
 
 
@@ -725,7 +731,7 @@ body {
 
     .form-control {
         padding-left: 30px;
-        border-radius: 4px;
+        border-radius: 8px;
         height: 100%;
         transition: .3s all ease;
 

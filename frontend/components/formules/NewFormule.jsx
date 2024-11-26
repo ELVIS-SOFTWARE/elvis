@@ -140,14 +140,8 @@ export default function NewFormule() {
                                     value: selectedActivities,
                                 }}
                                 meta={{}}
-                                label="Activité"
-                                required={true}
                                 options={displayActivities()}
-                                button={{
-                                    icon: "fa fa-plus-circle",
-                                    text: "",
-                                    tooltip: "Ajouter une activité",
-                                }}
+                                inline={true}
                             />
                         </div>
                         <div className="form-group mb-5">
