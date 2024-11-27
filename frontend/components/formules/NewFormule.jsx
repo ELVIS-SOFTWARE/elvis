@@ -45,7 +45,6 @@ export default function NewFormule() {
         nbActivitiesToSelect: '',
     });
 
-
     async function fetchActivities() {
         try {
             await api.set()
@@ -80,6 +79,30 @@ export default function NewFormule() {
         fetchActivities();
         fetchActivityRefKind();
     }, []);
+
+    const displayActivities = () => {
+        const familyOptions = activityRefKind.map(kind => ({
+            label: `${kind.name}`,
+            value: `family-${kind.id}`,
+            isFamily: true,
+            activities: activities
+                .filter(activity => activity.activity_ref_kind_id === kind.id)
+                .map(activity => ({
+                    label: activity.label,
+                    value: `activity-${activity.id}`,
+                    isFamily: false,
+                })),
+        }));
+
+        return familyOptions.reduce((acc, family) => {
+            acc.push({
+                ...family,
+                activities: family.activities, // Inclure les activités sous la famille
+            });
+            family.activities.forEach(activity => acc.push(activity));
+            return acc;
+        }, []);
+    };
 
     const handleActivityChange = (selectedOptions) => {
         if (!selectedOptions) {
@@ -116,30 +139,6 @@ export default function NewFormule() {
         }));
     };
 
-    const displayActivities = () => {
-        const familyOptions = activityRefKind.map(kind => ({
-            label: `${kind.name}`,
-            value: `family-${kind.id}`,
-            isFamily: true,
-            activities: activities
-                .filter(activity => activity.activity_ref_kind_id === kind.id)
-                .map(activity => ({
-                    label: activity.label,
-                    value: `activity-${activity.id}`,
-                    isFamily: false,
-                })),
-        }));
-
-        return familyOptions.reduce((acc, family) => {
-            acc.push({
-                ...family,
-                activities: family.activities, // Inclure les activités sous la famille
-            });
-            family.activities.forEach(activity => acc.push(activity));
-            return acc;
-        }, []);
-    };
-
     const handleNbActivitiesToSelectChange = (e) => {
         const value = e.target.value;
         if (value === '') {
@@ -161,7 +160,7 @@ export default function NewFormule() {
         }
     };
 
-    const handleValidate = () => {
+    const handleValidateModal = () => {
         let errors = {
             selectedActivities: '',
             nbActivitiesToSelect: ''
@@ -207,17 +206,16 @@ export default function NewFormule() {
                                     Ajouter une activité
                                 </button>
                             </div>
-                            {selectedActivities.map(activity => (
-
-                                <div key={activity.value}
-                                     className="d-inline-flex justify-content-between w-100 mt-5">
-                                    <div>
-                                        <label htmlFor="activites">{activity.label}</label>
-                                    </div>
-                                </div>
-                            ))}
 
                         </div>
+                        {selectedActivities.map(activity => (
+
+                            <div key={activity.value} className="form-group mt-3 m-0">
+                                <div className="form-control d-inline-flex align-items-center justify-content-between p-5">
+                                    <label style={{color: "#00334A"}}>{activity.label}</label>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -228,15 +226,8 @@ export default function NewFormule() {
                 </div>
             </form>
 
-            <Modal
-                isOpen={modalIsOpen}
-                onRequestClose={handleCloseModal}
-                contentLabel="addActivityModal"
-                className="Modal p-3"
-            >
-                <button type="button" className="close" onClick={handleCloseModal}>
-                    &times;
-                </button>
+            <Modal isOpen={modalIsOpen}  contentLabel="addActivityModal" className="Modal p-3">
+                <button type="button" className="close" onClick={handleCloseModal}>&times;</button>
 
                 <div className="row m-5">
                     <h2 className="m-0">Ajouter des activités à une formule</h2>
@@ -270,7 +261,7 @@ export default function NewFormule() {
                     </div>
                 </div>
                 <div className="row text-right m-5">
-                    <button className="btn btn-primary" onClick={handleValidate}>Valider</button>
+                    <button className="btn btn-primary" onClick={handleValidateModal}>Valider</button>
                 </div>
             </Modal>
         </div>
