@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Modal from "react-modal";
 import * as api from "../../tools/api";
 import swal from "sweetalert2";
-import { default as ReactSelect, components } from "react-select";
+import {default as ReactSelect, components} from "react-select";
 
 const Option = (props) => {
-    const { data, isSelected } = props;
+    const {data, isSelected} = props;
 
     return (
         <components.Option {...props}>
             {data.isFamily ? (
-                <div style={{ fontWeight: "bold", color: "rgb(0, 111.3073298429, 175.7)" }}>
+                <div style={{fontWeight: "bold"}}>
                     <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => null} // Ne pas modifier ici, gestion via handleActivityChange
-                        style={{ marginRight: "10px" }}
+                        onChange={() => null}
+                        style={{marginRight: "10px"}}
                     />
                     {data.label}
                 </div>
@@ -24,8 +24,8 @@ const Option = (props) => {
                     <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => null} // Ne pas modifier ici, gestion via handleActivityChange
-                        style={{ marginRight: "10px" }}
+                        onChange={() => null}
+                        style={{marginRight: "10px"}}
                     />
                     {data.label}
                 </div>
@@ -39,7 +39,12 @@ export default function NewFormule() {
     const [activities, setActivities] = useState([]);
     const [activityRefKind, setActivityRefKind] = useState([]);
     const [selectedActivities, setSelectedActivities] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [nbActivitiesToSelect, setNbActivitiesToSelect] = useState(0);
+    const [validationError, setValidationError] = useState({
+        selectedActivities: '',
+        nbActivitiesToSelect: '',
+    });
+
 
     async function fetchActivities() {
         try {
@@ -78,15 +83,17 @@ export default function NewFormule() {
 
     const handleActivityChange = (selectedOptions) => {
         if (!selectedOptions) {
-            setSelectedActivities([]); // Réinitialiser si aucune option n'est sélectionnée
+            setSelectedActivities([]);
+            setValidationError(prevState => ({
+                ...prevState,
+                selectedActivities: 'Veuillez sélectionner au moins une activité.'
+            }));
             return;
         }
-
         const selected = [];
 
         selectedOptions.forEach(option => {
-            if (option.isFamily) {
-                // Ajouter toutes les activités de la famille sélectionnée
+            if (option.isFamily) {   // Ajouter toutes les activités de la famille sélectionnée
                 const familyActivities = activities
                     .filter(activity => `family-${activity.activity_ref_kind_id}` === option.value)
                     .map(activity => ({
@@ -94,78 +101,114 @@ export default function NewFormule() {
                         value: `activity-${activity.id}`,
                     }));
                 selected.push(...familyActivities);
-            } else {
-                // Ajouter une activité spécifique
+            } else {// Ajouter une activité spécifique
                 selected.push(option);
             }
         });
-
-        // Supprimer les doublons (en utilisant Map pour éviter les duplications)
         const uniqueSelectedActivities = Array.from(
             new Map(selected.map(item => [item.value, item])).values()
         );
 
         setSelectedActivities(uniqueSelectedActivities);
+        setValidationError(prevState => ({
+            ...prevState,
+            selectedActivities: ''
+        }));
     };
 
     const displayActivities = () => {
-        // Construire les options pour les familles et leurs activités
         const familyOptions = activityRefKind.map(kind => ({
             label: `${kind.name}`,
-            value: `family-${kind.id}`, // Identifiant unique pour chaque famille
-            isFamily: true, // Marquer comme famille
+            value: `family-${kind.id}`,
+            isFamily: true,
             activities: activities
                 .filter(activity => activity.activity_ref_kind_id === kind.id)
                 .map(activity => ({
                     label: activity.label,
                     value: `activity-${activity.id}`,
-                    isFamily: false, // Marquer comme activité
+                    isFamily: false,
                 })),
         }));
 
-        // Affichage des familles d'abord, puis des activités individuelles
         return familyOptions.reduce((acc, family) => {
             acc.push({
                 ...family,
                 activities: family.activities, // Inclure les activités sous la famille
             });
-
-            // Ajouter les activités indépendantes sous les familles correspondantes
             family.activities.forEach(activity => acc.push(activity));
-
             return acc;
         }, []);
     };
+
+    const handleNbActivitiesToSelectChange = (e) => {
+        const value = e.target.value;
+        if (value === '') {
+            setValidationError(prevState => ({
+                ...prevState,
+                nbActivitiesToSelect: 'Le champ ne peut pas être vide.'
+            }));
+        } else if (!isNaN(value)) {
+            setNbActivitiesToSelect(Number(value));
+            setValidationError(prevState => ({
+                ...prevState,
+                nbActivitiesToSelect: ''
+            }));
+        } else {
+            setValidationError(prevState => ({
+                ...prevState,
+                nbActivitiesToSelect: 'Veuillez entrer un nombre valide.'
+            }));
+        }
+    };
+
+    const handleValidate = () => {
+        let errors = {
+            selectedActivities: '',
+            nbActivitiesToSelect: ''
+        };
+        if (selectedActivities.length === 0) {
+            errors.selectedActivities = 'Veuillez sélectionner au moins une activité.';
+        }
+        if (nbActivitiesToSelect === 0) {
+            errors.nbActivitiesToSelect = 'Veuillez entrer un nombre valide.';
+        }
+        setValidationError(errors);
+    };
+
 
     return (
         <div className="row p-2">
             <form>
                 <div className="row">
                     <div className="col-md-6 col-xs-12">
-                        {/* Nom de la formule */}
                         <div className="form-group mb-5">
                             <label htmlFor="nom">Nom de la formule</label>
                             <input type="text" className="form-control" id="nom" placeholder="Nom de la formule"/>
                         </div>
-                        {/* Description */}
                         <div className="form-group mb-5">
                             <label htmlFor="description">Description</label>
                             <textarea className="form-control" id="description"/>
                         </div>
-                        {/* Activités */}
                         <div className="d-inline-flex justify-content-between w-100 mt-5">
                             <div>
                                 <label htmlFor="activites">Activités</label>
                             </div>
                             <div>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    onClick={() => setModalIsOpen(true)}
-                                >
+                                <button type="button" className="btn btn-primary"
+                                        onClick={() => setModalIsOpen(true)}>
                                     Ajouter une activité
                                 </button>
                             </div>
+                            {selectedActivities.map(activity => (
+
+                                <div key={activity.value}
+                                     className="d-inline-flex justify-content-between w-100 mt-5">
+                                    <div>
+                                        <label htmlFor="activites">{activity.label}</label>
+                                    </div>
+                                </div>
+                            ))}
+
                         </div>
                     </div>
                 </div>
@@ -177,7 +220,6 @@ export default function NewFormule() {
                 </div>
             </form>
 
-            {/* Modal Ajouter Activité */}
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={() => setModalIsOpen(false)}
@@ -190,7 +232,6 @@ export default function NewFormule() {
 
                 <div className="row m-5">
                     <h2 className="m-0">Ajouter des activités à une formule</h2>
-
                     <div className="mt-5">
                         <div className="form-group mb-5">
                             <label htmlFor="activites">Sélectionner une famille ou des activités</label>
@@ -198,20 +239,30 @@ export default function NewFormule() {
                                 options={displayActivities()}
                                 isMulti={true}
                                 isClearable={true}
-                                components={{ Option }}
+                                components={{Option}}
                                 value={selectedActivities}
                                 onChange={handleActivityChange}
                                 closeMenuOnSelect={false}
                             />
+                            {validationError.selectedActivities &&
+                                <div className="text-danger">{validationError.selectedActivities}</div>}
                         </div>
                         <div className="form-group mb-5">
-                            <label htmlFor="activitiesToSelect">Nombre d'activités à choisir parmi les activités sélectionnées</label>
-                            <input type="text" className="form-control" id="activitiesToSelect"/>
+                            <label htmlFor="activitiesToSelect">Nombre d'activités à choisir parmi les activités
+                                sélectionnées</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="activitiesToSelect"
+                                onChange={handleNbActivitiesToSelectChange}
+                            />
+                            {validationError.nbActivitiesToSelect &&
+                                <div className="text-danger">{validationError.nbActivitiesToSelect}</div>}
                         </div>
                     </div>
                 </div>
                 <div className="row text-right m-5">
-                    <button type="submit" className="btn btn-primary">Valider</button>
+                    <button className="btn btn-primary" onClick={handleValidate}>Valider</button>
                 </div>
             </Modal>
         </div>
