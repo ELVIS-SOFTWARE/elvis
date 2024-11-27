@@ -1,22 +1,35 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from "react-modal";
 import * as api from "../../tools/api";
 import swal from "sweetalert2";
-import {default as ReactSelect, components} from "react-select";
+import { default as ReactSelect, components } from "react-select";
 
 const Option = (props) => {
-    const handleClick = () => {
-        props.selectOption(props.data);
-    };
+    const { data, isSelected } = props;
 
     return (
         <components.Option {...props}>
-            <input
-                type="checkbox"
-                checked={props.isSelected}
-                onChange={() => null}
-            />
-            <label>{props.label}</label>
+            {data.isFamily ? (
+                <div style={{ fontWeight: "bold", color: "rgb(0, 111.3073298429, 175.7)" }}>
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => null} // Ne pas modifier ici, gestion via handleActivityChange
+                        style={{ marginRight: "10px" }}
+                    />
+                    {data.label}
+                </div>
+            ) : (
+                <div className="ml-3">
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => null} // Ne pas modifier ici, gestion via handleActivityChange
+                        style={{ marginRight: "10px" }}
+                    />
+                    {data.label}
+                </div>
+            )}
         </components.Option>
     );
 };
@@ -28,7 +41,6 @@ export default function NewFormule() {
     const [selectedActivities, setSelectedActivities] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Récupérer les données des activités
     async function fetchActivities() {
         try {
             await api.set()
@@ -44,7 +56,6 @@ export default function NewFormule() {
         }
     }
 
-    // Récupérer les familles d'activités
     async function fetchActivityRefKind() {
         try {
             await api.set()
@@ -65,25 +76,65 @@ export default function NewFormule() {
         fetchActivityRefKind();
     }, []);
 
-
-    // Mise à jour des activités sélectionnées
     const handleActivityChange = (selectedOptions) => {
-        setSelectedActivities(selectedOptions || []);
+        if (!selectedOptions) {
+            setSelectedActivities([]); // Réinitialiser si aucune option n'est sélectionnée
+            return;
+        }
+
+        const selected = [];
+
+        selectedOptions.forEach(option => {
+            if (option.isFamily) {
+                // Ajouter toutes les activités de la famille sélectionnée
+                const familyActivities = activities
+                    .filter(activity => `family-${activity.activity_ref_kind_id}` === option.value)
+                    .map(activity => ({
+                        label: activity.label,
+                        value: `activity-${activity.id}`,
+                    }));
+                selected.push(...familyActivities);
+            } else {
+                // Ajouter une activité spécifique
+                selected.push(option);
+            }
+        });
+
+        // Supprimer les doublons (en utilisant Map pour éviter les duplications)
+        const uniqueSelectedActivities = Array.from(
+            new Map(selected.map(item => [item.value, item])).values()
+        );
+
+        setSelectedActivities(uniqueSelectedActivities);
     };
 
-
-    // Affichage des activités regroupées par famille
     const displayActivities = () => {
-        return activityRefKind.map(kind => ({
-            label: kind.name,
-            id: kind.id,
-            options: activities
+        // Construire les options pour les familles et leurs activités
+        const familyOptions = activityRefKind.map(kind => ({
+            label: `${kind.name}`,
+            value: `family-${kind.id}`, // Identifiant unique pour chaque famille
+            isFamily: true, // Marquer comme famille
+            activities: activities
                 .filter(activity => activity.activity_ref_kind_id === kind.id)
                 .map(activity => ({
                     label: activity.label,
-                    value: activity.id,
+                    value: `activity-${activity.id}`,
+                    isFamily: false, // Marquer comme activité
                 })),
         }));
+
+        // Affichage des familles d'abord, puis des activités individuelles
+        return familyOptions.reduce((acc, family) => {
+            acc.push({
+                ...family,
+                activities: family.activities, // Inclure les activités sous la famille
+            });
+
+            // Ajouter les activités indépendantes sous les familles correspondantes
+            family.activities.forEach(activity => acc.push(activity));
+
+            return acc;
+        }, []);
     };
 
     return (
@@ -147,15 +198,14 @@ export default function NewFormule() {
                                 options={displayActivities()}
                                 isMulti={true}
                                 isClearable={true}
-                                components={{Option}}
+                                components={{ Option }}
                                 value={selectedActivities}
                                 onChange={handleActivityChange}
                                 closeMenuOnSelect={false}
                             />
                         </div>
                         <div className="form-group mb-5">
-                            <label htmlFor="activitiesToSelect">Nombre d'activités à choisir parmi les activités
-                                sélectionnées</label>
+                            <label htmlFor="activitiesToSelect">Nombre d'activités à choisir parmi les activités sélectionnées</label>
                             <input type="text" className="form-control" id="activitiesToSelect"/>
                         </div>
                     </div>
