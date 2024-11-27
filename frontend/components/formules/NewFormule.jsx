@@ -1,19 +1,35 @@
 import React, {useEffect, useState} from 'react';
 import Modal from "react-modal";
-import InputSelect from "../common/InputSelect";
 import * as api from "../../tools/api";
 import swal from "sweetalert2";
+import {default as ReactSelect, components} from "react-select";
+
+const Option = (props) => {
+    const handleClick = () => {
+        props.selectOption(props.data);
+    };
+
+    return (
+        <components.Option {...props}>
+            <input
+                type="checkbox"
+                checked={props.isSelected}
+                onChange={() => null}
+            />
+            <label>{props.label}</label>
+        </components.Option>
+    );
+};
 
 export default function NewFormule() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [activities, setActivities] = useState([]);
     const [activityRefKind, setActivityRefKind] = useState([]);
     const [selectedActivities, setSelectedActivities] = useState([]);
-
     const [loading, setLoading] = useState(false);
 
+    // Récupérer les données des activités
     async function fetchActivities() {
-        setLoading(true);
         try {
             await api.set()
                 .success(res => {
@@ -23,16 +39,13 @@ export default function NewFormule() {
                     swal("Une erreur est survenue lors de la récupération des données", res.error, "error");
                 })
                 .get('/activity_ref');
-
         } catch (e) {
             swal("Une erreur est survenue lors de la récupération des données", e.message, "error");
-        } finally {
-            setLoading(false);
         }
     }
 
+    // Récupérer les familles d'activités
     async function fetchActivityRefKind() {
-        setLoading(true);
         try {
             await api.set()
                 .success(res => {
@@ -42,11 +55,8 @@ export default function NewFormule() {
                     swal("Une erreur est survenue lors de la récupération des données", res.error, "error");
                 })
                 .get('/activity_ref_kind');
-
         } catch (e) {
             swal("Une erreur est survenue lors de la récupération des données", e.message, "error");
-        } finally {
-            setLoading(false);
         }
     }
 
@@ -55,55 +65,57 @@ export default function NewFormule() {
         fetchActivityRefKind();
     }, []);
 
-    function displayActivities() {
-        return activityRefKind.map((kind) => {
-            return {
-                label: kind.name,
-                options: [
-                    {
-                        label: `Famille: ${kind.name}`,
-                        value: `famille-${kind.id}`
-                    },
-                    ...activities
-                        .filter(activity => activity.activity_ref_kind_id === kind.id)
-                        .map(activity => ({
-                            label: activity.label,
-                            value: activity.id
-                        }))
-                ]
-            };
-        });
-    }
 
+    // Mise à jour des activités sélectionnées
+    const handleActivityChange = (selectedOptions) => {
+        setSelectedActivities(selectedOptions || []);
+    };
+
+
+    // Affichage des activités regroupées par famille
+    const displayActivities = () => {
+        return activityRefKind.map(kind => ({
+            label: kind.name,
+            id: kind.id,
+            options: activities
+                .filter(activity => activity.activity_ref_kind_id === kind.id)
+                .map(activity => ({
+                    label: activity.label,
+                    value: activity.id,
+                })),
+        }));
+    };
 
     return (
         <div className="row p-2">
-
             <form>
                 <div className="row">
                     <div className="col-md-6 col-xs-12">
-                        {/*--------------------------------NOM DE LA FORMULE------------------------------------------*/}
+                        {/* Nom de la formule */}
                         <div className="form-group mb-5">
                             <label htmlFor="nom">Nom de la formule</label>
                             <input type="text" className="form-control" id="nom" placeholder="Nom de la formule"/>
                         </div>
-                        {/*--------------------------------DESCRIPTION------------------------------------------*/}
+                        {/* Description */}
                         <div className="form-group mb-5">
-                            <label htmlFor="activites">Description</label>
+                            <label htmlFor="description">Description</label>
                             <textarea className="form-control" id="description"/>
                         </div>
-                        {/*--------------------------------ACTIVITES------------------------------------------*/}
+                        {/* Activités */}
                         <div className="d-inline-flex justify-content-between w-100 mt-5">
                             <div>
                                 <label htmlFor="activites">Activités</label>
                             </div>
                             <div>
-                                <button type="button" className="btn btn-primary"
-                                        onClick={() => setModalIsOpen(true)}>Ajouter une activité
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => setModalIsOpen(true)}
+                                >
+                                    Ajouter une activité
                                 </button>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -114,7 +126,7 @@ export default function NewFormule() {
                 </div>
             </form>
 
-            {/*    ----------------------MODAL ADD ACTIVITY------------------------------*/}
+            {/* Modal Ajouter Activité */}
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={() => setModalIsOpen(false)}
@@ -130,32 +142,28 @@ export default function NewFormule() {
 
                     <div className="mt-5">
                         <div className="form-group mb-5">
-                            <label htmlFor="nom">Sélectionner une famille ou des activités</label>
-                            <InputSelect
-                                input={{
-                                    name: "selectedActivities",
-                                    onChange: e => this.handleChange({
-                                        selectedActivities: e.target.value,
-                                    }),
-                                    value: selectedActivities,
-                                }}
-                                meta={{}}
+                            <label htmlFor="activites">Sélectionner une famille ou des activités</label>
+                            <ReactSelect
                                 options={displayActivities()}
-                                inline={true}
+                                isMulti={true}
+                                isClearable={true}
+                                components={{Option}}
+                                value={selectedActivities}
+                                onChange={handleActivityChange}
+                                closeMenuOnSelect={false}
                             />
                         </div>
                         <div className="form-group mb-5">
-                            <label htmlFor="activites">Nombre d'activités à choisir parmi les activités
+                            <label htmlFor="activitiesToSelect">Nombre d'activités à choisir parmi les activités
                                 sélectionnées</label>
                             <input type="text" className="form-control" id="activitiesToSelect"/>
                         </div>
                     </div>
                 </div>
-                <div className="row text-right m-5 ">
+                <div className="row text-right m-5">
                     <button type="submit" className="btn btn-primary">Valider</button>
                 </div>
             </Modal>
-
         </div>
     );
 }
