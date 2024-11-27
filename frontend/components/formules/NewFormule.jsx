@@ -173,8 +173,16 @@ export default function NewFormule() {
             errors.nbActivitiesToSelect = 'Veuillez entrer un nombre valide.';
         }
         setValidationError(errors);
+        if (!errors.selectedActivities && !errors.nbActivitiesToSelect) {
+            setModalIsOpen(false);
+        }
     };
 
+    const handleCloseModal = () => {
+        setSelectedActivities([]);
+        setNbActivitiesToSelect(0);
+        setModalIsOpen(false);
+    };
 
     return (
         <div className="row p-2">
@@ -222,11 +230,11 @@ export default function NewFormule() {
 
             <Modal
                 isOpen={modalIsOpen}
-                onRequestClose={() => setModalIsOpen(false)}
+                onRequestClose={handleCloseModal}
                 contentLabel="addActivityModal"
                 className="Modal p-3"
             >
-                <button type="button" className="close" onClick={() => setModalIsOpen(false)}>
+                <button type="button" className="close" onClick={handleCloseModal}>
                     &times;
                 </button>
 
