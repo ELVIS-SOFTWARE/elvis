@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 import Modal from "react-modal";
 import * as api from "../../tools/api";
 import swal from "sweetalert2";
-import {default as ReactSelect, components} from "react-select";
+import Select, {default as ReactSelect, components} from "react-select";
+import ReactTable from "react-table";
 
 const Option = (props) => {
     const {data, isSelected} = props;
@@ -35,14 +36,26 @@ const Option = (props) => {
 };
 
 export default function NewFormule() {
-    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [activityModalIsOpen, setActivityModalIsOpen] = useState(false);
+    const [priceModalIsOpen, setPriceModalIsOpen] = useState(false);
     const [activities, setActivities] = useState([]);
     const [activityRefKind, setActivityRefKind] = useState([]);
+    const [seasons, setSeasons] = useState([]);
+    const [pricingCategories, setPricingCategories] = useState([]);
     const [selectedActivities, setSelectedActivities] = useState([]);
     const [nbActivitiesToSelect, setNbActivitiesToSelect] = useState(0);
+    const [formulePrices, setFormulePrices] = useState({
+        priceCategory: '',
+        price: '',
+        from: '',
+        to: ''
+    });
     const [validationError, setValidationError] = useState({
         selectedActivities: '',
         nbActivitiesToSelect: '',
+        priceCategory: '',
+        price: '',
+        from: ''
     });
 
     async function fetchActivities() {
@@ -75,12 +88,31 @@ export default function NewFormule() {
         }
     }
 
+    async function fetchSeasonsAndPricings() {
+        try {
+            await api.set()
+                .success(res => {
+                    setSeasons(res.seasons);
+                    setPricingCategories(res.pricing_categories);
+                })
+                .error(res => {
+                    swal("Une erreur est survenue lors de la récupération des saisons ou des catégories de prix", res.error, "error");
+                })
+                .get("/activity_ref_pricings/get_seasons_and_pricing_categories", {});
+        } catch (e) {
+            swal("Une erreur est survenue lors de la récupération des saisons ou des catégories de prix", e.message, "error");
+        }
+
+    }
+
     useEffect(() => {
         fetchActivities();
         fetchActivityRefKind();
+        fetchSeasonsAndPricings();
     }, []);
 
-    const displayActivities = () => {
+    // --------------------------------- Gestion des activités ---------------------------------
+    function displayActivities() {
         const familyOptions = activityRefKind.map(kind => ({
             label: `${kind.name}`,
             value: `family-${kind.id}`,
@@ -102,9 +134,9 @@ export default function NewFormule() {
             family.activities.forEach(activity => acc.push(activity));
             return acc;
         }, []);
-    };
+    }
 
-    const handleActivityChange = (selectedOptions) => {
+    function handleActivityChange(selectedOptions) {
         if (!selectedOptions) {
             setSelectedActivities([]);
             setValidationError(prevState => ({
@@ -137,9 +169,9 @@ export default function NewFormule() {
             ...prevState,
             selectedActivities: ''
         }));
-    };
+    }
 
-    const handleNbActivitiesToSelectChange = (e) => {
+    function handleNbActivitiesToSelectChange(e) {
         const value = e.target.value;
         if (value === '') {
             setValidationError(prevState => ({
@@ -158,9 +190,9 @@ export default function NewFormule() {
                 nbActivitiesToSelect: 'Veuillez entrer un nombre valide.'
             }));
         }
-    };
+    }
 
-    const handleValidateModal = () => {
+    function handleValidateActivityModal() {
         let errors = {
             selectedActivities: '',
             nbActivitiesToSelect: ''
@@ -173,18 +205,141 @@ export default function NewFormule() {
         }
         setValidationError(errors);
         if (!errors.selectedActivities && !errors.nbActivitiesToSelect) {
-            setModalIsOpen(false);
+            setActivityModalIsOpen(false);
         }
-    };
+    }
 
-    const handleCloseModal = () => {
+    function handleCloseActivityModal() {
         setSelectedActivities([]);
         setNbActivitiesToSelect(0);
-        setModalIsOpen(false);
-    };
+        setActivityModalIsOpen(false);
+    }
 
-    const handleDeleteActivity = (activityValue) => {
+    function handleDeleteActivity(activityValue) {
         setSelectedActivities(selectedActivities.filter(activity => activity.value !== activityValue));
+    }
+
+    // ------------------------------------------------------------------------------
+
+    // --------------------------------- Gestion des tarifs ---------------------------------
+
+  function displayFormulePrices() {
+    return [
+        {
+            id: "name",
+            Header: "Nom",
+            accessor: d => d.pricingCategory,
+        },
+        {
+            id: "price",
+            Header: "Tarif en €",
+            accessor: d => d.price,
+        },
+        {
+            id: "from",
+            Header: "Saisons concernées",
+            accessor: d => {
+                if (d.to) {
+                    return `${d.from} - ${d.to}`;
+                } else {
+                    return d.from;
+                }
+            }
+        },
+        {
+            id: "actions",
+            Header: "Actions",
+            Cell: props => {
+                return (
+                    <div className="btn-wrapper">
+                        <a className="btn-sm btn-primary m-r-sm" href={'/formules/' + props.original.id + "/edit"}>
+                            <i className="fas fa-edit"/>
+                        </a>
+                        <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
+                            <i className="fas fa-trash"/>
+                        </a>
+                    </div>
+                );
+            },
+            sortable: false,
+            filterable: false,
+        }
+    ];
+}
+
+
+    function displayPricingCategories() {
+        return pricingCategories.map(category => ({
+            label: category.name,
+            value: category.id
+        }));
+    }
+
+    function displaySeasons() {
+        return seasons.map(season => ({
+            label: season.label,
+            value: season.id
+        }));
+    }
+
+    function handlePriceChange(e) {
+        const value = e.target.value;
+        if (value === '') {
+            setValidationError(prevState => ({
+                ...prevState,
+                price: 'Le champ ne peut pas être vide.'
+            }));
+        } else if (!isNaN(value)) {
+            setFormulePrices(prevState => ({
+                ...prevState,
+                price: value
+            }));
+            setValidationError(prevState => ({
+                ...prevState,
+                price: ''
+            }));
+        } else {
+            setValidationError(prevState => ({
+                ...prevState,
+                price: 'Veuillez entrer un prix valide.'
+            }));
+        }
+    }
+    function handleValidatePriceModal() {
+
+        let errors = {
+            priceCategory: '',
+            price: '',
+            from: ''
+        };
+
+        if (!formulePrices.priceCategory) {
+            errors.priceCategory = 'Veuillez sélectionner un type de tarif.';
+        }
+
+        if (!formulePrices.from) {
+            errors.from = 'Veuillez sélectionner une saison.';
+        }
+
+        setValidationError(errors);
+
+        if (!errors.priceCategory && !errors.price && !errors.from) {
+            setFormulePrices(
+                {
+                    priceCategory: formulePrices.priceCategory,
+                    price: formulePrices.price,
+                    from: formulePrices.from,
+                    to: formulePrices.to
+                }
+            )
+            setPriceModalIsOpen(false);
+        }
+
+    }
+
+    function handleClosePriceModal() {
+        setFormulePrices({price: '', from: '', to: ''})
+        setPriceModalIsOpen(false);
     }
 
     return (
@@ -192,28 +347,31 @@ export default function NewFormule() {
             <form>
                 <div className="row">
                     <div className="col-md-6 col-xs-12">
+
                         <div className="form-group mb-5">
                             <label htmlFor="nom">Nom de la formule</label>
-                            <input type="text" className="form-control" id="nom" placeholder="Nom de la formule"/>
+                            <input type="text" className="form-control" id="nom"/>
                         </div>
+
                         <div className="form-group mb-5">
                             <label htmlFor="description">Description</label>
                             <textarea className="form-control" id="description"/>
                         </div>
+
                         <div className="d-inline-flex justify-content-between w-100 mt-5">
                             <div>
                                 <label htmlFor="activites">Activités</label>
                             </div>
                             <div>
                                 <button type="button" className="btn btn-primary"
-                                        onClick={() => setModalIsOpen(true)}>
+                                        onClick={() => setActivityModalIsOpen(true)}>
                                     Ajouter une activité
                                 </button>
                             </div>
 
                         </div>
-                        {selectedActivities.map(activity => (
 
+                        {selectedActivities.map(activity => (
                             <div key={activity.value} className="form-group mt-3 m-0">
                                 <div
                                     className="form-control d-inline-flex align-items-center justify-content-between p-5">
@@ -227,16 +385,36 @@ export default function NewFormule() {
                         ))}
                     </div>
                 </div>
+                <div className="col-md-8 col-xs-12 pl-0 mt-5">
+                    <div className="d-inline-flex justify-content-between w-100 mt-5">
+                        <div>
+                            <label htmlFor="activites">Tarif</label>
+                        </div>
+                        <div>
+                            <button type="button" className="btn btn-primary" onClick={() => setPriceModalIsOpen(true)}>
+                                Créer un tarif
+                            </button>
+                        </div>
+                    {/*    afficher les tarifs dans un reactDataTable*/}
+                    {/*    <div className="ibox mt-5">*/}
+                    {/*        <div className="ibox-content p-5">*/}
+                    {/*            /!*<ReactTable*!/*/}
+                    {/*            /!*    data={formulePrices}*!/*/}
+                    {/*            /!*    *!/*/}
+
+                    </div>
+                </div>
 
                 <div className="row">
-                    <div className="col-md-8 col-xs-12 text-right">
+                    <div className="col-md-8 col-xs-12 text-right mt-5">
                         <button type="submit" className="btn btn-primary">Enregistrer</button>
                     </div>
                 </div>
             </form>
 
-            <Modal isOpen={modalIsOpen} contentLabel="addActivityModal" className="Modal p-3">
-                <button type="button" className="close" onClick={handleCloseModal}>&times;</button>
+            {/*---------------------------------Activity Modal------------------------------------*/}
+            <Modal isOpen={activityModalIsOpen} contentLabel="addActivityModal" className="Modal p-3">
+                <button type="button" className="close" onClick={handleCloseActivityModal}>&times;</button>
 
                 <div className="row m-5">
                     <h2 className="m-0">Ajouter des activités à une formule</h2>
@@ -270,9 +448,72 @@ export default function NewFormule() {
                     </div>
                 </div>
                 <div className="row text-right m-5">
-                    <button className="btn btn-primary" onClick={handleValidateModal}>Valider</button>
+                    <button className="btn btn-primary" onClick={handleValidateActivityModal}>Valider</button>
                 </div>
             </Modal>
+
+            {/*---------------------------------Price Modal------------------------------------*/}
+            <Modal isOpen={priceModalIsOpen} contentLabel="addPriceModal" className="Modal p-3">
+                <button type="button" className="close" onClick={handleClosePriceModal}>&times;</button>
+
+                <div className="row m-5">
+                    <h2 className="m-0">Créer un tarif</h2>
+                    <div className="mt-5">
+                        <div className="form-group mb-5">
+                            <label htmlFor="price">Type de tarif</label>
+                            <Select
+                                options={displayPricingCategories()}
+                                onChange={(selectedOption) => setFormulePrices(prevState => ({
+                                    ...prevState,
+                                    priceCategory: selectedOption ? selectedOption.value : ''
+                                }))}
+                            />
+                            {validationError.priceCategory &&
+                                <div className="text-danger">{validationError.priceCategory}</div>}
+                        </div>
+                        <div className="form-group mb-5">
+                            <label htmlFor="price">Prix</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="activitiesToSelect"
+                                onChange={(e) => {
+                                    if (e.target) {
+                                        handlePriceChange(e);
+                                    }
+                                }}
+                            />
+                            {validationError.price &&
+                                <div className="text-danger">{validationError.price}</div>}
+                        </div>
+                        <div className="form-group mb-5">
+                            <label htmlFor="price">A partir de</label>
+                            <Select
+                                options={displaySeasons()}
+                                onChange={(selectedOption) => setFormulePrices(prevState => ({
+                                    ...prevState,
+                                    from: selectedOption ? selectedOption.value : ''
+                                }))}
+                            />
+                            {validationError.from && <div className="text-danger">{validationError.from}</div>}
+                        </div>
+                        <div className="form-group mb-5">
+                            <label htmlFor="price">Jusqu'à (optionnel)</label>
+                            <Select
+                                options={displaySeasons()}
+                                onChange={(selectedOption) => setFormulePrices(prevState => ({
+                                    ...prevState,
+                                    to: selectedOption ? selectedOption.value : ''
+                                }))}
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="row text-right m-5">
+                    <button className="btn btn-primary" onClick={handleValidatePriceModal}>Valider</button>
+                </div>
+            </Modal>
+
         </div>
     );
 }
