@@ -155,7 +155,7 @@ export default function NewFormule() {
                     .filter(activity => `family-${activity.activity_ref_kind_id}` === option.value)
                     .map(activity => ({
                         label: activity.label,
-                        value: `activity-${activity.id}`,
+                        value: activity.id,
                     }));
                 selected.push(...familyActivities);
             } else {// Ajouter une activité spécifique
@@ -219,7 +219,6 @@ export default function NewFormule() {
 
 
     // --------------------------------- Gestion des tarifs ---------------------------------
-
     function displayFormulePrices() {
         return [
             {
@@ -285,6 +284,7 @@ export default function NewFormule() {
     function handlePriceFormuleChange(selectedOption, field) {
         const value = selectedOption ? selectedOption.value : '';
         const label = selectedOption ? selectedOption.label : '';
+        const name = selectedOption ? selectedOption.name : '';
         let error = '';
 
         switch (field) {
@@ -306,6 +306,35 @@ export default function NewFormule() {
             default:
                 break;
         }
+
+        // if (field === 'price') {
+        //     setCurrentFormulePrice(
+        //         prevState => ({
+        //             ...prevState,
+        //             price: value
+        //             }
+        //     ));
+        // }
+        //
+        // if (field === 'from' || field === 'to') {
+        //     setCurrentFormulePrice(
+        //         prevState => ({
+        //             ...prevState,
+        //             [field]: label,
+        //             [`${field}id`]: value
+        //             }
+        //     ));
+        // }
+        //
+        // if (field === 'priceCategory') {
+        //     setCurrentFormulePrice(
+        //         prevState => ({
+        //             ...prevState,
+        //             priceCategory: name,
+        //             priceCategoryId: value
+        //             }
+        //     ));
+        // }
 
         setCurrentFormulePrice(prevState => ({
             ...prevState,
@@ -382,15 +411,27 @@ export default function NewFormule() {
         setPriceModalIsOpen(true);
     }
 
+    // --------------------------------- formulaire ---------------------------------
+    function handleSubmit(e) {
+        e.preventDefault()
+        console.log({
+            nom: e.target.name.value,
+            description: e.target.description.value,
+            selectedActivities: selectedActivities.map(activity => activity.value),
+            nbActivitiesToSelect: nbActivitiesToSelect,
+            formulePrices: formulePrices
+        })
+    }
+
     return (
         <div className="row p-2">
-            <form>
+            <form onSubmit={handleSubmit}>
                 <div className="row">
                     <div className="col-md-6 col-xs-12">
 
                         <div className="form-group mb-5">
-                            <label htmlFor="nom">Nom de la formule</label>
-                            <input type="text" className="form-control" id="nom"/>
+                            <label htmlFor="name">Nom de la formule</label>
+                            <input type="text" className="form-control" id="name"/>
                         </div>
 
                         <div className="form-group mb-5">
