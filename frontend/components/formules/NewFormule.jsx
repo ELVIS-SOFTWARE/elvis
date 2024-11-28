@@ -44,7 +44,8 @@ export default function NewFormule() {
     const [pricingCategories, setPricingCategories] = useState([]);
     const [selectedActivities, setSelectedActivities] = useState([]);
     const [nbActivitiesToSelect, setNbActivitiesToSelect] = useState(0);
-    const [formulePrices, setFormulePrices] = useState({
+    const [formulePrices, setFormulePrices] = useState([]);
+    const [currentFormulePrice, setCurrentFormulePrice] = useState({
         priceCategory: '',
         price: '',
         from: '',
@@ -173,21 +174,16 @@ export default function NewFormule() {
 
     function handleNbActivitiesToSelectChange(e) {
         const value = e.target.value;
-        if (value === '') {
-            setValidationError(prevState => ({
-                ...prevState,
-                nbActivitiesToSelect: 'Le champ ne peut pas être vide.'
-            }));
-        } else if (!isNaN(value)) {
-            setNbActivitiesToSelect(Number(value));
-            setValidationError(prevState => ({
-                ...prevState,
-                nbActivitiesToSelect: ''
-            }));
-        } else {
+        if (isNaN(value)) {
             setValidationError(prevState => ({
                 ...prevState,
                 nbActivitiesToSelect: 'Veuillez entrer un nombre valide.'
+            }));
+        } else {
+            setNbActivitiesToSelect(value);
+            setValidationError(prevState => ({
+                ...prevState,
+                nbActivitiesToSelect: ''
             }));
         }
     }
@@ -201,9 +197,10 @@ export default function NewFormule() {
             errors.selectedActivities = 'Veuillez sélectionner au moins une activité.';
         }
         if (nbActivitiesToSelect === 0) {
-            errors.nbActivitiesToSelect = 'Veuillez entrer un nombre valide.';
+            errors.nbActivitiesToSelect = `Veuillez indiquer le nombre d'activités à choisir.`;
         }
         setValidationError(errors);
+
         if (!errors.selectedActivities && !errors.nbActivitiesToSelect) {
             setActivityModalIsOpen(false);
         }
@@ -219,54 +216,50 @@ export default function NewFormule() {
         setSelectedActivities(selectedActivities.filter(activity => activity.value !== activityValue));
     }
 
-    // ------------------------------------------------------------------------------
 
     // --------------------------------- Gestion des tarifs ---------------------------------
 
-  function displayFormulePrices() {
-    return [
-        {
-            id: "name",
-            Header: "Nom",
-            accessor: d => d.pricingCategory,
-        },
-        {
-            id: "price",
-            Header: "Tarif en €",
-            accessor: d => d.price,
-        },
-        {
-            id: "from",
-            Header: "Saisons concernées",
-            accessor: d => {
-                if (d.to) {
-                    return `${d.from} - ${d.to}`;
-                } else {
-                    return d.from;
-                }
-            }
-        },
-        {
-            id: "actions",
-            Header: "Actions",
-            Cell: props => {
-                return (
-                    <div className="btn-wrapper">
-                        <a className="btn-sm btn-primary m-r-sm" href={'/formules/' + props.original.id + "/edit"}>
-                            <i className="fas fa-edit"/>
-                        </a>
-                        <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
-                            <i className="fas fa-trash"/>
-                        </a>
-                    </div>
-                );
+    function displayFormulePrices() {
+        return [
+            {
+                id: "name",
+                Header: "Nom",
+                accessor: d => d.priceCategory,
             },
-            sortable: false,
-            filterable: false,
-        }
-    ];
-}
-
+            {
+                id: "price",
+                Header: "Tarif en €",
+                accessor: d => d.price,
+            },
+            {
+                id: "from",
+                Header: "Saisons concernées",
+                accessor: d => {
+                    if (d.to) {
+                        return `${d.fromLabel} - ${d.toLabel}`;
+                    } else {
+                        return d.fromLabel;
+                    }
+                }
+            },
+            {
+                id: "actions",
+                Header: "Actions",
+                Cell: props => {
+                    return (
+                        <div className="btn-wrapper">
+                            <button className="btn-sm btn-warning"
+                                    onClick={() => handleDeleteFormulePrice(props.original)}>
+                                <i className="fas fa-trash"/>
+                            </button>
+                        </div>
+                    );
+                },
+                sortable: false,
+                filterable: false,
+            }
+        ];
+    }
 
     function displayPricingCategories() {
         return pricingCategories.map(category => ({
@@ -282,64 +275,90 @@ export default function NewFormule() {
         }));
     }
 
-    function handlePriceChange(e) {
-        const value = e.target.value;
-        if (value === '') {
-            setValidationError(prevState => ({
-                ...prevState,
-                price: 'Le champ ne peut pas être vide.'
-            }));
-        } else if (!isNaN(value)) {
-            setFormulePrices(prevState => ({
-                ...prevState,
-                price: value
-            }));
-            setValidationError(prevState => ({
-                ...prevState,
-                price: ''
-            }));
-        } else {
-            setValidationError(prevState => ({
-                ...prevState,
-                price: 'Veuillez entrer un prix valide.'
-            }));
-        }
-    }
-    function handleValidatePriceModal() {
+    function handlePriceFormuleChange(selectedOption, field) {
+        const value = selectedOption ? selectedOption.value : '';
+        const label = selectedOption ? selectedOption.label : '';
+        let error = '';
 
+        switch (field) {
+            case 'price':
+                if (isNaN(value)) {
+                    error = 'Veuillez entrer un prix valide.';
+                }
+                break;
+            case 'priceCategory':
+                if (!value) {
+                    error = 'Veuillez sélectionner une catégorie de tarif.';
+                }
+                break;
+            case 'from':
+                if (!value) {
+                    error = 'Veuillez sélectionner une saison.';
+                }
+                break;
+            default:
+                break;
+        }
+
+        setCurrentFormulePrice(prevState => ({
+            ...prevState,
+            [`${field}Id`]: value,
+            [field]: field === 'priceCategory' ? label : value,
+            [`${field}Label`]: field === 'from' || field === 'to' ? label : ''
+
+        }));
+
+        setValidationError(prevState => ({
+            ...prevState,
+            [field]: error
+        }));
+
+    }
+
+
+    function handleValidatePriceModal() {
         let errors = {
             priceCategory: '',
             price: '',
             from: ''
         };
 
-        if (!formulePrices.priceCategory) {
+        if (!currentFormulePrice.price) {
+            errors.price = 'Veuillez entrer un prix.';
+        }
+
+        if (!currentFormulePrice.priceCategory) {
             errors.priceCategory = 'Veuillez sélectionner un type de tarif.';
         }
 
-        if (!formulePrices.from) {
+        if (!currentFormulePrice.from) {
             errors.from = 'Veuillez sélectionner une saison.';
         }
 
         setValidationError(errors);
 
         if (!errors.priceCategory && !errors.price && !errors.from) {
-            setFormulePrices(
-                {
-                    priceCategory: formulePrices.priceCategory,
-                    price: formulePrices.price,
-                    from: formulePrices.from,
-                    to: formulePrices.to
-                }
-            )
+            setFormulePrices(prevState => [
+                ...prevState,
+                {...currentFormulePrice}
+            ]);
+            setCurrentFormulePrice({
+                priceCategory: '',
+                price: '',
+                from: '',
+                to: ''
+            });
             setPriceModalIsOpen(false);
         }
-
     }
 
     function handleClosePriceModal() {
-        setFormulePrices({price: '', from: '', to: ''})
+        setCurrentFormulePrice({priceCategory: '', price: '', from: '', to: ''});
         setPriceModalIsOpen(false);
+    }
+
+    function handleDeleteFormulePrice(formulePrice) {
+        setFormulePrices(formulePrices.filter(price => price !== formulePrice));
     }
 
     return (
@@ -385,7 +404,7 @@ export default function NewFormule() {
                         ))}
                     </div>
                 </div>
-                <div className="col-md-8 col-xs-12 pl-0 mt-5">
+                <div className="col-md-10 col-xs-12 pl-0 mt-5">
                     <div className="d-inline-flex justify-content-between w-100 mt-5">
                         <div>
                             <label htmlFor="activites">Tarif</label>
@@ -395,25 +414,36 @@ export default function NewFormule() {
                                 Créer un tarif
                             </button>
                         </div>
-                    {/*    afficher les tarifs dans un reactDataTable*/}
-                    {/*    <div className="ibox mt-5">*/}
-                    {/*        <div className="ibox-content p-5">*/}
-                    {/*            /!*<ReactTable*!/*/}
-                    {/*            /!*    data={formulePrices}*!/*/}
-                    {/*            /!*    *!/*/}
-
+                    </div>
+                    <div className="ibox mt-3">
+                        <div className="ibox-content p-5">
+                            <ReactTable
+                                columns={displayFormulePrices()}
+                                data={formulePrices}
+                                defaultPageSize={5}
+                                className="-striped -highlight"
+                                previousText="Précédent"
+                                nextText="Suivant"
+                                loadingText="Chargement..."
+                                noDataText="Aucune donnée"
+                                pageText="Page"
+                                ofText="sur"
+                                rowsText="lignes"
+                            />
+                        </div>
                     </div>
                 </div>
 
                 <div className="row">
-                    <div className="col-md-8 col-xs-12 text-right mt-5">
+                    <div className="col-md-10 col-xs-12 text-right mt-5">
                         <button type="submit" className="btn btn-primary">Enregistrer</button>
                     </div>
                 </div>
             </form>
 
             {/*---------------------------------Activity Modal------------------------------------*/}
-            <Modal isOpen={activityModalIsOpen} contentLabel="addActivityModal" className="Modal p-3">
+            <Modal isOpen={activityModalIsOpen} contentLabel="addActivityModal" className="Modal p-3"
+                   ariaHideApp={false}>
                 <button type="button" className="close" onClick={handleCloseActivityModal}>&times;</button>
 
                 <div className="row m-5">
@@ -429,6 +459,7 @@ export default function NewFormule() {
                                 value={selectedActivities}
                                 onChange={handleActivityChange}
                                 closeMenuOnSelect={false}
+                                required
                             />
                             {validationError.selectedActivities &&
                                 <div className="text-danger">{validationError.selectedActivities}</div>}
@@ -441,6 +472,7 @@ export default function NewFormule() {
                                 className="form-control"
                                 id="activitiesToSelect"
                                 onChange={handleNbActivitiesToSelectChange}
+                                required={true}
                             />
                             {validationError.nbActivitiesToSelect &&
                                 <div className="text-danger">{validationError.nbActivitiesToSelect}</div>}
@@ -453,7 +485,7 @@ export default function NewFormule() {
             </Modal>
 
             {/*---------------------------------Price Modal------------------------------------*/}
-            <Modal isOpen={priceModalIsOpen} contentLabel="addPriceModal" className="Modal p-3">
+            <Modal isOpen={priceModalIsOpen} contentLabel="addPriceModal" className="Modal p-3" ariaHideApp={false}>
                 <button type="button" className="close" onClick={handleClosePriceModal}>&times;</button>
 
                 <div className="row m-5">
@@ -463,10 +495,9 @@ export default function NewFormule() {
                             <label htmlFor="price">Type de tarif</label>
                             <Select
                                 options={displayPricingCategories()}
-                                onChange={(selectedOption) => setFormulePrices(prevState => ({
-                                    ...prevState,
-                                    priceCategory: selectedOption ? selectedOption.value : ''
-                                }))}
+                                onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'priceCategory')}
+
+                                required
                             />
                             {validationError.priceCategory &&
                                 <div className="text-danger">{validationError.priceCategory}</div>}
@@ -477,11 +508,9 @@ export default function NewFormule() {
                                 type="text"
                                 className="form-control"
                                 id="activitiesToSelect"
-                                onChange={(e) => {
-                                    if (e.target) {
-                                        handlePriceChange(e);
-                                    }
-                                }}
+                                onChange={(e) => handlePriceFormuleChange({value: e.target.value}, 'price')}
+
+                                required={true}
                             />
                             {validationError.price &&
                                 <div className="text-danger">{validationError.price}</div>}
@@ -490,10 +519,9 @@ export default function NewFormule() {
                             <label htmlFor="price">A partir de</label>
                             <Select
                                 options={displaySeasons()}
-                                onChange={(selectedOption) => setFormulePrices(prevState => ({
-                                    ...prevState,
-                                    from: selectedOption ? selectedOption.value : ''
-                                }))}
+                                onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'from')}
+
+                                required
                             />
                             {validationError.from && <div className="text-danger">{validationError.from}</div>}
                         </div>
@@ -501,10 +529,7 @@ export default function NewFormule() {
                             <label htmlFor="price">Jusqu'à (optionnel)</label>
                             <Select
                                 options={displaySeasons()}
-                                onChange={(selectedOption) => setFormulePrices(prevState => ({
-                                    ...prevState,
-                                    to: selectedOption ? selectedOption.value : ''
-                                }))}
+                                onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'to')}
                             />
                         </div>
                     </div>
