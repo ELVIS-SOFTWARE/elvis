@@ -183,6 +183,10 @@ export default function NewFormule() {
         setModalIsOpen(false);
     };
 
+    const handleDeleteActivity = (activityValue) => {
+        setSelectedActivities(selectedActivities.filter(activity => activity.value !== activityValue));
+    }
+
     return (
         <div className="row p-2">
             <form>
@@ -211,10 +215,11 @@ export default function NewFormule() {
                         {selectedActivities.map(activity => (
 
                             <div key={activity.value} className="form-group mt-3 m-0">
-                                <div className="form-control d-inline-flex align-items-center justify-content-between p-5">
+                                <div
+                                    className="form-control d-inline-flex align-items-center justify-content-between p-5">
                                     <label style={{color: "#00334A"}}>{activity.label}</label>
-                                {/*    delete activity button*/}
-                                    <button type="button" className="btn">
+                                    <button type="button" className="btn"
+                                            onClick={() => handleDeleteActivity(activity.value)}>
                                         <i className="fas fa-trash" style={{color: "#00334A"}}/>
                                     </button>
                                 </div>
@@ -230,7 +235,7 @@ export default function NewFormule() {
                 </div>
             </form>
 
-            <Modal isOpen={modalIsOpen}  contentLabel="addActivityModal" className="Modal p-3">
+            <Modal isOpen={modalIsOpen} contentLabel="addActivityModal" className="Modal p-3">
                 <button type="button" className="close" onClick={handleCloseModal}>&times;</button>
 
                 <div className="row m-5">
