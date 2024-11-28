@@ -213,6 +213,10 @@ export default function NewFormule() {
                             <div key={activity.value} className="form-group mt-3 m-0">
                                 <div className="form-control d-inline-flex align-items-center justify-content-between p-5">
                                     <label style={{color: "#00334A"}}>{activity.label}</label>
+                                {/*    delete activity button*/}
+                                    <button type="button" className="btn">
+                                        <i className="fas fa-trash" style={{color: "#00334A"}}/>
+                                    </button>
                                 </div>
                             </div>
                         ))}
