@@ -248,7 +248,11 @@ export default function NewFormule() {
                 Cell: props => {
                     return (
                         <div className="btn-wrapper">
-                            <button className="btn-sm btn-warning"
+                            <button className="btn btn-sm btn-primary m-r-sm"
+                                    onClick={() => handleEditFormulePrice(props.original)}>
+                                <i className="fas fa-edit"/>
+                            </button>
+                            <button className="btn btn-sm btn-warning"
                                     onClick={() => handleDeleteFormulePrice(props.original)}>
                                 <i className="fas fa-trash"/>
                             </button>
@@ -315,7 +319,6 @@ export default function NewFormule() {
 
     }
 
-
     function handleValidatePriceModal() {
         let errors = {
             priceCategory: '',
@@ -359,6 +362,12 @@ export default function NewFormule() {
 
     function handleDeleteFormulePrice(formulePrice) {
         setFormulePrices(formulePrices.filter(price => price !== formulePrice));
+    }
+
+    function handleEditFormulePrice(formulePrice) {
+        setCurrentFormulePrice(formulePrice);
+        console.log(formulePrice)
+        setPriceModalIsOpen(true);
     }
 
     return (
@@ -496,7 +505,7 @@ export default function NewFormule() {
                             <Select
                                 options={displayPricingCategories()}
                                 onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'priceCategory')}
-
+                                defaultValue={displayPricingCategories().find(option => option.value === currentFormulePrice.priceCategoryId)}
                                 required
                             />
                             {validationError.priceCategory &&
@@ -509,7 +518,7 @@ export default function NewFormule() {
                                 className="form-control"
                                 id="activitiesToSelect"
                                 onChange={(e) => handlePriceFormuleChange({value: e.target.value}, 'price')}
-
+                                defaultValue={currentFormulePrice.price}
                                 required={true}
                             />
                             {validationError.price &&
@@ -520,7 +529,7 @@ export default function NewFormule() {
                             <Select
                                 options={displaySeasons()}
                                 onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'from')}
-
+                                defaultValue={displaySeasons().find(option => option.value === currentFormulePrice.fromId)}
                                 required
                             />
                             {validationError.from && <div className="text-danger">{validationError.from}</div>}
@@ -530,6 +539,7 @@ export default function NewFormule() {
                             <Select
                                 options={displaySeasons()}
                                 onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'to')}
+                                defaultValue={displaySeasons().find(option => option.value === currentFormulePrice.toId)}
                             />
                         </div>
                     </div>
