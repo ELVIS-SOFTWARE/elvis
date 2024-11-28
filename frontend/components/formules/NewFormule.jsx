@@ -46,6 +46,7 @@ export default function NewFormule() {
     const [nbActivitiesToSelect, setNbActivitiesToSelect] = useState(0);
     const [formulePrices, setFormulePrices] = useState([]);
     const [currentFormulePrice, setCurrentFormulePrice] = useState({
+        id: null,
         priceCategory: '',
         price: '',
         from: '',
@@ -225,11 +226,13 @@ export default function NewFormule() {
                 id: "name",
                 Header: "Nom",
                 accessor: d => d.priceCategory,
+                className: "mt-2 mb-2"
             },
             {
                 id: "price",
                 Header: "Tarif en €",
                 accessor: d => d.price,
+                className: "mt-2 mb-2"
             },
             {
                 id: "from",
@@ -240,7 +243,8 @@ export default function NewFormule() {
                     } else {
                         return d.fromLabel;
                     }
-                }
+                },
+                className: "mt-2 mb-2"
             },
             {
                 id: "actions",
@@ -259,8 +263,7 @@ export default function NewFormule() {
                         </div>
                     );
                 },
-                sortable: false,
-                filterable: false,
+                className: "mt-2 mb-2 p-0"
             }
         ];
     }
@@ -341,11 +344,21 @@ export default function NewFormule() {
         setValidationError(errors);
 
         if (!errors.priceCategory && !errors.price && !errors.from) {
-            setFormulePrices(prevState => [
-                ...prevState,
-                {...currentFormulePrice}
-            ]);
+            if (currentFormulePrice.id) {
+                setFormulePrices(formulePrices.map(formulePrice => {
+                    if (formulePrice.id === currentFormulePrice.id) {
+                        return currentFormulePrice;
+                    }
+                    return formulePrice;
+                }));
+            } else {
+                setFormulePrices(prevState => [
+                    ...prevState,
+                    {...currentFormulePrice, id: formulePrices.length + 1}
+                ]);
+            }
             setCurrentFormulePrice({
+                id: null,
                 priceCategory: '',
                 price: '',
                 from: '',
@@ -366,7 +379,6 @@ export default function NewFormule() {
 
     function handleEditFormulePrice(formulePrice) {
         setCurrentFormulePrice(formulePrice);
-        console.log(formulePrice)
         setPriceModalIsOpen(true);
     }
 
