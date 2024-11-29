@@ -238,9 +238,9 @@ export default function NewFormule() {
                 Header: "Saisons concernées",
                 accessor: d => {
                     if (d.to) {
-                        return `${d.fromLabel} - ${d.toLabel}`;
+                        return `${d.from} - ${d.to}`;
                     } else {
-                        return d.fromLabel;
+                        return d.from;
                     }
                 },
                 className: "mt-2 mb-2"
@@ -307,41 +307,10 @@ export default function NewFormule() {
                 break;
         }
 
-        // if (field === 'price') {
-        //     setCurrentFormulePrice(
-        //         prevState => ({
-        //             ...prevState,
-        //             price: value
-        //             }
-        //     ));
-        // }
-        //
-        // if (field === 'from' || field === 'to') {
-        //     setCurrentFormulePrice(
-        //         prevState => ({
-        //             ...prevState,
-        //             [field]: label,
-        //             [`${field}id`]: value
-        //             }
-        //     ));
-        // }
-        //
-        // if (field === 'priceCategory') {
-        //     setCurrentFormulePrice(
-        //         prevState => ({
-        //             ...prevState,
-        //             priceCategory: name,
-        //             priceCategoryId: value
-        //             }
-        //     ));
-        // }
-
         setCurrentFormulePrice(prevState => ({
             ...prevState,
-            [`${field}Id`]: value,
-            [field]: field === 'priceCategory' ? label : value,
-            [`${field}Label`]: field === 'from' || field === 'to' ? label : ''
-
+            [`${field}Id`]: field === 'price' ? '' : value,
+            [field]: field === 'price' ? value : label,
         }));
 
         setValidationError(prevState => ({
@@ -352,24 +321,11 @@ export default function NewFormule() {
     }
 
     function handleValidatePriceModal() {
-        let errors = {
-            priceCategory: '',
-            price: '',
-            from: ''
+        const errors = {
+            priceCategory: currentFormulePrice.priceCategory ? '' : 'Veuillez sélectionner un type de tarif.',
+            price: currentFormulePrice.price ? '' : 'Veuillez entrer un prix.',
+            from: currentFormulePrice.from ? '' : 'Veuillez sélectionner une saison.'
         };
-
-        if (!currentFormulePrice.price) {
-            errors.price = 'Veuillez entrer un prix.';
-        }
-
-        if (!currentFormulePrice.priceCategory) {
-            errors.priceCategory = 'Veuillez sélectionner un type de tarif.';
-        }
-
-        if (!currentFormulePrice.from) {
-            errors.from = 'Veuillez sélectionner une saison.';
-        }
-
         setValidationError(errors);
 
         if (!errors.priceCategory && !errors.price && !errors.from) {
@@ -551,7 +507,7 @@ export default function NewFormule() {
                 <button type="button" className="close" onClick={handleClosePriceModal}>&times;</button>
 
                 <div className="row m-5">
-                    <h2 className="m-0">Créer un tarif</h2>
+                    <h2 className="m-0">{currentFormulePrice.id ? 'Modifier un tarif' : 'Créer un tarif'}</h2>
                     <div className="mt-5">
                         <div className="form-group mb-5">
                             <label htmlFor="price">Type de tarif</label>
