@@ -635,6 +635,7 @@ Rails.application.routes.draw do
   #  ===================
 
   resources :formules
+  post "/formules/create", to: "formules#create"
 
 
 end
