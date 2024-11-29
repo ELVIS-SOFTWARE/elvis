@@ -160,7 +160,6 @@ export default function NewFormule() {
                         .map(activity => ({
                             label: activity.label,
                             value: activity.id,
-                            activityRefKindId: activity.activity_ref_kind_id
                         }));
                     selected.push(...familyActivities);
 
@@ -169,25 +168,17 @@ export default function NewFormule() {
                         isFamily: true
                     });
 
-                }
-                // si l'activité est déjà selectionnée, ne pas l'ajouter
-                if (selected.find(activity => activity.value === option.value)) {
-                    return;
-                } else {
-
+                } else { // Ajouter une activité spécifique
                     selected.push({
                         ...option,
+                        isFamily: false
                     });
-
                     formattedActivity.push({
                         itemId: option.value,
                         isFamily: false
                     });
                 }
-
-            }
-        )
-        ;
+        });
         const uniqueSelectedActivities = Array.from(
             new Map(selected.map(item => [item.value, item])).values()
         );
