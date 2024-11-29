@@ -11,9 +11,9 @@ export default function Formules() {
     function columns() {
         return [
             {
-                id: "nom",
+                id: "name",
                 Header: "Nom de la formule",
-                accessor: d => d.nom,
+                accessor: d => d.name,
             },
             {
                 id: "activites",

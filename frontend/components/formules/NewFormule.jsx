@@ -45,21 +45,22 @@ export default function NewFormule() {
     const [pricingCategories, setPricingCategories] = useState([]);
 
     const [selectedActivities, setSelectedActivities] = useState([]);
+    const [formattedActivities, setFormattedActivities] = useState([]);
     const [nbActivitiesToSelect, setNbActivitiesToSelect] = useState(0);
     const [formulePrices, setFormulePrices] = useState([]);
     const [currentFormulePrice, setCurrentFormulePrice] = useState({
         id: null,
         priceCategory: '',
         price: '',
-        from: '',
-        to: ''
+        fromSeason: '',
+        toSeason: ''
     });
     const [validationError, setValidationError] = useState({
         selectedActivities: '',
         nbActivitiesToSelect: '',
         priceCategory: '',
         price: '',
-        from: ''
+        fromSeason: ''
     });
 
     async function fetchActivities() {
@@ -118,14 +119,14 @@ export default function NewFormule() {
     // --------------------------------- Gestion des activités ---------------------------------
     function displayActivities() {
         const familyOptions = activityRefKind.map(kind => ({
-            label: `${kind.name}`,
-            value: `family-${kind.id}`,
+            label: kind.name,
+            value: kind.id,
             isFamily: true,
             activities: activities
                 .filter(activity => activity.activity_ref_kind_id === kind.id)
                 .map(activity => ({
                     label: activity.label,
-                    value: `activity-${activity.id}`,
+                    value: activity.id,
                     isFamily: false,
                 })),
         }));
@@ -150,6 +151,7 @@ export default function NewFormule() {
             return;
         }
         const selected = [];
+        const formatted = [];
 
         selectedOptions.forEach(option => {
             if (option.isFamily) {   // Ajouter toutes les activités de la famille sélectionnée
@@ -157,12 +159,23 @@ export default function NewFormule() {
                     .filter(activity => `family-${activity.activity_ref_kind_id}` === option.value)
                     .map(activity => ({
                         label: activity.label,
-                        type: activity.activity_type,
                         value: activity.id,
                     }));
                 selected.push(...familyActivities);
+
+                formatted.push({
+                    itemId: option.value,
+                    isFamily: true
+                });
+
             } else {// Ajouter une activité spécifique
-                selected.push(option);
+                selected.push({
+                    ...option,
+                });
+                formatted.push({
+                    itemId: option.value,
+                    isFamily: false
+                });
             }
         });
         const uniqueSelectedActivities = Array.from(
@@ -170,6 +183,7 @@ export default function NewFormule() {
         );
 
         setSelectedActivities(uniqueSelectedActivities);
+        setFormattedActivities(formatted);
         setValidationError(prevState => ({
             ...prevState,
             selectedActivities: ''
@@ -237,13 +251,13 @@ export default function NewFormule() {
                 className: "mt-2 mb-2"
             },
             {
-                id: "from",
+                id: "fromSeason",
                 Header: "Saisons concernées",
                 accessor: d => {
-                    if (d.to) {
-                        return `${d.from} - ${d.to}`;
+                    if (d.toSeason) {
+                        return `${d.fromSeason} - ${d.toSeason}`;
                     } else {
-                        return d.from;
+                        return d.fromSeason;
                     }
                 },
                 className: "mt-2 mb-2"
@@ -300,7 +314,7 @@ export default function NewFormule() {
                     error = 'Veuillez sélectionner une catégorie de tarif.';
                 }
                 break;
-            case 'from':
+            case 'fromSeason':
                 if (!value) {
                     error = 'Veuillez sélectionner une saison.';
                 }
@@ -311,7 +325,7 @@ export default function NewFormule() {
 
         setCurrentFormulePrice(prevState => ({
             ...prevState,
-            ...(field !== 'price' && { [`${field}Id`]: value }),
+            ...(field !== 'price' && {[`${field}Id`]: value}),
             [field]: field === 'price' ? value : label,
         }));
 
@@ -326,11 +340,11 @@ export default function NewFormule() {
         const errors = {
             priceCategory: currentFormulePrice.priceCategory ? '' : 'Veuillez sélectionner un type de tarif.',
             price: currentFormulePrice.price ? '' : 'Veuillez entrer un prix.',
-            from: currentFormulePrice.from ? '' : 'Veuillez sélectionner une saison.'
+            fromSeason: currentFormulePrice.fromSeason ? '' : 'Veuillez sélectionner une saison.'
         };
         setValidationError(errors);
 
-        if (!errors.priceCategory && !errors.price && !errors.from) {
+        if (!errors.priceCategory && !errors.price && !errors.fromSeason) {
             if (currentFormulePrice.id) {
                 setFormulePrices(formulePrices.map(formulePrice => {
                     if (formulePrice.id === currentFormulePrice.id) {
@@ -348,15 +362,15 @@ export default function NewFormule() {
                 id: null,
                 priceCategory: '',
                 price: '',
-                from: '',
-                to: ''
+                fromSeason: '',
+                toSeason: ''
             });
             setPriceModalIsOpen(false);
         }
     }
 
     function handleClosePriceModal() {
-        setCurrentFormulePrice({priceCategory: '', price: '', from: '', to: ''});
+        setCurrentFormulePrice({priceCategory: '', price: '', fromSeason: '', toSeason: ''});
         setPriceModalIsOpen(false);
     }
 
@@ -370,15 +384,26 @@ export default function NewFormule() {
     }
 
     // --------------------------------- formulaire ---------------------------------
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault()
-        console.log({
-            name: e.target.name.value,
-            description: e.target.description.value,
-            selectedActivities: selectedActivities.map(activity => activity),
-            numberOfItems: nbActivitiesToSelect,
-            formulePrices: formulePrices
-        })
+        try {
+            await api.set()
+                .success(res => {
+                    swal("Formule créée avec succès", "", "success");
+                })
+                .error(res => {
+                    swal("La création de la formule n'a pas pu aboutir", res.error, "error");
+                })
+                .post('/formules/create', {
+                    name: e.target.name.value,
+                    description: e.target.description.value,
+                    number_of_items: nbActivitiesToSelect,
+                    formuleItems: formattedActivities,
+                    formulePrices: formulePrices
+                });
+        } catch (e) {
+            swal("Une erreur est survenue lors de la création de la formule", e.message, "error");
+        }
     }
 
     return (
@@ -539,11 +564,12 @@ export default function NewFormule() {
                             <label htmlFor="price">A partir de</label>
                             <Select
                                 options={displaySeasons()}
-                                onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'from')}
-                                defaultValue={displaySeasons().find(option => option.value === currentFormulePrice.fromId)}
+                                onChange={(selectedOption) => handlePriceFormuleChange(selectedOption, 'fromSeason')}
+                                defaultValue={displaySeasons().find(option => option.value === currentFormulePrice.fromSeasonId)}
                                 required
                             />
-                            {validationError.from && <div className="text-danger">{validationError.from}</div>}
+                            {validationError.fromSeason &&
+                                <div className="text-danger">{validationError.fromSeason}</div>}
                         </div>
                         <div className="form-group mb-5">
                             <label htmlFor="price">Jusqu'à (optionnel)</label>
