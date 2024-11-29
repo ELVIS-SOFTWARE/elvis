@@ -127,7 +127,6 @@ export default function NewFormule() {
                 .map(activity => ({
                     label: activity.label,
                     value: activity.id,
-                    isFamily: false,
                 })),
         }));
 
@@ -151,39 +150,50 @@ export default function NewFormule() {
             return;
         }
         const selected = [];
-        const formatted = [];
+        const formattedFamily = [];
+        const formattedActivity = [];
 
         selectedOptions.forEach(option => {
-            if (option.isFamily) {   // Ajouter toutes les activités de la famille sélectionnée
-                const familyActivities = activities
-                    .filter(activity => `family-${activity.activity_ref_kind_id}` === option.value)
-                    .map(activity => ({
-                        label: activity.label,
-                        value: activity.id,
-                    }));
-                selected.push(...familyActivities);
+                if (option.isFamily) {   // Ajouter toutes les activités de la famille sélectionnée
+                    const familyActivities = activities
+                        .filter(activity => activity.activity_ref_kind_id === option.value)
+                        .map(activity => ({
+                            label: activity.label,
+                            value: activity.id,
+                            activityRefKindId: activity.activity_ref_kind_id
+                        }));
+                    selected.push(...familyActivities);
 
-                formatted.push({
-                    itemId: option.value,
-                    isFamily: true
-                });
+                    formattedFamily.push({
+                        itemId: option.value,
+                        isFamily: true
+                    });
 
-            } else {// Ajouter une activité spécifique
-                selected.push({
-                    ...option,
-                });
-                formatted.push({
-                    itemId: option.value,
-                    isFamily: false
-                });
+                }
+                // si l'activité est déjà selectionnée, ne pas l'ajouter
+                if (selected.find(activity => activity.value === option.value)) {
+                    return;
+                } else {
+
+                    selected.push({
+                        ...option,
+                    });
+
+                    formattedActivity.push({
+                        itemId: option.value,
+                        isFamily: false
+                    });
+                }
+
             }
-        });
+        )
+        ;
         const uniqueSelectedActivities = Array.from(
             new Map(selected.map(item => [item.value, item])).values()
         );
 
         setSelectedActivities(uniqueSelectedActivities);
-        setFormattedActivities(formatted);
+        setFormattedActivities([...formattedFamily, ...formattedActivity]);
         setValidationError(prevState => ({
             ...prevState,
             selectedActivities: ''
@@ -235,7 +245,7 @@ export default function NewFormule() {
     }
 
 
-    // --------------------------------- Gestion des tarifs ---------------------------------
+// --------------------------------- Gestion des tarifs ---------------------------------
     function displayFormulePrices() {
         return [
             {
@@ -383,7 +393,7 @@ export default function NewFormule() {
         setPriceModalIsOpen(true);
     }
 
-    // --------------------------------- formulaire ---------------------------------
+// --------------------------------- formulaire ---------------------------------
     async function handleSubmit(e) {
         e.preventDefault()
         try {
