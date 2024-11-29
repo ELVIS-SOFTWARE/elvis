@@ -38,10 +38,12 @@ const Option = (props) => {
 export default function NewFormule() {
     const [activityModalIsOpen, setActivityModalIsOpen] = useState(false);
     const [priceModalIsOpen, setPriceModalIsOpen] = useState(false);
+
     const [activities, setActivities] = useState([]);
     const [activityRefKind, setActivityRefKind] = useState([]);
     const [seasons, setSeasons] = useState([]);
     const [pricingCategories, setPricingCategories] = useState([]);
+
     const [selectedActivities, setSelectedActivities] = useState([]);
     const [nbActivitiesToSelect, setNbActivitiesToSelect] = useState(0);
     const [formulePrices, setFormulePrices] = useState([]);
@@ -155,6 +157,7 @@ export default function NewFormule() {
                     .filter(activity => `family-${activity.activity_ref_kind_id}` === option.value)
                     .map(activity => ({
                         label: activity.label,
+                        type: activity.activity_type,
                         value: activity.id,
                     }));
                 selected.push(...familyActivities);
@@ -284,7 +287,6 @@ export default function NewFormule() {
     function handlePriceFormuleChange(selectedOption, field) {
         const value = selectedOption ? selectedOption.value : '';
         const label = selectedOption ? selectedOption.label : '';
-        const name = selectedOption ? selectedOption.name : '';
         let error = '';
 
         switch (field) {
@@ -309,7 +311,7 @@ export default function NewFormule() {
 
         setCurrentFormulePrice(prevState => ({
             ...prevState,
-            [`${field}Id`]: field === 'price' ? '' : value,
+            ...(field !== 'price' && { [`${field}Id`]: value }),
             [field]: field === 'price' ? value : label,
         }));
 
@@ -371,10 +373,10 @@ export default function NewFormule() {
     function handleSubmit(e) {
         e.preventDefault()
         console.log({
-            nom: e.target.name.value,
+            name: e.target.name.value,
             description: e.target.description.value,
-            selectedActivities: selectedActivities.map(activity => activity.value),
-            nbActivitiesToSelect: nbActivitiesToSelect,
+            selectedActivities: selectedActivities.map(activity => activity),
+            numberOfItems: nbActivitiesToSelect,
             formulePrices: formulePrices
         })
     }
