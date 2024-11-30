@@ -107,6 +107,11 @@ body {
 .datepicker {
     z-index: 10000;
     padding: 3px 12px;
+    border-radius: 8px;
+}
+
+.react-datepicker__input-container .react-datepicker__calendar-icon {
+    margin-top: 5px
 }
 
 .react-date-picker__button {
