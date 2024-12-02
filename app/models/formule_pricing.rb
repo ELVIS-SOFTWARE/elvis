@@ -10,6 +10,10 @@ class FormulePricing < ApplicationRecord
   scope :for_pricing_category, ->(pricing_category) { where(pricing_category: pricing_category) }
   scope :for_pricing_category_id, ->(pricing_category_id) { where(pricing_category_id: pricing_category_id) }
 
+  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :from_season_id, presence: true
+  validates :pricing_category_id, presence: true
+
   def self.display_class_name(singular= true)
     singular ? "Tarif" : "Tarifs"
   end

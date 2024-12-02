@@ -5,10 +5,11 @@ import * as api from "../../tools/api";
 
 export default function Formules() {
     const [data, setData] = useState([]);
-    const [pages, setPages] = useState(null);
+    const [pages, setPages] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    function columns() {
+    function columns()
+    {
         return [
             {
                 id: "name",
@@ -18,7 +19,7 @@ export default function Formules() {
             {
                 id: "activites",
                 Header: "Activités ou familles d'activités",
-                accessor: d => d.activites,
+                accessor: d => (d.activities || []).map(activite => activite.display_name).join(', '),
             },
             {
                 id: "actions",
@@ -42,7 +43,8 @@ export default function Formules() {
         ];
     }
 
-    async function fetchData(state) {
+    async function fetchData(state, instance) {
+        console.log(state)
         setLoading(true);
         try {
             await api.set()
@@ -57,8 +59,8 @@ export default function Formules() {
                 .get('/formules', {
                     page: state.page + 1,
                     pageSize: state.pageSize,
-                    sorted: state.sorted,
-                    filtered: state.filtered
+                    sorted: state.sorted[0] ? JSON.stringify(state.sorted[0]) : null,
+                    filtered: JSON.stringify(state.filtered)
                 })
         } catch (error) {
             swal("Une erreur est survenue lors de la récupération des données", error, "error");

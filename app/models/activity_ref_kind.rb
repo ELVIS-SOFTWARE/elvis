@@ -27,12 +27,18 @@ class ActivityRefKind < ApplicationRecord
 
   has_many :max_prices, as: :target, dependent: :destroy, class_name: "MaxActivityRefPriceForSeason"
 
+  attribute :display_name
+
   def self.display_class_name(singular = true)
     singular ? "famille d'activité" : "familles d'activités"
   end
 
   def self.class_name_gender
     return :F
+  end
+
+  def display_name
+    name
   end
 
   private
