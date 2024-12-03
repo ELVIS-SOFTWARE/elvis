@@ -11,6 +11,38 @@ class FormulesController < ApplicationController
     end
   end
 
+  def edit
+    formule = Formule.find(params[:id])
+
+    authorize! :edit, formule
+
+    @formule = formule.as_json(include: {
+      formule_items: {
+        include: {
+          item: {
+            only: %i[id display_name]
+          },
+          method: %i[is_for_kind],
+          only: %i[id]
+        }
+      },
+      formule_pricings: {
+        only: %i[id price],
+        include: {
+          pricing_category: {
+            only: %i[id name]
+          },
+          from_season: {
+            only: %i[id name]
+          },
+          to_season: {
+            only: %i[id name]
+          }
+        }
+      }
+    })
+  end
+
   def create
     formule_params = params.permit(:name, :description, :number_of_items)
     formule = Formule.new(formule_params)

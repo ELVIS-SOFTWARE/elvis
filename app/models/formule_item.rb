@@ -11,4 +11,8 @@ class FormuleItem < ApplicationRecord
   def self.class_name_gender
     return :M
   end
+
+  def is_for_kind
+    item_type == ActivityRefKind.class_name
+  end
 end
