@@ -254,8 +254,7 @@ export default function EditFormule({formule})
                             <label htmlFor="activites">Activités</label>
                         </div>
                         <div className="col-sm-2 text-right">
-                            <button type="button" className="btn btn-primary"
-                                    onClick={}>
+                            <button type="button" className="btn btn-primary">
                                 Ajouter une activité
                             </button>
                         </div>
@@ -267,7 +266,7 @@ export default function EditFormule({formule})
                             <div
                                 className="form-control d-inline-flex align-items-center justify-content-between p-5">
                                 <label style={{ color: "#00334A" }}><small><i>Famille
-                                    d'activité:</i></small> {kind.name}</label>
+                                    d'activité:</i></small> {kind.display_name}</label>
                                 <button type="button" className="btn"
                                         onClick={() => setSelectedKinds(selectedKinds.filter(a => a.id !== kind.id))}>
                                     <i className="fas fa-trash" style={{ color: "#00334A" }} />
@@ -280,7 +279,7 @@ export default function EditFormule({formule})
                         <div key={`activity_${activity.id}`} className="form-group mt-3 m-0">
                             <div
                                 className="form-control d-inline-flex align-items-center justify-content-between p-5">
-                                <label style={{ color: "#00334A" }}><small><i>activité:</i></small> {activity.name}
+                                <label style={{ color: "#00334A" }}><small><i>activité:</i></small> {activity.display_name}
                                 </label>
                                 <button type="button" className="btn"
                                         onClick={() => setSelectedActivities(selectedActivities.filter(a => a.id !== activity.id))}>

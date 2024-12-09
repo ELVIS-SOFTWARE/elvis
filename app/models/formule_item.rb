@@ -13,6 +13,6 @@ class FormuleItem < ApplicationRecord
   end
 
   def is_for_kind
-    item_type == ActivityRefKind.class_name
+    item_type == ActivityRefKind.name
   end
 end

@@ -43,7 +43,7 @@ class Formule < ApplicationRecord
   private
 
   def validate_number_of_items
-    if formule_items.size != number_of_items
+    if formule_items.size < number_of_items
       errors.add(:number_of_items, :invalid)
     end
   end

@@ -4,7 +4,7 @@ import * as api from "../../tools/api";
 export default class FormulePricingDataService extends DataService
 {
     constructor(formule_id) {
-        super("/formule_pricings");
+        super(`/formules/${formule_id}/formule_pricings`);
 
         this.formule_id = formule_id;
     }

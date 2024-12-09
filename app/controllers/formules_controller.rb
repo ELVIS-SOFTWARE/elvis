@@ -16,31 +16,33 @@ class FormulesController < ApplicationController
 
     authorize! :edit, formule
 
-    @formule = formule.as_json(include: {
-      formule_items: {
-        include: {
-          item: {
-            only: %i[id display_name]
+    @formule = formule.as_json(
+      include: {
+        formule_items: {
+          include: {
+            item: {
+              only: %i[id display_name]
+            },
           },
+          only: %i[id],
           method: %i[is_for_kind],
-          only: %i[id]
-        }
-      },
-      formule_pricings: {
-        only: %i[id price],
-        include: {
-          pricing_category: {
-            only: %i[id name]
-          },
-          from_season: {
-            only: %i[id name]
-          },
-          to_season: {
-            only: %i[id name]
+        },
+        formule_pricings: {
+          only: %i[id price],
+          include: {
+            pricing_category: {
+              only: %i[id name]
+            },
+            from_season: {
+              only: %i[id name]
+            },
+            to_season: {
+              only: %i[id name]
+            }
           }
         }
       }
-    })
+    )
   end
 
   def create
