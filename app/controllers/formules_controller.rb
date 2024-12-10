@@ -25,7 +25,7 @@ class FormulesController < ApplicationController
             },
           },
           only: %i[id],
-          method: %i[is_for_kind],
+          methods: %i[is_for_kind],
         },
         formule_pricings: {
           only: %i[id price],
@@ -49,7 +49,7 @@ class FormulesController < ApplicationController
     formule_params = params.permit(:name, :description, :number_of_items)
     formule = Formule.new(formule_params)
 
-    authorize! :create, @formules
+    authorize! :create, formule
 
     ActiveRecord::Base.transaction do
       # Save formule items
@@ -89,9 +89,9 @@ class FormulesController < ApplicationController
     # @type [Formule]
     formule = Formule.find(params[:id])
 
-    authorize! :edit, @formules
+    authorize! :edit, formule
 
-    formule_params = params.permit(:name, :description, :number_of_items)
+    formule_params = params.permit(:name, :description, :number_of_items, :active)
 
     ActiveRecord::Base.transaction do
       # Save formule items
@@ -99,28 +99,13 @@ class FormulesController < ApplicationController
 
       formule.formule_items.destroy_all
       formule_items_params.each do |formule_item|
-        formule.formule_items.new(
-          item_type: formule_item[:isFamily] ? ActivityRefKind.class.name : Activity.class.name,
+        formule.formule_items.create!(
+          item_type: formule_item[:isFamily] ? ActivityRefKind.name : ActivityRef.name,
           item_id: formule_item[:itemId]
         )
       end
 
-      # Save formule prices
-      formule.formule_pricings.destroy_all
-
-      formule_prices_params = params.permit(formulePrices: [:priceCategoryId, :price, :fromSeasonId, :toSeasonId])[:formulePrices]
-      formule_prices_params.each do |formule_price|
-        to_season = Season.find_by(id: formule_price[:toSeasonId])
-        from_season = Season.find(formule_price[:fromSeasonId])
-        pricing_category = PricingCategory.find(formule_price[:priceCategoryId])
-
-        formule.formule_pricings.new(
-          pricing_category_id: pricing_category.id,
-          price: formule_price[:price],
-          from_season_id: from_season.id,
-          to_season_id: to_season&.id
-        )
-      end
+      # do not save pricings because pricings was dynamically updated in the front with formulePricingsController
 
       if formule.update(formule_params)
         render json: formule.as_json

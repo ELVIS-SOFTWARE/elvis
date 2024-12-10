@@ -8,6 +8,8 @@ import DefaultActionButtons from "../common/baseDataTable/DefaultActionButtons";
 import FormulePricingDataService from "./FormulePricingDataService";
 import NewFormulePricingDataService from "./NewFormulePricingDataService";
 import DefaultCreateButton from "../common/baseDataTable/DefaultCreateButton";
+import { components, default as ReactSelect } from "react-select";
+import Modal from "react-modal";
 
 /**
  *
@@ -71,6 +73,9 @@ export default function EditFormule({formule})
         price: '',
         fromSeason: ''
     });
+
+    const [activityModalIsOpen, setActivityModalIsOpen] = useState(false);
+    const [reactSelectActivitiesSelected, setReactSelectActivitiesSelected] = useState([]);
 
 
     async function fetchActivityRefKind()
@@ -138,10 +143,15 @@ export default function EditFormule({formule})
 
     }
 
-    useEffect(async () =>
+    useEffect(() =>
     {
-        await Promise.all([fetchActivityRefKind(), fetchActivities(), fetchSeasonsAndPricings()]);
+        Promise.all([fetchActivityRefKind(), fetchActivities(), fetchSeasonsAndPricings()]);
     }, []);
+
+    useEffect(() =>
+    {
+        setReactSelectActivitiesSelected(selectedActivities.map(a => ({label: a.display_name, value: `a${a.id}`})).concat(selectedKinds.map(k => ({label: k.display_name, value: `k${k.id}`}))))
+    }, [selectedActivities, selectedKinds]);
 
 
     // --------------------------------- Gestion des activités ---------------------------------
@@ -149,13 +159,14 @@ export default function EditFormule({formule})
     {
         const familyOptions = allKinds.map(kind => ({
             label: kind.name,
-            value: kind.id,
+            value: `k${kind.id}`,
             isFamily: true,
             activities: allActivities
                 .filter(activity => activity.activity_ref_kind_id === kind.id)
                 .map(activity => ({
                     label: activity.label,
-                    value: activity.id,
+                    value: `a${activity.id}`,
+                    familyValue: `k${kind.id}`,
                 })),
         }));
 
@@ -174,17 +185,19 @@ export default function EditFormule({formule})
 
     function handleNbActivitiesToSelectChange(e)
     {
-        const value = e.target.value;
-        if (isNaN(value))
+        const value = parseInt(e.target.value);
+
+        if (isNaN(value) || value <= 0)
         {
             setValidationError(prevState => ({
                 ...prevState,
-                nbActivitiesToSelect: 'Veuillez entrer un nombre valide.'
+                nbActivitiesToSelect: 'Veuillez entrer un nombre valide supérieur à 0.'
             }));
+            setNumberOfItems(isNaN(value) ? '' : value);
         }
         else
         {
-            setNumberOfItems(parseInt(value));
+            setNumberOfItems(value);
             setValidationError(prevState => ({
                 ...prevState,
                 nbActivitiesToSelect: ''
@@ -192,9 +205,78 @@ export default function EditFormule({formule})
         }
     }
 
+    function handleValidateActivitiesChanges()
+    {
+        const selectedActivities = reactSelectActivitiesSelected
+            .filter(a => a.value.startsWith('a'))
+            .map(a => allActivities.find(activity => activity.id === parseInt(a.value.substring(1))));
+
+        const selectedKinds = reactSelectActivitiesSelected
+            .filter(a => a.value.startsWith('k'))
+            .map(k => allKinds.find(kind => kind.id === parseInt(k.value.substring(1))));
+
+        setSelectedActivities(selectedActivities);
+        setSelectedKinds(selectedKinds);
+        setActivityModalIsOpen(false);
+    }
+
     async function handleSubmit(e)
     {
         e.preventDefault();
+
+        if (selectedActivities.length < number_of_items)
+        {
+            setValidationError(prevState => ({
+                ...prevState,
+                selectedActivities: 'Vous devez sélectionner au moins autant d\'activités que le nombre d\'activités à sélectionner.'
+            }));
+            return;
+        }
+
+        if (selectedPricings.length === 0)
+        {
+            setValidationError(prevState => ({
+                ...prevState,
+                priceCategory: 'Vous devez ajouter au moins un tarif.'
+            }));
+            return;
+        }
+
+        if (selectedPricings.some(p => p.price === 0))
+        {
+            setValidationError(prevState => ({
+                ...prevState,
+                price: 'Le prix ne peut pas être nul.'
+            }));
+            return;
+        }
+
+        await api.set()
+            .success(res =>
+            {
+                swal("La formule a été modifiée avec succès", "", "success");
+
+                setName(res.name);
+                setDescription(res.description);
+                setActive(res.active);
+            })
+            .error(res =>
+            {
+                if(res.errors)
+                    swal("Une erreur est survenue lors de la modification de la formule", res.error, "error");
+                else
+                    swal("Une erreur est survenue lors de la modification de la formule", "", "error");
+            })
+            .patch(`/formules/${formule.id}`, {
+                name,
+                description,
+                active,
+                number_of_items,
+                formuleItems: [
+                    ...selectedActivities.map(a => ({ itemId: a.id, isFamily: false })),
+                    ...selectedKinds.map(k => ({ itemId: k.id, isFamily: true }))
+                ]
+            })
     }
 
     function handleSavePricingForNewFormule(pricing) {
@@ -233,6 +315,36 @@ export default function EditFormule({formule})
 
     const pricingDataService = formule.id ? new FormulePricingDataService(formule.id) : new NewFormulePricingDataService(handleSavePricingForNewFormule, handleUpdatePricingForNewFormule, handleDeletePricingForNewFormule, selectedPricings, allPricingCategories)
 
+    const Option = (props) => {
+        const {data, isSelected} = props;
+
+        return (
+            <components.Option {...props}>
+                {data.isFamily ? (
+                    <div style={{fontWeight: "bold"}}>
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => null}
+                            style={{marginRight: "10px"}}
+                        />
+                        {data.label}
+                    </div>
+                ) : (
+                    <div className="ml-3">
+                        <input
+                            type="checkbox"
+                            checked={isSelected || reactSelectActivitiesSelected.find(a => a.value === data.familyValue) !== undefined}
+                            onChange={() => null}
+                            style={{marginRight: "10px"}}
+                        />
+                        {data.label}
+                    </div>
+                )}
+            </components.Option>
+        );
+    };
+
     return <div className="row p-2">
         <form onSubmit={handleSubmit}>
             <div className="row">
@@ -254,7 +366,7 @@ export default function EditFormule({formule})
                             <label htmlFor="activites">Activités</label>
                         </div>
                         <div className="col-sm-2 text-right">
-                            <button type="button" className="btn btn-primary">
+                            <button type="button" className="btn btn-primary" onClick={() => setActivityModalIsOpen(true)}>
                                 Ajouter une activité
                             </button>
                         </div>
@@ -262,7 +374,7 @@ export default function EditFormule({formule})
                     </div>
 
                     {selectedKinds.map(kind => (
-                        <div key={`kind_${activity.id}`} className="form-group mt-3 m-0">
+                        <div key={`kind_${kind.id}`} className="form-group mt-3 m-0">
                             <div
                                 className="form-control d-inline-flex align-items-center justify-content-between p-5">
                                 <label style={{ color: "#00334A" }}><small><i>Famille
@@ -315,7 +427,56 @@ export default function EditFormule({formule})
                     </div>
                 </div>
             </div>
+
+            <div className="col-md-12 mt-5">
+                <button type="submit" className="btn btn-primary">Enregistrer</button>
+            </div>
         </form>
+
+        <Modal isOpen={activityModalIsOpen} contentLabel="addActivityModal" className="Modal p-3"
+               ariaHideApp={false}>
+            <button type="button" className="close" onClick={() => setActivityModalIsOpen(false)}>&times;</button>
+
+            <div className="row m-5">
+                <h2 className="m-0">Ajouter des activités à une formule</h2>
+                <div className="mt-5">
+                    <div className="form-group mb-5">
+                        <label htmlFor="activites">Sélectionner une famille ou des activités</label>
+                        <ReactSelect
+                            options={displayActivities()}
+                            isMulti={true}
+                            isClearable={true}
+                            components={{Option}}
+                            isOptionDisabled={(option) => !option.isFamily && reactSelectActivitiesSelected.find(a => a.value === option.familyValue) !== undefined}
+                            value={reactSelectActivitiesSelected}
+                            onChange={setReactSelectActivitiesSelected}
+                            closeMenuOnSelect={false}
+                            hideSelectedOptions={false}
+                            required
+                        />
+                        {validationError.selectedActivities &&
+                            <div className="text-danger">{validationError.selectedActivities}</div>}
+                    </div>
+                    <div className="form-group mb-5">
+                        <label htmlFor="activitiesToSelect">Nombre d'activités à choisir parmi les activités
+                            sélectionnées</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="activitiesToSelect"
+                            onChange={handleNbActivitiesToSelectChange}
+                            value={number_of_items}
+                            required={true}
+                        />
+                        {validationError.nbActivitiesToSelect &&
+                            <div className="text-danger">{validationError.nbActivitiesToSelect}</div>}
+                    </div>
+                </div>
+            </div>
+            <div className="row text-right m-5">
+                <button className="btn btn-primary" onClick={handleValidateActivitiesChanges}>Valider</button>
+            </div>
+        </Modal>
     </div>
 }
 
