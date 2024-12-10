@@ -251,7 +251,7 @@ export default function EditFormule({formule})
             return;
         }
 
-        await api.set()
+        const request = api.set()
             .success(res =>
             {
                 swal("La formule a été modifiée avec succès", "", "success");
@@ -266,8 +266,11 @@ export default function EditFormule({formule})
                     swal("Une erreur est survenue lors de la modification de la formule", res.error, "error");
                 else
                     swal("Une erreur est survenue lors de la modification de la formule", "", "error");
-            })
-            .patch(`/formules/${formule.id}`, {
+            });
+
+        if(formule.id)
+        {
+            await request.patch(`/formules/${formule.id}`, {
                 name,
                 description,
                 active,
@@ -277,6 +280,26 @@ export default function EditFormule({formule})
                     ...selectedKinds.map(k => ({ itemId: k.id, isFamily: true }))
                 ]
             })
+        }
+        else
+        {
+            await request.post(`/formules`, {
+                name,
+                description,
+                active,
+                number_of_items,
+                formuleItems: [
+                    ...selectedActivities.map(a => ({ itemId: a.id, isFamily: false })),
+                    ...selectedKinds.map(k => ({ itemId: k.id, isFamily: true }))
+                ],
+                formulePricings: selectedPricings.map(p => ({
+                    priceCategoryId: p.pricing_category.id,
+                    price: p.price,
+                    fromSeasonId: p.from_season.id,
+                    toSeasonId: p.to_season ? p.to_season.id : null
+                }))
+            })
+        }
     }
 
     function handleSavePricingForNewFormule(pricing) {

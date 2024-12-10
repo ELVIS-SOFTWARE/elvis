@@ -56,7 +56,7 @@ class FormulesController < ApplicationController
       formule_items_params = params.permit(formuleItems: [:itemId, :isFamily])[:formuleItems]
       formule_items_params.each do |formule_item|
         formule.formule_items.new(
-          item_type: formule_item[:isFamily] ? ActivityRefKind.class.name : Activity.class.name,
+          item_type: formule_item[:isFamily] ? ActivityRefKind.name : Activity.name,
           item_id: formule_item[:itemId]
         )
       end
