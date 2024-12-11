@@ -1,11 +1,20 @@
-FROM ruby:3.3.6-alpine AS build
+FROM node:20-alpine3.20 AS node
+
+FROM ruby:3.3.6-alpine3.20 AS build
+
+COPY --from=node /usr/lib /usr/lib
+COPY --from=node /usr/local/lib /usr/local/lib
+COPY --from=node /usr/local/include /usr/local/include
+COPY --from=node /usr/local/bin /usr/local/bin
+
+RUN npm install -g yarn --force
 
 # Sets the path where the app is going to be installed
-ENV RAILS_ROOT /Elvis
+ENV RAILS_ROOT=/Elvis
 
 # Configure github PAT for bundler
 ARG GITHUB_TOKEN
-ENV BUNDLE_GITHUB__COM $GITHUB_TOKEN
+ENV BUNDLE_GITHUB__COM=$GITHUB_TOKEN
 RUN export BUNDLE_GITHUB__COM=$BUNDLE_GITHUB__COM
 
 ARG PLUGINS_LIST_DOWNLOAD_URL
@@ -27,8 +36,6 @@ RUN apk add --no-interactive \
   libpq-dev postgresql-client \
   git \
   shared-mime-info \
-    nodejs \
-    yarn \
     jemalloc \
     py3-setuptools
 
@@ -45,6 +52,7 @@ COPY lib /Elvis/lib
 ENV RAILS_ENV=kubernetes
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
 
+RUN bundle config set without 'development test'
 RUN PLUGINS_LIST_DOWNLOAD_URL=$PLUGINS_LIST_DOWNLOAD_URL bundle install
 
 COPY package.json yarn.lock Gemfile Rakefile /Elvis/
@@ -107,11 +115,14 @@ RUN rm -r /usr/local/bundle/cache
 
 
 
+FROM surnet/alpine-wkhtmltopdf:3.20.3-0.12.6-small AS wkhtmltopdf
 
+FROM ruby:3.3.6-alpine3.20
 
-FROM ruby:3.3.6-alpine
+# Copy wkhtmltopdf files from docker-wkhtmltopdf image
+COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
 
-ENV RAILS_ROOT /Elvis
+ENV RAILS_ROOT=/Elvis
 ENV RAILS_ENV=kubernetes
 ENV RAILS_LOG_TO_STDOUT=true
 ENV SECRET_KEY_BASE $(bundle exec rails secret)
@@ -121,11 +132,35 @@ RUN adduser -Ds /bin/sh elvis
 # ~2mb
 RUN apk update
 
+RUN apk add --no-cache \
+    libstdc++ \
+    libx11 \
+    libxrender \
+    libxext \
+    libssl3 \
+    ca-certificates \
+    fontconfig \
+    freetype \
+    ttf-dejavu \
+    ttf-droid \
+    ttf-freefont \
+    ttf-liberation \
+    # more fonts
+  && apk add --no-cache --virtual .build-deps \
+    msttcorefonts-installer \
+  # Install microsoft fonts
+  && update-ms-fonts \
+  && fc-cache -f \
+  # Clean up when done
+  && rm -rf /tmp/* \
+  && apk del .build-deps
+
 # ~ 34mb => pdf generation
-RUN apk add --no-interactive libpq libcap dcron bash jemalloc curl shared-mime-info fontconfig libxrender libxtst libxi libpng libjpeg
+RUN apk add --no-interactive libpq libcap dcron bash jemalloc curl shared-mime-info libxtst libxi libpng libjpeg
 RUN setcap 'cap_net_bind_service=+ep cap_setuid=+ep' /usr/local/bin/ruby
 RUN setcap cap_setgid=+ep /usr/sbin/crond
-RUN chown elvis:elvis /usr/sbin/crond /usr/bin/crontab /etc/crontabs/
+RUN touch /var/run/crond.pid
+RUN chown elvis:elvis /usr/sbin/crond /usr/bin/crontab /etc/crontabs/ /var/run/crond.pid
 
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 
