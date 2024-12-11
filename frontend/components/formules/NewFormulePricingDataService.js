@@ -10,8 +10,8 @@ export default class NewFormulePricingDataService extends DataService
         this.handleUpdatePricingForNewFormule = handleUpdatePricingForNewFormule;
         this.handleDeletePricingForNewFormule = handleDeletePricingForNewFormule;
 
-        this.pricing_categories = pricing_categories;
-        this.forumulePricings = forumulePricings;
+        this.pricing_categories = pricing_categories || [];
+        this.forumulePricings = forumulePricings || [];
         this.tempIdCounter = 1;
 
         this.createData = this.createData.bind(this);

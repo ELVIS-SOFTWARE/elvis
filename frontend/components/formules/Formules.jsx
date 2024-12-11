@@ -1,12 +1,47 @@
 import React, {useState} from 'react';
 import ReactTable from "react-table";
 import * as api from "../../tools/api";
+import swal from "sweetalert2";
 
 
 export default function Formules() {
     const [data, setData] = useState([]);
     const [pages, setPages] = useState(0);
     const [loading, setLoading] = useState(false);
+
+    function deleteFormule(formule)
+    {
+        swal({
+            title: "Êtes-vous sûr ?",
+            text: "Voulez-vous vraiment supprimer cette formule ?",
+            type: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then(async (willDelete) => {
+            if (willDelete) {
+                try {
+                    await api.set()
+                        .success(res => {
+                            fetchData({page: 0, pageSize: 10, sorted: [], filtered: {}}, null);
+                            swal({
+                                title: "Formule supprimée",
+                                text: "La formule a été supprimée avec succès",
+                                type: "success",
+                                timer: 1000
+                            })
+                        })
+                        .error(res => {
+                            swal("Une erreur est survenue lors de la suppression de la formule", res.error, "error");
+                        })
+                        .del('/formules/' + formule.id, {})
+                } catch (error) {
+                    console.error(error);
+                    swal("Une erreur est survenue lors de la suppression de la formule", error.message, "error");
+                }
+            }
+        });
+    }
 
     function columns()
     {
@@ -44,7 +79,6 @@ export default function Formules() {
     }
 
     async function fetchData(state, instance) {
-        console.log(state)
         setLoading(true);
         try {
             await api.set()

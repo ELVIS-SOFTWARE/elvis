@@ -56,13 +56,13 @@ class FormulesController < ApplicationController
       formule_items_params = params.permit(formuleItems: [:itemId, :isFamily])[:formuleItems]
       formule_items_params.each do |formule_item|
         formule.formule_items.new(
-          item_type: formule_item[:isFamily] ? ActivityRefKind.name : Activity.name,
+          item_type: formule_item[:isFamily] ? ActivityRefKind.name : ActivityRef.name,
           item_id: formule_item[:itemId]
         )
       end
 
       # Save formule prices
-      formule_prices_params = params.permit(formulePrices: [:priceCategoryId, :price, :fromSeasonId, :toSeasonId])[:formulePrices]
+      formule_prices_params = params.permit(formulePricings: [:priceCategoryId, :price, :fromSeasonId, :toSeasonId])[:formulePricings]
       formule_prices_params.each do |formule_price|
         to_season = Season.find_by(id: formule_price[:toSeasonId])
         from_season = Season.find(formule_price[:fromSeasonId])
@@ -114,6 +114,15 @@ class FormulesController < ApplicationController
         raise ActiveRecord::Rollback
       end
     end
+  end
+
+  def destroy
+    formule = Formule.find(params[:id])
+
+    authorize! :destroy, formule
+
+    formule.destroy
+    render json: { message: "Formule deleted" }
   end
 
   private

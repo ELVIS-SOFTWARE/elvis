@@ -10,6 +10,7 @@ import NewFormulePricingDataService from "./NewFormulePricingDataService";
 import DefaultCreateButton from "../common/baseDataTable/DefaultCreateButton";
 import { components, default as ReactSelect } from "react-select";
 import Modal from "react-modal";
+import _ from "lodash";
 
 /**
  *
@@ -54,12 +55,12 @@ export default function EditFormule({formule})
     const [active, setActive] = useState(formule.active);
     const [number_of_items, setNumberOfItems] = useState(formule.number_of_items);
 
-    const fActivities = formule.formule_items.filter(i => !i.is_for_kind).map(i => i.item);
-    const fKinds = formule.formule_items.filter(i => i.is_for_kind).map(i => i.item);
+    const fActivities = (formule.formule_items || []).filter(i => !i.is_for_kind).map(i => i.item);
+    const fKinds = (formule.formule_items || []).filter(i => i.is_for_kind).map(i => i.item);
 
     const [selectedActivities, setSelectedActivities] = useState(fActivities);
     const [selectedKinds, setSelectedKinds] = useState(fKinds);
-    const [selectedPricings, setSelectedPricings] = useState(formule.formule_pricings);
+    const [selectedPricings, setSelectedPricings] = useState(formule.formule_pricings || []);
 
     const [allActivities, setAllActivities] = useState([]);
     const [allKinds, setKinds] = useState([]);
@@ -224,15 +225,6 @@ export default function EditFormule({formule})
     {
         e.preventDefault();
 
-        if (selectedActivities.length < number_of_items)
-        {
-            setValidationError(prevState => ({
-                ...prevState,
-                selectedActivities: 'Vous devez sélectionner au moins autant d\'activités que le nombre d\'activités à sélectionner.'
-            }));
-            return;
-        }
-
         if (selectedPricings.length === 0)
         {
             setValidationError(prevState => ({
@@ -254,11 +246,22 @@ export default function EditFormule({formule})
         const request = api.set()
             .success(res =>
             {
-                swal("La formule a été modifiée avec succès", "", "success");
+                swal({
+                    title: "La formule a été modifiée avec succès",
+                    type: "success",
+                    timer: 1500,
+                })
 
-                setName(res.name);
-                setDescription(res.description);
-                setActive(res.active);
+                if(formule.id)
+                {
+                    setName(res.name);
+                    setDescription(res.description);
+                    setActive(res.active);
+                }
+                else
+                {
+                    window.location.href = '/formules';
+                }
             })
             .error(res =>
             {
@@ -295,15 +298,15 @@ export default function EditFormule({formule})
                 formulePricings: selectedPricings.map(p => ({
                     priceCategoryId: p.pricing_category.id,
                     price: p.price,
-                    fromSeasonId: p.from_season.id,
-                    toSeasonId: p.to_season ? p.to_season.id : null
+                    fromSeasonId: p.from_season_id,
+                    toSeasonId: p.to_season_id ? p.to_season_id : null
                 }))
             })
         }
     }
 
     function handleSavePricingForNewFormule(pricing) {
-        setSelectedPricings([...selectedPricings, pricing]);
+        setSelectedPricings(_.uniqBy([...selectedPricings, pricing], 'id'));
     }
 
     function handleUpdatePricingForNewFormule(pricing) {
