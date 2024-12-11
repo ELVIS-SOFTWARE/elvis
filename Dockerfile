@@ -120,6 +120,7 @@ FROM surnet/alpine-wkhtmltopdf:3.20.3-0.12.6-small AS wkhtmltopdf
 FROM ruby:3.3.6-alpine3.20
 
 # Copy wkhtmltopdf files from docker-wkhtmltopdf image
+# ~ 47mb
 COPY --from=wkhtmltopdf /bin/wkhtmltopdf /bin/wkhtmltopdf
 
 ENV RAILS_ROOT=/Elvis
@@ -132,6 +133,7 @@ RUN adduser -Ds /bin/sh elvis
 # ~2mb
 RUN apk update
 
+# ~ 40mb => for wkhtmltopdf
 RUN apk add --no-cache \
     libstdc++ \
     libx11 \
@@ -155,7 +157,7 @@ RUN apk add --no-cache \
   && rm -rf /tmp/* \
   && apk del .build-deps
 
-# ~ 34mb => pdf generation
+# ~ 26mb
 RUN apk add --no-interactive libpq libcap dcron bash jemalloc curl shared-mime-info libxtst libxi libpng libjpeg
 RUN setcap 'cap_net_bind_service=+ep cap_setuid=+ep' /usr/local/bin/ruby
 RUN setcap cap_setgid=+ep /usr/sbin/crond
@@ -167,10 +169,10 @@ ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT
 
-# ~ 560mb => with 450mb for wkhtmltopdf-binary
+# ~ 147mb
 COPY --from=build /usr/local/bundle /usr/local/bundle
 
-# ~ 50mb => because of bootsnap precompile. It is bigger for more speed
+# ~ 60mb => because of bootsnap precompile. It is bigger for more speed
 COPY --from=build --chown=elvis:elvis $RAILS_ROOT $RAILS_ROOT
 
 USER elvis
