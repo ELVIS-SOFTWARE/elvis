@@ -27,7 +27,7 @@ export default function Payers({values, mutators, currentUser})
     }
 
     const select_payers_all_features = family_links_with_user.map(flwu => [`${flwu.first_name} ${flwu.last_name}`, flwu.id]);
-    const select_payers_selected_features = family_links_with_user.filter(flwu => flwu.is_paying_for).map(f => f.id);
+    const select_payers_selected_features = family_links_with_user.filter(flwu => flwu.is_paying_for).map(f => f.is_inverse ? f.id : f.member_id);
 
     return <Fragment>
         <h3 className="mb-0">Payeurs</h3>

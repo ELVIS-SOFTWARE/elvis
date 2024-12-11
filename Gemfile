@@ -39,7 +39,6 @@ gem "annotate"
 
 gem "responders"
 gem "wicked_pdf"
-gem "wkhtmltopdf-binary"
 gem 'rubyzip'
 
 gem "kaminari", '~> 1.2.2'
@@ -83,6 +82,7 @@ group :development, :test do
   gem "factory_bot_rails"
   gem 'rails-controller-testing'
   gem "rspec"
+  gem "wkhtmltopdf-binary"
 end
 
 group :development do

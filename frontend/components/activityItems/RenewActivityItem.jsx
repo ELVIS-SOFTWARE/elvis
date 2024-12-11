@@ -198,7 +198,8 @@ class RenewActivityItem extends React.Component {
         /**
          *  Affichage du nom de l'activité
          */
-        let activityDisplayName = _.get(this.props, "pre_application_activity.activity_application.desired_activities[0].activity_ref.display_name");
+        const desired_activities = _.get(this.props, "pre_application_activity.activity_application.desired_activities") || [];
+        const activityDisplayName = (desired_activities.find(d => d.activity_ref_id === activityState.activity_ref_id) || desired_activities[0]).activity_ref.display_name
 
         return (
             <React.Fragment>

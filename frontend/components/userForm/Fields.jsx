@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment } from "react";
 import {Field} from "react-final-form";
 import {
     composeValidators,
@@ -36,7 +36,7 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
         family = Object.values(family)
     }
     return fields.map((field, i) => (
-        <div key={field}>
+        <Fragment key={field}>
             {Array.isArray(family) && family.length > 0 && (
                 <SelectSameAs
                     family={family}
@@ -81,7 +81,7 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
                 </div>
 
                 {fields.length > 1 ? (
-                    <div className="col text-right">
+                    <div className="col-xs text-right">
                         <button
                             className="btn btn-sm btn-warning"
                             onClick={() => fields.remove(i)}
@@ -94,7 +94,7 @@ export const TelephoneFields = ({ignoreValidate, fields, setSameAs, family, curr
             </div>
 
 
-        </div>
+        </Fragment>
     ));
 }
 

@@ -19,7 +19,13 @@ class String
 end
 
 class EmailConfigInterceptor
+  # @param [Mail::Message] message
   def self.delivering_email(message)
+
+    # add header to identify the instance that sent the email
+    message.headers({
+      "X-Instance-Name" => ENV["INSTANCE_NAME"] || "development"
+                    })
 
     password = Parameter.get_value("app.email.password")
 

@@ -51,7 +51,8 @@ class DestroyJob < ApplicationJob
           data = {
             success: false,
             message: "Une erreur est survenue lors de la pré-suppression de l'objet: <strong>#{e.message}</strong>",
-            status: :internal_server_error
+            status: :internal_server_error,
+            objId: @object&.id
           }
 
           raise DestroyEndError.new(data)
@@ -95,7 +96,8 @@ class DestroyJob < ApplicationJob
         data = {
           success: false,
           status: :unprocessable_entity,
-          message: message
+          message: message,
+          objId: @object&.id
         }
 
         raise DestroyEndError.new(data)
@@ -115,13 +117,13 @@ class DestroyJob < ApplicationJob
     data = {
       success: true,
       message: @destroy_params[:success_message],
-      status: :ok
+      status: :ok,
+      objId: @object&.id
     }
 
     EventHandler.send("#{@classname.name}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data,
-      objId: @object&.id
+      args: data
     )
 
     return data
@@ -130,8 +132,7 @@ class DestroyJob < ApplicationJob
   rescue DestroyEndError => e
     EventHandler.send("#{@classname.name}").destroy_ended.trigger(
       sender: self.class.name,
-      args: e.data,
-      objId: @object&.id
+      args: e.data
     )
 
     return e.data
@@ -143,13 +144,13 @@ class DestroyJob < ApplicationJob
     data = {
       success: false,
       message: "La classe #{params&.first&.fetch(:classname, "Inconnue")} n'a pas été trouvée.",
-      status: :not_found
+      status: :not_found,
+      objId: @object&.id
     }
 
     EventHandler.send("#{params&.first&.fetch(:classname, "Inconnue")}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data,
-      objId: @object&.id
+      args: data
     )
 
     return data
@@ -161,13 +162,13 @@ class DestroyJob < ApplicationJob
     data = {
       success: false,
       message: "L'objet n'a pas été trouvé.",
-      status: :not_found
+      status: :not_found,
+      objId: @object&.id
     }
 
     EventHandler.send("#{@classname.name}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data,
-      objId: @object&.id
+      args: data
     )
 
     return data
@@ -179,13 +180,13 @@ class DestroyJob < ApplicationJob
     data = {
       success: false,
       message: "Une erreur est survenue lors de la suppression de l'objet. #{e.message}",
-      status: :internal_server_error
+      status: :internal_server_error,
+      objId: @object&.id
     }
 
     EventHandler.send("#{@classname&.name || params&.first&.fetch(:classname, "notFound")}").destroy_ended.trigger(
       sender: self.class.name,
-      args: data,
-      objId: @object&.id
+      args: data
     )
 
     return data

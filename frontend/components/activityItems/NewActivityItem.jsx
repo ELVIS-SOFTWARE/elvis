@@ -137,11 +137,8 @@ class NewActivityItem extends React.Component {
             }, {});
     }
 
-    render() {
-        const {
-            data
-        } = this.props;
-
+    render()
+    {
         const activity_application_status_id = _.get(this.props, "new_activity_application.activity_application_status_id");
 
         let actionLabel = "";
@@ -172,50 +169,50 @@ class NewActivityItem extends React.Component {
          *  Affichage du jour, créneau, professeur, et salle
          */
 
-        let desiredActivity = _.get(this.props, "new_activity_application.desired_activities[0]");
-
-        let activityDetails = "";
-        if (data !== undefined && data !== null) {
-            let dayLabel = moment(data.time_interval.start).format('dddd')
-            activityDetails = <React.Fragment>
-                <p className="pb-0">
-                    {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
-                    {moment(data.time_interval.start).format('HH:mm')} à&nbsp;
-                    {moment(data.time_interval.end).format('HH:mm')}
-                </p>
-            </React.Fragment>;
-        }
+        const desiredActivities = _.get(this.props, "new_activity_application.desired_activities");
 
         let activityApplicationId = this.state.activityApplicationId.toString();
         let paddedActivityApplicationId = activityApplicationId.padStart(3, '0');
-
-        const dayLabel = data ? moment(data.time_interval.start).format('dddd') : undefined;
 
         return (
             <React.Fragment>
                 <div className="card p-4 pt-0 col-md-12 col-lg-6 mr-4 mb-4 text-dark"
                      style={{border: "none", borderRadius: "12px", color: "#00283B"}}>
-                    <div className={`d-inline-flex align-items-top pt-0 row ${data && "pb-sm-0"}`}>
-                        <div className="col-sm-6">
-                            {(this.props.current_user || {}).is_admin ? <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`#${paddedActivityApplicationId}`}</a> : null}
-                            <h3 className="font-weight-bold">{desiredActivity.activity_ref.label}</h3>
-                            {
-                                data && <div>
-                                    <p style={{color: "#00283B"}}>
-                                        {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
-                                        {moment(data.time_interval.start).format('HH:mm')} à&nbsp;
-                                        {moment(data.time_interval.end).format('HH:mm')}
-                                        {data.room && data.room.label && <Fragment>, en salle : {data.room.label}</Fragment>}
-                                    </p>
-                                    <p style={{color: "#8AA4B1"}}>Avec {data.teacher.first_name} {data.teacher.last_name}</p>
-                                </div>
-                            }
-                        </div>
+                    {
+                        desiredActivities.map((desiredActivity, i) =>
+                        {
+                            const activity = desiredActivity.activity;
+                            const dayLabel = activity ? moment(activity.time_interval.start).format('dddd') : undefined;
 
-                        <div className="col-sm-6 text-right">
-                            {renderActivityAction(actionLabel)}
-                        </div>
-                    </div>
+                            return <Fragment>
+                                <div className={`d-inline-flex align-items-top pt-0 row ${activity && "pb-sm-0"}`}>
+                                    <div className="col-sm-6">
+                                        {i === 0 && (this.props.current_user || {}).is_admin ?
+                                            <a href={`/inscriptions/${this.state.activityApplicationId}`}>{`#${paddedActivityApplicationId}`}</a> : null}
+                                        <h3 className="font-weight-bold">{desiredActivity.activity_ref.label}</h3>
+                                        {
+                                            activity && <div>
+                                                <p style={{ color: "#00283B" }}>
+                                                    {dayLabel.charAt(0).toUpperCase() + dayLabel.slice(1)} de&nbsp;
+                                                    {moment(activity.time_interval.start).format("HH:mm")} à&nbsp;
+                                                    {moment(activity.time_interval.end).format("HH:mm")}
+                                                    {activity.room && activity.room.label &&
+                                                        <Fragment>, en salle : {activity.room.label}</Fragment>}
+                                                </p>
+                                                <p style={{ color: "#8AA4B1" }}>Avec {activity.teacher.first_name} {activity.teacher.last_name}</p>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    {i === 0 ? <div className="col-sm-6 text-right">
+                                        {renderActivityAction(actionLabel)}
+                                    </div>: undefined}
+                                </div>
+
+                                {i < desiredActivities.length - 1 ? <hr className="d-inline-flex align-items-top pt-0 row "/> : undefined}
+                            </Fragment>
+                        })
+                    }
 
 
                     <div className="col-sm-12 d-inline-flex justify-content-between p-0">

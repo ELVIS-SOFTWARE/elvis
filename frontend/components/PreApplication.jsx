@@ -43,18 +43,18 @@ class PreApplication extends React.Component {
             this.props.current_activity_applications
         )
             .sortBy(paa => paa.id)
-            .map((current_application_activity, i) => (
-                <CurrentActivityItem
+            .map((current_application_activity, i) => <Fragment>
+                {current_application_activity.desired_activities.map((desired_activity, j) => <CurrentActivityItem
                     key={i}
                     current_user={this.props.current_user}
                     authToken={this.props.user.authentication_token}
-                    data={current_application_activity.desired_activities[0]}
+                    data={desired_activity}
                     pre_application_activity={current_application_activity.pre_application_activity}
                     user={this.props.user}
                     allowPreApplication={allowPreApplication}
                     current_activity_application={current_application_activity}
-                />
-            ))
+                />)}
+            </Fragment>)
             .value();
 
         // Liste les activités où l'utilisateur à choisi de se réinscrire
@@ -87,7 +87,6 @@ class PreApplication extends React.Component {
                     key={i}
                     current_user={this.props.current_user}
                     authToken={this.props.user.authentication_token}
-                    data={new_activity_application.desired_activities[0].activity}
                     user_id={this.props.user.id}
                     user={this.props.user}
                     new_activity_application={new_activity_application}
@@ -95,29 +94,6 @@ class PreApplication extends React.Component {
                     default_activity_status_id={this.props.default_activity_status_id}
                 />
             ))
-            .value();
-
-
-        // utilisé nulle part dans le code mais je laisse ça au cas ou
-        const changedActivities = _.chain(
-            this.props.pre_application.pre_application_activities
-        )
-            .sortBy(paa => paa.id)
-            .filter(paa => paa.action === "change")
-            .map((pre_application_activity, i) => {
-                let data = _.head(
-                    pre_application_activity.activity_application
-                        .desired_activities
-                );
-                return (
-                    <DesiredActivityItem
-                        key={i}
-                        data={data}
-                        pre_application_activity={pre_application_activity}
-                        user_id={this.props.user.id}
-                    />
-                );
-            })
             .value();
 
         const othersActivities = _.chain(
