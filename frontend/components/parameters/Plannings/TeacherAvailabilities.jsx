@@ -26,17 +26,22 @@ export default function TeacherAvailabilities({defaultChecked})
             }, {});
     }
 
-    return <Fragment>
+    return <div className="col-sm-6">
         <h3>Disponibilité</h3>
         <div className="mb-sm-3 mt-3">
             <input type="checkbox" id="check" checked={checked} onChange={() => setChecked(!checked)} />
             &nbsp;
-            <label className="ml-2 font-normal" htmlFor="check">Créer un créneau de disponibilité avant la création d'un cours</label>
+            <label className="ml-2 font-normal" htmlFor="check">Créer un créneau de disponibilité avant la création d'un
+                cours</label>
         </div>
-    </Fragment>
+
+        <div className="mt-3">
+            <button className="btn btn-success no-margin pull-right" onClick={onSubmit}>Sauvegarder</button>
+        </div>
+    </div>
 }
 
 TeacherAvailabilities.propTypes = {
     defaultChecked: PropTypes.bool,
-    planningDefaultChecked: PropTypes.bool
+        planningDefaultChecked: PropTypes.bool
 }
