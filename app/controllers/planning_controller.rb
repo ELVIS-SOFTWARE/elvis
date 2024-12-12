@@ -70,7 +70,7 @@ class PlanningController < ApplicationController
     end
     @show_availabilities = Parameter.get_value("planning.show_disponibilities") == true
     @teacher_can_edit = Parameter.get_value("planning.teacher_can_edit_planning") == true
-    @show_activity_code = Parameter.get_value("planning.show_activity_code", default: false)
+    @show_activity_code = Parameter.get_value("planning.card.show_activity_code", default: false)
   end
 
   def show_simple
@@ -196,7 +196,7 @@ class PlanningController < ApplicationController
                                                                                          ])
     @levels = EvaluationLevelRef.all
     @locations = Location.all.as_json
-    @show_activity_code = Parameter.get_value("planning.show_activity_code", default: false)
+    @show_activity_code = Parameter.get_value("planning.card.show_activity_code", default: false)
   end
 
   def get_intervals
@@ -400,7 +400,7 @@ class PlanningController < ApplicationController
     @intervals = ActiveModelSerializers::SerializableResource.new(intervals, each_serializer: TimeIntervalSerializer)
     @conflict = conflict.as_json(include: [:activity_instance])
     @season = Season.current.as_json({ include: [:holidays] })
-    @show_activity_code = Parameter.get_value("planning.show_activity_code", default: false)
+    @show_activity_code = Parameter.get_value("planning.card.show_activity_code", default: false)
   end
 
   def show_for_room
@@ -428,7 +428,7 @@ class PlanningController < ApplicationController
     @season = Season.current.as_json({ include: [:holidays] })
     @next_season = Season.next.as_json({ include: [:holidays] })
     @seasons = Season.all.as_json({ include: [:holidays] })
-    @show_activity_code = Parameter.get_value("planning.show_activity_code", default: false)
+    @show_activity_code = Parameter.get_value("planning.card.show_activity_code", default: false)
   end
 
   def show_all_rooms
@@ -438,7 +438,7 @@ class PlanningController < ApplicationController
     @levels = EvaluationLevelRef.all
     @locations = Location.all.as_json
     @activity_refs = ActivityRef.all
-    @show_activity_code = Parameter.get_value("planning.show_activity_code", default: false)
+    @show_activity_code = Parameter.get_value("planning.card.show_activity_code", default: false)
     @teachers = User.teachers.order(:last_name, :first_name).includes(:teachers_activity_refs,
                                                                       :planning).as_json(include: %i[
                                                                                            teachers_activity_refs planning
