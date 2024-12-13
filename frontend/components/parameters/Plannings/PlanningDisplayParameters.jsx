@@ -5,6 +5,7 @@ import swal from "sweetalert2";
 export default function PlanningDisplayParameters()
 {
     const [showActivityCode, setShowActivityCode] = React.useState(false);
+    const [recurrenceActivated, setRecurrenceActivated] = React.useState(false);
 
     useEffect(() =>
     {
@@ -12,6 +13,7 @@ export default function PlanningDisplayParameters()
             .success((data) =>
             {
                 setShowActivityCode(data.show_activity_code);
+                setRecurrenceActivated(data.recurrence_activated);
             })
             .error(() =>
             {
@@ -20,7 +22,7 @@ export default function PlanningDisplayParameters()
                     type: "error",
                 });
             })
-            .get("/parameters/show_activity_code", {});
+            .get("/parameters/planning/school_planning_params", {});
     }, []);
 
     const onSubmit = (e) =>
@@ -40,7 +42,10 @@ export default function PlanningDisplayParameters()
                     type: "error",
                 });
             })
-            .post("/parameters/show_activity_code", { show_activity_code: showActivityCode });
+            .post("/parameters/planning/school_planning_params", {
+                show_activity_code: showActivityCode,
+                recurrence_activated: recurrenceActivated
+            });
     };
 
     return <div className="row">
@@ -49,8 +54,16 @@ export default function PlanningDisplayParameters()
 
             <div className="form-group mb-3">
 
-                <input id="show_activity_code" type="checkbox" checked={showActivityCode} onChange={() => setShowActivityCode(!showActivityCode)} />
+                <input id="show_activity_code" type="checkbox" checked={showActivityCode}
+                       onChange={() => setShowActivityCode(!showActivityCode)} />
                 <label htmlFor="show_activity_code" className="ml-2 font-normal">Afficher le code de l'activité</label>
+            </div>
+
+            <div className="form-group mb-3">
+
+                <input id="recurrence_activated" type="checkbox" checked={recurrenceActivated}
+                       onChange={() => setRecurrenceActivated(!recurrenceActivated)} />
+                <label htmlFor="recurrence_activated" className="ml-2 font-normal">Permettre la récurrence des disponibilités</label>
             </div>
 
             <button className="btn btn-success pull-right mt-5" onClick={onSubmit}>Valider</button>

@@ -53,8 +53,8 @@ Rails.application.routes.draw do
     get "planning_parameters", to: "planning_parameters#index"
     post "planning_parameters", to: "planning_parameters#update"
 
-    get "show_activity_code", to: "planning_parameters#show_activity_code"
-    post "show_activity_code", to: "planning_parameters#update_show_activity_code"
+    get "planning/school_planning_params", to: "planning_parameters#school_planning_params"
+    post "planning/school_planning_params", to: "planning_parameters#update_school_planning_params"
 
     get "hours_before_cancelling_activity", to: "planning_parameters#get_hours_before_cancelling_activity"
     post "hours_before_cancelling_activity", to: "planning_parameters#save_hours_before_cancelling_activity"

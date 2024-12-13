@@ -1,6 +1,8 @@
 class PlanningController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:update_availabilities]
 
+  before_action -> { @recurrence_activated = Parameter.get_value("planning.recurrence_activated", default: false) }, only: %i[show show_generic show_all_rooms show_for_conflict show_for_room]
+
   def index_for_teachers
     @current_user = current_user
     plannings = Planning.includes(:user).where(users: { is_teacher: true })

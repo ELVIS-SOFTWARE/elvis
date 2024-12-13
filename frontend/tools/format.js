@@ -2,6 +2,7 @@ import moment from "moment";
 import { retrieveUserLevel } from "./obj";
 import React from "react";
 import {findAndGet, ISO_DATE_FORMAT} from "../components/utils";
+import { WEEKDAYS } from "./constants";
 
 export const twoDigits = n => (n < 10 ? `0${n}` : `${n}`);
 
@@ -77,6 +78,12 @@ export const timeToDate = (timestr, refDate = null) => {
 
     return date;
 };
+
+export const toFullDateFr = date => {
+    const tmpDate = new Date(date);
+
+    return `${WEEKDAYS[tmpDate.getDay()]} ${tmpDate.getDate()} ${toMonthName(tmpDate.getMonth())} ${tmpDate.getFullYear()}`;
+}
 
 export const fullname = user =>
     `${(user.last_name || "").toUpperCase()} ${user.first_name}`;
