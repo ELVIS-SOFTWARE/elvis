@@ -63,8 +63,9 @@ class Planning < ApplicationRecord
             holiday_dates = season.holidays.map { |h| h.date }
 
             while interval.end < recurrence_end
-              next if holiday_dates.include?(interval.start&.to_date)
-              intervalList << interval if interval.save
+              unless holiday_dates.include?(interval.start&.to_date)
+                intervalList << interval if interval.save
+              end
 
               interval = interval.dup
               interval.id = nil
