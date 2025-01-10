@@ -92,36 +92,6 @@ function addDuration(date, nb, type) {
     return new Date(epoch + toAdd);
 }
 
-/**
- * Turns a date into a dummy day shift.
- * between 3 and 10 hours of work per shift.
- *
- * @param {*} date the date of the resulting shift.
- */
-function dateToHourShift(date) {
-    const shift = { d: date, morning: 0, afternoon: 0 };
-
-    //1 chance out of 2 to work on saturdays
-    if (
-        date.getDay() !== 0 &&
-        ((date.getDay() === 6 && Math.random() < 0.5) || date.getDay() !== 6)
-    ) {
-        //work between 3 and
-        let nbHours = 3 + Math.random() * 8;
-
-        const oneThird = 1 / 3;
-        const twoThirds = 2 / 3;
-
-        shift.morning = nbHours * oneThird;
-        //round to half an hour
-        shift.morning = Math.floor(shift.morning * 4) / 4;
-        shift.afternoon = nbHours * twoThirds;
-        shift.afternoon = Math.floor(shift.afternoon * 4) / 4;
-    }
-
-    return shift;
-}
-
 function getHoursString(n) {
     return n || n === 0 ? `${Math.floor(n)}h${Math.round((n % 1) * 60) || ""}` : "";
 }
@@ -161,7 +131,6 @@ const frDayNum = d => (7 + d.getDay() - 1) % 7;
 export {
     daysRange,
     addDuration,
-    dateToHourShift,
     getHoursString,
     monthWeekNum,
     weekNum,
