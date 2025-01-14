@@ -169,7 +169,7 @@ class PreApplication extends React.Component {
                                         </div>
                                         <div>
                                             <h5 className="card-title" style={{color: "#00283B"}}>Période de
-                                                ré-inscription <i className="fas fa-info-circle"></i></h5>
+                                                ré-inscription <i className="fas fa-inf-circle"></i></h5>
                                             <h6 className="card-subtitle mb-2 text-muted">Ferme le {closingApplication.format("DD MMMM YYYY")}</h6>
                                             <div>{isPreApplicationOpened ?
                                                 <span className="badge badge-success">ouverte</span> :
