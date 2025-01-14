@@ -170,18 +170,21 @@ class Activity extends React.Component {
         return duration < 60 ? `- ${minutes} min` : `- ${hours}h${minutes}`;
     }
 
-    handleOptionButton(suggestion) {
-        // Checks if user is already on option for this activity, act accordingly
-        if (this.isSuggestionInDesiredActivityOptions(suggestion)) {
-            this.props.handleRemoveSuggestionOption(
-                suggestion.id,
-                this.props.desiredActivity
-            );
-        } else {
-            this.props.handleSelectSuggestionOption(
-                suggestion.id,
-                this.props.desiredActivity.id
-            );
+    async handleOptionButton(suggestion) {
+        try {
+            const isOption = this.isSuggestionInDesiredActivityOptions(suggestion);
+            if (isOption) {
+                await this.props.handleRemoveSuggestionOption(suggestion.id, this.props.desiredActivity);
+                this.props.desiredActivity.options = this.props.desiredActivity.options.filter(opt => opt.activity_id !== suggestion.id);
+            } else {
+                await this.props.handleSelectSuggestionOption(suggestion.id, this.props.desiredActivity.id);
+                this.props.desiredActivity.options.push({activity_id: suggestion.id});
+            }
+            this.forceUpdate();
+        } catch (error) {
+            console.error("Erreur lors de la modification de l'option", error);
+        } finally {
+            this.setState({ submittingOptionId: 0 });
         }
     }
 
@@ -308,7 +311,8 @@ class Activity extends React.Component {
                 });
         }
 
-        suggestionsColumns = [...suggestionsColumns,
+        suggestionsColumns = [
+            ...suggestionsColumns,
             {
                 Header: "Groupe",
                 accessor: "group_name",
@@ -320,61 +324,94 @@ class Activity extends React.Component {
                 id: "day",
                 maxWidth: 150,
                 accessor: s => moment(s.time_interval.start).isoWeekday(),
-                Cell: ({value}) => moment(value, "E").format("dddd").toUpperCase(),
-                Filter: ({onChange}) => <select defaultValue=""
-                                                onChange={e => onChange(parseInt(e.target.value) || "")}>
-                    <option value=""/>
-                    {WEEKDAYS.map((w, i) => ({label: w, id: i})).map(optionMapper())}
-                </select>,
-                filterMethod: (filter, row) => !filter || (row.day === filter.value),
+                Cell: ({ value }) =>
+                    moment(value, "E")
+                        .format("dddd")
+                        .toUpperCase(),
+                Filter: ({ onChange }) => (
+                    <select
+                        defaultValue=""
+                        onChange={e => onChange(parseInt(e.target.value) || "")}
+                    >
+                        <option value="" />
+                        {WEEKDAYS.map((w, i) => ({ label: w, id: i })).map(
+                            optionMapper()
+                        )}
+                    </select>
+                ),
+                filterMethod: (filter, row) =>
+                    !filter || row.day === filter.value,
             },
             {
                 Header: "Famille de cours",
                 id: "type_cour",
                 maxWidth: 150,
                 accessor: "activity_ref.label",
-                Filter: ({onChange}) => <select defaultValue="" onChange={e => onChange(e.target.value)}>
-                    <option value=""/>
-                    {_.uniq((this.props.suggestions || []).map(s => s.activity_ref.label)).map(s => ({
-                        label: s,
-                        id: s
-                    })).map(optionMapper())}
-                </select>,
-                filterMethod: (filter, row) => !filter || (row.type_cour === filter.value)
+                Filter: ({ onChange }) => (
+                    <select
+                        defaultValue=""
+                        onChange={e => onChange(e.target.value)}
+                    >
+                        <option value="" />
+                        {_.uniq(
+                            (this.props.suggestions || []).map(
+                                s => s.activity_ref.label
+                            )
+                        )
+                            .map(s => ({
+                                label: s,
+                                id: s,
+                            }))
+                            .map(optionMapper())}
+                    </select>
+                ),
+                filterMethod: (filter, row) =>
+                    !filter || row.type_cour === filter.value,
             },
             {
                 Header: "Horaires",
                 id: "time",
-                Filter: ({filter, onChange}) => {
-                    filter = filter && filter.value || {};
+                Filter: ({ filter, onChange }) => {
+                    filter = (filter && filter.value) || {};
                     const start = filter.start || "";
                     const end = filter.end || "";
 
-                    return <div className="flex flex-space-around-justified">
-                        <input
-                            type="time"
-                            defaultValue={start}
-                            onChange={e => onChange({
-                                ...filter,
-                                start: e.target.value,
-                            })}/>
-                        <input
-                            type="time"
-                            defaultValue={end}
-                            onChange={e => onChange({
-                                ...filter,
-                                end: e.target.value,
-                            })}/>
-                    </div>;
+                    return (
+                        <div className="flex flex-space-around-justified">
+                            <input
+                                type="time"
+                                defaultValue={start}
+                                onChange={e =>
+                                    onChange({
+                                        ...filter,
+                                        start: e.target.value,
+                                    })
+                                }
+                            />
+                            <input
+                                type="time"
+                                defaultValue={end}
+                                onChange={e =>
+                                    onChange({
+                                        ...filter,
+                                        end: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+                    );
                 },
-                filterMethod: ({value: {start, end}} = {}, row) => {
+                filterMethod: ({ value: { start, end } } = {}, row) => {
                     let res = true;
 
                     if (start)
-                        res = res && moment(row.time.start).format("HH:mm") >= start;
+                        res =
+                            res &&
+                            moment(row.time.start).format("HH:mm") >= start;
 
                     if (end)
-                        res = res && moment(row.time.end).format("HH:mm") <= end;
+                        res =
+                            res && moment(row.time.end).format("HH:mm") <= end;
 
                     return res;
                 },
@@ -382,13 +419,18 @@ class Activity extends React.Component {
                     start: s.closest_lesson || s.time_interval.start,
                     end: s.closest_lesson_end || s.time_interval.end,
                 }),
-                Cell: ({value: v}) => `${moment(v.start).format("HH:mm")} ~> ${moment(v.end).format("HH:mm")}`,
+                Cell: ({ value: v }) =>
+                    `${moment(v.start).format("HH:mm")} ~> ${moment(
+                        v.end
+                    ).format("HH:mm")}`,
             },
             {
                 Header: "Professeur",
                 id: "teacher",
-                accessor: ({teacher: t}) => `${t.first_name} ${t.last_name}`,
-                filterMethod: (filter, {teacher}) => !filter || teacher.match(new RegExp(`.*${filter.value}.*`, 'i'))
+                accessor: ({ teacher: t }) => `${t.first_name} ${t.last_name}`,
+                filterMethod: (filter, { teacher }) =>
+                    !filter ||
+                    teacher.match(new RegExp(`.*${filter.value}.*`, "i")),
             },
             {
                 Header: "Lieu",
@@ -403,7 +445,7 @@ class Activity extends React.Component {
                 accessor: s => {
                     const level = TimeIntervalHelpers.levelDisplayForActivity(
                         s,
-                        this.props.seasons,
+                        this.props.seasons
                     );
                     return level || "Pas de niveau";
                 },
@@ -413,23 +455,27 @@ class Activity extends React.Component {
                 id: "average_age",
                 maxWidth: 50,
                 accessor: s => TimeIntervalHelpers.averageAge(s.users),
-                Cell: props => TimeIntervalHelpers.averageAgeDisplay(props.value)
+                Cell: props =>
+                    TimeIntervalHelpers.averageAgeDisplay(props.value),
             },
             {
                 Header: "Occupées",
                 id: "occupation",
                 maxWidth: 100,
                 accessor: s => {
-                    let {validatedHeadCount, headCountLimit} = occupationInfos(s);
+                    let {
+                        validatedHeadCount,
+                        headCountLimit,
+                    } = occupationInfos(s);
 
                     return validatedHeadCount / headCountLimit;
                 },
-                Cell: (props) => formatActivityHeadcount(props.original)
+                Cell: props => formatActivityHeadcount(props.original),
             },
             {
                 Header: "Actions",
                 id: "actions",
-                style: {textAlign: "right"},
+                style: { textAlign: "right" },
                 filterable: false,
                 maxWidth: 250,
                 Cell: props => {
@@ -449,21 +495,24 @@ class Activity extends React.Component {
                                 className="btn btn-xs btn-primary"
                                 disabled={!!this.state.submittingId}
                                 onClick={() => {
-                                    this.setState({submittingId: act.id});
-                                    self.props.handleRemoveStudent(
-                                        act.id,
-                                        self.props.desiredActivity.id,
-                                        self.props.activityRef.id
-                                    ).then(() =>
-                                        this.setState({submittingId: 0})
-                                    )
-                                }}>
-                                Retirer de ce créneau
-                                &nbsp;
-                                {this.state.submittingId === act.id ?
+                                    this.setState({ submittingId: act.id });
+                                    self.props
+                                        .handleRemoveStudent(
+                                            act.id,
+                                            self.props.desiredActivity.id,
+                                            self.props.activityRef.id
+                                        )
+                                        .then(() =>
+                                            this.setState({ submittingId: 0 })
+                                        );
+                                }}
+                            >
+                                Retirer de ce créneau &nbsp;
+                                {this.state.submittingId === act.id ? (
                                     <i className="fas fa-circle-notch fa-spin"></i>
-                                    :
-                                    ""}
+                                ) : (
+                                    ""
+                                )}
                             </button>
                         );
                     }
@@ -474,48 +523,85 @@ class Activity extends React.Component {
 
                     return (
                         <React.Fragment>
+                            {/* Bouton Sélectionner */}
                             <button
                                 disabled={
-                                    self.props.isAlreadyBusy(props.original.time_interval) ||
-                                    act.users.length >= act.activity_ref.occupation_hard_limit ||
+                                    self.props.isAlreadyBusy(
+                                        props.original.time_interval
+                                    ) ||
+                                    act.users.length >=
+                                    act.activity_ref
+                                        .occupation_hard_limit ||
                                     !!this.state.submittingId
                                 }
                                 className="btn btn-xs btn-primary m-r-sm"
                                 onClick={() => {
-                                    this.setState({submittingId: act.id})
-                                    self.props.handleSelectSuggestion(
-                                        act.id,
-                                        self.props.desiredActivity.id,
-                                        self.props.activityRef.id
-                                    ).then(() =>
-                                        this.setState({submittingId: 0})
-                                    )
+                                    this.setState({ submittingId: act.id });
+                                    self.props
+                                        .handleSelectSuggestion(
+                                            act.id,
+                                            self.props.desiredActivity.id,
+                                            self.props.activityRef.id
+                                        )
+                                        .then(() => {
+                                            this.setState({ submittingId: 0 });
+                                            this.setState(prevState => ({
+                                                actUsers: [...act.users],
+                                            }));
+                                        });
                                 }}
                             >
-                                Sélectionner
-                                &nbsp;
-                                {this.state.submittingId === act.id ?
+                                Sélectionner &nbsp;
+                                {this.state.submittingId === act.id ? (
                                     <i className="fas fa-circle-notch fa-spin"></i>
-                                    :
-                                    ""}
+                                ) : (
+                                    ""
+                                )}
                             </button>
+
+                            {/* Bouton Option / Retirer l'option */}
                             <button
                                 disabled={
-                                    // désactiver l'option si l'utilisateur est déjà inscrit sur ce cours
-                                    act.users.some(u=>u.id === this.props.userId)
+                                    act.users.some(
+                                        u => u.id === this.props.userId
+                                    ) || !!this.state.submittingOptionId
                                 }
                                 className="btn btn-xs"
                                 style={{
                                     color: "#FFF",
                                     backgroundColor: "#9575CD",
                                 }}
-                                onClick={() => {
-                                    return this.handleOptionButton(
-                                        act
-                                    );
+                                onClick={async () => {
+                                    // Définir l'ID de l'option en cours de traitement
+                                    this.setState({
+                                        submittingOptionId: act.id,
+                                    });
+
+                                    try {
+                                        // Appeler handleOptionButton avec l'option spécifique
+                                        await this.handleOptionButton(act);
+                                    } catch (error) {
+                                        console.error(
+                                            "Erreur lors du traitement de l'option :",
+                                            error
+                                        );
+                                    } finally {
+                                        // Réinitialiser submittingOptionId pour permettre d'autres clics
+                                        this.setState({
+                                            submittingOptionId: null,
+                                        });
+                                    }
                                 }}
                             >
-                                {this.isSuggestionInDesiredActivityOptions(act) ? "Retirer l'option" : "option"}
+                                {this.isSuggestionInDesiredActivityOptions(act)
+                                    ? "Retirer l'option"
+                                    : "Option"}
+                                &nbsp;
+                                {this.state.submittingOptionId === act.id ? (
+                                    <i className="fas fa-circle-notch fa-spin"></i>
+                                ) : (
+                                    ""
+                                )}
                             </button>
                         </React.Fragment>
                     );
@@ -528,24 +614,33 @@ class Activity extends React.Component {
 
         let actionLabel = "Nouvelle demande";
         if (this.props.application.pre_application_activity) {
-            actionLabel = PRE_APPLICATION_ACTION_LABELS[this.props.application.pre_application_activity.action];
+            actionLabel =
+                PRE_APPLICATION_ACTION_LABELS[
+                    this.props.application.pre_application_activity.action
+                ];
         } else if (this.props.pre_application_desired_activity) {
-            actionLabel = PRE_APPLICATION_ACTION_LABELS[this.props.application.pre_application_desired_activity.action];
+            actionLabel =
+                PRE_APPLICATION_ACTION_LABELS[
+                    this.props.application.pre_application_desired_activity
+                        .action
+                ];
         }
 
         let previousActivity = null;
         if (this.props.activityRef.kind === "Enfance") {
             //Look for Enfance activity in previous applications
-            const previousDesired = _.chain(this
-                .props
-                .application
-                .user
-                .activity_applications
+            const previousDesired = _.chain(
+                this.props.application.user.activity_applications
             )
-                .filter(app => moment(app.season.end).isSame(this.props.application.season.start, "year"))
+                .filter(app =>
+                    moment(app.season.end).isSame(
+                        this.props.application.season.start,
+                        "year"
+                    )
+                )
                 .map(app => app.desired_activities)
                 .flatten()
-                .find(des => des.activity_ref.kind === 'Enfance')
+                .find(des => des.activity_ref.kind === "Enfance")
                 .value();
 
             if (previousDesired) {
@@ -560,25 +655,29 @@ class Activity extends React.Component {
                             <p>
                                 <b>
                                     {applicationActivity.activity_ref.label},{" "}
-                                    {
-                                        applicationActivity.time_interval ?
-                                            <React.Fragment>
-                                                {_.capitalize(
-                                                    moment(applicationActivity.time_interval.start).format("dddd")
-                                                )}{" "}
-                                                {moment(applicationActivity.time_interval.start).format("HH:mm")}
-                                                {" -› "}
-                                                {moment(applicationActivity.time_interval.end).format(
-                                                    "HH:mm"
-                                                )}
-                                            </React.Fragment>
-                                            :
-                                            "Créneau introuvable"
-                                    }
+                                    {applicationActivity.time_interval ? (
+                                        <React.Fragment>
+                                            {_.capitalize(
+                                                moment(
+                                                    applicationActivity
+                                                        .time_interval.start
+                                                ).format("dddd")
+                                            )}{" "}
+                                            {moment(
+                                                applicationActivity
+                                                    .time_interval.start
+                                            ).format("HH:mm")}
+                                            {" -› "}
+                                            {moment(
+                                                applicationActivity
+                                                    .time_interval.end
+                                            ).format("HH:mm")}
+                                        </React.Fragment>
+                                    ) : (
+                                        "Créneau introuvable"
+                                    )}
                                     ,{" "}
-                                    {`${applicationActivity.teacher.first_name} ${
-                                        applicationActivity.teacher.last_name
-                                    }`}{" "}
+                                    {`${applicationActivity.teacher.first_name} ${applicationActivity.teacher.last_name}`}{" "}
                                 </b>
                             </p>
                         </div>
@@ -596,24 +695,26 @@ class Activity extends React.Component {
                         <p>
                             <b>
                                 {act.activity_ref.label},{" "}
-                                {
-                                    act.time_interval ?
-                                        <React.Fragment>
-                                            {_.capitalize(
-                                                moment(act.time_interval.start).format("dddd")
-                                            )}{" "}
-                                            {moment(act.time_interval.start).format("HH:mm")}
-                                            {" -› "}
-                                            {moment(act.time_interval.end).format(
-                                                "HH:mm"
-                                            )}
-                                        </React.Fragment>
-                                        :
-                                        "Créneau introuvable"
-                                },{" "}
-                                {`${act.teacher.first_name} ${
-                                    act.teacher.last_name
-                                }`}{" "}
+                                {act.time_interval ? (
+                                    <React.Fragment>
+                                        {_.capitalize(
+                                            moment(
+                                                act.time_interval.start
+                                            ).format("dddd")
+                                        )}{" "}
+                                        {moment(act.time_interval.start).format(
+                                            "HH:mm"
+                                        )}
+                                        {" -› "}
+                                        {moment(act.time_interval.end).format(
+                                            "HH:mm"
+                                        )}
+                                    </React.Fragment>
+                                ) : (
+                                    "Créneau introuvable"
+                                )}
+                                ,{" "}
+                                {`${act.teacher.first_name} ${act.teacher.last_name}`}{" "}
                             </b>
                         </p>
                     </div>

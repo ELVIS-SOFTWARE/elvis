@@ -402,14 +402,14 @@ class Wizard extends React.Component {
                     allowOutsideClick: false,
                     confirmButtonText: confirmtext,
                 })
-                .then((result) =>
-                {
-                    if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                        window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
-                    } else {
-                        window.location.href = `/inscriptions/${data.activity_application.id}`;
-                    }
-                })
+                    .then((result) =>
+                    {
+                        if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
+                            window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
+                        } else {
+                            window.location.href = `/inscriptions/${data.activity_application.id}`;
+                        }
+                    })
             })
             .error(data => {
                 this.setState({buttonDisabled: false});
@@ -479,7 +479,7 @@ class Wizard extends React.Component {
             })
             this.state.selectedActivities = [this.props.preSelectedActivityId];
 
-        // sinon on regarde si on peut en déduire une
+            // sinon on regarde si on peut en déduire une
         } else if (cycleActivityRefs.length) {
             // Pre select when there is only one activity to select
             if (cycleActivityRefs.length === 1
@@ -736,10 +736,10 @@ class Wizard extends React.Component {
                 name: "Membre Concerné",
                 component: (
                     this.props.currentUserIsAdmin ? <UserSearch
-                        user={this.props.user}
-                        onSelect={this.handleSelectUser.bind(this)}
-                        season={this.state.season}
-                    /> :
+                            user={this.props.user}
+                            onSelect={this.handleSelectUser.bind(this)}
+                            season={this.state.season}
+                        /> :
                         <WizardUserSelectMember
                             user={this.props.user}
                             onSelect={this.handleSelectUser.bind(this)}
@@ -956,11 +956,11 @@ class Wizard extends React.Component {
                     marginBottom: "35px",
                     marginTop: "45px",
                 }}>
-                    <h1 style={{color: "#00334A"}}>Nouvelle demande d’inscription</h1>
-                    <h3 style={{color: "#8AA4B1"}}>Demande d'inscription
+                    <h1 style={{ color: "#00334A" }}>Nouvelle demande d’inscription</h1>
+                    <h3 style={{ color: "#8AA4B1" }}>Demande d'inscription
                         {!this.state.skipActivityChoice && activityChoiceActionTypes.includes(this.props.actionType) ?
                             " aux activités"
-                            : " à l'activité " + this.props.allActivityRefs.find( ar => ar.id === this.state.selectedActivities[0]).display_name
+                            : " à l'activité " + this.props.allActivityRefs.find(ar => ar.id === this.state.selectedActivities[0]).display_name
                         } pour la {this.state.season.label}
                     </h3>
                     {this.props.currentUserIsAdmin ? (
@@ -985,14 +985,14 @@ class Wizard extends React.Component {
                             <div className="form-group flex flex-center-aligned m-l ml-5">
                                 <label
                                     className="m-r-sm my-auto"
-                                    style={{width: "100%"}}
+                                    style={{ width: "100%" }}
                                 >
                                     Date de début
                                 </label>
                                 <input
                                     type="date"
                                     className="w-150 form-control"
-                                    style={{border: "none", borderRadius: "8px"}}
+                                    style={{ border: "none", borderRadius: "8px" }}
                                     min={moment(
                                         findAndGet(
                                             this.props.seasons,
@@ -1022,7 +1022,7 @@ class Wizard extends React.Component {
                         </div>
                     ) : null}
                 </div>
-                <div className="step-progress" style={{marginBottom: "75px"}}>
+                <div className="step-progress" style={{ marginBottom: "75px" }}>
                     <StepZilla
                         steps={steps}
                         showSteps={true}
@@ -1035,6 +1035,9 @@ class Wizard extends React.Component {
                         backButtonCls={
                             "btn btn-prev btn-primary btn-md pull-left font-weight-bold"
                         }
+                        onStepChange={(step) => {
+                            window.scrollTo({ top: 0, behavior: "instant" });
+                        }}
                     />
                 </div>
             </div>
