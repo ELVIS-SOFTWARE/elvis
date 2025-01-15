@@ -247,7 +247,10 @@ class ActivitiesApplicationsList extends React.Component {
     }
 
     handleBulkDelete() {
-        const selectedCount = this.state.bulkTargets.length;
+        const selectedCount = this.state.bulkTargets === "all"
+            ? this.state.total // Total pour "tout sélectionner"
+            : this.state.bulkTargets.length;
+
         const confirmationText = selectedCount === 1
             ? "Voulez-vous supprimer la demande d'inscription sélectionnée ?"
             : `Voulez-vous supprimer les ${selectedCount} demandes d'inscription sélectionnées ?`;
@@ -275,11 +278,28 @@ class ActivitiesApplicationsList extends React.Component {
                 })
                     .catch(res => console.error(res))
                     .then(res => {
+                        const remainingItems = this.state.total - selectedCount;
+                        const newTotalPages = Math.ceil(remainingItems / this.state.filter.pageSize);
+
+                        const newPage = Math.min(
+                            this.state.filter.page, // Page actuelle
+                            newTotalPages - 1 // Dernière page disponible
+                        );
+
                         this.setState({
-                            data: this.state.data.filter(
+                            data: this.state.bulkTargets === "all" ? [] : this.state.data.filter(
                                 d => !this.state.bulkTargets.includes(d.id)
                             ),
                             bulkTargets: [],
+                            total: remainingItems,
+                            pages: newTotalPages,
+                            filter: {
+                                ...this.state.filter,
+                                page: newPage, // Mettre à jour la page actuelle
+                            },
+                        }, () => {
+                            // Recharger les données pour la nouvelle page
+                            this.fetchData(this.state.filter);
                         });
                     });
             } else {
@@ -287,6 +307,8 @@ class ActivitiesApplicationsList extends React.Component {
             }
         });
     }
+
+
 
     resetFilters() {
         localStorage.setItem(

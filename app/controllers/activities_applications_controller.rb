@@ -1559,7 +1559,7 @@ class ActivitiesApplicationsController < ApplicationController
     total = query.count
 
     pending_total = ActivityApplication
-           .joins(:activity_application_status)
+                      .joins(:activity_application_status)
                       .merge(
                         ActivityApplicationStatus.where(id: ActivityApplicationStatus::TREATMENT_PENDING_ID)
                       ).count
@@ -1612,7 +1612,6 @@ class ActivitiesApplicationsController < ApplicationController
     Rails.logger.info("Réponse JSON : #{response.to_json}")
     response
   end
-
 
 
   def applications_list_csv(query)
