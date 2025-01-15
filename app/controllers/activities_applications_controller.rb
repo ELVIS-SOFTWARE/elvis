@@ -1187,7 +1187,14 @@ class ActivitiesApplicationsController < ApplicationController
   def bulk_delete
     targets = params[:targets]
 
-    if targets.blank? || !targets.is_a?(Array)
+    if targets == "all"
+      targets = ActivityApplication
+                  .joins(:activity_application_status)
+                  .where(activity_application_status: { id: ActivityApplicationStatus::TREATMENT_PENDING_ID })
+                  .pluck(:id)
+    end
+
+    if targets.blank? || (!targets.is_a?(Array) && targets != "all")
       render json: { error: "Invalid targets" }, status: :unprocessable_entity and return
     end
 
@@ -1215,6 +1222,8 @@ class ActivitiesApplicationsController < ApplicationController
     render json: { success: true }, status: :ok
   rescue ActiveRecord::Rollback => e
     render json: { error: e.message }, status: :forbidden
+  rescue CanCan::AccessDenied
+    render json: { error: 'Non autorisé' }, status: :forbidden
   end
 
   def find_activity_suggestions
@@ -1549,6 +1558,13 @@ class ActivitiesApplicationsController < ApplicationController
   def applications_list_json(query, filter = params)
     total = query.count
 
+    pending_total = ActivityApplication
+                      .joins(:activity_application_status)
+                      .merge(
+                        ActivityApplicationStatus.where(id: ActivityApplicationStatus::TREATMENT_PENDING_ID)
+                      ).count
+
+
     query = query
               .page(filter[:page] + 1)
               .per(filter[:pageSize])
@@ -1584,14 +1600,19 @@ class ActivitiesApplicationsController < ApplicationController
       season: {},
       referent: {},
     },
-                                 methods: :availabilities)
+                                                 methods: :availabilities)
 
-    {
+    response = {
       applications: applications,
       pages: pages,
       total: total,
+      pending_total: pending_total
     }
+
+    Rails.logger.info("Réponse JSON : #{response.to_json}")
+    response
   end
+
 
   def applications_list_csv(query)
     authorize! :read, query.select(:id, :season_id, :desired_activity_id)
@@ -1750,4 +1771,20 @@ class ActivitiesApplicationsController < ApplicationController
       end
     end
   end
+end
+
+
+def check_terminal_status
+  query = get_query_from_params
+
+  # Vérifie si une des demandes a un statut terminal
+  has_terminal_status = query.exists?(
+    activity_application_status_id: [
+      ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID,
+      ActivityApplicationStatus::ACTIVITY_PROPOSED_ID,
+      ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID
+    ]
+  )
+
+  render json: { hasTerminalStatus: has_terminal_status }
 end

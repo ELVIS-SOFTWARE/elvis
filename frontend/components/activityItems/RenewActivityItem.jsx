@@ -199,8 +199,14 @@ class RenewActivityItem extends React.Component {
          *  Affichage du nom de l'activité
          */
         const desired_activities = _.get(this.props, "pre_application_activity.activity_application.desired_activities") || [];
-        const activityDisplayName = (desired_activities.find(d => d.activity_ref_id === activityState.activity_ref_id) || desired_activities[0]).activity_ref.display_name
+        let activityDisplayName = "Activité inconnue";
 
+        if (activityState && activityState.activity_ref_id) {
+            const desiredActivity = desired_activities.find(d => d.activity_ref_id === activityState.activity_ref_id);
+            activityDisplayName = desiredActivity ? desiredActivity.activity_ref.display_name : "Activité inconnue";
+        } else if (desired_activities[0]) {
+            activityDisplayName = desired_activities[0].activity_ref.display_name;
+        }
         return (
             <React.Fragment>
                 <div className="card p-4 pt-0 col-md-12 col-lg-6 mr-4 mb-4"

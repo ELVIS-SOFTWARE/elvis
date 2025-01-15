@@ -736,6 +736,7 @@ class Summary extends React.Component
         const desiredIdx = desiredActivities.findIndex(da => da.activity_ref.activity_ref_kind_id === suggestion.activity_ref.activity_ref_kind_id);
         const desiredActivity = { ...desiredActivities[desiredIdx] };
 
+        this.setState({ desiredActivity: updatedActivity });
         const suggestions = _.mapValues(
             this.state.suggestions,
             s => s.map(a => a.id === suggestion.id ? suggestion : a),
