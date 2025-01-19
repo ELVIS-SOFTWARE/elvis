@@ -68,7 +68,7 @@
     "moment-timezone": "^0.5.23",
     "normalize.css": "^7.0.0",
     "popper.js": "^1.16.1",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.0",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-loader": "^8.1.1",
     "postcss-nested": "^3.0.0",
