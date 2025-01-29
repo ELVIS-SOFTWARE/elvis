@@ -231,7 +231,7 @@ export default class WizardUserSelectMember extends React.Component {
                     </div>
                 </div>
 
-                {this.state.showError && Object.keys(this.state.error).length && <div className="row mb-3">
+                {this.state.showError && Object.keys(this.state.error).length ? <div className="row mb-3">
                     <div className="alert alert-info d-inline-flex align-items-center pt-4 pb-4"
                          style={{ border: "1px solid #0079BF", borderRadius: "12px", color: "#0079BF" }}>
                         <div className="col-1 p-0 text-center">
@@ -241,11 +241,11 @@ export default class WizardUserSelectMember extends React.Component {
                             Si la personne est mineur, ajouter un nouveau membre
                         </div>
                     </div>
-                </div>}
+                </div> : null}
 
-                {this.state.showError && this.state.error.members && <div className="row">
+                {this.state.showError && this.state.error.members ? <div className="row">
                     <p className="text-danger">{this.state.error.members}</p>
-                </div>}
+                </div> : null}
 
                 <div className="row mb-4">
                     <ToggleButtonGroup

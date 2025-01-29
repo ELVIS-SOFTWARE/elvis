@@ -17,10 +17,22 @@ module ActivityApplications
       ActivityApplication.transaction do
         # Etape 1 : création / mise à jour de l'utilisateur sur la base de l'email
         user = User.where("LOWER(email) = ?", row["email"].downcase).first_or_initialize
+
+        # duplicate user if first_name or last_name is modified after import
+        # not possible to prevent duplicates with provided data
+        # If duplicate user is created, use merge tool to merge them
+        if user.id.positive? && (user.first_name != row["prenom"] || user.last_name != row["nom"])
+          user = User.new(
+            email: nil,
+            attached_to_id: user.id,
+          )
+        else
+          user.email = row["email"].downcase
+        end
+
         user.first_name = row["prenom"]
         user.last_name = row["nom"]
         user.birthday = map_birthday(row["date_naissance"])
-        user.email = row["email"].downcase
         user.sex = map_civilite_to_sex(row["civilite"])
         user.profession = row["profession"]
         # user.employer = row["employeur"]

@@ -80,6 +80,27 @@ export const TIME_STEPS = [
     { label: "15min", value: 0.25 },
 ];
 
+export const RECURRENCE_TYPES = {
+    DAILY: "daily",
+    WEEKLY: "weekly",
+    BIWEEKLY: "biweekly",
+    MONTHLY: "monthly",
+    BIMONTHLY: "bimonthly",
+    YEARLY: "yearly",
+    toString: function (type) {
+        return {
+            [this.DAILY]: "Tous les jours",
+            [this.WEEKLY]: "Toutes les semaines",
+            [this.BIWEEKLY]: "Toutes les deux semaines",
+            [this.MONTHLY]: "Tous les mois",
+            [this.BIMONTHLY]: "Tous les deux mois",
+            [this.YEARLY]: "Tous les ans",
+        }[type];
+    },
+    getDefault: function () {return this.WEEKLY},
+    getAll: function () {return Object.values(this).filter(v => typeof v === "string")},
+}
+
 export const modalStyle = {
     overlay: {
         overflowY: "auto",
