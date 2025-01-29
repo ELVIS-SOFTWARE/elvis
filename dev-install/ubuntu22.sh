@@ -67,7 +67,7 @@ fi
 
 echo ""
 echo "-----------------------------------------------"
-echo "installing ruby 3.3.2"
+echo "installing ruby 3.3.6"
 echo ""
 echo "-----------------------------------------------"
 echo ""

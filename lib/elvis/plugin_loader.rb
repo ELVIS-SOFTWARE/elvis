@@ -130,7 +130,17 @@ module Elvis
         plugin.register_settings(config["settings"]) if plugin.configurable?
 
         all_modules = ObjectSpace.each_object(Module).reject { |m| m.is_a?(Class) }
-        plugin_module = all_modules.find { |mod|  mod.to_s.include?(plugin.name.camelcase) }
+        plugin_module = all_modules.find { |mod|
+          begin
+            mod_name = mod.to_s
+          rescue
+            mod_name = mod.to_json
+          rescue
+            mod_name = mod.name
+          end
+
+          mod_name.include?(plugin.name.camelcase)
+        }
 
         menus = if plugin_module && plugin_module.respond_to?(:menu_is_to_add?)
                   config["menus"].filter { |m| plugin_module.menu_is_to_add?(m) }
