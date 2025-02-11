@@ -231,61 +231,6 @@ export default class LessonList extends React.Component {
                 .del(`/activity_instances?instance_ids=${values.instanceIds}&time_interval_ids=${values.timeIntervalIds}&activity_id=${activity.id}`);
         }
     }
-    bulkDelete() {
-        swal({
-            title: "Confirmation",
-            text: "Voulez-vous supprimer tous les cours sélectionnés ? Cette action est irréversible.",
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Oui, supprimer",
-            cancelButtonText: "Annuler",
-        }).then(r => {
-            if (r.value) {
-                fetch("/lessons/bulkdelete", {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-Token": csrfToken,
-                    },
-                    body: JSON.stringify({
-                        targets: this.state.targets,
-                    }),
-                })
-                    .then(response => response.json()) // Ajoute ceci pour voir la réponse JSON
-                    .then((data) => {
-                        console.log("Réponse du serveur :", data);
-                        if (data.success) { // Modifie selon la structure réelle de ta réponse
-                            this.setState({
-                                data: this.state.data.filter(
-                                    d => !this.state.targets.includes(d.id)
-                                ),
-                                targets: [],
-                            });
-                            swal({
-                                title: "Succès",
-                                text: "Les cours sélectionnés ont été supprimés.",
-                                type: "success",
-                            });
-                        } else {
-                            swal({
-                                type: "error",
-                                title: "Échec de la suppression",
-                                text: "Une erreur s'est produite côté serveur.",
-                            });
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Erreur lors de la suppression :", err);
-                        swal({
-                            type: "error",
-                            title: "Erreur",
-                            text: "La suppression a échoué. Veuillez réessayer.",
-                        });
-                    });
-            }
-        });
-    }
-
 
     fetchData(filter) {
         const hasSeasonChanged =
@@ -440,7 +385,7 @@ export default class LessonList extends React.Component {
                             >
                                 Sélectionner les{" "}
                                 {this.state.total - this.state.targets.length}{" "}
-                                restants
+                                restantes
                             </button>
                         ) : null}
                     </div>
@@ -459,18 +404,12 @@ export default class LessonList extends React.Component {
                         >
                             Envoyer un message
                         </button>
-                        <button
-                            className="btn btn-sm btn-danger m-r"
-                            onClick={() => this.bulkDelete()}
-                        >
-                            Supprimer
-                        </button>
+
                     </div>
                 </div>
             </div>
         );
     }
-
 
     sendReminderMail(referenceDate = undefined) {
         const to = _.chain(this.state.data)
@@ -631,8 +570,8 @@ export default class LessonList extends React.Component {
                         onChange={e =>
                             e.target.checked
                                 ? this.setState({
-                                    targets: this.state.data.map(r => r.id),
-                                })
+                                      targets: this.state.data.map(r => r.id),
+                                  })
                                 : this.setState({ targets: [] })
                         }
                     />
@@ -703,7 +642,7 @@ export default class LessonList extends React.Component {
                 Cell: c => {
                     if (c.value) {
                         return `${moment(c.value.start).format(
-                            "HH:mm",
+                            "HH:mm"
                         )} ➝ ${moment(c.value.end).format("HH:mm")}`;
                     } else {
                         return "?";
@@ -727,7 +666,7 @@ export default class LessonList extends React.Component {
                         <span>
                             {
                                 this.props.activityRefs.find(
-                                    r => r.id === c.value,
+                                    r => r.id === c.value
                                 ).label
                             }
                         </span>
@@ -766,7 +705,7 @@ export default class LessonList extends React.Component {
                 accessor: a => {
                     // filtre les salles en fonction de celle de la premiere instance trouvée. Ne devrais pas contenir plus d'une salle
                     const rooms = this.props.rooms.filter(
-                        r => r.id === (a.activity_instance || {}).room_id,
+                        r => r.id === (a.activity_instance || {}).room_id
                     );
 
                     // affiche le nom de la salle de la première instance ou le nom de la salle enregistré dans l'activité sinon. (pas la bonne dans certains cas)
@@ -830,7 +769,7 @@ export default class LessonList extends React.Component {
                     ];
 
                     const value = options.find(
-                        o => o.value == (filter && filter.value),
+                        o => o.value == (filter && filter.value)
                     );
 
                     return (
@@ -898,6 +837,7 @@ export default class LessonList extends React.Component {
                     >
                         <option value="" />
                         <option value="TBD">À PRÉCISER</option>
+                        <option value="NON INDIQUÉ">NON INDIQUÉ</option>
                         {this.props.evaluationLevelRefs.map(r => (
                             <option key={r.id} value={r.id}>
                                 {r.label}
@@ -919,7 +859,7 @@ export default class LessonList extends React.Component {
                 Cell: c => {
                     const season = TimeIntervalHelpers.getSeasonFromDate(
                         c.value && c.value.start,
-                        this.props.seasons,
+                        this.props.seasons
                     );
                     return (season && season.label) || "ø";
                 },
@@ -946,10 +886,10 @@ export default class LessonList extends React.Component {
                             href={
                                 c.original.time_interval
                                     ? `/planning/${
-                                        c.original.teacher.planning.id
-                                    }/${moment(
-                                        c.original.time_interval.start,
-                                    ).format(ISO_DATE_FORMAT)}`
+                                          c.original.teacher.planning.id
+                                      }/${moment(
+                                          c.original.time_interval.start
+                                      ).format(ISO_DATE_FORMAT)}`
                                     : "/activities"
                             }
                         >
