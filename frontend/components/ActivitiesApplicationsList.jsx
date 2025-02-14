@@ -64,7 +64,6 @@ const debounce = makeDebounce();
 class ActivitiesApplicationsList extends React.Component {
     constructor(props) {
         super(props);
-        console.log("Props initiaux :", props);
 
         const localStorageFilter = localStorage.getItem(FILTER_STORAGE_KEY);
         const filter =
@@ -107,20 +106,11 @@ class ActivitiesApplicationsList extends React.Component {
             confirmButtonText: 'OK',
         });
     }
-
     componentDidMount() {
         this.fetchData(this.state.filter);
     }
 
     componentDidUpdate(prevProps, prevState) {
-        // Log lorsque les valeurs changent
-        if (prevProps.pendingTotal !== this.props.pendingTotal || prevState.total !== this.state.total) {
-            console.log("Mise à jour détectée :");
-            console.log("Ancien pendingTotal :", prevProps.pendingTotal, "Nouveau pendingTotal :", this.props.pendingTotal);
-            console.log("Ancien total :", prevState.total, "Nouveau total :", this.state.total);
-        }
-
-        // Conserver les filtres dans le localStorage (logique existante)
         localStorage.setItem(
             FILTER_STORAGE_KEY,
             JSON.stringify(this.state.filter),
@@ -488,7 +478,6 @@ class ActivitiesApplicationsList extends React.Component {
     statusFilterContainsTerminalStatus() {
         if (this.state.bulkTargets === "all") {
             const allSelectedArePending = this.state.pendingTotal === this.state.total;
-            console.log("All selected are pending:", allSelectedArePending);
             return !allSelectedArePending;
         }
 
@@ -500,7 +489,6 @@ class ActivitiesApplicationsList extends React.Component {
         const containsTerminalStatus = selectedStatuses.some(s =>
             [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s)
         );
-        console.log("Contains terminal status:", containsTerminalStatus);
 
         return containsTerminalStatus;
     }

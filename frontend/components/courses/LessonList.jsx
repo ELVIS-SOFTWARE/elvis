@@ -251,10 +251,9 @@ export default class LessonList extends React.Component {
                         targets: this.state.targets,
                     }),
                 })
-                    .then(response => response.json()) // Ajoute ceci pour voir la réponse JSON
+                    .then(response => response.json())
                     .then((data) => {
-                        console.log("Réponse du serveur :", data);
-                        if (data.success) { // Modifie selon la structure réelle de ta réponse
+                        if (data.success) {
                             this.setState({
                                 data: this.state.data.filter(
                                     d => !this.state.targets.includes(d.id)
