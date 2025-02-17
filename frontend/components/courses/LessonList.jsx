@@ -1036,12 +1036,6 @@ export default class LessonList extends React.Component {
                                 rowInfo &&
                                 rowInfo.original.options.length != 0
                             ) {
-                                return {
-                                    style: {
-                                        color: "#9575CD",
-                                        fontWeight: "bold",
-                                    },
-                                };
                             }
                             return {};
                         }}
