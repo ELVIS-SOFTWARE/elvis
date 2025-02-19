@@ -1180,10 +1180,9 @@ const UserRow = ({
                  }) => {
     const customStyle = isOption ? { color: "#9575CD" } : {};
 
-    if (referenceDate != undefined) {
+    if (referenceDate !== undefined) {
         if (user.begin_at > referenceDate) customStyle.color = "#fca000";
-
-        if (user.stopped_at != undefined && user.stopped_at <= referenceDate)
+        if (user.stopped_at !== undefined && user.stopped_at <= referenceDate)
             customStyle.color = "#ff001a";
     }
 
@@ -1193,23 +1192,40 @@ const UserRow = ({
         activity_ref: activityRef,
         activity_ref: { is_work_group: isWorkGroup },
     } = activity;
-
     const users = [user];
 
     const userInstrument =
         (isWorkGroup &&
             activity.activities_instruments
-                .filter(ai => ai.user_id === user.id)
-                .map(ai => _.get(ai, "instrument.label"))
+                .filter((ai) => ai.user_id === user.id)
+                .map((ai) => _.get(ai, "instrument.label"))
                 .join(", ")) ||
         "NON ASSIGNÉ";
+
+    const [desiredActivityId, setDesiredActivityId] = React.useState(null);
+
+    React.useEffect(() => {
+        api
+            .set()
+            .error((error) => {
+                console.error("Erreur lors de la récupération de la demande d'inscription:", error);
+            })
+            .success((data) => {
+                setDesiredActivityId(data.id);
+            })
+            .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
+    }, [user.id, activity.id]);
+
+    const inscriptionUrl = desiredActivityId ? `/inscriptions/${desiredActivityId}` : "#";
 
     return (
         <tr style={customStyle}>
             <td>
-                <UserWithInfos userId={user.id}>
+                <a
+                    href={inscriptionUrl}
+                >
                     {user.first_name} {user.last_name}
-                </UserWithInfos>
+                </a>
             </td>
             <td>{TimeIntervalHelpers.age(user.birthday)} ans</td>
             <td>
@@ -1220,24 +1236,21 @@ const UserRow = ({
                         time_interval,
                         activity_ref: activityRef,
                     },
-                    seasons,
+                    seasons
                 )}
             </td>
             {isWorkGroup && <td>{userInstrument}</td>}
             <td>
                 {(user.begin_at &&
-                        Intl.DateTimeFormat("fr").format(
-                            new Date(user.begin_at),
-                        )) ||
+                        Intl.DateTimeFormat("fr").format(new Date(user.begin_at))) ||
                     ""}
             </td>
             <td>
                 {(user.stopped_at &&
-                        Intl.DateTimeFormat("fr").format(
-                            new Date(user.stopped_at),
-                        )) ||
+                        Intl.DateTimeFormat("fr").format(new Date(user.stopped_at))) ||
                     ""}
             </td>
         </tr>
     );
 };
+
