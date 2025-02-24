@@ -797,12 +797,18 @@ export default class LessonList extends React.Component {
                             faIcon: true,
                         },
                         {
+                            value: "NOT_FULL",
+                            text: "Non plein",
+                            icon: "fas fa-adjust fa-flip-horizontal",
+                            faIcon: true,
+                        },
+                        {
                             value: "FULL",
                             text: "Plein",
                             icon: "fas fa-circle",
                             faIcon: true,
                             color: "#d63031",
-                        },
+                        }
                     ];
 
                     const value = options.find(
