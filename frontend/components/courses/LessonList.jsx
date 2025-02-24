@@ -1,5 +1,4 @@
 import React from "react";
-
 import ReactTable from "react-table";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -7,6 +6,7 @@ import moment from "moment";
 import "moment/locale/fr";
 import Modal from "react-modal";
 import MessageModal from "../generalPayments/MessageModal";
+import ListPreferences from "../common/ListPreferences";
 import DeleteCourseModal from "./DeleteCourseModal";
 import * as api from "../../tools/api";
 import swal from "sweetalert2";
@@ -27,6 +27,7 @@ import _ from "lodash";
 import { averageAgeDisplay } from "../planning/TimeIntervalHelpers";
 
 const FILTER_STORAGE_KEY = "lessons_list_filters";
+const PREFERENCES_STORAGE_KEY = "lessons_list_preferences";
 
 const defaultTableProps = () => ({
     page: 0,
@@ -41,6 +42,7 @@ const defaultTableProps = () => ({
 
 const NB_DISPLAYED_RECIPIENTS = 3;
 const MESSAGE_MODAL_ID = "messagesModal";
+
 
 const filterUserWithDate = date => u => filterUser(u, date);
 
@@ -142,6 +144,9 @@ export default class LessonList extends React.Component {
                 ? JSON.parse(localStorageValue)
                 : defaultTableProps();
 
+        const localStoragePrefs = localStorage.getItem(PREFERENCES_STORAGE_KEY);
+        const listPreferences = localStoragePrefs && JSON.parse(localStoragePrefs);
+
         this.state = {
             data: [],
             pages: null,
@@ -149,6 +154,7 @@ export default class LessonList extends React.Component {
             total: 0,
             filter,
             loading: false,
+            listPreferences,
             message: {
                 title: "Informations cours",
                 content: "",
@@ -489,6 +495,18 @@ export default class LessonList extends React.Component {
                     type: "error",
                 }),
             );
+    }
+
+    handleUpdateListPreferences(prefs) {
+        this.setState(
+            {
+                listPreferences: prefs,
+            },
+            () => localStorage.setItem(
+                PREFERENCES_STORAGE_KEY,
+                JSON.stringify(prefs),
+            ),
+        );
     }
 
     render() {
@@ -919,11 +937,28 @@ export default class LessonList extends React.Component {
             },
         ];
 
+        let filteredColumns = [...tableColumns];
+        if (this.state.listPreferences) {
+            filteredColumns = [
+                tableColumns[0],
+                ..._(tableColumns.slice(1))
+                    .filter(c => _.find(this.state.listPreferences, {id: c.id, disabled: false}))
+                    .sortBy(c => _.findIndex(this.state.listPreferences, {id: c.id}))
+                    .value(),
+            ];
+        }
+
         return (
             <div className="ibox">
                 <div className="ibox-title">
                     <div className="flex flex-center-aligned">
                         <h2 className="m-r">{this.state.total} cours</h2>
+                        <ListPreferences
+                            preferences={this.state.listPreferences}
+                            columns={tableColumns.slice(1)}
+                            className="m-r"
+                            onSubmit={prefs => this.handleUpdateListPreferences(prefs)}
+                        />
                         <button
                             className="btn btn-primary m-r"
                             data-tippy-content="Réinitialiser les filtres"
@@ -993,7 +1028,7 @@ export default class LessonList extends React.Component {
                         data={this.state.data}
                         manual
                         pages={this.state.pages}
-                        columns={tableColumns}
+                        columns={filteredColumns}
                         loading={this.state.loading}
                         pageSizeOptions={[5, 10, 15, 20, 50, 100]}
                         page={
@@ -1122,7 +1157,6 @@ export default class LessonList extends React.Component {
             </div>
         );
     }
-
 }
 
 const UserList = ({ activity, seasons, referenceDate = undefined }) => (
