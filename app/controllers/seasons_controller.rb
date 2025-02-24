@@ -3,17 +3,25 @@ class SeasonsController < ApplicationController
 
   def index
     @current_user = current_user
-    @seasons = Season.all
 
     authorize! :manage, @current_user.is_admin
 
-    respond_to do |format|
-      format.html 
-
-      format.json do
+    if params[:current] == "true"
+      season = Season.current_apps_season
+      render json: season.as_json(
+        include: :holidays,
+        except: [:created_at, :updated_at, :deleted_at]
+      )
+    else
+      @seasons = Season.all
+      respond_to do |format|
+        format.html
+        format.json do
           render json: @seasons.as_json(
-              include: :holidays,
-              except: [:created_at, :updated_at, :deleted_at] )
+            include: :holidays,
+            except: [:created_at, :updated_at, :deleted_at]
+          )
+        end
       end
     end
   end

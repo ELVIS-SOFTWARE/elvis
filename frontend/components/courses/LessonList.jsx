@@ -157,14 +157,33 @@ export default class LessonList extends React.Component {
             },
             isModalOpen: false,
             activity: undefined,
+            currentAppsSeason: null,
+            filterApplied: false,
         };
 
         this.toggleModal = this.toggleModal.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
     }
 
+
     componentDidMount() {
         this.fetchData(this.state.filter);
+
+        api.get('/seasons?current=true')
+            .then(response => {
+                const season = response.data;
+                this.setState(
+                    { currentAppsSeason: season },
+                    () => {
+                        const newFilter = {
+                            ...this.state.filter,
+                            season_id: season.id || ""
+                        };
+                        this.fetchData(newFilter);
+                    }
+                );
+            })
+            .catch(error => console.error("Erreur :", error));
     }
 
     componentDidUpdate() {
@@ -826,31 +845,6 @@ export default class LessonList extends React.Component {
                 Cell: c => TimeIntervalHelpers.averageAgeDisplay(c.value),
             },
             {
-                Header: "Niveau",
-                id: "level",
-                maxWidth: 125,
-                accessor: d => d,
-                Filter: ({ filter, onChange }) => (
-                    <select
-                        onChange={e => onChange(e.target.value)}
-                        defaultValue={filter ? filter.value : ""}
-                    >
-                        <option value="" />
-                        <option value="TBD">À PRÉCISER</option>
-                        {this.props.evaluationLevelRefs.map(r => (
-                            <option key={r.id} value={r.id}>
-                                {r.label}
-                            </option>
-                        ))}
-                    </select>
-                ),
-                Cell: c =>
-                    TimeIntervalHelpers.levelDisplayForActivity(
-                        c.value,
-                        this.props.seasons,
-                    ),
-            },
-            {
                 Header: "Saison",
                 maxWidth: 150,
                 id: "season_id",
@@ -862,15 +856,24 @@ export default class LessonList extends React.Component {
                     );
                     return (season && season.label) || "ø";
                 },
-                Filter: ({ filter, onChange }) => (
-                    <select
-                        onChange={e => onChange(e.target.value)}
-                        value={filter ? filter.value : ""}
-                    >
-                        <option value="" />
-                        {seasonsOptions}
-                    </select>
-                ),
+                Filter: ({ filter, onChange }) => {
+                    const { currentAppsSeason, filterApplied } = this.state;
+
+                    if (currentAppsSeason && !filterApplied) {
+                        onChange(currentAppsSeason?.id || "");
+                        this.setState({ filterApplied: true });
+                    }
+
+                    return (
+                        <select
+                            onChange={e => onChange(e.target.value)}
+                            value={filter?.value ?? ""}
+                        >
+                            <option value="" />
+                            {seasonsOptions}
+                        </select>
+                    );
+                },
             },
             {
                 Header: "",
