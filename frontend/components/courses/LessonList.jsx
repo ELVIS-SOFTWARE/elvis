@@ -256,6 +256,61 @@ export default class LessonList extends React.Component {
                 .del(`/activity_instances?instance_ids=${values.instanceIds}&time_interval_ids=${values.timeIntervalIds}&activity_id=${activity.id}`);
         }
     }
+    bulkDelete() {
+        swal({
+            title: "Confirmation",
+            text: "Voulez-vous supprimer tous les cours sélectionnés ? Cette action est irréversible.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Oui, supprimer",
+            cancelButtonText: "Annuler",
+        }).then(r => {
+            if (r.value) {
+                fetch("/lessons/bulkdelete", {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": csrfToken,
+                    },
+                    body: JSON.stringify({
+                        targets: this.state.targets,
+                    }),
+                })
+                    .then(response => response.json()) // Ajoute ceci pour voir la réponse JSON
+                    .then((data) => {
+                        console.log("Réponse du serveur :", data);
+                        if (data.success) { // Modifie selon la structure réelle de ta réponse
+                            this.setState({
+                                data: this.state.data.filter(
+                                    d => !this.state.targets.includes(d.id)
+                                ),
+                                targets: [],
+                            });
+                            swal({
+                                title: "Succès",
+                                text: "Les cours sélectionnés ont été supprimés.",
+                                type: "success",
+                            });
+                        } else {
+                            swal({
+                                type: "error",
+                                title: "Échec de la suppression",
+                                text: "Une erreur s'est produite côté serveur.",
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Erreur lors de la suppression :", err);
+                        swal({
+                            type: "error",
+                            title: "Erreur",
+                            text: "La suppression a échoué. Veuillez réessayer.",
+                        });
+                    });
+            }
+        });
+    }
+
 
     fetchData(filter) {
         const hasSeasonChanged =
@@ -410,7 +465,7 @@ export default class LessonList extends React.Component {
                             >
                                 Sélectionner les{" "}
                                 {this.state.total - this.state.targets.length}{" "}
-                                restantes
+                                restants
                             </button>
                         ) : null}
                     </div>
@@ -429,12 +484,18 @@ export default class LessonList extends React.Component {
                         >
                             Envoyer un message
                         </button>
-
+                        <button
+                            className="btn btn-sm btn-danger m-r"
+                            onClick={() => this.bulkDelete()}
+                        >
+                            Supprimer
+                        </button>
                     </div>
                 </div>
             </div>
         );
     }
+
 
     sendReminderMail(referenceDate = undefined) {
         const to = _.chain(this.state.data)
