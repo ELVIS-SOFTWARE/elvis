@@ -857,7 +857,15 @@ class ActivityController < ApplicationController
             act.count_active_students(reference_date).zero?
           end
         end
-      end
+      when "NOT_FULL"
+        query = query.select do |act|
+          if act.activity_ref.is_work_group
+            act.count_active_instruments < act.activities_instruments.count
+          else
+            act.count_active_students(reference_date) < act.activity_ref.occupation_limit
+          end
+        end
+    end
 
       query = Activity.includes(includes_h).where(id: query.map(&:id))
     end

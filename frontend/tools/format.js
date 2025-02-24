@@ -167,35 +167,46 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
 }
 
 export const formatActivityHeadcount = (activity, referenceDate = undefined) => {
-    let {headCount, validatedHeadCount, headCountLimit, hasOption} = occupationInfos(activity, referenceDate);
+    let { headCount, validatedHeadCount, headCountLimit, hasOption } = occupationInfos(activity, referenceDate);
 
     const isFull = validatedHeadCount >= headCountLimit;
-    const hasNoRole= headCountLimit === 0 && validatedHeadCount === 0
+    const hasNoRole = headCountLimit === 0 && validatedHeadCount === 0;
+    const options = headCount - validatedHeadCount;
+
     let styles = {};
-    if (isFull && !hasNoRole)
+    if (isFull && !hasNoRole) {
         styles = {
             ...styles,
             color: "#d63031",
             fontWeight: "bold",
         };
+    }
 
-    if (hasOption)
-        styles = {
-            ...styles,
-            color: "#9575CD",
-            fontWeight: "bold",
-        };
+    if (hasNoRole) {
+        return (
+            <p style={styles} data-tippy-content="Aucun rôle n'a été ajouté">
+                {validatedHeadCount}
+                {options > 0 && (
+                    <span style={{ color: "#9575CD" }}> + {options}</span>
+                )}
+                {" / "}
+                {headCountLimit}
+                <i className="fas fa-info-circle m-l-xs" />
+            </p>
+        );
+    }
 
-    if (hasNoRole)
-        return <p style={styles} data-tippy-content="Aucun rôle n'a été ajouté">
-            {`${headCount} / ${headCountLimit}  `}
-            <i className="fas fa-info-circle m-l-xs"/>
+    return (
+        <p style={styles}>
+            {validatedHeadCount}
+            {options > 0 && (
+                <span style={{ color: "#9575CD" }}> + {options}</span>
+            )}
+            {" / "}
+            {headCountLimit}
+            {isFull ? <i className="fas fa-lock m-l-xs" /> : null}
         </p>
-
-    return <p style={styles}>
-        {`${headCount} / ${headCountLimit} `}
-        {isFull ? <i className="fas fa-lock m-l-xs"/> : null}
-    </p>
+    );
 };
 
 // export const formatActivityHeadcount = (activity, referenceDate = undefined) => {

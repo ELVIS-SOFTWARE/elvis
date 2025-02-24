@@ -1,5 +1,4 @@
 import React from "react";
-
 import ReactTable from "react-table";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -7,6 +6,7 @@ import moment from "moment";
 import "moment/locale/fr";
 import Modal from "react-modal";
 import MessageModal from "../generalPayments/MessageModal";
+import ListPreferences from "../common/ListPreferences";
 import DeleteCourseModal from "./DeleteCourseModal";
 import * as api from "../../tools/api";
 import swal from "sweetalert2";
@@ -27,6 +27,7 @@ import _ from "lodash";
 import { averageAgeDisplay } from "../planning/TimeIntervalHelpers";
 
 const FILTER_STORAGE_KEY = "lessons_list_filters";
+const PREFERENCES_STORAGE_KEY = "lessons_list_preferences";
 
 const defaultTableProps = () => ({
     page: 0,
@@ -41,6 +42,7 @@ const defaultTableProps = () => ({
 
 const NB_DISPLAYED_RECIPIENTS = 3;
 const MESSAGE_MODAL_ID = "messagesModal";
+
 
 const filterUserWithDate = date => u => filterUser(u, date);
 
@@ -142,6 +144,9 @@ export default class LessonList extends React.Component {
                 ? JSON.parse(localStorageValue)
                 : defaultTableProps();
 
+        const localStoragePrefs = localStorage.getItem(PREFERENCES_STORAGE_KEY);
+        const listPreferences = localStoragePrefs && JSON.parse(localStoragePrefs);
+
         this.state = {
             data: [],
             pages: null,
@@ -149,6 +154,7 @@ export default class LessonList extends React.Component {
             total: 0,
             filter,
             loading: false,
+            listPreferences,
             message: {
                 title: "Informations cours",
                 content: "",
@@ -157,14 +163,33 @@ export default class LessonList extends React.Component {
             },
             isModalOpen: false,
             activity: undefined,
+            currentAppsSeason: null,
+            filterApplied: false,
         };
 
         this.toggleModal = this.toggleModal.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
     }
 
+
     componentDidMount() {
         this.fetchData(this.state.filter);
+
+        api.get('/seasons?current=true')
+            .then(response => {
+                const season = response.data;
+                this.setState(
+                    { currentAppsSeason: season },
+                    () => {
+                        const newFilter = {
+                            ...this.state.filter,
+                            season_id: season.id || ""
+                        };
+                        this.fetchData(newFilter);
+                    }
+                );
+            })
+            .catch(error => console.error("Erreur :", error));
     }
 
     componentDidUpdate() {
@@ -231,6 +256,60 @@ export default class LessonList extends React.Component {
                 .del(`/activity_instances?instance_ids=${values.instanceIds}&time_interval_ids=${values.timeIntervalIds}&activity_id=${activity.id}`);
         }
     }
+    bulkDelete() {
+        swal({
+            title: "Confirmation",
+            text: "Voulez-vous supprimer tous les cours sélectionnés ? Cette action est irréversible.",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Oui, supprimer",
+            cancelButtonText: "Annuler",
+        }).then(r => {
+            if (r.value) {
+                fetch("/lessons/bulkdelete", {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": csrfToken,
+                    },
+                    body: JSON.stringify({
+                        targets: this.state.targets,
+                    }),
+                })
+                    .then(response => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            this.setState({
+                                data: this.state.data.filter(
+                                    d => !this.state.targets.includes(d.id)
+                                ),
+                                targets: [],
+                            });
+                            swal({
+                                title: "Succès",
+                                text: "Les cours sélectionnés ont été supprimés.",
+                                type: "success",
+                            });
+                        } else {
+                            swal({
+                                type: "error",
+                                title: "Échec de la suppression",
+                                text: "Une erreur s'est produite côté serveur.",
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Erreur lors de la suppression :", err);
+                        swal({
+                            type: "error",
+                            title: "Erreur",
+                            text: "La suppression a échoué. Veuillez réessayer.",
+                        });
+                    });
+            }
+        });
+    }
+
 
     fetchData(filter) {
         const hasSeasonChanged =
@@ -385,7 +464,7 @@ export default class LessonList extends React.Component {
                             >
                                 Sélectionner les{" "}
                                 {this.state.total - this.state.targets.length}{" "}
-                                restantes
+                                restants
                             </button>
                         ) : null}
                     </div>
@@ -404,12 +483,18 @@ export default class LessonList extends React.Component {
                         >
                             Envoyer un message
                         </button>
-
+                        <button
+                            className="btn btn-sm btn-danger m-r"
+                            onClick={() => this.bulkDelete()}
+                        >
+                            Supprimer
+                        </button>
                     </div>
                 </div>
             </div>
         );
     }
+
 
     sendReminderMail(referenceDate = undefined) {
         const to = _.chain(this.state.data)
@@ -470,6 +555,18 @@ export default class LessonList extends React.Component {
                     type: "error",
                 }),
             );
+    }
+
+    handleUpdateListPreferences(prefs) {
+        this.setState(
+            {
+                listPreferences: prefs,
+            },
+            () => localStorage.setItem(
+                PREFERENCES_STORAGE_KEY,
+                JSON.stringify(prefs),
+            ),
+        );
     }
 
     render() {
@@ -760,12 +857,18 @@ export default class LessonList extends React.Component {
                             faIcon: true,
                         },
                         {
+                            value: "NOT_FULL",
+                            text: "Non plein",
+                            icon: "fas fa-adjust fa-flip-horizontal",
+                            faIcon: true,
+                        },
+                        {
                             value: "FULL",
                             text: "Plein",
                             icon: "fas fa-circle",
                             faIcon: true,
                             color: "#d63031",
-                        },
+                        }
                     ];
 
                     const value = options.find(
@@ -863,15 +966,24 @@ export default class LessonList extends React.Component {
                     );
                     return (season && season.label) || "ø";
                 },
-                Filter: ({ filter, onChange }) => (
-                    <select
-                        onChange={e => onChange(e.target.value)}
-                        value={filter ? filter.value : ""}
-                    >
-                        <option value="" />
-                        {seasonsOptions}
-                    </select>
-                ),
+                Filter: ({ filter, onChange }) => {
+                    const { currentAppsSeason, filterApplied } = this.state;
+
+                    if (currentAppsSeason && !filterApplied) {
+                        onChange(currentAppsSeason?.id || "");
+                        this.setState({ filterApplied: true });
+                    }
+
+                    return (
+                        <select
+                            onChange={e => onChange(e.target.value)}
+                            value={filter?.value ?? ""}
+                        >
+                            <option value="" />
+                            {seasonsOptions}
+                        </select>
+                    );
+                },
             },
             {
                 Header: "",
@@ -917,11 +1029,28 @@ export default class LessonList extends React.Component {
             },
         ];
 
+        let filteredColumns = [...tableColumns];
+        if (this.state.listPreferences) {
+            filteredColumns = [
+                tableColumns[0],
+                ..._(tableColumns.slice(1))
+                    .filter(c => _.find(this.state.listPreferences, {id: c.id, disabled: false}))
+                    .sortBy(c => _.findIndex(this.state.listPreferences, {id: c.id}))
+                    .value(),
+            ];
+        }
+
         return (
             <div className="ibox">
                 <div className="ibox-title">
                     <div className="flex flex-center-aligned">
                         <h2 className="m-r">{this.state.total} cours</h2>
+                        <ListPreferences
+                            preferences={this.state.listPreferences}
+                            columns={tableColumns.slice(1)}
+                            className="m-r"
+                            onSubmit={prefs => this.handleUpdateListPreferences(prefs)}
+                        />
                         <button
                             className="btn btn-primary m-r"
                             data-tippy-content="Réinitialiser les filtres"
@@ -991,7 +1120,7 @@ export default class LessonList extends React.Component {
                         data={this.state.data}
                         manual
                         pages={this.state.pages}
-                        columns={tableColumns}
+                        columns={filteredColumns}
                         loading={this.state.loading}
                         pageSizeOptions={[5, 10, 15, 20, 50, 100]}
                         page={
@@ -1037,12 +1166,6 @@ export default class LessonList extends React.Component {
                                 rowInfo &&
                                 rowInfo.original.options.length != 0
                             ) {
-                                return {
-                                    style: {
-                                        color: "#9575CD",
-                                        fontWeight: "bold",
-                                    },
-                                };
                             }
                             return {};
                         }}
@@ -1120,7 +1243,6 @@ export default class LessonList extends React.Component {
             </div>
         );
     }
-
 }
 
 const UserList = ({ activity, seasons, referenceDate = undefined }) => (
@@ -1181,10 +1303,9 @@ const UserRow = ({
                  }) => {
     const customStyle = isOption ? { color: "#9575CD" } : {};
 
-    if (referenceDate != undefined) {
+    if (referenceDate !== undefined) {
         if (user.begin_at > referenceDate) customStyle.color = "#fca000";
-
-        if (user.stopped_at != undefined && user.stopped_at <= referenceDate)
+        if (user.stopped_at !== undefined && user.stopped_at <= referenceDate)
             customStyle.color = "#ff001a";
     }
 
@@ -1194,23 +1315,40 @@ const UserRow = ({
         activity_ref: activityRef,
         activity_ref: { is_work_group: isWorkGroup },
     } = activity;
-
     const users = [user];
 
     const userInstrument =
         (isWorkGroup &&
             activity.activities_instruments
-                .filter(ai => ai.user_id === user.id)
-                .map(ai => _.get(ai, "instrument.label"))
+                .filter((ai) => ai.user_id === user.id)
+                .map((ai) => _.get(ai, "instrument.label"))
                 .join(", ")) ||
         "NON ASSIGNÉ";
+
+    const [desiredActivityId, setDesiredActivityId] = React.useState(null);
+
+    React.useEffect(() => {
+        api
+            .set()
+            .error((error) => {
+                console.error("Erreur lors de la récupération de la demande d'inscription:", error);
+            })
+            .success((data) => {
+                setDesiredActivityId(data.id);
+            })
+            .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
+    }, [user.id, activity.id]);
+
+    const inscriptionUrl = desiredActivityId ? `/inscriptions/${desiredActivityId}` : "#";
 
     return (
         <tr style={customStyle}>
             <td>
-                <UserWithInfos userId={user.id}>
+                <a
+                    href={inscriptionUrl}
+                >
                     {user.first_name} {user.last_name}
-                </UserWithInfos>
+                </a>
             </td>
             <td>{TimeIntervalHelpers.age(user.birthday)} ans</td>
             <td>
@@ -1221,22 +1359,18 @@ const UserRow = ({
                         time_interval,
                         activity_ref: activityRef,
                     },
-                    seasons,
+                    seasons
                 )}
             </td>
             {isWorkGroup && <td>{userInstrument}</td>}
             <td>
                 {(user.begin_at &&
-                        Intl.DateTimeFormat("fr").format(
-                            new Date(user.begin_at),
-                        )) ||
+                        Intl.DateTimeFormat("fr").format(new Date(user.begin_at))) ||
                     ""}
             </td>
             <td>
                 {(user.stopped_at &&
-                        Intl.DateTimeFormat("fr").format(
-                            new Date(user.stopped_at),
-                        )) ||
+                        Intl.DateTimeFormat("fr").format(new Date(user.stopped_at))) ||
                     ""}
             </td>
         </tr>
