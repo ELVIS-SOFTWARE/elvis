@@ -64,6 +64,7 @@ const debounce = makeDebounce();
 class ActivitiesApplicationsList extends React.Component {
     constructor(props) {
         super(props);
+        console.log("Props initiaux :", props);
 
         const localStorageFilter = localStorage.getItem(FILTER_STORAGE_KEY);
         const filter =
