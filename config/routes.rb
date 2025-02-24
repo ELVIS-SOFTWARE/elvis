@@ -159,6 +159,7 @@ Rails.application.routes.draw do
   # ACTIVITY APPLICATIONS
   #  =====================
   get "/applications/:id/desired_activities/:des_id/suggestions", to: "activities_applications#find_activity_suggestions"
+  get '/desired_activities/user/:user_id/activity/:activity_id', to: 'desired_activity#find_by_user_and_activity'
 
   # (pour élève/admin) pour un élève déjà inscrit et possédant une préinscription, renvoie vers le Wizard
   get "/inscriptions/new/:user_id/:pre_application_activity_id/:activity_ref_id(/:action_type)",
