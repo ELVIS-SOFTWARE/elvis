@@ -891,7 +891,7 @@ export default class LessonList extends React.Component {
                 ),
             },
             {
-                Header: "",
+                Header: "Action",
                 filterable: false,
                 sortable: false,
                 Cell: c => (
