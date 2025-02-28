@@ -1090,6 +1090,7 @@ export default class LessonList extends React.Component {
                 <div className="ibox-content">
                     {this.state.targets.length > 0 ? this.renderTargetsAlert() : null}
                     <ReactTable
+                        key={JSON.stringify(this.state.filter.filtered)}
                         style={{ backgroundColor: "white" }}
                         data={this.state.data}
                         manual
@@ -1122,6 +1123,7 @@ export default class LessonList extends React.Component {
                             this.fetchData({
                                 ...this.state.filter,
                                 filtered,
+                                page: 0,
                             })
                         }
                         filterable
