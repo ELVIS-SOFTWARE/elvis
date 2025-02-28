@@ -13,6 +13,7 @@ export default function myActivities() {
     const [user, setUser] = useState(null);
     const [userActivities, setUserActivities] = useState(null);
     const [regularActivities, setRegularActivities] = useState([]);
+    const [showTeacherContacts, setShowTeacherContacts] = useState(false);
 
     const fetchSeason = async () => {
         return await api.set()
@@ -38,6 +39,7 @@ export default function myActivities() {
                 setUser(res.user);
                 setUserActivities(res.userActivities);
                 setRegularActivities(res.regular_user_activities);
+                setShowTeacherContacts(res.user.show_teacher_contacts || false);
                 setLoading(false);
             })
             .error(res => {
@@ -136,6 +138,7 @@ export default function myActivities() {
                                     <RegularActivityCard
                                         key={index}
                                         activityApplication={regularActivities[index]}
+                                        showTeacherContacts={showTeacherContacts}
                                     />
                                 ))
                             }

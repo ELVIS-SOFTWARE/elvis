@@ -124,6 +124,8 @@ class MyActivitiesController < ApplicationController
                    Pack.where(user_id: params[:user_id], season_id: params[:season_id])
     user = User.find(params[:user_id])
 
+    show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
+
     respond_to do |format|
       format.json {
         render json: {
@@ -136,7 +138,7 @@ class MyActivitiesController < ApplicationController
                              methods: [:closest_instance_from_now],
                              include: {
                                activity_ref: {},
-                               teacher: {},
+                               teacher: { include: { telephones: { only: [:number] } } },
                                room: {},
                                time_interval: {}
                              }
@@ -152,13 +154,13 @@ class MyActivitiesController < ApplicationController
                                                    include: {
                                                      activities: {
                                                        include: {
-                                                         teacher: {},
+                                                         teacher: { include: { telephones: { only: [:number] } } },
                                                          room: {},
                                                          time_interval: {},
                                                          closest_instance_from_now: {
-                                                            include: {
-                                                              time_interval: {}
-                                                            }
+                                                           include: {
+                                                             time_interval: {}
+                                                           }
                                                          },
                                                        }
                                                      },
@@ -168,7 +170,7 @@ class MyActivitiesController < ApplicationController
                                                  }
                                                }
                                              }),
-          user: User.find(params[:user_id]),
+          user: user.as_json.merge(show_teacher_contacts: show_teacher_contacts)
         }
       }
     end
@@ -201,9 +203,16 @@ class MyActivitiesController < ApplicationController
       (activity.time_interval.start - DateTime.now).to_i.abs
     end
 
+    show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
+
     upcoming_activities = upcoming_activities.as_json({
                                                         include: {
-                                                          teacher: {},
+                                                          teacher: {
+                                                            include: {
+                                                              telephones: { only: [:number] }
+                                                            },
+                                                            only: [:id, :first_name, :last_name]
+                                                          },
                                                           room: {},
                                                           time_interval: {},
                                                         }
@@ -213,6 +222,10 @@ class MyActivitiesController < ApplicationController
     upcoming_activities.each do |activity|
       activity["activity_ref"] = Activity.find(activity['activity_id']).activity_ref if activity['activity_id']
       activity["activity_ref"] = ActivityRef.find(activity['activity_ref_id']) if activity['activity_ref_id']
+
+      if activity["teacher"]
+        activity["teacher"]["show_contact_info"] = show_teacher_contacts
+      end
     end
 
     respond_to do |format|
