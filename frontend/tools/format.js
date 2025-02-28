@@ -140,12 +140,11 @@ export const formatIntervalHours = interval =>
 export const displayActivityRef = ref => ref.activity_type === "child" ? ref.label : ref.kind;
 
 export const occupationInfos = (activity, referenceDate = undefined) => {
-    let headCount, validatedHeadCount, headCountLimit  = 0;
-
+    let headCount, validatedHeadCount, headCountLimit = 0;
     let hasOption = false;
 
     if(_.get(activity, "activity_ref.is_work_group")) {
-        hasOption =  _.some(activity.activities_instruments, ai => Boolean(ai.user_id) && !ai.is_validated);
+        hasOption = _.some(activity.activities_instruments, ai => Boolean(ai.user_id) && !ai.is_validated);
         headCount = activity.activities_instruments.filter(ai => Boolean(ai.user_id)).length;
         headCountLimit = activity.activities_instruments.length;
         validatedHeadCount = headCount;
@@ -158,12 +157,17 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
 
         hasOption = Boolean(optionsUserIds.length);
         // ne pas mettre === car stopped_at et referenceDate peut être undefined ou null ou chaine vide
-        headCount = activity.users.filter(u => referenceDate == undefined || u.begin_at <= referenceDate && (u.stopped_at == undefined || u.stopped_at > referenceDate)).length + optionsUserIds.length;
+        const activeUsers = activity.users.filter(u =>
+            referenceDate == undefined ||
+            (u.begin_at <= referenceDate && (u.stopped_at == undefined || u.stopped_at > referenceDate))
+        );
+
+        headCount = activeUsers.length + optionsUserIds.length;
         headCountLimit = activity.activity_ref.occupation_limit;
-        validatedHeadCount = activity.users.length;
+        validatedHeadCount = activeUsers.length;
     }
 
-    return {headCount: headCount, validatedHeadCount: validatedHeadCount, headCountLimit: headCountLimit, hasOption: hasOption};
+    return {headCount, validatedHeadCount, headCountLimit, hasOption};
 }
 
 export const formatActivityHeadcount = (activity, referenceDate = undefined) => {
