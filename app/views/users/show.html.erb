@@ -256,11 +256,15 @@
                 user_id: @user.id
               }) %>
             <% elsif @current_user.is_admin %>
-              <%= react_component("utils/BtnApiElement", {
+              <%= react_component("devise/password/BtnResetPassword", {
                 sendRequest: {
                   type: "post",
                   data: { user_id: @user.id },
                   url: "/users/reset_password",
+                },
+                user: {
+                  is_admin: @user.is_admin,
+                  is_teacher: @user.is_teacher
                 },
                 text: "Réinitialiser le mot de passe",
                 className: "btn btn-warning btn-block m-t-sm",
