@@ -129,48 +129,50 @@ class MyActivitiesController < ApplicationController
     respond_to do |format|
       format.json {
         render json: {
-          regular_user_activities: user.activity_applications.where(season_id: params[:season_id]).as_json(
-            include: { activity_application_status: {},
-                       desired_activities: {
-                         include: {
-                           activity_ref: {},
-                           activity: {
-                             methods: [:closest_instance_from_now],
-                             include: {
-                               activity_ref: {},
-                               teacher: { include: { telephones: { only: [:number] } } },
-                               room: {},
-                               time_interval: {}
-                             }
-                           }
-                         }
-                       }
-            }),
-
-          userActivities: user_packs.as_json({
-                                               include: {
-                                                 activity_ref: {
-                                                   methods: [:picture_path],
-                                                   include: {
-                                                     activities: {
-                                                       include: {
-                                                         teacher: { include: { telephones: { only: [:number] } } },
-                                                         room: {},
-                                                         time_interval: {},
-                                                         closest_instance_from_now: {
-                                                           include: {
-                                                             time_interval: {}
-                                                           }
-                                                         },
-                                                       }
-                                                     },
-                                                   },
-                                                   season: {},
-                                                   pricing: {},
-                                                 }
-                                               }
-                                             }),
-          user: user.as_json.merge(show_teacher_contacts: show_teacher_contacts)
+      regular_user_activities: user.activity_applications.where(season_id: params[:season_id]).as_json(
+        include: {
+          activity_application_status: {},
+          desired_activities: {
+            include: {
+              activity_ref: {},
+              activity: {
+                methods: [:closest_instance_from_now],
+                include: {
+                  activity_ref: {},
+                  teacher: { include: { telephones: { only: [:number] } } },
+                  room: {},
+                  time_interval: {}
+                }
+              }
+            }
+          }
+        }
+      ),
+      userActivities: user_packs.as_json(
+        include: {
+          activity_ref: {
+            methods: [:picture_path],
+            include: {
+              activities: {
+                include: {
+                  teacher: { include: { telephones: { only: [:number] } } },
+                  room: {},
+                  time_interval: {},
+                  closest_instance_from_now: {
+                    include: { time_interval: {} }
+                  }
+                }
+              }
+            },
+            season: {},
+            pricing: {}
+          }
+        }
+      ),
+          user: user.as_json,
+          config: {
+            show_teacher_contacts: show_teacher_contacts
+          }
         }
       }
     end
@@ -203,16 +205,9 @@ class MyActivitiesController < ApplicationController
       (activity.time_interval.start - DateTime.now).to_i.abs
     end
 
-    show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
-
     upcoming_activities = upcoming_activities.as_json({
                                                         include: {
-                                                          teacher: {
-                                                            include: {
-                                                              telephones: { only: [:number] }
-                                                            },
-                                                            only: [:id, :first_name, :last_name]
-                                                          },
+                                                          teacher: {},
                                                           room: {},
                                                           time_interval: {},
                                                         }
@@ -222,10 +217,6 @@ class MyActivitiesController < ApplicationController
     upcoming_activities.each do |activity|
       activity["activity_ref"] = Activity.find(activity['activity_id']).activity_ref if activity['activity_id']
       activity["activity_ref"] = ActivityRef.find(activity['activity_ref_id']) if activity['activity_ref_id']
-
-      if activity["teacher"]
-        activity["teacher"]["show_contact_info"] = show_teacher_contacts
-      end
     end
 
     respond_to do |format|

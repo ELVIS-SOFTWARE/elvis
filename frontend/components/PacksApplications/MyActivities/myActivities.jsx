@@ -39,7 +39,7 @@ export default function myActivities() {
                 setUser(res.user);
                 setUserActivities(res.userActivities);
                 setRegularActivities(res.regular_user_activities);
-                setShowTeacherContacts(res.user.show_teacher_contacts || false);
+                setShowTeacherContacts(res.config.show_teacher_contacts || false);
                 setLoading(false);
             })
             .error(res => {
