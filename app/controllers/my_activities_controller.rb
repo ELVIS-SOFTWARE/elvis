@@ -124,51 +124,55 @@ class MyActivitiesController < ApplicationController
                    Pack.where(user_id: params[:user_id], season_id: params[:season_id])
     user = User.find(params[:user_id])
 
+    show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
+
     respond_to do |format|
       format.json {
         render json: {
-          regular_user_activities: user.activity_applications.where(season_id: params[:season_id]).as_json(
-            include: { activity_application_status: {},
-                       desired_activities: {
-                         include: {
-                           activity_ref: {},
-                           activity: {
-                             methods: [:closest_instance_from_now],
-                             include: {
-                               activity_ref: {},
-                               teacher: {},
-                               room: {},
-                               time_interval: {}
-                             }
-                           }
-                         }
-                       }
-            }),
-
-          userActivities: user_packs.as_json({
-                                               include: {
-                                                 activity_ref: {
-                                                   methods: [:picture_path],
-                                                   include: {
-                                                     activities: {
-                                                       include: {
-                                                         teacher: {},
-                                                         room: {},
-                                                         time_interval: {},
-                                                         closest_instance_from_now: {
-                                                            include: {
-                                                              time_interval: {}
-                                                            }
-                                                         },
-                                                       }
-                                                     },
-                                                   },
-                                                   season: {},
-                                                   pricing: {},
-                                                 }
-                                               }
-                                             }),
-          user: User.find(params[:user_id]),
+      regular_user_activities: user.activity_applications.where(season_id: params[:season_id]).as_json(
+        include: {
+          activity_application_status: {},
+          desired_activities: {
+            include: {
+              activity_ref: {},
+              activity: {
+                methods: [:closest_instance_from_now],
+                include: {
+                  activity_ref: {},
+                  teacher: { include: { telephones: { only: [:number] } } },
+                  room: {},
+                  time_interval: {}
+                }
+              }
+            }
+          }
+        }
+      ),
+      userActivities: user_packs.as_json(
+        include: {
+          activity_ref: {
+            methods: [:picture_path],
+            include: {
+              activities: {
+                include: {
+                  teacher: { include: { telephones: { only: [:number] } } },
+                  room: {},
+                  time_interval: {},
+                  closest_instance_from_now: {
+                    include: { time_interval: {} }
+                  }
+                }
+              }
+            },
+            season: {},
+            pricing: {}
+          }
+        }
+      ),
+          user: user.as_json,
+          config: {
+            show_teacher_contacts: show_teacher_contacts
+          }
         }
       }
     end

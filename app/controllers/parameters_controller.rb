@@ -286,6 +286,7 @@ class ParametersController < ApplicationController
   def teachers_parameters_edit
     @authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
     @teacher_can_edit_planning = Parameter.get_value("planning.teacher_can_edit_planning", default: false)
+    @show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
   end
 
   def teachers_parameters_update
@@ -296,6 +297,10 @@ class ParametersController < ApplicationController
     teacher_can_edit_planning = Parameter.find_or_create_by label: "planning.teacher_can_edit_planning", value_type: "boolean"
     teacher_can_edit_planning.value = (params[:teacher_can_edit_planning]&.to_s == "true").to_s
     teacher_can_edit_planning.save!
+
+    show_teacher_contacts = Parameter.find_or_create_by(label: "teachers.show_teacher_contacts", value_type: "boolean")
+    show_teacher_contacts.value = (params[:show_teacher_contacts]&.to_s == "true").to_s
+    show_teacher_contacts.save!
 
     if res
       MenuGenerator.regenerate_menus
