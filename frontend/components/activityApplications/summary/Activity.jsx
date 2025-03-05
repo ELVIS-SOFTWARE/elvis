@@ -122,56 +122,6 @@ const SubStudentList = ({row}) => {
     );
 };
 
-const StudentRow = ({user, closestLesson}) => {
-    const getRowStyle = () => {
-        switch(user.type) {
-            case 'inactive': return { color: "#ff0000" };
-            case 'option': return { color: "#9575CD" };
-            default: return {};
-        }
-    };
-
-    const getBeginDate = () => {
-        if (user.type === 'inactive') {
-            return user.application ? moment(user.application.begin_at).format('DD/MM/YYYY') : '';
-        }
-        return user.begin_at ? moment(user.begin_at).format('DD/MM/YYYY') : '';
-    };
-
-    const getStopDate = () => {
-        if (user.type === 'inactive') {
-            return user.application && user.application.stopped_at
-                ? moment(user.application.stopped_at).format('DD/MM/YYYY')
-                : '';
-        }
-        return user.stopped_at ? moment(user.stopped_at).format('DD/MM/YYYY') : '';
-    };
-
-    const calculateAge = (birthday) => {
-        return moment().diff(moment(birthday), 'years');
-    };
-
-    return (
-        <tr style={getRowStyle()}>
-            <td>
-                <StudentItem
-                    user={user}
-                    color={
-                        user.type === 'inactive' ? "#ff0000" :
-                            user.type === 'option' ? "#9575CD" :
-                                undefined
-                    }
-                    application={user.application || user.activity_applications?.[0]}
-                />
-            </td>
-            <td>{calculateAge(user.birthday)} ans</td>
-            <td>{user.type === 'active' ? 'Actif' : user.type === 'inactive' ? 'Inactif' : 'Option'}</td>
-            <td>{getBeginDate()}</td>
-            <td>{getStopDate()}</td>
-        </tr>
-    );
-};
-
 const createAllExpanded = pageSize => _.zipObject(_.range(pageSize), _.times(pageSize, () => ({})));
 
 // MAIN COMPONENT
