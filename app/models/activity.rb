@@ -410,6 +410,10 @@ class Activity < ApplicationRecord
     end
   end
 
+  def closest_instance_from_now
+    self.closest_instance(DateTime.now)
+  end
+
   def full_periods(period_start, period_end)
     periods = []
     current_start = nil

@@ -133,6 +133,7 @@ class MyActivitiesController < ApplicationController
                          include: {
                            activity_ref: {},
                            activity: {
+                             methods: [:closest_instance_from_now],
                              include: {
                                activity_ref: {},
                                teacher: {},
@@ -153,7 +154,12 @@ class MyActivitiesController < ApplicationController
                                                        include: {
                                                          teacher: {},
                                                          room: {},
-                                                         time_interval: {}
+                                                         time_interval: {},
+                                                         closest_instance_from_now: {
+                                                            include: {
+                                                              time_interval: {}
+                                                            }
+                                                         },
                                                        }
                                                      },
                                                    },

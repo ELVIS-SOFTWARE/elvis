@@ -79,11 +79,18 @@ class Parameters::PlanningParametersController < ApplicationController
     end
   end
 
-  def show_activity_code
-    render json: { show_activity_code: Parameter.get_value("planning.card.show_activity_code", default: false) }
+  def school_planning_params
+    authorize! :manage, Parameter
+
+    render json: {
+      show_activity_code: Parameter.get_value("planning.card.show_activity_code", default: false),
+      recurrence_activated: Parameter.get_value("planning.recurrence_activated", default: false)
+    }
   end
 
-  def update_show_activity_code
+  def update_school_planning_params
+    authorize! :manage, Parameter
+
     show_activity_code = Parameter.find_or_create_by(
       label: "planning.card.show_activity_code",
       value_type: "boolean"
@@ -91,10 +98,19 @@ class Parameters::PlanningParametersController < ApplicationController
 
     show_activity_code.value = (params[:show_activity_code]&.to_s == "true").to_s
 
-    saved = show_activity_code.save!
+    show_activity_code.save!
+
+    recurrence_activated = Parameter.find_or_create_by(
+      label: "planning.recurrence_activated",
+      value_type: "boolean"
+    )
+
+    recurrence_activated.value = (params[:recurrence_activated]&.to_s == "true").to_s
+
+    recurrence_activated.save!
 
     respond_to do |format|
-      format.json { render json: { success: saved } }
+      format.json { render json: { success: true } }
     end
   end
 end

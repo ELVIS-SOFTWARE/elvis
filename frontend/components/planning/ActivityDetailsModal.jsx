@@ -753,9 +753,7 @@ class ActivityDetailsModal extends React.Component {
         const start = moment.isMoment(this.state.startTime)
             ? moment(this.state.startTime).format("HH:mm")
             : moment(this.state.startTime.toDate()).format("HH:mm");
-        const end = moment.isMoment(this.state.endTime)
-            ? moment(this.state.endTime).format("HH:mm")
-            : moment(this.state.endTime.toDate()).format("HH:mm");
+            const end = moment.isMoment(this.state.endTime)
         const timeIntervalInvalid = end <= start;
 
         const detectedSeason = TimeIntervalHelpers.getSeasonFromDate(
@@ -961,8 +959,39 @@ class ActivityDetailsModal extends React.Component {
                     header: "Cours",
                     active: false,
                     body: withSave(editionPanelContent, {
-                        onSave: () => this.props.handleEditActivityInstance(this.state.changes.instance),
-                        label: "Modifier",
+                        onSave: async () => {
+                            this.setState({ isEditing: true });
+
+                            swal({
+                                title: "Modification en cours",
+                                text: "Veuillez patienter...",
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                allowEnterKey: false,
+                            });
+                            swal.showLoading();
+
+                            try {
+                                await this.props.handleEditActivityInstance(this.state.changes.instance);
+                                swal.close();
+                            } catch (error) {
+                                swal.close();
+                                swal({
+                                    title: "Erreur",
+                                    text: "Une erreur est survenue lors de la modification",
+                                    icon: "error"
+                                });
+                            } finally {
+                                this.setState({ isEditing: false });
+                            }
+                        },
+                        label: this.state.isEditing ? (
+                            <>
+                                Modifier <i className="fas fa-circle-notch fa-spin"></i>
+                            </>
+                        ) : (
+                            "Modifier"
+                        ),
                     }),
                 },
                 {

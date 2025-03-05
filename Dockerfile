@@ -158,7 +158,7 @@ RUN apk add --no-cache \
   && apk del .build-deps
 
 # ~ 26mb
-RUN apk add --no-interactive libpq libcap dcron bash jemalloc curl shared-mime-info libxtst libxi libpng libjpeg
+RUN apk add --no-cache --no-interactive libpq libcap dcron bash jemalloc curl shared-mime-info libxtst libxi libpng libjpeg
 RUN setcap 'cap_net_bind_service=+ep cap_setuid=+ep' /usr/local/bin/ruby
 RUN setcap cap_setgid=+ep /usr/sbin/crond
 RUN touch /var/run/crond.pid
@@ -178,6 +178,7 @@ COPY --from=build --chown=elvis:elvis $RAILS_ROOT $RAILS_ROOT
 USER elvis
 
 EXPOSE 80
+VOLUME ["$RAILS_ROOT/storage"]
 
 LABEL maintainer="Elvis Team"
 

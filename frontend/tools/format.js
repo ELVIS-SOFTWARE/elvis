@@ -2,6 +2,7 @@ import moment from "moment";
 import { retrieveUserLevel } from "./obj";
 import React from "react";
 import {findAndGet, ISO_DATE_FORMAT} from "../components/utils";
+import { WEEKDAYS } from "./constants";
 
 export const twoDigits = n => (n < 10 ? `0${n}` : `${n}`);
 
@@ -78,6 +79,12 @@ export const timeToDate = (timestr, refDate = null) => {
     return date;
 };
 
+export const toFullDateFr = date => {
+    const tmpDate = new Date(date);
+
+    return `${WEEKDAYS[tmpDate.getDay()]} ${tmpDate.getDate()} ${toMonthName(tmpDate.getMonth())} ${tmpDate.getFullYear()}`;
+}
+
 export const fullname = user =>
     `${(user.last_name || "").toUpperCase()} ${user.first_name}`;
 
@@ -133,12 +140,11 @@ export const formatIntervalHours = interval =>
 export const displayActivityRef = ref => ref.activity_type === "child" ? ref.label : ref.kind;
 
 export const occupationInfos = (activity, referenceDate = undefined) => {
-    let headCount, validatedHeadCount, headCountLimit  = 0;
-
+    let headCount, validatedHeadCount, headCountLimit = 0;
     let hasOption = false;
 
     if(_.get(activity, "activity_ref.is_work_group")) {
-        hasOption =  _.some(activity.activities_instruments, ai => Boolean(ai.user_id) && !ai.is_validated);
+        hasOption = _.some(activity.activities_instruments, ai => Boolean(ai.user_id) && !ai.is_validated);
         headCount = activity.activities_instruments.filter(ai => Boolean(ai.user_id)).length;
         headCountLimit = activity.activities_instruments.length;
         validatedHeadCount = headCount;
@@ -151,44 +157,60 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
 
         hasOption = Boolean(optionsUserIds.length);
         // ne pas mettre === car stopped_at et referenceDate peut être undefined ou null ou chaine vide
-        headCount = activity.users.filter(u => referenceDate == undefined || u.begin_at <= referenceDate && (u.stopped_at == undefined || u.stopped_at > referenceDate)).length + optionsUserIds.length;
+        const activeUsers = activity.users.filter(u =>
+            referenceDate == undefined ||
+            (u.begin_at <= referenceDate && (u.stopped_at == undefined || u.stopped_at > referenceDate))
+        );
+
+        headCount = activeUsers.length + optionsUserIds.length;
         headCountLimit = activity.activity_ref.occupation_limit;
-        validatedHeadCount = activity.users.length;
+        validatedHeadCount = activeUsers.length;
     }
 
-    return {headCount: headCount, validatedHeadCount: validatedHeadCount, headCountLimit: headCountLimit, hasOption: hasOption};
+    return {headCount, validatedHeadCount, headCountLimit, hasOption};
 }
 
 export const formatActivityHeadcount = (activity, referenceDate = undefined) => {
-    let {headCount, validatedHeadCount, headCountLimit, hasOption} = occupationInfos(activity, referenceDate);
+    let { headCount, validatedHeadCount, headCountLimit, hasOption } = occupationInfos(activity, referenceDate);
 
     const isFull = validatedHeadCount >= headCountLimit;
-    const hasNoRole= headCountLimit === 0 && validatedHeadCount === 0
+    const hasNoRole = headCountLimit === 0 && validatedHeadCount === 0;
+    const options = headCount - validatedHeadCount;
+
     let styles = {};
-    if (isFull && !hasNoRole)
+    if (isFull && !hasNoRole) {
         styles = {
             ...styles,
             color: "#d63031",
             fontWeight: "bold",
         };
+    }
 
-    if (hasOption)
-        styles = {
-            ...styles,
-            color: "#9575CD",
-            fontWeight: "bold",
-        };
+    if (hasNoRole) {
+        return (
+            <p style={styles} data-tippy-content="Aucun rôle n'a été ajouté">
+                {validatedHeadCount}
+                {options > 0 && (
+                    <span style={{ color: "#9575CD" }}> + {options}</span>
+                )}
+                {" / "}
+                {headCountLimit}
+                <i className="fas fa-info-circle m-l-xs" />
+            </p>
+        );
+    }
 
-    if (hasNoRole)
-        return <p style={styles} data-tippy-content="Aucun rôle n'a été ajouté">
-            {`${headCount} / ${headCountLimit}  `}
-            <i className="fas fa-info-circle m-l-xs"/>
+    return (
+        <p style={styles}>
+            {validatedHeadCount}
+            {options > 0 && (
+                <span style={{ color: "#9575CD" }}> + {options}</span>
+            )}
+            {" / "}
+            {headCountLimit}
+            {isFull ? <i className="fas fa-lock m-l-xs" /> : null}
         </p>
-
-    return <p style={styles}>
-        {`${headCount} / ${headCountLimit} `}
-        {isFull ? <i className="fas fa-lock m-l-xs"/> : null}
-    </p>
+    );
 };
 
 // export const formatActivityHeadcount = (activity, referenceDate = undefined) => {

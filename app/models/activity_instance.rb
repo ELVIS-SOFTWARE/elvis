@@ -25,12 +25,23 @@ class ActivityInstance < ApplicationRecord
 
   has_many :student_attendances, dependent: :destroy
 
+  attribute :start, :datetime
+  attribute :end, :datetime
+
   def self.display_class_name(singular = true)
     singular ? "séance de cours" : "séances de cours"
   end
 
   def self.class_name_gender
     return :F
+  end
+
+  def start
+    self.time_interval&.start
+  end
+
+  def end
+    self.time_interval&.end
   end
 
   def teacher

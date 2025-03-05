@@ -43,7 +43,7 @@
                   <% if @current_user.is_admin or @current_user.id == @user.id %>
                       <%= react_component("userForm/HandleFamilyMember", {
                             user: @user_json,
-                            current_user: @current_user.as_json(only: %i[id first_name last_name]),
+                            current_user: @current_user.as_json(only: %i[id first_name last_name is_admin]),
                             familyMember: nil,
                             season: @season,
                             shouldCheckGdpr: !@user.is_admin,
@@ -107,7 +107,7 @@
                             <h4> Lien Familial </h4>
                                 <%= react_component("userForm/HandleFamilyMember", {
                                       user: @user_json,
-                                      current_user: current_user.as_json(only: %i[id first_name last_name]),
+                                      current_user: current_user.as_json(only: %i[id first_name last_name is_admin]),
                                       familyMember: family.select { |fmu| fmu[:id] == data[:user].id }.first,
                                       season: @season,
                                       shouldCheckGdpr: !@user.is_admin,
@@ -156,7 +156,7 @@
                 <% if @current_user.is_admin or @current_user.id == @user.id %>
                     <%= react_component("userForm/HandleFamilyMember", {
                           user: @user_json,
-                          current_user: current_user.as_json(only: %i[id first_name last_name]),
+                          current_user: current_user.as_json(only: %i[id first_name last_name is_admin]),
                           familyMember: nil,
                           season: @season,
                           shouldCheckGdpr: !@user.is_admin,
