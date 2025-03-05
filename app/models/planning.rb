@@ -38,19 +38,55 @@ class Planning < ApplicationRecord
         end
 
         intervals.each do |i|
+          # isRecurrent if only a param on planning when new interval is created
+          if i["recurrentType"]&.present?
+            interval = TimeInterval.new(start: i["start"], end: i["end"], kind: i["kind"] || "d", is_validated: i["is_validated"] || false)
+
+            season = Season.from_interval(interval).first || Season.current
+
+            recurrence_end = season.end
+            recurrence_step = case i["recurrentType"]
+                              when "weekly"
+                                1.week
+                              when "biweekly"
+                                2.weeks
+                              when "monthly"
+                                1.month
+                              when "bimonthly"
+                                2.months
+                              when "yearly"
+                                1.year
+                              else
+                                1.week
+                              end
+
+            holiday_dates = season.holidays.map { |h| h.date }
+
+            while interval.end < recurrence_end
+              unless holiday_dates.include?(interval.start&.to_date)
+                intervalList << interval if interval.save
+              end
+
+              interval = interval.dup
+              interval.id = nil
+              interval.start += recurrence_step
+              interval.end += recurrence_step
+            end
+          else
             if i["isNew"] == true
-                interval = TimeInterval.new
+              interval = TimeInterval.new
             else
-                interval = TimeInterval.find_or_initialize_by(id: i['id'])
+              interval = TimeInterval.find_or_initialize_by(id: i['id'])
             end
             interval.start = i["start"]
             interval.end = i["end"]
             if !season.nil?
-                interval.convert_to_first_week_of_season(season)
+              interval.convert_to_first_week_of_season(season)
             end
             interval.kind = i["kind"] || "d"
             interval.is_validated = i["is_validated"] || false
             interval.save
+          end
 
             if self.time_intervals.where(id: interval.id).none?
                 intervalList << interval

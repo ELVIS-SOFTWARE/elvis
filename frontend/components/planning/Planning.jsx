@@ -320,6 +320,7 @@ class Planning extends React.Component {
                 : interval.end,
             kind: interval.kind || "p",
             uid: idGenerator.next().value,
+            recurrentType: interval.recurrentType,
         }));
 
         if (this.props.updateTimePreferences) {
@@ -345,7 +346,7 @@ class Planning extends React.Component {
             });
         } else {
             this.commitIntervals(intervals, seasonId).then(results => {
-                if (results.intervals.length === 1 && this.props.isTeacher) {
+                if (results.intervals.length === 1 && (this.props.isTeacher || this.props.isAdmin)) {
                     this.handleOpenDetail(results.intervals[0]);
                 }
             })
@@ -1569,12 +1570,20 @@ class Planning extends React.Component {
                     contentLabel="Creation d'un créneau"
                 >
                     <CreateIntervalModal
+                        recurrenceActivated={this.props.recurrenceActivated}
                         newInterval={this.state.newInterval}
                         onSave={(interval, seasonId) =>
                             this.handleCreateInterval(interval, seasonId)
                         }
                         closeModal={() => this.closeCreationModal()}
                         seasons={this.props.seasons}
+                        currentUserIsAdmin={this.props.isAdmin}
+                        handleCloseAndOpenDetails={interval => {
+                            this.closeCreationModal();
+                            this.handleCreateInterval(interval);
+
+                            //this.handleOpenDetail(interval);
+                        }}
                     />
                 </Modal>
 

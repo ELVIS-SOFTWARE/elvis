@@ -53,8 +53,8 @@ Rails.application.routes.draw do
     get "planning_parameters", to: "planning_parameters#index"
     post "planning_parameters", to: "planning_parameters#update"
 
-    get "show_activity_code", to: "planning_parameters#show_activity_code"
-    post "show_activity_code", to: "planning_parameters#update_show_activity_code"
+    get "planning/school_planning_params", to: "planning_parameters#school_planning_params"
+    post "planning/school_planning_params", to: "planning_parameters#update_school_planning_params"
 
     get "hours_before_cancelling_activity", to: "planning_parameters#get_hours_before_cancelling_activity"
     post "hours_before_cancelling_activity", to: "planning_parameters#save_hours_before_cancelling_activity"
@@ -159,6 +159,7 @@ Rails.application.routes.draw do
   # ACTIVITY APPLICATIONS
   #  =====================
   get "/applications/:id/desired_activities/:des_id/suggestions", to: "activities_applications#find_activity_suggestions"
+  get '/desired_activities/user/:user_id/activity/:activity_id', to: 'desired_activity#find_by_user_and_activity'
 
   # (pour élève/admin) pour un élève déjà inscrit et possédant une préinscription, renvoie vers le Wizard
   get "/inscriptions/new/:user_id/:pre_application_activity_id/:activity_ref_id(/:action_type)",

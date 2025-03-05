@@ -64,6 +64,7 @@ const debounce = makeDebounce();
 class ActivitiesApplicationsList extends React.Component {
     constructor(props) {
         super(props);
+        console.log("Props initiaux :", props);
 
         const localStorageFilter = localStorage.getItem(FILTER_STORAGE_KEY);
         const filter =
@@ -106,17 +107,17 @@ class ActivitiesApplicationsList extends React.Component {
             confirmButtonText: 'OK',
         });
     }
-
     componentDidMount() {
         this.fetchData(this.state.filter);
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         localStorage.setItem(
             FILTER_STORAGE_KEY,
             JSON.stringify(this.state.filter),
         );
     }
+
 
     handleUpdateListPreferences(prefs) {
         this.setState(
@@ -237,7 +238,10 @@ class ActivitiesApplicationsList extends React.Component {
     }
 
     handleBulkDelete() {
-        const selectedCount = this.state.bulkTargets.length;
+        const selectedCount = this.state.bulkTargets === "all"
+            ? this.state.total // Total pour "tout sélectionner"
+            : this.state.bulkTargets.length;
+
         const confirmationText = selectedCount === 1
             ? "Voulez-vous supprimer la demande d'inscription sélectionnée ?"
             : `Voulez-vous supprimer les ${selectedCount} demandes d'inscription sélectionnées ?`;
@@ -265,11 +269,28 @@ class ActivitiesApplicationsList extends React.Component {
                 })
                     .catch(res => console.error(res))
                     .then(res => {
+                        const remainingItems = this.state.total - selectedCount;
+                        const newTotalPages = Math.ceil(remainingItems / this.state.filter.pageSize);
+
+                        const newPage = Math.min(
+                            this.state.filter.page, // Page actuelle
+                            newTotalPages - 1 // Dernière page disponible
+                        );
+
                         this.setState({
-                            data: this.state.data.filter(
+                            data: this.state.bulkTargets === "all" ? [] : this.state.data.filter(
                                 d => !this.state.bulkTargets.includes(d.id)
                             ),
                             bulkTargets: [],
+                            total: remainingItems,
+                            pages: newTotalPages,
+                            filter: {
+                                ...this.state.filter,
+                                page: newPage, // Mettre à jour la page actuelle
+                            },
+                        }, () => {
+                            // Recharger les données pour la nouvelle page
+                            this.fetchData(this.state.filter);
                         });
                     });
             } else {
@@ -277,6 +298,8 @@ class ActivitiesApplicationsList extends React.Component {
             }
         });
     }
+
+
 
     resetFilters() {
         localStorage.setItem(
@@ -331,16 +354,13 @@ class ActivitiesApplicationsList extends React.Component {
                 }
                 </div>
                 <div id="targets-actions">
-                    {
-                        this.props.currentUserIsAdmin && this.statusFilterContainsTerminalStatus() && <button
-                            onClick={() => this.sendGroupConfirmationMail()}
-                            className="btn btn-primary m-r-sm"
-                            data-tippy-content="Envoi groupé mail confirmation"
-                            disabled={false}>
-                            <i className="fas fa-envelope"/>
-
-                        </button>
-                    }
+                    {this.props.currentUserIsAdmin && this.statusFilterContainsTerminalStatus() && <button
+                        onClick={() => this.sendGroupConfirmationMail()}
+                        className="btn btn-primary m-r-sm"
+                        data-tippy-content="Envoi groupé mail confirmation"
+                        disabled={false}>
+                        <i className="fas fa-envelope"/>
+                    </button>}
 
                     <a
                         href="#"
@@ -363,12 +383,10 @@ class ActivitiesApplicationsList extends React.Component {
         </div>;
     }
 
-    fetchData(filter)
-    {
+    fetchData(filter) {
         this.setState({ loading: true, filter });
 
-        debounce(() =>
-        {
+        debounce(() => {
             requestData(
                 filter.pageSize,
                 filter.page,
@@ -382,6 +400,7 @@ class ActivitiesApplicationsList extends React.Component {
                         data: data.applications,
                         pages: data.pages,
                         total: data.total,
+                        pendingTotal: data.pending_total
                     };
 
                     return res;
@@ -393,8 +412,10 @@ class ActivitiesApplicationsList extends React.Component {
                         bulkTargets: [],
                     });
                 });
+
         }, 400);
     }
+
 
     handleToggleNoAvailabilityFilter() {
         const newFilter = [...this.state.filter.filtered];
@@ -457,13 +478,22 @@ class ActivitiesApplicationsList extends React.Component {
 
     statusFilterContainsTerminalStatus() {
         if (this.state.bulkTargets === "all") {
-            return true;
+            const allSelectedArePending = this.state.pendingTotal === this.state.total;
+            return !allSelectedArePending;
         }
-        const statusFilter = [...this.state.data]
-            .filter(f => (this.state.bulkTargets || []).includes(f.id))
-            .map(f => f.activity_application_status_id);
-        return statusFilter.some(s => [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s));
+
+        const selectedStatuses = this.state.bulkTargets.map(id => {
+            const demande = this.state.data.find(d => d.id === id);
+            return demande ? demande.activity_application_status_id : null;
+        }).filter(status => status !== null);
+
+        const containsTerminalStatus = selectedStatuses.some(s =>
+            [ACTIVITY_ATTRIBUTED_ID, ACTIVITY_PROPOSED_ID, PROPOSAL_ACCEPTED_ID].includes(s)
+        );
+
+        return containsTerminalStatus;
     }
+
 
 
     render() {
@@ -786,94 +816,132 @@ class ActivitiesApplicationsList extends React.Component {
                         <div className="flex flex-column">
                             <div className="flex flex-space-between-justified">
                                 <div className="flex">
-                                    <h3 className="m-r">En attente de traitement ({this.state.total || 0})</h3>
+                                    <h3 className="m-r">
+                                        En attente de traitement (
+                                        {this.state.pendingTotal || 0})
+                                    </h3>
                                     <ListPreferences
                                         preferences={this.state.listPreferences}
                                         columns={columns.slice(1)}
                                         className="m-r-sm"
-                                        onSubmit={prefs => this.handleUpdateListPreferences(prefs)}/>
+                                        onSubmit={prefs =>
+                                            this.handleUpdateListPreferences(
+                                                prefs
+                                            )
+                                        }
+                                    />
                                     <button
                                         className="btn btn-primary m-r-sm"
                                         data-tippy-content="Réinitialiser les filtres"
-                                        onClick={() => this.resetFilters()}>
+                                        onClick={() => this.resetFilters()}
+                                    >
                                         <i className="fas fa-times"></i>
                                     </button>
                                     <button
                                         className="btn btn-primary m-r-sm"
                                         data-tippy-content="Rafraîchir les données"
-                                        onClick={() => this.fetchData(this.state.filter)}>
+                                        onClick={() =>
+                                            this.fetchData(this.state.filter)
+                                        }
+                                    >
                                         <i className="fas fa-sync"></i>
                                     </button>
                                     <input
                                         type="file"
                                         ref={this.fileInput}
-                                        style={{display: "none"}}
-                                        onChange={this.handleFileSelect.bind(this)}
+                                        style={{ display: "none" }}
+                                        onChange={this.handleFileSelect.bind(
+                                            this
+                                        )}
                                         accept=".csv"
                                     />
-                                    {this.props.currentUserIsAdmin && <Fragment>
-                                        <button
-                                            className="btn btn-primary m-r-sm"
-                                            data-tippy-content="Importer un fichier d'inscriptions"
-                                            onClick={() => this.fileInput.current.click()}>
-                                            {
-                                                this.state.importOngoing ?
+                                    {this.props.currentUserIsAdmin && (
+                                        <Fragment>
+                                            <button
+                                                className="btn btn-primary m-r-sm"
+                                                data-tippy-content="Importer un fichier d'inscriptions"
+                                                onClick={() =>
+                                                    this.fileInput.current.click()
+                                                }
+                                            >
+                                                {this.state.importOngoing ? (
                                                     <Loader
                                                         type="Oval"
                                                         color="white"
                                                         height={15}
-                                                        width={15} /> :
+                                                        width={15}
+                                                    />
+                                                ) : (
                                                     <i className="fas fa-download" />
-                                            }
-                                        </button>
-                                        <button
-                                            className="btn btn-primary m-r-sm"
-                                            data-tippy-content="Exporter en CSV"
-                                            onClick={this.downloadExport.bind(this)}>
-                                            {
-                                                this.state.exportOngoing ?
+                                                )}
+                                            </button>
+                                            <button
+                                                className="btn btn-primary m-r-sm"
+                                                data-tippy-content="Exporter en CSV"
+                                                onClick={this.downloadExport.bind(
+                                                    this
+                                                )}
+                                            >
+                                                {this.state.exportOngoing ? (
                                                     <Loader
                                                         type="Oval"
                                                         color="white"
                                                         height={15}
-                                                        width={15} /> :
+                                                        width={15}
+                                                    />
+                                                ) : (
                                                     <i className="fas fa-upload" />
-                                            }
-                                        </button>
-                                    </Fragment>}
+                                                )}
+                                            </button>
+                                        </Fragment>
+                                    )}
                                     <button
-                                        onClick={e => this.handleToggleNoAvailabilityFilter()}
+                                        onClick={e =>
+                                            this.handleToggleNoAvailabilityFilter()
+                                        }
                                         data-tippy-content="Afficher les élèves sans disponibilités renseignées"
-                                        className={`btn m-r-sm btn-${withoutAvailabilityMode ? "primary" : "muted"}`}>
-                                        <strong><i className="fas fa-calendar-times"></i></strong>
+                                        className={`btn m-r-sm btn-${
+                                            withoutAvailabilityMode
+                                                ? "primary"
+                                                : "muted"
+                                        }`}
+                                    >
+                                        <strong>
+                                            <i className="fas fa-calendar-times"></i>
+                                        </strong>
                                     </button>
                                 </div>
-                                {this.props.currentUserIsAdmin && <div className="flex">
-                                    <ButtonModal
-                                        modalProps={{
-                                            style: {
-                                                content: {
-                                                    width: "750px",
-                                                    margin: "auto",
-                                                    inset: "unset",
+                                {this.props.currentUserIsAdmin && (
+                                    <div className="flex">
+                                        <ButtonModal
+                                            modalProps={{
+                                                style: {
+                                                    content: {
+                                                        width: "750px",
+                                                        margin: "auto",
+                                                        inset: "unset",
+                                                    },
                                                 },
-                                            },
-                                        }}
-                                        className="btn btn-primary m-r-sm"
-                                        tooltip="Statistiques d'inscriptions"
-                                        label={<i className="fas fa-chart-pie"/>}>
-                                        <ActivitiesApplicationsDashboard
-                                            {...this.props.dashboardInfos} />
-                                    </ButtonModal>
-                                    <StopList seasons={this.props.seasons} />
-                                </div>}
+                                            }}
+                                            className="btn btn-primary m-r-sm"
+                                            tooltip="Statistiques d'inscriptions"
+                                            label={
+                                                <i className="fas fa-chart-pie" />
+                                            }
+                                        >
+                                            <ActivitiesApplicationsDashboard
+                                                {...this.props.dashboardInfos}
+                                            />
+                                        </ButtonModal>
+                                        <StopList
+                                            seasons={this.props.seasons}
+                                        />
+                                    </div>
+                                )}
                             </div>
-                            {
-                                this.state.bulkTargets.length > 0 ?
-                                    this.bulkAlert()
-                                    :
-                                    null
-                            }
+                            {this.state.bulkTargets.length > 0
+                                ? this.bulkAlert()
+                                : null}
                         </div>
                     </div>
                     <div className="ibox-content no-padding">
@@ -883,12 +951,10 @@ class ActivitiesApplicationsList extends React.Component {
                             pages={this.state.pages}
                             loading={this.state.loading}
                             columns={filteredColumns}
-                            defaultSorted={[{id: "date", desc: true}]}
+                            defaultSorted={[{ id: "date", desc: true }]}
                             filterable={true}
-                            defaultFilterMethod={(filter, row) =>
-                            {
-                                if (row[filter.id] !== null)
-                                {
+                            defaultFilterMethod={(filter, row) => {
+                                if (row[filter.id] !== null) {
                                     return row[filter.id]
                                         .toString()
                                         .toLowerCase()
@@ -900,7 +966,7 @@ class ActivitiesApplicationsList extends React.Component {
                             sorted={this.state.filter.sorted}
                             filtered={this.state.filter.filtered}
                             onPageChange={page =>
-                                this.fetchData({...this.state.filter, page})
+                                this.fetchData({ ...this.state.filter, page })
                             }
                             onPageSizeChange={(pageSize, page) =>
                                 this.fetchData({
@@ -910,7 +976,7 @@ class ActivitiesApplicationsList extends React.Component {
                                 })
                             }
                             onSortedChange={sorted =>
-                                this.fetchData({...this.state.filter, sorted})
+                                this.fetchData({ ...this.state.filter, sorted })
                             }
                             onFilteredChange={filtered =>
                                 this.fetchData({
@@ -927,10 +993,15 @@ class ActivitiesApplicationsList extends React.Component {
                             rowsText="résultats"
                             pageSizeOptions={[5, 10, 15, 16, 20]}
                             getTdProps={(state, rowInfo, column, instance) => {
-                                if (column.id !== "selection" && column.id !== "name")
+                                if (
+                                    column.id !== "selection" &&
+                                    column.id !== "name"
+                                )
                                     return {
                                         onClick: (e, handleOriginal) => {
-                                            window.open(`/inscriptions/${rowInfo.original.id}`);
+                                            window.open(
+                                                `/inscriptions/${rowInfo.original.id}`
+                                            );
 
                                             if (handleOriginal) {
                                                 handleOriginal();
@@ -944,9 +1015,7 @@ class ActivitiesApplicationsList extends React.Component {
 
                         <div className="flex flex-center-justified m-t-xs">
                             <h3>
-                                {`${
-                                    this.state.total
-                                } Demandes d'inscription au total`}
+                                {`${this.state.total} Demandes d'inscription au total`}
                             </h3>
                         </div>
                     </div>
@@ -956,12 +1025,17 @@ class ActivitiesApplicationsList extends React.Component {
                     statuses={this.props.statuses}
                     targets={this.state.bulkTargets}
                     state={this.state.bulkEdit}
-                    onChange={(name, value) => this.handleUpdateBulkEdit(name, value)}
-                    onSave={() => this.handleBulkEdit()}/>
+                    onChange={(name, value) =>
+                        this.handleUpdateBulkEdit(name, value)
+                    }
+                    onSave={() => this.handleBulkEdit()}
+                />
             </div>
         );
     }
 }
+
+
 
 const BulkEditModal = ({targets, state, statuses, onChange, onSave}) => <div
     id="applications-bulk-edit-modal"

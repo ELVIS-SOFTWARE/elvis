@@ -28,7 +28,7 @@ class DesiredActivityController < ApplicationController
 
         @desired_activity = des.as_json include: :options
 
-        render :json => @desired_activity
+        render json: @desired_activity
     end
 
     def set_pricing
@@ -43,12 +43,27 @@ class DesiredActivityController < ApplicationController
         head :ok
     end
 
-    # def set_prorata
-    #     desired_activity = DesiredActivity.find(params[:id])
-    #     desired_activity.prorata = params[:prorata]
-    #
-    #     desired_activity.save!
-    # end
+    def find_by_user_and_activity
+        user_id = params[:user_id]
+        activity_id = params[:activity_id]
+
+        desired_activity = DesiredActivity
+                             .joins(:activity_application)
+                             .where("activity_applications.user_id = ? AND desired_activities.activity_id = ?", user_id, activity_id)
+                             .first
+
+        if !desired_activity
+            option = Option.find_by(activity_id: activity_id)
+            desired_activity = option&.desired_activity
+        end
+
+        if desired_activity
+            render json: { id: desired_activity.id }
+        else
+            render json: { error: "Demande d'inscription introuvable" }, status: 404
+        end
+    end
+
 
     private
     def update_params
