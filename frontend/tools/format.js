@@ -156,7 +156,7 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
             .value();
 
         hasOption = Boolean(optionsUserIds.length);
-        // ne pas mettre === car stopped_at et referenceDate peut être undefined ou null ou chaine vide
+        // ne pas mettre === car stopped_at et referenceDate peut-être undefined ou null ou chaine vide
         const activeUsers = activity.users.filter(u =>
             referenceDate == undefined ||
             (u.begin_at <= referenceDate && (u.stopped_at == undefined || u.stopped_at > referenceDate))
