@@ -50,13 +50,74 @@ const SubStudentList = ({row}) => {
         .map((u, i) => <StudentItem key={i} user={u} color="#9575CD"/>);
 
     return (
-        <div style={{padding: "10px"}}>
-            <p>{`Effectifs au : ${moment(row.original.closest_lesson).format(FR_DATE_FORMAT)}`}</p>
-            <ul>
-                {students}
-                {options}
-                {inactives}
-            </ul>
+        <div className="flex-column">
+            <div className="flex" style={{ padding: "15px" }}>
+                <h3 className="m-r">
+                    Effectifs au : {moment(row.original.closest_lesson).format('DD/MM/YYYY')}
+                </h3>
+            </div>
+            <table className="table table-bordered">
+                <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Âge</th>
+                    <th>Statut</th>
+                    <th>Début le</th>
+                    <th>Arrêt le</th>
+                </tr>
+                </thead>
+                <tbody>
+                {_.orderBy(
+                    [
+                        ...row.original.users.map(u => ({...u, type: 'active', application: null})),
+                        ..._.compact(inactives).map(item => ({
+                            ...item.props.user,
+                            type: 'inactive',
+                            application: item.props.application
+                        })),
+                        ...row.original.options.map(o => ({
+                            ..._.get(o, 'desired_activity.activity_application.user'),
+                            type: 'option',
+                            application: null
+                        }))
+                    ],
+                    u => u.last_name
+                ).map((u, index) => (
+                    <tr
+                        key={u.id || index}
+                        style={{
+                            color: u.type === 'inactive' ? "#ff0000" :
+                                u.type === 'option' ? "#9575CD" :
+                                    undefined
+                        }}
+                    >
+                        <td>
+                            <StudentItem
+                                user={u}
+                                color={
+                                    u.type === 'inactive' ? "#ff0000" :
+                                        u.type === 'option' ? "#9575CD" :
+                                            undefined
+                                }
+                                application={u.application}
+                            />
+                        </td>
+                        <td>{toAge(u.birthday)} ans</td>
+                        <td>
+                            {u.type === 'active' ? 'Actif' :
+                                u.type === 'inactive' ? 'Inactif' : 'Option'}
+                        </td>
+                        <td>
+                            {u.begin_at ? moment(u.begin_at).format('DD/MM/YYYY') : ''}
+                        </td>
+                        <td>
+                            {u.stopped_at ? moment(u.stopped_at).format('DD/MM/YYYY') :
+                                u.application?.stopped_at ? moment(u.application.stopped_at).format('DD/MM/YYYY') : ''}
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
         </div>
     );
 };
