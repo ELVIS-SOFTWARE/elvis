@@ -10,12 +10,11 @@
 
 <br/>
 
-<%=
-  react_component(
-    "editParameters/TeachersParameters",
-    {
-      teacher_can_edit_planning: @teacher_can_edit_planning,
-      authorize_teachers: @authorize_teachers
-    }
-  )
-%>
+<%= react_component(
+      "editParameters/TeachersParameters",
+      {
+        teacher_can_edit_planning: @teacher_can_edit_planning,
+        authorize_teachers: @authorize_teachers,
+        show_teacher_contacts: @show_teacher_contacts
+      }
+    ) %>
