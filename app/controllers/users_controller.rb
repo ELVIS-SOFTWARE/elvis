@@ -1491,13 +1491,24 @@ end
 
   def reset_password
     user = User.find(params[:user_id])
-
     return render json: {}, status: :unauthorized if !current_user.is_admin || user.id == current_user.id
 
-    Devise::Mailer.reset_password_instructions(user, user.set_reset_password_token).deliver_later
+    token = user.set_reset_password_token
+    reset_link = edit_user_password_url(reset_password_token: token)
 
-    render json: {}, status: :ok
+    if params[:send_email] == "true"
+      Devise::Mailer.reset_password_instructions(user, token).deliver_later
+      render json: { message: "Email envoyé" }, status: :ok
+    else
+      render json: {
+        reset_link: reset_link,
+        is_admin: user.is_admin,
+        is_teacher: user.is_teacher
+      }, status: :ok
+    end
   end
+
+
 
   def all_doc_consented
     # @type [User]
