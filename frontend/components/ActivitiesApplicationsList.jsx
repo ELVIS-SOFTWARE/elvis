@@ -312,7 +312,7 @@ class ActivitiesApplicationsList extends React.Component {
 
     //Displays an alert which gives information about how many rows are selected
     //And also suggests the user select all data (across pages) when he checked
-    //The "all" checkbox. Bulk actions are on the right of the alert.
+    //The "all" checkbox. Bulk actions are on the right of the alert
     bulkAlert() {
         const count = this.state.bulkTargets === "all" && this.state.total || this.state.bulkTargets.length;
 

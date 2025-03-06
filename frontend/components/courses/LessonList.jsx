@@ -340,7 +340,7 @@ export default class LessonList extends React.Component {
 
     updateTarget(id, checked) {
         if (checked) {
-            //add target to bulk targets list
+            //add target to bulk targets lists
             this.setState({
                 targets: [...this.state.targets, id],
             });
