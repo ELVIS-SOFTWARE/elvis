@@ -8,19 +8,19 @@ export const twoDigits = n => (n < 10 ? `0${n}` : `${n}`);
 
 export const validateEmail = (email) => {
     return String(email)
-      .toLowerCase()
-      .match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      );
-  };
+        .toLowerCase()
+        .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        );
+};
 
 export const toRawPhoneNumber = value => value.replace(/\s/gi, "");
 export const prettifyPhoneNumber = value =>
     value
         ? value.replace(
-              /(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/gi,
-              "$1 $2 $3 $4 $5"
-          )
+            /(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/gi,
+            "$1 $2 $3 $4 $5"
+        )
         : "";
 
 export const toBirthday = value => (value ? value.split("T")[0] : "");
@@ -156,6 +156,7 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
             .value();
 
         hasOption = Boolean(optionsUserIds.length);
+
         // ne pas mettre === car stopped_at et referenceDate peut-être undefined ou null ou chaine vide
         const activeUsers = activity.users.filter(u =>
             referenceDate == undefined ||
