@@ -1494,10 +1494,17 @@ end
     return render json: {}, status: :unauthorized if !current_user.is_admin || user.id == current_user.id
 
     token = user.set_reset_password_token
-    reset_link = edit_user_password_url(reset_password_token: token)
+
+    # Utiliser la même logique que dans le template d'email
+    reset_link = if Rails.env.kubernetes?
+                   "#{ApplicationMailer.application_url}/u/edit_password.#{user.id}?reset_password_token=#{token}"
+                 else
+                   edit_password_url(user, reset_password_token: token)
+                 end
 
     if params[:send_email] == "true"
-      Devise::Mailer.reset_password_instructions(user, token).deliver_later
+      # Envoi de l'email avec ta propre template
+      PasswordResetMailer.reset_password_instructions(user, token).deliver_later
       render json: { message: "Email envoyé" }, status: :ok
     else
       render json: {
@@ -1507,6 +1514,7 @@ end
       }, status: :ok
     end
   end
+
 
 
 
