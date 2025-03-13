@@ -62,7 +62,6 @@ const SubStudentList = ({row}) => {
                     <th>Nom</th>
                     <th>Âge</th>
                     <th>Statut</th>
-                    <th>Début le</th>
                     <th>Arrêt le</th>
                 </tr>
                 </thead>
@@ -102,13 +101,10 @@ const SubStudentList = ({row}) => {
                                 application={u.application}
                             />
                         </td>
-                        <td>{toAge(u.birthday)} ans</td>
+                        <td>{toAge(u.birthday)}</td>
                         <td>
                             {u.type === 'active' ? 'Actif' :
                                 u.type === 'inactive' ? 'Inactif' : 'Option'}
-                        </td>
-                        <td>
-                            {u.begin_at ? moment(u.begin_at).format('DD/MM/YYYY') : ''}
                         </td>
                         <td>
                             {u.stopped_at ? moment(u.stopped_at).format('DD/MM/YYYY') :
