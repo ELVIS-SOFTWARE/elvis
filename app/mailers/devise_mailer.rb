@@ -6,7 +6,7 @@ class DeviseMailer < Devise::Mailer
 
     mail.from ||= Parameter.get_value("app.application_mailer.default_from")
     name = School.first.name
-    name.nil? ? subject = "réinitialiser votre mot de passe" :  subject = "#{name} - réinitialiser votre mot de passe"
+    name.nil? ? subject = "Réinitialisation de votre mot de passe" :  subject = "#{name} - Réinitialisation de votre mot de passe"
     # logic
     mail.subject = subject
     mail
