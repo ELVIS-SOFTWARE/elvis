@@ -1502,7 +1502,7 @@ end
                  end
 
     if params[:send_email] == "true"
-      Devise::Mailer.reset_password_instructions(user, token).deliver_later
+      DeviseMailer.reset_password_instructions(user, token).deliver_later
       render json: { message: "Email envoyé" }, status: :ok
     else
       render json: {
@@ -1512,7 +1512,6 @@ end
       }, status: :ok
     end
   end
-
 
 
   def all_doc_consented
