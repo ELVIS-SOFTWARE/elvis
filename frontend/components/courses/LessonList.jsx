@@ -987,6 +987,7 @@ export default class LessonList extends React.Component {
             },
             {
                 Header: "Action",
+                id: "action",
                 filterable: false,
                 sortable: false,
                 Cell: c => (
@@ -1154,7 +1155,7 @@ export default class LessonList extends React.Component {
                         }
                         filterable
                         sortable
-                        resizable={false}
+                        resizable={true}
                         previousText="Précédent"
                         nextText="Suivant"
                         loadingText="Chargement..."
