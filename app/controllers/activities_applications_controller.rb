@@ -331,10 +331,7 @@ class ActivitiesApplicationsController < ApplicationController
     # when current_user is nil and params[:user_id] is nil => cannot create inscription for nothing
     redirect_to "/" and return if @pre_selected_user.nil?
 
-    # etant donnée que l'on récupère toutes les activity_refs pour le front
-    # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
-    # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
-
+    # Récupération unique des activity_refs pour le front afin d'éviter des appels multiples à la BDD
     if MaxActivityRefPriceForSeason.all.empty?
       ActivityRefMaxPricesCalculatorJob.perform_now(nil)
     end
@@ -347,7 +344,6 @@ class ActivitiesApplicationsController < ApplicationController
     )
 
     activity_refs = @all_activity_refs.filter { |ar| ar["is_lesson"] || ar["is_visible_to_admin"] }
-
     activity_refs = activity_refs.filter { |ar| (ar["is_visible_to_admin"] || false) == false } unless current_user&.is_admin
 
     all_max_prices = Elvis::CacheUtils.cache_block_if_enabled("wizard:activity_ref_max_prices") do
@@ -356,9 +352,7 @@ class ActivitiesApplicationsController < ApplicationController
         .as_json
     end
 
-    # do not add display_prices_by_season and display_price to @all_activity_refs.as_json
-    # because this can be a huge amount of data && sql queries
-    # So add them to activity_refs in a bulk operation
+    # Méthode interne pour récupérer le prix max pour une cible donnée
     def get_max_price_for_target_id(all_max_prices, target_id, target_type, season_id)
       all_max_prices
         .find { |mp|
@@ -386,14 +380,13 @@ class ActivitiesApplicationsController < ApplicationController
       end
     end
 
-    # We want only the highest priced activity_ref for each kind
+    # On souhaite récupérer uniquement la référence d'activité la mieux tarifée pour chaque type
     display_activity_refs = activity_refs
                               .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and ar["substitutable"] }
                               .group_by { |ar| ar["kind"] }
                               .transform_values do |values|
       default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
       default_activity = values.find { |ar| ar["id"] == default_activity_id }
-
       default_activity || values.max_by { |ar| ar["display_price"] }
     end
                               .values
@@ -403,9 +396,7 @@ class ActivitiesApplicationsController < ApplicationController
                        .flatten
                        .sort_by { |a| a["kind"] }
 
-    @activity_refs_childhood = activity_refs
-                                 .select { |ar| ar["activity_type"] == "child" }
-
+    @activity_refs_childhood = activity_refs.select { |ar| ar["activity_type"] == "child" }
     @activity_refs_cham = activity_refs.filter { |ar| ar["activity_type"] == "cham" }
 
     @application_change_questions = Question.application_change_questionnaire.to_a
@@ -443,24 +434,39 @@ class ActivitiesApplicationsController < ApplicationController
       pack["activity_ref"] = @all_activity_refs.find { |ar| ar["id"] == pack["activity_ref_id"] }
     end
 
-    # on regroupe les activity_ref_pricings par label
+    # Regroupement des activity_ref_pricings par label
     @packs = @packs.group_by { |arp| arp["activity_ref"]["label"] }
-
-    # pick only the is_a_pack activity_ref_pricings
+    # Ne garder que ceux qui correspondent à un pack
     @packs = @packs.each do |key, value|
       @packs[key] = value.select { |arp| arp["pricing_category"]["is_a_pack"] }
     end
-
-    # on retire les packs qui n'ont pas de tarifs
     @packs = @packs.select { |_key, value| value.any? }
 
+    # === Ajout de la récupération des formules pour le wizard d'inscription ===
+    @formules = Formule.all.as_json(
+      include: {
+        formule_items: { include: { item: { only: %i[id display_name] } } },
+        formule_pricings: {
+          only: %i[id price],
+          include: {
+            pricing_category: { only: %i[id name] },
+            from_season: { only: %i[id name] },
+            to_season: { only: %i[id name] }
+          }
+        }
+      }
+    )
+
+    @formula_prices = @formules.map do |f|
+      { id: f["id"], display_price: f["display_price"] || 0 }
+    end
+    # ==========================================================================
+
     if @current_user.nil?
-      # @current_user = User.new
-      # @current_user.first_connection = true
-      # @hide_navigation = true
       render layout: "simple"
     end
   end
+
 
   # (pour élève/admin) pour un élève déjà inscrit et possédant une préinscription, renvoie vers le Wizard
   def new_for_existing_user

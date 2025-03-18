@@ -1,6 +1,5 @@
 class Formule < ApplicationRecord
   acts_as_paranoid
-
   has_many :formule_pricings, dependent: :destroy
   has_many :formule_items, dependent: :destroy
   has_many :activity_applications

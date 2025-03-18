@@ -23,6 +23,7 @@ class School < ApplicationRecord
   has_one_attached :logo
   belongs_to :address, required: false
   belongs_to :planning, required: false
+  has_many :formules
 
   def self.display_class_name(singular = true)
     singular ? "école" : "écoles"
