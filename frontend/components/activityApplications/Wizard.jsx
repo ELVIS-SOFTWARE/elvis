@@ -691,14 +691,7 @@ class Wizard extends React.Component {
 
 
     getLabelsFromSelectedActivities() {
-        // Récupérer les activités sélectionnées individuellement
         let selectedActivityRefIds = this.state.selectedActivities.slice();
-
-        // Récupérer les activités des formules
-        const formulaActivitiesIds = Object.values(this.state.selectedFormulaActivities || {}).flat();
-
-        // Combiner les deux listes d'activités
-        let allSelectedActivities = [...selectedActivityRefIds, ...formulaActivitiesIds];
 
         // Lister les activités qui nécessitent une sélection de préférences
         const prefsReqActivityRefIds = this.props.allActivityRefs
@@ -706,22 +699,19 @@ class Wizard extends React.Component {
             .map(ref => ref.id);
 
         // Filtrer notre sélection pour ne conserver que les activités qui ne nécessitent pas de préférences
-        // ou celles qui sont des ateliers spécifiques (conserve la logique existante tout en ajoutant les activités des formules)
-        const filteredActivities = allSelectedActivities.filter(activityId => {
-            const activityRef = this.props.allActivityRefs.find(ref => ref.id === activityId);
-            return !prefsReqActivityRefIds.includes(activityId) ||
-                (activityRef && activityRef.kind === "Atelier musique");
-        });
+        selectedActivityRefIds = selectedActivityRefIds.filter(activity => !prefsReqActivityRefIds.includes(activity));
 
         // Retourner un tableau avec les noms des activités sélectionnées
-        return filteredActivities.reduce((labels, id) => {
+        return selectedActivityRefIds.reduce((labels, id) => {
             const element = this.props.allActivityRefs.find(activityRef => activityRef.id === id);
             if (element) {
                 labels.push(element.display_name);
             }
             return labels;
         }, []);
+
     }
+
     isApplicationAuthorized(season_id)
     {
         if(this.props.currentUserIsAdmin)
@@ -778,14 +768,20 @@ class Wizard extends React.Component {
             .filter(ref => ref.allows_timeslot_selection)
             .map(ref => ref.id);
 
+        const allSelectedActivities = [
+            ...this.state.selectedActivities,
+            ...Object.values(this.state.selectedFormulaActivities || {}).flat()
+        ];
+
         const preferencesActivities = _.intersection(
             activitiesThatRequirePreferencesSelection,
-            this.state.selectedActivities
+            allSelectedActivities
         );
 
-        const timePrefsMode = preferencesActivities.length>0
-            ? preferencesActivities.length<this.state.selectedActivities.length ? PLANNING_AND_PREFERENCES_MODE : PREFERENCES_MODE
+        const timePrefsMode = preferencesActivities.length > 0
+            ? preferencesActivities.length < allSelectedActivities.length ? PLANNING_AND_PREFERENCES_MODE : PREFERENCES_MODE
             : PLANNING_MODE;
+
 
         const formulaActivitiesIds = Object.values(this.state.selectedFormulaActivities || {}).flat();
         const refsToEvaluate = this.state.activityRefs.filter(
