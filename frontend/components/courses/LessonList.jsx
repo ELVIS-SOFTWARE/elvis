@@ -1329,6 +1329,7 @@ const UserRow = ({
         "NON ASSIGNÉ";
 
     const [desiredActivityId, setDesiredActivityId] = React.useState(null);
+    const [activityApplicationId, setActivityApplicationId] = React.useState(null);
 
     React.useEffect(() => {
         api
@@ -1337,12 +1338,13 @@ const UserRow = ({
                 console.error("Erreur lors de la récupération de la demande d'inscription:", error);
             })
             .success((data) => {
-                setDesiredActivityId(data.activity_application_id);
+                setDesiredActivityId(data.id);
+                setActivityApplicationId(data.activity_application_id);
             })
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
 
-    const inscriptionUrl = desiredActivityId ? `/inscriptions/${desiredActivityId}` : "#";
+    const inscriptionUrl = setActivityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
 
     return (
         <tr style={customStyle}>
