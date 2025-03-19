@@ -58,7 +58,10 @@ class DesiredActivityController < ApplicationController
         end
 
         if desired_activity
-            render json: { id: desired_activity.id }
+            render json: {
+              id: desired_activity.id,
+              activity_application_id: desired_activity.activity_application_id,
+            }
         else
             render json: { error: "Demande d'inscription introuvable" }, status: 404
         end

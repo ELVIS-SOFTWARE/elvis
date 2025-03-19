@@ -1334,7 +1334,7 @@ const UserRow = ({
                 console.error("Erreur lors de la récupération de la demande d'inscription:", error);
             })
             .success((data) => {
-                setDesiredActivityId(data.id);
+                setDesiredActivityId(data.activity_application_id);
             })
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
