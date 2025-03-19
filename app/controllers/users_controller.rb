@@ -1491,13 +1491,28 @@ end
 
   def reset_password
     user = User.find(params[:user_id])
-
     return render json: {}, status: :unauthorized if !current_user.is_admin || user.id == current_user.id
 
-    Devise::Mailer.reset_password_instructions(user, user.set_reset_password_token).deliver_later
+    token = user.set_reset_password_token
 
-    render json: {}, status: :ok
+    reset_link = if Rails.env.kubernetes?
+                   "#{ApplicationMailer.application_url}/u/edit_password.#{user.id}?reset_password_token=#{token}"
+                 else
+                   edit_password_url(user, reset_password_token: token)
+                 end
+
+    if params[:send_email] == "true"
+      DeviseMailer.reset_password_instructions(user, token).deliver_later
+      render json: { message: "Email envoyé" }, status: :ok
+    else
+      render json: {
+        reset_link: reset_link,
+        is_admin: user.is_admin,
+        is_teacher: user.is_teacher
+      }, status: :ok
+    end
   end
+
 
   def all_doc_consented
     # @type [User]

@@ -65,9 +65,11 @@ const SubStudentList = ({ row, seasons }) => {
                 <tr>
                     <th>Nom</th>
                     <th>Âge</th>
+
                     <th>Niveau</th>
                     {isWorkGroup && <th>Instrument</th>}
                     <th>Début le</th>
+                    <th>Statut</th>
                     <th>Arrêt le</th>
                 </tr>
                 </thead>
@@ -141,6 +143,53 @@ const SubStudentList = ({ row, seasons }) => {
                         </tr>
                     );
                 })}
+                {_.orderBy(
+                    [
+                        ...row.original.users.map(u => ({...u, type: 'active', application: null})),
+                        ..._.compact(inactives).map(item => ({
+                            ...item.props.user,
+                            type: 'inactive',
+                            application: item.props.application
+                        })),
+                        ...row.original.options.map(o => ({
+                            ..._.get(o, 'desired_activity.activity_application.user'),
+                            type: 'option',
+                            application: null
+                        }))
+                    ],
+                    u => u.last_name
+                ).map((u, index) => (
+                    <tr
+                        key={u.id || index}
+                        style={{
+                            color: u.type === 'inactive' ? "#ff0000" :
+                                u.type === 'option' ? "#9575CD" :
+                                    undefined
+                        }}
+                    >
+                        <td>
+                            <StudentItem
+                                user={u}
+                                color={
+                                    u.type === 'inactive' ? "#ff0000" :
+                                        u.type === 'option' ? "#9575CD" :
+                                            undefined
+                                }
+                                application={u.application}
+                            />
+                        </td>
+                        <td>{toAge(u.birthday)}</td>
+                        <td>
+                            {u.type === 'active' ? 'Actif' :
+                                u.type === 'inactive' ? 'Inactif' : 'Option'}
+                        </td>
+                        <td>
+                            {u.stopped_at ? moment(u.stopped_at).format('DD/MM/YYYY') :
+                                u.application?.stopped_at ? moment(u.application.stopped_at).format('DD/MM/YYYY') : ''}
+                        </td>
+                    </tr>
+                ))}
+
                 </tbody>
             </table>
         </div>
