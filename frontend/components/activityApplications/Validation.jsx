@@ -20,9 +20,12 @@ const Validation = ({
                         handleComment,
                         selectedPacks,
                         packs,
+                        formulas,
                         paymentTerms,
                         availPaymentScheduleOptions,
                         availPaymentMethods,
+                        selectedFormulas,
+                        selectedFormulaActivities,
                     }) => {
     const addStudents = [...additionalStudents];
 
@@ -166,6 +169,23 @@ const Validation = ({
         }
     }
 
+    // Calcul du coût total des activités sélectionnées
+    const totalActivitiesCost = selectedActivities.reduce((total, act) => {
+        return total + (act && act.display_price ? parseFloat(act.display_price) : 0);
+    }, 0);
+
+// Calcul du coût total des formules sélectionnées
+    const totalFormulasCost = application.selectedFormulas.reduce((total, formulaId) => {
+        const formula = (application.formulas || formulas || []).find(f => f.id === formulaId);
+        return total + (formula && formula.formule_pricings && formula.formule_pricings[0]
+            ? parseFloat(formula.formule_pricings[0].price)
+            : 0);
+    }, 0);
+
+// Coût total global
+    const totalEstimatedCost = totalActivitiesCost + totalFormulasCost;
+
+
     return <Fragment>
         <div className="row mb-5">
 
@@ -265,20 +285,93 @@ const Validation = ({
                     )}
 
                     {/*Activités sélectionnées*/}
-                    <div className="mb-5">
-                        <h3 className="font-weight-bold" style={{color: "#8AA4B1"}}>
-                            Activités sélectionnées
-                        </h3>
-                        <div>
-                            <SelectedActivitiesTable
-                                duration={application.duration}
-                                selectedActivities={selectedActivities}
-                                selectedPacks={selectedPacks}
-                                packs={packs}
-                                allActivityRefs={allActivityRefs}
-                            />
+                    {((selectedActivities && selectedActivities.length > 0) || (selectedPacks && selectedPacks.length > 0)) && (
+                        <div className="mb-5">
+                            <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
+                                Activités sélectionnées
+                            </h3>
+                            <div>
+                                <SelectedActivitiesTable
+                                    duration={application.duration}
+                                    selectedActivities={selectedActivities}
+                                    selectedPacks={selectedPacks}
+                                    packs={packs}
+                                    allActivityRefs={allActivityRefs}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Formules sélectionnées */}
+                    {application.selectedFormulas && application.selectedFormulas.length > 0 && (
+                        <div className="mb-5">
+                            <h3 className="font-weight-bold" style={{ color: "#8AA4B1" }}>
+                                Formules sélectionnées
+                            </h3>
+                            <div>
+                                <table className="table table-striped" style={{ borderRadius: "12px", overflow: "hidden" }}>
+                                    <thead>
+                                    <tr style={{ backgroundColor: "#F7FBFC", color: "#8AA4B1" }}>
+                                        <th scope="col">Formule</th>
+                                        <th scope="col">Activités incluses</th>
+                                        <th scope="col">Tarif estimé</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {application.selectedFormulas.map(formulaId => {
+                                        const formula = (application.formulas || formulas || []).find(f => f.id === formulaId);
+                                        if (!formula) return null;
+                                        const chosenActivities = (application.selectedFormulaActivities && application.selectedFormulaActivities[formula.id]) || [];
+                                        const activitiesLabel = chosenActivities
+                                            .map(activityId => {
+                                                const activityItem = formula.formule_items.find(item => item.item.id === activityId);
+                                                return activityItem ? activityItem.item.display_name : null;
+                                            })
+                                            .filter(Boolean)
+                                            .join(", ");
+                                        return (
+                                            <tr key={formulaId} style={{ backgroundColor: "#ffffff" }}>
+                                                <td className="font-weight-bold">{formula.name}</td>
+                                                <td className="text-left">
+                                                    {activitiesLabel.length > 0 ? activitiesLabel : "Aucune activité sélectionnée"}
+                                                </td>
+                                                <td className="text-left">
+                                                    {formula.formule_pricings && formula.formule_pricings[0]
+                                                        ? `${formula.formule_pricings[0].price} €`
+                                                        : "--"}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                    </tbody>
+                                    {application.selectedFormulas.length > 0 && (
+                                        <tfoot>
+                                        <tr style={{ backgroundColor: "#F7FBFC", color: "#8AA4B1" }}>
+                                            <td></td>
+                                            <td className="text-right font-weight-bold">Total estimé</td>
+                                            <td className="font-weight-bold">
+                                                {application.selectedFormulas.reduce((total, formulaId) => {
+                                                    const formula = (application.formulas || formulas || []).find(f => f.id === formulaId);
+                                                    return total + (formula && formula.formule_pricings && formula.formule_pricings[0]
+                                                        ? parseFloat(formula.formule_pricings[0].price)
+                                                        : 0);
+                                                }, 0)}€
+                                            </td>
+                                        </tr>
+                                        </tfoot>
+                                    )}
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="d-flex justify-content-end mt-2">
+                        <div className="p-2 bg-light" style={{ borderRadius: "5px", fontWeight: "bold" }}>
+                            Coût total estimé : {totalEstimatedCost.toFixed(2)} €
                         </div>
                     </div>
+
+
 
                     {/*Disponibilités*/}
                     {showTimePreferences ? (

@@ -691,7 +691,19 @@ class Wizard extends React.Component {
 
 
     getLabelsFromSelectedActivities() {
+        // Récupérer les activités directement sélectionnées
         let selectedActivityRefIds = this.state.selectedActivities.slice();
+
+        // Ajouter les activités sélectionnées dans les formules
+        if (this.state.selectedFormulaActivities) {
+            Object.values(this.state.selectedFormulaActivities).forEach(activities => {
+                activities.forEach(activityId => {
+                    if (!selectedActivityRefIds.includes(activityId)) {
+                        selectedActivityRefIds.push(activityId);
+                    }
+                });
+            });
+        }
 
         // Lister les activités qui nécessitent une sélection de préférences
         const prefsReqActivityRefIds = this.props.allActivityRefs
@@ -699,6 +711,7 @@ class Wizard extends React.Component {
             .map(ref => ref.id);
 
         // Filtrer notre sélection pour ne conserver que les activités qui ne nécessitent pas de préférences
+        // Gardons le fonctionnement original avec !prefsReqActivityRefIds.includes(activity)
         selectedActivityRefIds = selectedActivityRefIds.filter(activity => !prefsReqActivityRefIds.includes(activity));
 
         // Retourner un tableau avec les noms des activités sélectionnées
@@ -709,7 +722,6 @@ class Wizard extends React.Component {
             }
             return labels;
         }, []);
-
     }
 
     isApplicationAuthorized(season_id)
@@ -1028,6 +1040,9 @@ class Wizard extends React.Component {
                         paymentTerms={(this.state.infos.payer_payment_terms || [])}
                         availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
                         availPaymentMethods={this.state.availPaymentMethods}
+                        selectedFormulas={this.state.selectedFormulas}
+                        selectedFormulaActivities={this.state.selectedFormulaActivities}
+                        formulas={this.props.formulas}
                     />
                 ),
             },
