@@ -17,43 +17,47 @@ import WorkGroupEditor from "./WorkGroupEditor";
 import UserWithInfos from "../../common/UserWithInfos";
 
 // SUB COMPONENTS
-const StudentItem = ({user, color, application}) => (
-    <li style={color ? {color} : undefined}>
+const StudentItem = ({ user, color }) => (
+    <td style={color ? { color } : undefined}>
         <UserWithInfos userId={user.id}>
             {user.first_name} {user.last_name}
-        </UserWithInfos> - {toAge(user.birthday)}
-        {application && application.stopped_at ? ` - Arrêt le ${moment(application.stopped_at).format(FR_DATE_FORMAT)}` : null}
-    </li>
+        </UserWithInfos>
+    </td>
 );
 
-const SubStudentList = ({row}) => {
-    const students = _.map(row.original.users, (u, i) => <StudentItem key={i} user={u}/>);
-    const inactives = _.map(row.original.inactive_users, (u, i) => {
-        const application = _.find(
-            u.activity_applications,
-            app => app.desired_activities.map(da => da.activity_id).includes(row.original.id)
-        );
+const SubStudentList = ({ row, seasons }) => {
 
-        const beginAt = new Date(application.begin_at);
-        const closestLesson = new Date(row.original.closest_lesson);
+    const activeStudents = row.original.users.map(u => ({ ...u, type: 'active', application: null }));
+    const inactiveStudents = row.original.inactive_users
+        .map(u => {
+            const application = _.find(
+                u.activity_applications,
+                app => app.desired_activities.map(da => da.activity_id).includes(row.original.id)
+            );
+            const beginAt = new Date(application.begin_at);
+            const closestLesson = new Date(row.original.closest_lesson);
+            if (beginAt > closestLesson) return null;
+            return { ...u, type: 'inactive', application };
+        })
+        .filter(u => u != null);
+    const optionStudents = row.original.options.map(o => ({
+        ..._.get(o, 'desired_activity.activity_application.user'),
+        type: 'option',
+        application: null
+    }));
 
-        if (beginAt > closestLesson) {
-            return null;
-        }
+    const combinedUsers = _.orderBy(
+        [...activeStudents, ...inactiveStudents, ...optionStudents],
+        u => u.last_name
+    );
 
-        return (<StudentItem key={i} color="#ff0000" user={u} application={application}/>);
-    });
-    const options = _.chain(row.original.options)
-        .map(o => _.get(o, "desired_activity.activity_application.user"))
-        .compact()
-        .value()
-        .map((u, i) => <StudentItem key={i} user={u} color="#9575CD"/>);
+    const isWorkGroup = row.original.activity_ref.is_work_group;
 
     return (
         <div className="flex-column">
             <div className="flex" style={{ padding: "15px" }}>
                 <h3 className="m-r">
-                    Effectifs au : {moment(row.original.closest_lesson).format('DD/MM/YYYY')}
+                    Effectifs au : {moment(row.original.closest_lesson).format("DD/MM/YYYY")}
                 </h3>
             </div>
             <table className="table table-bordered">
@@ -61,11 +65,84 @@ const SubStudentList = ({row}) => {
                 <tr>
                     <th>Nom</th>
                     <th>Âge</th>
+
+                    <th>Niveau</th>
+                    {isWorkGroup && <th>Instrument</th>}
+                    <th>Début le</th>
                     <th>Statut</th>
                     <th>Arrêt le</th>
                 </tr>
                 </thead>
                 <tbody>
+                {combinedUsers.map((u, index) => {
+                    let customStyle = {};
+                    if (u.type === "inactive") customStyle = { color: "#ff001a" };
+                    else if (u.type === "option") customStyle = { color: "#9575CD" };
+
+                    const userInstrument = isWorkGroup
+                        ? row.original.activities_instruments
+                        .filter(ai => ai.user_id === u.id)
+                        .map(ai => _.get(ai, "instrument.label"))
+                        .join(", ") || "NON ASSIGNÉ"
+                        : null;
+
+                    return (
+                        <tr key={u.id || index} style={customStyle}>
+                            <StudentItem user={u} color={customStyle.color} application={u.application} />
+                            <td>{TimeIntervalHelpers.age(u.birthday)} ans</td>
+                            <td>
+                                {TimeIntervalHelpers.levelDisplayForActivity(
+                                    {
+                                        users: [u],
+                                        activity_ref_id: row.original.activity_ref_id,
+                                        time_interval: row.original.time_interval,
+                                        activity_ref: row.original.activity_ref
+                                    },
+                                    seasons
+                                )}
+                            </td>
+                            {isWorkGroup && <td>{userInstrument}</td>}
+
+                            <td>
+                                {(() => {
+                                    if (u.type === 'active' || u.type === 'option') {
+                                        const application = u.activity_applications?.find(app =>
+                                            app.desired_activities?.some(da => da.activity_id === row.original.id)
+                                        );
+
+                                        if (application?.begin_at) {
+                                            return Intl.DateTimeFormat("fr").format(new Date(application.begin_at));
+                                        }
+                                    }
+                                    else if (u.application?.begin_at) {
+                                        return Intl.DateTimeFormat("fr").format(new Date(u.application.begin_at));
+                                    }
+
+                                    return "";
+                                })()}
+                            </td>
+
+                            <td>
+                                {(() => {
+                                    if (u.type === 'active' || u.type === 'option') {
+                                        const application = u.activity_applications?.find(app =>
+                                            app.desired_activities?.some(da => da.activity_id === row.original.id)
+                                        );
+
+                                        if (application?.stopped_at) {
+                                            return Intl.DateTimeFormat("fr").format(new Date(application.stopped_at));
+                                        }
+                                    }
+                                    else if (u.application?.stopped_at) {
+                                        return Intl.DateTimeFormat("fr").format(new Date(u.application.stopped_at));
+                                    }
+
+                                    return "";
+                                })()}
+                            </td>
+                        </tr>
+                    );
+                })}
                 {_.orderBy(
                     [
                         ...row.original.users.map(u => ({...u, type: 'active', application: null})),
@@ -112,11 +189,13 @@ const SubStudentList = ({row}) => {
                         </td>
                     </tr>
                 ))}
+
                 </tbody>
             </table>
         </div>
     );
 };
+
 
 const createAllExpanded = pageSize => _.zipObject(_.range(pageSize), _.times(pageSize, () => ({})));
 
@@ -1043,10 +1122,12 @@ class Activity extends React.Component {
                                 ) : (
                                     <SubStudentList
                                         row={row}
-                                        desiredActivity={
-                                            this.props.desiredActivity
-                                        }
+                                        seasons={this.props.seasons}
+                                        desiredActivity={this.props.desiredActivity}
+                                        referenceDate={this.props.referenceDate}
+
                                     />
+
                                 );
                             }}
                         />
