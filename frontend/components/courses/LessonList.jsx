@@ -987,6 +987,7 @@ export default class LessonList extends React.Component {
             },
             {
                 Header: "Action",
+                id: "action",
                 filterable: false,
                 sortable: false,
                 Cell: c => (
@@ -1154,7 +1155,7 @@ export default class LessonList extends React.Component {
                         }
                         filterable
                         sortable
-                        resizable={false}
+                        resizable={true}
                         previousText="Précédent"
                         nextText="Suivant"
                         loadingText="Chargement..."
@@ -1329,6 +1330,7 @@ const UserRow = ({
 
     const [desiredActivityId, setDesiredActivityId] = React.useState(null);
     const [studentLevel, setStudentLevel] = React.useState(null);
+    const [activityApplicationId, setActivityApplicationId] = React.useState(null);
 
     React.useEffect(() => {
         api
@@ -1341,11 +1343,13 @@ const UserRow = ({
                 if (data && data.evaluation_level_ref) {
                     setStudentLevel(data.evaluation_level_ref.label);
                 }
+
+                setActivityApplicationId(data.activity_application_id);
             })
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
 
-    const inscriptionUrl = desiredActivityId ? `/inscriptions/${desiredActivityId}` : "#";
+    const inscriptionUrl = setActivityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
 
     return (
         <tr style={customStyle}>
