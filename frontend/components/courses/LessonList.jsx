@@ -1328,6 +1328,7 @@ const UserRow = ({
         "NON ASSIGNÉ";
 
     const [desiredActivityId, setDesiredActivityId] = React.useState(null);
+    const [studentLevel, setStudentLevel] = React.useState(null);
 
     React.useEffect(() => {
         api
@@ -1337,6 +1338,9 @@ const UserRow = ({
             })
             .success((data) => {
                 setDesiredActivityId(data.id);
+                if (data && data.evaluation_level_ref) {
+                    setStudentLevel(data.evaluation_level_ref.label);
+                }
             })
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
@@ -1346,15 +1350,13 @@ const UserRow = ({
     return (
         <tr style={customStyle}>
             <td>
-                <a
-                    href={inscriptionUrl}
-                >
+                <a href={inscriptionUrl}>
                     {user.first_name} {user.last_name}
                 </a>
             </td>
             <td>{TimeIntervalHelpers.age(user.birthday)} ans</td>
             <td>
-                {TimeIntervalHelpers.levelDisplayForActivity(
+                {studentLevel || TimeIntervalHelpers.levelDisplayForActivity(
                     {
                         users,
                         activity_ref_id,
