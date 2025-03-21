@@ -419,37 +419,50 @@ class Wizard extends React.Component {
     }
 
     handleSubmit() {
-        this.setState({buttonDisabled: true});
+        this.setState({ buttonDisabled: true });
 
-        const state = {...this.state};
+        const state = { ...this.state };
 
-        const authToken = _.get(this.state, "infos.authentication_token");
+        const individualActivities = Array.isArray(state.selectedActivities)
+            ? state.selectedActivities
+            : [];
+
+        const formulaActivities = Array.isArray(state.selectedFormulaActivities)
+            ? state.selectedFormulaActivities
+            : Object.values(state.selectedFormulaActivities).flat();
+
+        const allSelectedActivities = Array.from(new Set([...individualActivities, ...formulaActivities]));
+
+        state.selectedActivities = allSelectedActivities;
+
+        state.selectedFormulaActivities = {};
+
+
+        const authToken = _.get(this.state, "infos.authenticationtoken");
 
         api.set()
-            .success((data) =>
-            {
-                this.setState({buttonDisabled: false});
+            .success((data) => {
+                this.setState({ buttonDisabled: false });
 
-                let user = this.state.user;
-                let title = '<h5>Bonjour <b>' + user.first_name + ' ' + user.last_name + '</b></h5>';
+                const user = this.state.user;
+                const title = `<h5>Bonjour <b>${user.first_name} ${user.last_name}</b></h5>`;
                 let htmltext = '';
-                let confirmtext = 'Redirection';
-
+                const confirmtext = 'Redirection';
 
                 if (data.activity_application !== null) {
                     htmltext += '<p>'
-                        + '<b>' + 'Votre demande d\'inscription a bien été prise en compte' + '</b>' + '<br/>'
-                        + 'Le numéro d\'identification de votre demande d\'inscription est :' + '<br/>'
-                        + '<b>' + data.activity_application.id + '</b>' + '<br/>'
-                        + 'Un email récapitulatif de votre inscription va vous être envoyé sur votre adresse mail ' + '<br/>'
+                        + '<b>Votre demande d\'inscription a bien été prise en compte</b><br/>'
+                        + 'Le numéro d\'identification de votre demande d\'inscription est :<br/>'
+                        + `<b>${data.activity_application.id}</b><br/>`
+                        + 'Un email récapitulatif de votre inscription va vous être envoyé sur votre adresse mail<br/>'
                         + 'Vous allez être automatiquement redirigé vers l\'accueil du site'
-                        + '</p>'
+                        + '</p>';
                 }
 
                 if (data.pack_created || data.pack_created !== false) {
                     htmltext += '<p>'
-                        + '<b>' + 'Vos packs de séances vous ont bien été attribués' + '</b>' + '<br/>'
-                        + '</p>'
+                        + '<b>Vos packs de séances vous ont bien été attribués</b><br/>'
+                        + '</p>';
                 }
 
                 Swal.fire({
@@ -459,27 +472,26 @@ class Wizard extends React.Component {
                     allowOutsideClick: false,
                     confirmButtonText: confirmtext,
                 })
-                    .then((result) =>
-                    {
+                    .then((result) => {
                         if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                            window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
+                            window.location.href = `/new_application/${this.state.user.id || _.get(data, "activityapplication.user_id")}`;
                         } else {
                             window.location.href = `/inscriptions/${data.activity_application.id}`;
                         }
-                    })
+                    });
             })
             .error(data => {
-                this.setState({buttonDisabled: false});
+                this.setState({ buttonDisabled: false });
 
                 Swal({
                     title: "Erreur",
-                    text: [...data].join(",") || "Une erreur est survenue lors de la création de votre demande d\'inscription",
+                    text: [...data].join(",") || "Une erreur est survenue lors de la création de votre demande d'inscription",
                     type: "error",
                 });
 
                 console.error([...data].join("\n"));
             })
-            .post(`/inscriptions${authToken ? `?auth_token=${authToken}` : ""}`, {
+            .post(`/inscriptions${authToken ? `?authtoken=${authToken}` : ""}`, {
                 application: state,
                 actionType: this.props.actionType,
                 preApplicationActivityId: _.get(this.props.preApplicationActivity, "id"),
