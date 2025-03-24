@@ -948,11 +948,31 @@ export default class LessonList extends React.Component {
                         ))}
                     </select>
                 ),
-                Cell: c =>
-                    TimeIntervalHelpers.levelDisplayForActivity(
-                        c.value,
-                        this.props.seasons,
-                    ),
+                Cell: c => {
+                    if (c.value.student_id || c.value.user_id) {
+                        const timeInterval = c.value.time_interval || c.value.activity?.time_interval;
+                        const activityRef = c.value.activity_ref || c.value.activity?.activity_ref;
+
+                        if (timeInterval && activityRef) {
+                            const season = TimeIntervalHelpers.getSeasonFromDate(
+                                timeInterval.start,
+                                this.props.seasons
+                            );
+
+                            return TimeIntervalHelpers.studentLevelDisplay(
+                                c.value,
+                                activityRef,
+                                season ? season.id : 0
+                            );
+                        }
+                        return "NON INDIQUÉ";
+                    } else {
+                        return TimeIntervalHelpers.levelDisplayForActivity(
+                            c.value,
+                            this.props.seasons,
+                        );
+                    }
+                },
             },
             {
                 Header: "Saison",
