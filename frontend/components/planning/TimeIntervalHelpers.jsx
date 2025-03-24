@@ -317,6 +317,19 @@ export const levelDisplayForActivity = (activity, seasons) => {
     return null;
 }
 
+export const studentLevelDisplay = (student, activityRef, seasonId) => {
+    const studentLevel = _.find(
+        student.levels,
+        level => (level.activity_ref_id == activityRef.id ||
+                (level.activity_ref && level.activity_ref.activity_ref_kind_id == activityRef.activity_ref_kind_id)) &&
+            level.season_id == seasonId
+    );
+
+    return studentLevel && studentLevel.evaluation_level_ref ?
+        studentLevel.evaluation_level_ref.label :
+        "NON INDIQUÉ";
+}
+
 export const age = birthday => moment().diff(birthday, "years");
 
 export const averageAge = users => {
