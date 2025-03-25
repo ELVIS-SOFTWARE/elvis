@@ -150,7 +150,7 @@ class Evaluation extends React.Component {
                         className="p"
                         key={u.id}
                         user={u}
-                        questions={questions}
+                        questions={questions.filter(q => q.name !== 'pursue_on_next_season')}
                         answers={currentStudent && studentAnswers[currentStudent] || {}}
                         referenceData={referenceData}
                         onSubmit={answers => this.handleSubmit(answers)}

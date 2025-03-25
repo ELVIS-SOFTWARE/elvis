@@ -413,7 +413,7 @@ export default class LessonList extends React.Component {
 
     updateTarget(id, checked) {
         if (checked) {
-            //add target to bulk targets list
+            //add target to bulk targets lists
             this.setState({
                 targets: [...this.state.targets, id],
             });
@@ -948,11 +948,31 @@ export default class LessonList extends React.Component {
                         ))}
                     </select>
                 ),
-                Cell: c =>
-                    TimeIntervalHelpers.levelDisplayForActivity(
-                        c.value,
-                        this.props.seasons,
-                    ),
+                Cell: c => {
+                    if (c.value.student_id || c.value.user_id) {
+                        const timeInterval = c.value.time_interval || c.value.activity?.time_interval;
+                        const activityRef = c.value.activity_ref || c.value.activity?.activity_ref;
+
+                        if (timeInterval && activityRef) {
+                            const season = TimeIntervalHelpers.getSeasonFromDate(
+                                timeInterval.start,
+                                this.props.seasons
+                            );
+
+                            return TimeIntervalHelpers.studentLevelDisplay(
+                                c.value,
+                                activityRef,
+                                season ? season.id : 0
+                            );
+                        }
+                        return "NON INDIQUÉ";
+                    } else {
+                        return TimeIntervalHelpers.levelDisplayForActivity(
+                            c.value,
+                            this.props.seasons,
+                        );
+                    }
+                },
             },
             {
                 Header: "Saison",
@@ -986,7 +1006,8 @@ export default class LessonList extends React.Component {
                 },
             },
             {
-                Header: "",
+                Header: "Action",
+                id: "action",
                 filterable: false,
                 sortable: false,
                 Cell: c => (
@@ -1116,6 +1137,7 @@ export default class LessonList extends React.Component {
                 <div className="ibox-content">
                     {this.state.targets.length > 0 ? this.renderTargetsAlert() : null}
                     <ReactTable
+                        key={this.state.filter.filtered.map(f => f.id).join('-')}
                         style={{ backgroundColor: "white" }}
                         data={this.state.data}
                         manual
@@ -1148,11 +1170,12 @@ export default class LessonList extends React.Component {
                             this.fetchData({
                                 ...this.state.filter,
                                 filtered,
+                                page: 0,
                             })
                         }
                         filterable
                         sortable
-                        resizable={false}
+                        resizable={true}
                         previousText="Précédent"
                         nextText="Suivant"
                         loadingText="Chargement..."
@@ -1326,6 +1349,8 @@ const UserRow = ({
         "NON ASSIGNÉ";
 
     const [desiredActivityId, setDesiredActivityId] = React.useState(null);
+    const [studentLevel, setStudentLevel] = React.useState(null);
+    const [activityApplicationId, setActivityApplicationId] = React.useState(null);
 
     React.useEffect(() => {
         api
@@ -1335,24 +1360,27 @@ const UserRow = ({
             })
             .success((data) => {
                 setDesiredActivityId(data.id);
+                if (data && data.evaluation_level_ref) {
+                    setStudentLevel(data.evaluation_level_ref.label);
+                }
+
+                setActivityApplicationId(data.activity_application_id);
             })
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
 
-    const inscriptionUrl = desiredActivityId ? `/inscriptions/${desiredActivityId}` : "#";
+    const inscriptionUrl = setActivityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
 
     return (
         <tr style={customStyle}>
             <td>
-                <a
-                    href={inscriptionUrl}
-                >
+                <a href={inscriptionUrl}>
                     {user.first_name} {user.last_name}
                 </a>
             </td>
             <td>{TimeIntervalHelpers.age(user.birthday)} ans</td>
             <td>
-                {TimeIntervalHelpers.levelDisplayForActivity(
+                {studentLevel || TimeIntervalHelpers.levelDisplayForActivity(
                     {
                         users,
                         activity_ref_id,

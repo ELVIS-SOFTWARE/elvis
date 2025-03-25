@@ -47,13 +47,18 @@ module Utils
         inactive_users_ids = instance&.inactive_students&.pluck(:id)&.to_a || []
 
         result["users"] = instance_users.filter { |u| !inactive_users_ids.include?(u.id) }.as_json(include: {
-                                                               levels: {
-                                                                 include: {
-                                                                   activity_ref: { include: [:activity_ref_kind] },
-                                                                   evaluation_level_ref: {}
-                                                                 }
-                                                               }
-                                                             }) || []
+                                                                              levels: {
+                                                                                include: {
+                                                                                  activity_ref: { include: [:activity_ref_kind] },
+                                                                                  evaluation_level_ref: {}
+                                                                                }
+                                                                              },
+                                                                              activity_applications: {
+                                                                                include: {
+                                                                                  desired_activities: {}
+                                                                                }
+                                                                              }
+                                                                            }) || []
         result["inactive_users"] = instance_users.filter { |u| inactive_users_ids.include?(u.id) }.as_json(include: {
                                                                           activity_applications: {
                                                                             include: {
