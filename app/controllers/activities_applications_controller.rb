@@ -607,6 +607,8 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def create
+    Rails.logger.info "Params selectedFormulas: #{params[:application][:selectedFormulas].inspect}"
+
     authorize! :create, ActivityApplication.new(user_id: params[:application][:infos][:id])
     begin
       new_applications = []
@@ -925,6 +927,13 @@ class ActivitiesApplicationsController < ApplicationController
             )
                                                  .execute
           end
+        end
+
+        formules_ids = params[:application][:selectedFormulas] || []
+        unless formules_ids.empty?
+          Rails.logger.info "Updating application with formule_id: #{formules_ids.first}"
+          @activity_application.update(formule_id: formules_ids.first)
+          # Vous pouvez ajouter ici d'autres traitements si besoin
         end
 
         @pack_created = false

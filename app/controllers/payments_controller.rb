@@ -1011,6 +1011,9 @@ class PaymentsController < ApplicationController
     desired = @desired_activities[season_id.to_s]
     season_activities = @activities_json.select { |act| desired.select { |d| d["activity_id"] == act["activity_id"] } }
 
+    # Stocker les activités par formule pour les regrouper plus tard
+    formula_activities = {}
+
     season_activities.each do |act|
       a = act["activity"]
       des = desired.find do |d|
@@ -1018,6 +1021,12 @@ class PaymentsController < ApplicationController
           d["activity_application"]["user_id"] == act["user_id"]
       end
       next unless des
+
+      if des["formula_id"].present?
+        formula_id = des["formula_id"]
+        formula_activities[formula_id] ||= []
+        formula_activities[formula_id] << {act: act, des: des, activity: a}
+      else
 
       activity_nb_lessons = a["intended_nb_lessons"]
 
@@ -1047,7 +1056,59 @@ class PaymentsController < ApplicationController
                   paymentLocation: act["payment_location"],
                   due_total: amount || 0
                 })
+      end
     end
+
+    formula_activities.each do |formula_id, activities|
+      # Récupérer les infos de la formule
+      formula = Formula.find(formula_id)
+      # On prend l'utilisateur du premier élément (tous devraient avoir le même utilisateur)
+      user = activities.first[:act]["user"]
+
+      # Calculer le prix de la formule (soit un prix fixe, soit la somme des activités avec une réduction)
+      formula_price = calculate_formula_price(formula, activities, season_id)
+
+      # Ajouter la formule comme une ligne dans le tableau des paiements
+      data.push({
+                  id: 0, # ID temporaire pour la formule
+                  activity: "Formule #{formula.name} de #{user['first_name']} #{user['last_name']}",
+                  frequency: 1,
+                  initial_total: 1,
+                  due_total: formula_price,
+                  unitPrice: formula_price,
+                  user: user,
+                  studentId: user["id"],
+                  formulaId: formula.id,
+                  formula_activities: activities.map { |item| item[:des]["id"] }, # Pour référencer les activités incluses
+                  # Ajout d'un indicateur pour différencier les formules dans l'UI
+                  isFormula: true
+                })
+
+      # On peut aussi ajouter les activités individuelles avec prix à 0 pour montrer ce qui est inclus
+      activities.each do |item|
+        a = item[:activity]
+        des = item[:des]
+        act = item[:act]
+
+        data.push({
+                    id: des["id"],
+                    activity: "#{a['activity_ref']['label']} (#{a['activity_ref']['kind']}) - Inclus dans formule #{formula.name}",
+                    stopped_at: des["activity_application"]["stopped_at"],
+                    des: nil,
+                    ref: a["activity_ref"],
+                    prorata: des["prorata"],
+                    studentId: act["id"],
+                    user: act["user"],
+                    pricingCategoryId: des["pricing_category_id"],
+                    activityId: a["id"],
+                    paymentLocation: act["payment_location"],
+                    due_total: 0, # Prix à 0 car inclus dans la formule
+                    formulaId: formula.id, # Référence à la formule parente
+                    isFormulaItem: true # Pour identifier comme élément d'une formule
+                  })
+      end
+    end
+
 
     taken = data.map { |d| d["activityId"] }
     taken_desired = data.map { |d| d["id"] }
@@ -1157,6 +1218,39 @@ class PaymentsController < ApplicationController
 
     data
   end
+
+
+  def calculate_formula_price(formula, activities, season_id)
+    if formula.fixed_price
+      # Si la formule a un prix fixe
+      return formula.price
+    else
+      # Sinon, calculer le prix basé sur les activités avec la réduction
+      total = 0
+      activities.each do |item|
+        a = item[:activity]
+        des = item[:des]
+
+        activity_nb_lessons = a["intended_nb_lessons"]
+
+        activity_ref_pricing = ActivityRefPricing
+                                 .for_season_id(season_id)
+                                 .for_activity_ref_id(a["activity_ref"]['id'])
+                                 .for_pricing_category_id(des['pricing_category_id'])
+                                 .first
+
+        if activity_ref_pricing&.price
+          activity_price = ((activity_ref_pricing.price / activity_nb_lessons) * (des["prorata"] || activity_nb_lessons)).round(2)
+          total += activity_price
+        end
+      end
+
+      # Appliquer la réduction de la formule
+      discount_amount = (total * formula.discount_percent / 100).round(2)
+      return total - discount_amount
+    end
+  end
+
 
   def generate_activities_data_for_action(user)
 

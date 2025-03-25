@@ -86,13 +86,18 @@ function generateDataForPaymentSummaryTable({
                                                 adhesionPrices,
                                                 adhesionEnabled,
                                                 packs,
-                                                user
+                                                user,
+                                                formulas // Nouvel argument pour récupérer les formules
                                             }) {
     let data = [];
+
+    const formulaActivities = {}; // Stocker les activités par formule
 
     const seasonActivities = activities.filter(a =>
         desired.find(d => d.activity_id === a.activity.id)
     );
+    console.log("Formulas:", formulas);
+
 
     // Et ensuite une ligne par activité
     _.forEach(seasonActivities, act => {
@@ -104,18 +109,34 @@ function generateDataForPaymentSummaryTable({
                 d.activity_application.user_id === act.user_id
         );
 
+
+        console.log("des:", des);
+
         if (des) {
-            const activity_nb_lessons = a.intended_nb_lessons
+            // Vérifier si l'activité fait partie d'une formule
+            if (des.formula_id) {
+                const formulaId = des.formula_id;
+                if (!formulaActivities[formulaId]) {
+                    formulaActivities[formulaId] = [];
+                }
+                formulaActivities[formulaId].push({ act, des, activity: a });
+                // Supprimez le return pour permettre le traitement ultérieur
+            }
+
+            console.log("Formula ID:", des.formula_id);
+            console.log("Formula Activities:", formulaActivities);
+
+            const activity_nb_lessons = a.intended_nb_lessons;
             const season = seasons.find(s => s.id === seasonId);
-            const priceAssociations = []
+            const priceAssociations = [];
 
             a.activity_ref.activity_ref_pricing.forEach(arp => {
                 if (new Date(arp.from_season.start) <= new Date(season.start) && (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
                     priceAssociations.push(arp);
                 }
-            })
+            });
 
-            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id)
+            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
 
             let amount = 0;
             if (priceAssociation && priceAssociation.price) {
@@ -133,7 +154,7 @@ function generateDataForPaymentSummaryTable({
                 des,
                 ref: a.activity_ref,
                 prorata: des.prorata,
-                coupon: {...coupon},
+                coupon: { ...coupon },
                 studentId: act.id,
                 user: act.user,
                 pricingCategoryId: des.pricing_category_id,
@@ -144,6 +165,77 @@ function generateDataForPaymentSummaryTable({
                 unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
             });
         }
+    });
+
+    // Traitement des formules
+    _.forEach(formulaActivities, (activities, formulaId) => {
+        const formula = _.find(formulas, f => f.id === parseInt(formulaId));
+        if (!formula) return;
+
+        const user = activities[0].act.user;
+        const formulaPrice = formula.price;
+
+        data.push({
+            id: 0,
+            activity: `Formule ${formula.name} de ${user.first_name} ${user.last_name}`,
+            frequency: 1,
+            initial_total: 1,
+            due_total: formulaPrice,
+            coupon: formula.discount ? { percent_off: formula.discount_percent, label: `Remise formule ${formula.discount_percent}%` } : {},
+            discountedTotal: formulaPrice,
+            unitPrice: formulaPrice,
+            user: user,
+            studentId: user.id,
+            formulaId: formula.id,
+            formula_activities: activities.map(item => item.des.id),
+            isFormula: true,
+            formula: formula
+        });
+
+        _.forEach(activities, item => {
+            const a = item.activity;
+            const des = item.des;
+            const act = item.act;
+
+            const activity_nb_lessons = a.intended_nb_lessons;
+            const season = seasons.find(s => s.id === seasonId);
+            const priceAssociations = [];
+
+            a.activity_ref.activity_ref_pricing.forEach(arp => {
+                if (new Date(arp.from_season.start) <= new Date(season.start) && (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
+                    priceAssociations.push(arp);
+                }
+            });
+
+            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
+
+            let originalAmount = 0;
+            if (priceAssociation && priceAssociation.price) {
+                originalAmount = _.round((priceAssociation.price / activity_nb_lessons) * (des.prorata || activity_nb_lessons), 2);
+            }
+
+            data.push({
+                id: des.id,
+                activity: `${a.activity_ref.label} (${a.activity_ref.kind}) - Inclus dans formule ${formula.name}`,
+                stopped_at: des.activity_application.stopped_at,
+                intended_nb_lessons: a.intended_nb_lessons,
+                des,
+                ref: a.activity_ref,
+                prorata: des.prorata,
+                coupon: {},
+                studentId: act.id,
+                user: act.user,
+                pricingCategoryId: des.pricing_category_id,
+                activityId: a.id,
+                paymentLocation: act.payment_location,
+                due_total: 0,
+                discountedTotal: 0,
+                unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
+                originalAmount: originalAmount,
+                formulaId: formula.id,
+                isFormulaItem: true
+            });
+        });
     });
 
     const taken = data.map(d => d.activityId);
@@ -159,17 +251,17 @@ function generateDataForPaymentSummaryTable({
         if (des && !takenDesired.includes(des.id)) {
             takenDesired.push(des.id);
 
-            const activity_nb_lessons = a.intended_nb_lessons
+            const activity_nb_lessons = a.intended_nb_lessons;
             const season = seasons.find(s => s.id === seasonId);
-            const priceAssociations = []
+            const priceAssociations = [];
 
             a.activity_ref.activity_ref_pricing.forEach(arp => {
                 if (arp.from_season.start <= season.start && (!arp.to_season || arp.to_season.end >= season.end)) {
                     priceAssociations.push(arp);
                 }
-            })
+            });
 
-            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id)
+            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
 
             let amount = 0;
             if (priceAssociation && priceAssociation.price) {
@@ -226,14 +318,11 @@ function generateDataForPaymentSummaryTable({
         }
     }
 
-    if ((packs || []).length > 0)
-    {
-        const userPacks = packs.filter(p => p)
+    if ((packs || []).length > 0) {
+        const userPacks = packs.filter(p => p);
 
-        if (userPacks.length > 0)
-        {
-            for (const pack of userPacks)
-            {
+        if (userPacks.length > 0) {
+            for (const pack of userPacks) {
                 const pack_price = pack.activity_ref_pricing.price;
                 const coupon = _.get(pack, "discount.coupon", 0);
                 const percentOff = _.get(pack, "discount.coupon.percent_off", 0);
@@ -257,6 +346,39 @@ function generateDataForPaymentSummaryTable({
     }
 
     return data;
+}
+
+function calculateFormulaPrice(formula, activities, seasonId, seasons) {
+    if (formula.fixed_price) {
+        return formula.price;
+    } else {
+        let total = 0;
+        _.forEach(activities, item => {
+            const a = item.activity;
+            const des = item.des;
+
+            const activity_nb_lessons = a.intended_nb_lessons;
+            const season = seasons.find(s => s.id === seasonId);
+            const priceAssociations = [];
+
+            a.activity_ref.activity_ref_pricing.forEach(arp => {
+                if (new Date(arp.from_season.start) <= new Date(season.start) && (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
+                    priceAssociations.push(arp);
+                }
+            });
+
+            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
+
+            if (priceAssociation && priceAssociation.price) {
+                const activityPrice = _.round((priceAssociation.price / activity_nb_lessons) * (des.prorata || activity_nb_lessons), 2);
+                total += activityPrice;
+            }
+        });
+
+        // Appliquer la réduction de la formule
+        const discountAmount = _.round(total * (formula.discount_percent / 100), 2);
+        return total - discountAmount;
+    }
 }
 
 class PaymentsManagement extends React.Component {
