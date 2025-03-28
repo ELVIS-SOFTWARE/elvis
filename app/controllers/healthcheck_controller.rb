@@ -81,10 +81,13 @@ class HealthcheckController < ActionController::Base
     end
 
     final_status = {}
-    final_status.merge!(components_status)
 
-    final_status[:status] = final_status.values.all? { |status| status[:status] == 'ok' } ? 'ok' : 'ko'
-    final_status[:message] = final_status[:status] == 'ok' ? 'All systems operational' : 'Some systems are down'
+    all_system_up = components_status.values.all? { |status| status[:status] == 'ok' }
+
+    final_status[:status] = all_system_up ? 'ok' : 'ko'
+    final_status[:message] = all_system_up ? 'All systems operational' : 'Some systems are down'
+
+    final_status = final_status.merge(components_status)
 
     render json: final_status, status: final_status[:status] == 'ok' ? 200 : 500
 
