@@ -940,7 +940,6 @@ export default class LessonList extends React.Component {
                     >
                         <option value="" />
                         <option value="TBD">À PRÉCISER</option>
-                        <option value="NON INDIQUÉ">NON INDIQUÉ</option>
                         {this.props.evaluationLevelRefs.map(r => (
                             <option key={r.id} value={r.id}>
                                 {r.label}
@@ -1349,7 +1348,31 @@ const UserRow = ({
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
 
-    const inscriptionUrl = setActivityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
+    const inscriptionUrl = activityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
+
+    // Modification principale : priorité à studentLevel, puis vérification explicite
+    const displayLevel = () => {
+        if (studentLevel === "NON INDIQUÉ") {
+            return "NON INDIQUÉ";
+        }
+        if (studentLevel) {
+            return studentLevel;
+        }
+
+        const computedLevel = TimeIntervalHelpers.levelDisplayForActivity(
+            {
+                users,
+                activity_ref_id,
+                time_interval,
+                activity_ref: activityRef,
+            },
+            seasons
+        );
+
+        return computedLevel && computedLevel !== "À PRÉCISER"
+            ? computedLevel
+            : "NON INDIQUÉ";
+    };
 
     return (
         <tr style={customStyle}>
@@ -1359,17 +1382,7 @@ const UserRow = ({
                 </a>
             </td>
             <td>{TimeIntervalHelpers.age(user.birthday)} ans</td>
-            <td>
-                {studentLevel || TimeIntervalHelpers.levelDisplayForActivity(
-                    {
-                        users,
-                        activity_ref_id,
-                        time_interval,
-                        activity_ref: activityRef,
-                    },
-                    seasons
-                )}
-            </td>
+            <td>{displayLevel()}</td>
             {isWorkGroup && <td>{userInstrument}</td>}
             <td>
                 {(user.begin_at &&
