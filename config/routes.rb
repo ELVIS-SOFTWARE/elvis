@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   # FIN PLUGINS
   # ===================
 
+  get "/health", to: "healthcheck#index"
   get "/ping", to: "ping#index"
   get "debug", to: "debug#index"
   post "send_mail", to: "debug#send_mail"
