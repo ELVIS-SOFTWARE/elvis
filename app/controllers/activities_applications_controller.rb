@@ -608,6 +608,7 @@ class ActivitiesApplicationsController < ApplicationController
 
   def create
     Rails.logger.info "Params selectedFormulas: #{params[:application][:selectedFormulas].inspect}"
+    Rails.logger.info "Params selectedFormulaActivities: #{params[:application][:selectedFormulaActivities].inspect}"
 
     authorize! :create, ActivityApplication.new(user_id: params[:application][:infos][:id])
     begin

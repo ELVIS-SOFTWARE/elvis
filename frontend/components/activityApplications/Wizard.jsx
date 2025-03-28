@@ -426,21 +426,24 @@ class Wizard extends React.Component {
         const individualActivities = Array.isArray(state.selectedActivities)
             ? state.selectedActivities
             : [];
+        console.log("Raw selectedFormulas:", this.state.selectedFormulas);
+
 
         const formulaActivities = Array.isArray(state.selectedFormulaActivities)
             ? state.selectedFormulaActivities
             : Object.values(state.selectedFormulaActivities).flat();
 
-        state.selectedFormulas = this.state.selectedFormulas
-            ? this.state.selectedFormulas.map(formula => formula.id)
+        state.selectedFormulas = Array.isArray(this.state.selectedFormulas)
+            ? this.state.selectedFormulas.map(f => (typeof f === "object" ? f.id : f))
             : [];
 
-        const allSelectedActivities = Array.from(new Set([...individualActivities, ...formulaActivities]));
 
+        const allSelectedActivities = Array.from(new Set([...individualActivities, ...formulaActivities]));
         state.selectedActivities = allSelectedActivities;
 
         state.selectedFormulaActivities = {};
 
+        console.log("Selected formulas to send:", state.selectedFormulas);
 
         const authToken = _.get(this.state, "infos.authenticationtoken");
 
@@ -472,7 +475,7 @@ class Wizard extends React.Component {
                 Swal.fire({
                     title: title,
                     html: htmltext,
-                    timer: 10000,
+                    timer: 1000000,
                     allowOutsideClick: false,
                     confirmButtonText: confirmtext,
                 })
