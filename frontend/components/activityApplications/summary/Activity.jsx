@@ -69,6 +69,7 @@ const SubStudentList = ({ row, seasons }) => {
                     <th>Niveau</th>
                     {isWorkGroup && <th>Instrument</th>}
                     <th>Début le</th>
+                    <th>Statut</th>
                     <th>Arrêt le</th>
                 </tr>
                 </thead>
