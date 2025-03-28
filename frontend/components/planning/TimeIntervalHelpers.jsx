@@ -269,26 +269,35 @@ export const formatHolidays = holidays => {
 //Returns the label of the first valid level
 //found in given users for given activityref and season
 export const levelDisplay = (users, activityRef, seasonId) => {
-    if(activityRef === undefined)
-        activityRef = {}
+    if (!activityRef)
+        activityRef = {};
 
-    const id = activityRef.id || activityRef
+    const id = activityRef.id || activityRef;
 
-    const uniqueLevels = _(users)
+    const allLevels = _(users)
         .map(u => u.levels)
         .flatten()
         .compact()
-        .filter(level =>
-            (level.activity_ref_id == id || ( level.activity_ref !== undefined && level.activity_ref.activity_ref_kind_id == activityRef.activity_ref_kind_id) ) &&
-            level.season_id == seasonId)
-        .uniqBy("evaluation_level_ref_id")
+        .filter(level => level.season_id == seasonId)
         .value();
 
-    if(uniqueLevels.length > 1)
-        return "À PRÉCISER";
-    else
-        return _.get(uniqueLevels, "[0].evaluation_level_ref.label") || "NON INDIQUÉ";
-}
+    const exactLevels = allLevels.filter(level => level.activity_ref_id == id);
+
+    const levelsToConsider = exactLevels.length
+        ? exactLevels
+        : allLevels.filter(
+            level =>
+                level.activity_ref &&
+                level.activity_ref.activity_ref_kind_id == activityRef.activity_ref_kind_id
+        );
+
+    const uniqueLevels = _.uniqBy(levelsToConsider, "evaluation_level_ref_id");
+
+    return uniqueLevels.length > 1
+        ? "À PRÉCISER"
+        : _.get(uniqueLevels, "[0].evaluation_level_ref.label") || "NON INDIQUÉ";
+};
+
 
 export const levelDisplayForActivity = (activity, seasons) => {
     const {
@@ -315,6 +324,19 @@ export const levelDisplayForActivity = (activity, seasons) => {
     }
 
     return null;
+}
+
+export const studentLevelDisplay = (student, activityRef, seasonId) => {
+    const studentLevel = _.find(
+        student.levels,
+        level => (level.activity_ref_id == activityRef.id ||
+                (level.activity_ref && level.activity_ref.activity_ref_kind_id == activityRef.activity_ref_kind_id)) &&
+            level.season_id == seasonId
+    );
+
+    return studentLevel && studentLevel.evaluation_level_ref ?
+        studentLevel.evaluation_level_ref.label :
+        "NON INDIQUÉ";
 }
 
 export const age = birthday => moment().diff(birthday, "years");

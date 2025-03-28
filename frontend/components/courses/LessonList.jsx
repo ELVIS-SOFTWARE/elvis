@@ -940,7 +940,6 @@ export default class LessonList extends React.Component {
                     >
                         <option value="" />
                         <option value="TBD">À PRÉCISER</option>
-                        <option value="NON INDIQUÉ">NON INDIQUÉ</option>
                         {this.props.evaluationLevelRefs.map(r => (
                             <option key={r.id} value={r.id}>
                                 {r.label}
@@ -1329,6 +1328,7 @@ const UserRow = ({
         "NON ASSIGNÉ";
 
     const [desiredActivityId, setDesiredActivityId] = React.useState(null);
+    const [studentLevel, setStudentLevel] = React.useState(null);
     const [activityApplicationId, setActivityApplicationId] = React.useState(null);
 
     React.useEffect(() => {
@@ -1339,34 +1339,50 @@ const UserRow = ({
             })
             .success((data) => {
                 setDesiredActivityId(data.id);
+                if (data && data.evaluation_level_ref) {
+                    setStudentLevel(data.evaluation_level_ref.label);
+                }
+
                 setActivityApplicationId(data.activity_application_id);
             })
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
 
-    const inscriptionUrl = setActivityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
+    const inscriptionUrl = activityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
+
+    // Modification principale : priorité à studentLevel, puis vérification explicite
+    const displayLevel = () => {
+        if (studentLevel === "NON INDIQUÉ") {
+            return "NON INDIQUÉ";
+        }
+        if (studentLevel) {
+            return studentLevel;
+        }
+
+        const computedLevel = TimeIntervalHelpers.levelDisplayForActivity(
+            {
+                users,
+                activity_ref_id,
+                time_interval,
+                activity_ref: activityRef,
+            },
+            seasons
+        );
+
+        return computedLevel && computedLevel !== "À PRÉCISER"
+            ? computedLevel
+            : "NON INDIQUÉ";
+    };
 
     return (
         <tr style={customStyle}>
             <td>
-                <a
-                    href={inscriptionUrl}
-                >
+                <a href={inscriptionUrl}>
                     {user.first_name} {user.last_name}
                 </a>
             </td>
             <td>{TimeIntervalHelpers.age(user.birthday)} ans</td>
-            <td>
-                {TimeIntervalHelpers.levelDisplayForActivity(
-                    {
-                        users,
-                        activity_ref_id,
-                        time_interval,
-                        activity_ref: activityRef,
-                    },
-                    seasons
-                )}
-            </td>
+            <td>{displayLevel()}</td>
             {isWorkGroup && <td>{userInstrument}</td>}
             <td>
                 {(user.begin_at &&
