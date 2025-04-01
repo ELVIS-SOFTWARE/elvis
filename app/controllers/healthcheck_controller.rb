@@ -18,9 +18,9 @@ class HealthcheckController < ActionController::Base
         end
 
         components_status[:database] = {
-          status: 'ok',
+          status: 1,
           message: "",
-          duration: "#{(stop - start) * 1000}ms"
+          duration: (stop - start) * 1000
         }
       else
         raise 'Database is not active'
@@ -29,9 +29,9 @@ class HealthcheckController < ActionController::Base
     rescue StandardError => e
       stop = Time.now
       components_status[:database] = {
-        status: 'ko',
+        status: 0,
         message: e.message,
-        duration: "#{(stop - start) * 1000}ms"
+        duration: (stop - start) * 1000
       }
     end
 
@@ -44,17 +44,17 @@ class HealthcheckController < ActionController::Base
         stop = Time.now
 
         components_status[:redis] = {
-          status: 'ok',
+          status: 1,
           message: "",
-          duration: "#{(stop - start) * 1000}ms"
+          duration: (stop - start) * 1000
         }
       rescue StandardError => e
         stop = Time.now
         components_status[:redis] = {
-          status: 'ko',
+          status: 0,
           # remove urls from string
           message: "#{e.message}",
-          duration: "#{(stop - start) * 1000}ms"
+          duration: (stop - start) * 1000
         }
       end
     end
@@ -66,34 +66,34 @@ class HealthcheckController < ActionController::Base
       stop = Time.now
 
       components_status[:elasticsearch] = {
-        status: 'ok',
+        status: 1,
         message: "",
-        duration: "#{(stop - start) * 1000}ms"
+        duration: (stop - start) * 1000
       }
 
     rescue StandardError => e
       stop = Time.now
       components_status[:elasticsearch] = {
-        status: 'ko',
+        status: 0,
         message: e.message,
-        duration: "#{(stop - start) * 1000}ms"
+        duration: (stop - start) * 1000
       }
     end
 
     final_status = {}
 
-    all_system_up = components_status.values.all? { |status| status[:status] == 'ok' }
+    all_system_up = components_status.values.all? { |status| status[:status] == 1 }
 
-    final_status[:status] = all_system_up ? 'ok' : 'ko'
+    final_status[:status] = all_system_up ? 1 : 0
     final_status[:message] = all_system_up ? 'All systems operational' : 'Some systems are down'
 
     final_status = final_status.merge(components_status)
 
-    render json: final_status, status: final_status[:status] == 'ok' ? 200 : 500
+    render json: final_status, status: all_system_up ? 200 : 500
 
   rescue StandardError => e
     render json: {
-      status: 'ko',
+      status: 0,
       message: e.message
     }, status: 500
   end
