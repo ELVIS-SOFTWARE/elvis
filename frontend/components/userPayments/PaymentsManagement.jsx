@@ -18,31 +18,31 @@ import * as api from "../../tools/api";
 const SEASON_STORED_KEY = "PaymentsSummarySelectedSeason";
 
 function calculateTotals(duePayments, payments, itemsForPayment) {
+    // Corriger le calcul de totalDue pour éviter de compter deux fois les activités incluses dans des formules
     const totalDue = _.reduce(
-        _.map(itemsForPayment, d => d.discountedTotal),
-        (sum, f) => sum + f,
+        _.filter(itemsForPayment, item => !item.isFormulaItem), // Filtrer pour exclure les éléments des formules
+        (sum, item) => sum + (item.discountedTotal || 0),
         0.0
     );
 
     const previsionalTotal = _.chain(duePayments)
         .values()
         .flatten()
-        .map(dp => parseFloat(dp.adjusted_amount))
+        .map(dp => parseFloat(dp.adjusted_amount)) // Corriger le nom de la propriété
         .reduce((sum, n) => (sum + n), 0)
         .value();
 
     const totalPayments = _.chain(payments)
         .values()
         .flatten()
-        .map(p => parseFloat(p.adjusted_amount))
+        .map(p => parseFloat(p.adjusted_amount)) // Corriger le nom de la propriété
         .reduce((sum, n) => (sum + n), 0)
         .value();
-
 
     const totalPayback = _.chain(payments)
         .values()
         .flatten()
-        .map(p => parseFloat(p.adjusted_amount))
+        .map(p => parseFloat(p.adjusted_amount)) // Corriger le nom de la propriété
         .compact()
         .reduce((sum, n) => (sum + n), 0)
         .value();
@@ -52,7 +52,7 @@ function calculateTotals(duePayments, payments, itemsForPayment) {
         .flatten()
         .filter(
             p =>
-                !p.payment_status_id && Date.parse(p.cashing_date) <= Date.now()
+                !p.payment_status_id && Date.parse(p.cashing_date) <= Date.now() // Corriger le nom de la propriété
         )
         .map(p => parseFloat(p.adjusted_amount))
         .reduce((sum, n) => (sum + n), 0)
@@ -87,299 +87,136 @@ function generateDataForPaymentSummaryTable({
                                                 adhesionEnabled,
                                                 packs,
                                                 user,
-                                                formulas // Nouvel argument pour récupérer les formules
+                                                formulas = []
                                             }) {
     let data = [];
 
     const formulaActivities = {}; // Stocker les activités par formule
-
+    const nonFormulaActivities = []; // Pour stocker les activités qui ne font pas partie d'une formule
     const seasonActivities = activities.filter(a =>
         desired.find(d => d.activity_id === a.activity.id)
     );
-    console.log("Formulas:", formulas);
 
+    console.log("Formulas in generation:", formulas);
 
-    // Et ensuite une ligne par activité
-    _.forEach(seasonActivities, act => {
+    // Première passe : trier les activités entre formules et individuelles
+    seasonActivities.forEach(act => {
         const a = act.activity;
-        const des = _.find(
-            desired,
+        const des = desired.find(
             d =>
                 d.activity_id === act.activity_id &&
                 d.activity_application.user_id === act.user_id
         );
 
-
-        console.log("des:", des);
-
         if (des) {
-            // Vérifier si l'activité fait partie d'une formule
-            if (des.formula_id) {
-                const formulaId = des.formula_id;
+            // Récupération de l'ID de formule depuis activity_application
+            const formulaId = des.activity_application.formule_id;
+            if (formulaId) {
                 if (!formulaActivities[formulaId]) {
                     formulaActivities[formulaId] = [];
                 }
                 formulaActivities[formulaId].push({ act, des, activity: a });
-                // Supprimez le return pour permettre le traitement ultérieur
+            } else {
+                // Si l'activité ne fait pas partie d'une formule, on la traite individuellement
+                nonFormulaActivities.push({ act, des, activity: a });
             }
-
-            console.log("Formula ID:", des.formula_id);
-            console.log("Formula Activities:", formulaActivities);
-
-            const activity_nb_lessons = a.intended_nb_lessons;
-            const season = seasons.find(s => s.id === seasonId);
-            const priceAssociations = [];
-
-            a.activity_ref.activity_ref_pricing.forEach(arp => {
-                if (new Date(arp.from_season.start) <= new Date(season.start) && (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
-                    priceAssociations.push(arp);
-                }
-            });
-
-            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
-
-            let amount = 0;
-            if (priceAssociation && priceAssociation.price) {
-                amount = _.round((priceAssociation.price / activity_nb_lessons) * (des.prorata || activity_nb_lessons), 2);
-            }
-
-            const coupon = _.get(des, "discount.coupon", 0);
-            const percentOff = _.get(des, "discount.coupon.percent_off", 0);
-
-            data.push({
-                id: des.id,
-                activity: `${a.activity_ref.label} (${a.activity_ref.kind})`,
-                stopped_at: des.activity_application.stopped_at,
-                intended_nb_lessons: a.intended_nb_lessons,
-                des,
-                ref: a.activity_ref,
-                prorata: des.prorata,
-                coupon: { ...coupon },
-                studentId: act.id,
-                user: act.user,
-                pricingCategoryId: des.pricing_category_id,
-                activityId: a.id,
-                paymentLocation: act.payment_location,
-                due_total: amount || 0,
-                discountedTotal: getDiscountedAmount(amount, percentOff),
-                unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
-            });
         }
     });
 
-    // Traitement des formules
-    _.forEach(formulaActivities, (activities, formulaId) => {
-        const formula = _.find(formulas, f => f.id === parseInt(formulaId));
-        if (!formula) return;
-
-        const user = activities[0].act.user;
-        const formulaPrice = formula.price;
-
+    // Traitement des activités individuelles (qui ne font pas partie d'une formule)
+    nonFormulaActivities.forEach(({ act, des, activity: a }) => {
+        const activityNbLessons = a.intended_nb_lessons;
+        const season = seasons.find(s => s.id === seasonId);
+        const priceAssociations = [];
+        a.activity_ref.activity_ref_pricing.forEach(arp => {
+            if (
+                new Date(arp.from_season.start) <= new Date(season.start) &&
+                (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))
+            ) {
+                priceAssociations.push(arp);
+            }
+        });
+        const priceAssociation = priceAssociations.find(
+            pa => pa.pricing_category_id === des.pricing_category_id
+        );
+        let amount = 0;
+        if (priceAssociation && priceAssociation.price) {
+            amount = _.round(
+                (priceAssociation.price / activityNbLessons) *
+                (des.prorata || activityNbLessons),
+                2
+            );
+        }
+        const coupon = _.get(des, "discount.coupon", 0);
+        const percentOff = _.get(des, "discount.coupon.percent_off", 0);
         data.push({
-            id: 0,
-            activity: `Formule ${formula.name} de ${user.first_name} ${user.last_name}`,
+            id: des.id,
+            activity: `${a.activity_ref.label} (${a.activity_ref.kind})`,
+            stopped_at: des.activity_application.stopped_at,
+            intended_nb_lessons: a.intended_nb_lessons,
+            des,
+            ref: a.activity_ref,
+            prorata: des.prorata,
+            coupon: { ...coupon },
+            studentId: act.id,
+            user: act.user,
+            pricingCategoryId: des.pricing_category_id,
+            activityId: a.id,
+            paymentLocation: act.payment_location,
+            due_total: amount || 0,
+            discountedTotal: getDiscountedAmount(amount, percentOff),
+            unitPrice:
+                priceAssociation && priceAssociation.price
+                    ? _.round(priceAssociation.price / activityNbLessons, 2)
+                    : 0,
+            formula: null, // Pas de formule pour cette activité
+            isFormula: false
+        });
+    });
+
+    // Traitement des formules
+    _.forEach(formulaActivities, (activitiesArray, formulaId) => {
+        console.log(`Searching for formula with ID: ${formulaId}`);
+        console.log("Available formulas:", formulas);
+        const formula = _.find(formulas, f => String(f.id) === String(formulaId));
+        if (!formula) {
+            console.warn(`Formule non trouvée pour l'ID ${formulaId}`);
+            return;
+        }
+        const user = activitiesArray[0].act.user;
+        const formulaPricing = formula.formule_pricings && formula.formule_pricings[0];
+        const formulaPrice = formulaPricing ? formulaPricing.price : 0;
+
+        // Utiliser la même logique que pour les activités individuelles
+        const coupon = _.get(formula, "discount.coupon", {});
+        const percentOff = _.get(formula, "discount.coupon.percent_off", 0);
+        const discountedFormulaPrice = getDiscountedAmount(formulaPrice, percentOff);
+
+        // Créer une seule ligne pour la formule
+        data.push({
+            id: `formula-${formula.id}`,
+            activity: `${formula.name}`, // Affiche uniquement le nom de la formule
+            subActivities: activitiesArray.map(
+                ({ activity: a }) => `${a.activity_ref.label} (${a.activity_ref.kind})`
+            ),
             frequency: 1,
-            initial_total: 1,
-            due_total: formulaPrice,
-            coupon: formula.discount ? { percent_off: formula.discount_percent, label: `Remise formule ${formula.discount_percent}%` } : {},
-            discountedTotal: formulaPrice,
+            initial_total: formulaPrice,         // Prix de base de la formule (avant remise)
+            due_total: formulaPrice,             // Affiche le prix de base
+            coupon: coupon,                      // Coupon tel qu'enregistré (avec percent_off, label, id, etc.)
+            discountedTotal: discountedFormulaPrice, // Prix après remise
             unitPrice: formulaPrice,
             user: user,
             studentId: user.id,
             formulaId: formula.id,
-            formula_activities: activities.map(item => item.des.id),
+            formula_activities: activitiesArray.map(item => item.des["id"]),
             isFormula: true,
             formula: formula
         });
-
-        _.forEach(activities, item => {
-            const a = item.activity;
-            const des = item.des;
-            const act = item.act;
-
-            const activity_nb_lessons = a.intended_nb_lessons;
-            const season = seasons.find(s => s.id === seasonId);
-            const priceAssociations = [];
-
-            a.activity_ref.activity_ref_pricing.forEach(arp => {
-                if (new Date(arp.from_season.start) <= new Date(season.start) && (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
-                    priceAssociations.push(arp);
-                }
-            });
-
-            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
-
-            let originalAmount = 0;
-            if (priceAssociation && priceAssociation.price) {
-                originalAmount = _.round((priceAssociation.price / activity_nb_lessons) * (des.prorata || activity_nb_lessons), 2);
-            }
-
-            data.push({
-                id: des.id,
-                activity: `${a.activity_ref.label} (${a.activity_ref.kind}) - Inclus dans formule ${formula.name}`,
-                stopped_at: des.activity_application.stopped_at,
-                intended_nb_lessons: a.intended_nb_lessons,
-                des,
-                ref: a.activity_ref,
-                prorata: des.prorata,
-                coupon: {},
-                studentId: act.id,
-                user: act.user,
-                pricingCategoryId: des.pricing_category_id,
-                activityId: a.id,
-                paymentLocation: act.payment_location,
-                due_total: 0,
-                discountedTotal: 0,
-                unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
-                originalAmount: originalAmount,
-                formulaId: formula.id,
-                isFormulaItem: true
-            });
-        });
     });
-
-    const taken = data.map(d => d.activityId);
-    const takenDesired = data.map(d => d.id);
-
-    _.forEach(options, option => {
-        if (_.includes(taken, option.activity.id)) {
-            return;
-        }
-        const a = option.activity;
-        const des = _.find(desired, d => d.id === option.desired_activity_id);
-
-        if (des && !takenDesired.includes(des.id)) {
-            takenDesired.push(des.id);
-
-            const activity_nb_lessons = a.intended_nb_lessons;
-            const season = seasons.find(s => s.id === seasonId);
-            const priceAssociations = [];
-
-            a.activity_ref.activity_ref_pricing.forEach(arp => {
-                if (arp.from_season.start <= season.start && (!arp.to_season || arp.to_season.end >= season.end)) {
-                    priceAssociations.push(arp);
-                }
-            });
-
-            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
-
-            let amount = 0;
-            if (priceAssociation && priceAssociation.price) {
-                amount = _.round((priceAssociation.price / activity_nb_lessons) * (des.prorata || activity_nb_lessons), 2);
-            }
-
-            const coupon = _.get(des, "discount.coupon", 0);
-            const percentOff = _.get(des, "discount.coupon.percent_off", 0);
-
-            const formattedOption = {
-                id: des.id,
-                activity: `${a.activity_ref.label} (${a.activity_ref.kind})`,
-                intended_nb_lessons: a.intended_nb_lessons,
-                des,
-                ref: des.activity_ref,
-                prorata: des.prorata,
-                coupon: coupon,
-                studentId: option.id,
-                user: option.desired_activity.activity_application.user,
-                pricingCategoryId: des.pricing_category_id,
-                paymentLocation: option.payment_location,
-                due_total: amount || 0,
-                discountedTotal: getDiscountedAmount(amount, percentOff),
-                isOption: true,
-                unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0,
-            };
-            data.push(formattedOption);
-        }
-    });
-
-    if (adhesionEnabled) {
-        for (const adhesion of adhesions) {
-            const adhesionPrice = adhesionPrices.find(p => p.id === adhesion.adhesion_price_id) || {};
-
-            if (adhesionPrice) {
-                const coupon = _.get(adhesion, "discount.coupon", 0);
-                const percentOff = _.get(adhesion, "discount.coupon.percent_off", 0);
-
-                data.push({
-                    id: 0,
-                    activity: `Adhésion de ${adhesion.user.first_name} ${adhesion.user.last_name}`,
-                    frequency: 1,
-                    initial_total: 1,
-                    due_total: adhesionPrice.price || 0,
-                    coupon: coupon,
-                    discountedTotal: getDiscountedAmount(adhesionPrice.price, percentOff),
-                    unitPrice: adhesionPrice.price || 0,
-                    user: adhesion.user,
-                    studentId: adhesion.user.id,
-                    adhesionPriceId: adhesionPrice.id,
-                    adhesionId: adhesion.id,
-                });
-            }
-        }
-    }
-
-    if ((packs || []).length > 0) {
-        const userPacks = packs.filter(p => p);
-
-        if (userPacks.length > 0) {
-            for (const pack of userPacks) {
-                const pack_price = pack.activity_ref_pricing.price;
-                const coupon = _.get(pack, "discount.coupon", 0);
-                const percentOff = _.get(pack, "discount.coupon.percent_off", 0);
-
-                data.push({
-                    id: 0,
-                    activity: `Pack de ${user.first_name} ${user.last_name} pour ${pack.activity_ref.label} (${pack.activity_ref.kind})`,
-                    frequency: 1,
-                    initial_total: 1,
-                    due_total: pack_price || 0,
-                    coupon: coupon,
-                    discountedTotal: getDiscountedAmount(pack_price || 0, percentOff),
-                    unitPrice: pack_price || 0,
-                    user: user,
-                    studentId: user.id,
-                    packPrice: pack.activity_ref_pricing,
-                    packId: pack.id,
-                });
-            }
-        }
-    }
 
     return data;
 }
 
-function calculateFormulaPrice(formula, activities, seasonId, seasons) {
-    if (formula.fixed_price) {
-        return formula.price;
-    } else {
-        let total = 0;
-        _.forEach(activities, item => {
-            const a = item.activity;
-            const des = item.des;
-
-            const activity_nb_lessons = a.intended_nb_lessons;
-            const season = seasons.find(s => s.id === seasonId);
-            const priceAssociations = [];
-
-            a.activity_ref.activity_ref_pricing.forEach(arp => {
-                if (new Date(arp.from_season.start) <= new Date(season.start) && (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
-                    priceAssociations.push(arp);
-                }
-            });
-
-            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
-
-            if (priceAssociation && priceAssociation.price) {
-                const activityPrice = _.round((priceAssociation.price / activity_nb_lessons) * (des.prorata || activity_nb_lessons), 2);
-                total += activityPrice;
-            }
-        });
-
-        // Appliquer la réduction de la formule
-        const discountAmount = _.round(total * (formula.discount_percent / 100), 2);
-        return total - discountAmount;
-    }
-}
 
 class PaymentsManagement extends React.Component {
     constructor(props) {
@@ -401,6 +238,7 @@ class PaymentsManagement extends React.Component {
             adhesions: this.props.adhesions,
             newComment: "",
             editedComment: null,
+            formulas: this.props.formulas || [],
         };
 
         this.state = {
@@ -658,7 +496,7 @@ class PaymentsManagement extends React.Component {
                 const adhesions = [...this.state.adhesions];
                 const index = this.state.adhesions.findIndex(
                     adh => adh.id === discountable_id
-                )
+                );
                 if (index === -1) return null;
                 oldCoupon = _.get(adhesions[index], "discount.coupon", null);
 
@@ -671,14 +509,13 @@ class PaymentsManagement extends React.Component {
                 this.setState({adhesions});
                 break;
 
-
             // si mise à jour de la remise sur une activité
             case "DesiredActivity":
                 // retrouver l'activité dans le state et mettre à jour la remise
                 let dess = [...this.state.desiredActivities];
                 const des = this.state.desiredActivities.find(
                     i => i.id === discountable_id
-                )
+                );
                 if (!des) return null;
                 oldCoupon = _.get(des, "discount.coupon", null);
 
@@ -686,15 +523,41 @@ class PaymentsManagement extends React.Component {
                 dess = [...dess, des];
                 this.setState({desiredActivities: dess});
                 break;
-        }
+
+            // Ajouter un cas pour les formules
+                case "Formula":
+                // Récupérer les formules du state
+                let formulas = [...this.state.formulas];
+                const formulaIndex = formulas.findIndex(f => f.id === discountable_id);
+                if (formulaIndex === -1) return null;
+                oldCoupon = _.get(formulas[formulaIndex], "discount.coupon", null);
+
+                // Si coupon est indéfini (aucune remise), on stocke un objet vide
+                const updatedCoupon = coupon ? { ...coupon } : {};
+                // Si un coupon est défini et qu'il n'a pas d'id, le créer via un fallback
+                if (coupon && !updatedCoupon.id) {
+                    updatedCoupon.id = coupon.id || coupon.coupon_id || coupon.label;
+                }
+
+                formulas[formulaIndex] = {
+                    ...formulas[formulaIndex],
+                    discount: { coupon: updatedCoupon },
+                    discount_percent: coupon ? coupon.percent_off : 0
+                };
+
+                this.setState({ formulas });
+                break;        }
 
         return oldCoupon;
     }
-
     handleChangePercentOffChoice(discountable_id, discountable_type, couponId) {
+        // Corriger l'utilisation de Lodash
         const coupon = _.find(this.props.coupons, c => c.id == couponId);
 
+        // Stocker l'ancien coupon pour pouvoir le restaurer en cas d'erreur
         const oldCoupon = this.setStateWithCoupon(discountable_id, discountable_type, coupon);
+        console.log("State après ajout de la remise :", this.state.formulas);
+
 
         const fetcher = api.set()
             .error((e) => {
@@ -702,19 +565,19 @@ class PaymentsManagement extends React.Component {
                 // Erreur -> on restaure la valeur précédente
                 this.setStateWithCoupon(discountable_id, discountable_type, oldCoupon);
                 swal("Erreur", "Une erreur est survenue", "error");
-            })
+            });
 
         if (parseInt(couponId) === 0) {
             // si pas de remise sélectionnée, supprimer la remise
             fetcher.del(`/discounts`, {
                 discountable_id: discountable_id,
-                discountable_type: discountable_type
+                discountable_type: discountable_type === "Formula" ? "Formule" : discountable_type
             });
         } else {
             // sinon, mettre à jour la remise
             fetcher.post(`/discounts/upsert`, {
                 discountable_id: discountable_id,
-                discountable_type: discountable_type,
+                discountable_type: discountable_type === "Formula" ? "Formule" : discountable_type,
                 coupon_id: couponId
             });
         }
@@ -1436,7 +1299,11 @@ class PaymentsManagement extends React.Component {
             adhesions: this.state.adhesions,
             packs: (this.props.packs || {})[this.state.season],
             user: this.props.user,
+            formulas: this.state.formulas,
         });
+
+        console.log("Items for payment calculation:", itemsForPayment);
+
 
         const {
             totalDue,
@@ -1522,6 +1389,7 @@ class PaymentsManagement extends React.Component {
                     adhesions: previousSeasonState.adhesions,
                     packs: (this.props.packs || {})[this.state.season],
                     user: this.props.user,
+                    formulas: this.state.formulas,
                 })
             );
 
@@ -1784,6 +1652,7 @@ class PaymentsManagement extends React.Component {
                                     handleChangePercentOffChoice={(discountable_id, discountable_type, couponId) => this.handleChangePercentOffChoice(discountable_id, discountable_type, couponId)}
                                     adhesionPrices={this.props.adhesionPrices}
                                     handleChangeAdhesionPricingChoice={(userId, evt) => this.handleChangeAdhesionPricingChoice(userId, evt)}
+                                    formulas={this.props.formulas}
                                     // handleChangeProrataForDesiredActivity={(id, prorata) => this.handleChangeProrataForDesiredActivity(id, prorata)}
                                 />
                             </div>
@@ -1919,7 +1788,7 @@ class PaymentsManagement extends React.Component {
                                                     className="col-lg-12 col-md-12 d-flex justify-content-between m-b-sm">
                                                     <button
                                                         type="button"
-                                                        className="btn btn-primary btn-xs"
+                                                        className="btn b    tn-primary btn-xs"
                                                         onClick={() => window.open(`/payments/summary/${this.props.user.id}.pdf?season_id=${this.state.season}&payer_id=${payer.id}`)}>
                                                         <i className="fas fa-print text-primary mr-1"/>
                                                         Imprimer une attestation de paiement

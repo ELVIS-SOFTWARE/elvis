@@ -155,6 +155,19 @@ class PaymentsController < ApplicationController
 
     @is_upcoming_payment_defined = NotificationTemplate.where(path: "upcoming_payment_mailer/upcoming_payment").any?
 
+    @formulas = Formule.all.as_json(
+      only: [:id, :name, :description],
+      include: {
+        formule_pricings: {
+          only: [:id, :price],
+          include: {
+            pricing_category: { only: [:id, :name] }
+          }
+        }
+      }
+    )
+
+
     respond_to do |format|
       format.html
 
@@ -1059,13 +1072,14 @@ class PaymentsController < ApplicationController
       end
     end
 
+    # Traitement des formules
     formula_activities.each do |formula_id, activities|
       # Récupérer les infos de la formule
       formula = Formula.find(formula_id)
       # On prend l'utilisateur du premier élément (tous devraient avoir le même utilisateur)
       user = activities.first[:act]["user"]
 
-      # Calculer le prix de la formule (soit un prix fixe, soit la somme des activités avec une réduction)
+      # Calculer le prix de la formule en utilisant la fonction calculate_formula_price (Ruby)
       formula_price = calculate_formula_price(formula, activities, season_id)
 
       # Ajouter la formule comme une ligne dans le tableau des paiements
@@ -1073,7 +1087,7 @@ class PaymentsController < ApplicationController
                   id: 0, # ID temporaire pour la formule
                   activity: "Formule #{formula.name} de #{user['first_name']} #{user['last_name']}",
                   frequency: 1,
-                  initial_total: 1,
+                  initial_total: formula_price,
                   due_total: formula_price,
                   unitPrice: formula_price,
                   user: user,

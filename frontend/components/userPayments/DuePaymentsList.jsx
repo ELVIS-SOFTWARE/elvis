@@ -8,7 +8,7 @@ require("moment/locale/fr");
 import ReactTable from "react-table";
 import BulkEditModalAlert from "../utils/alerts/BulkEditModalAlert";
 
-// import { ADHESION_PRICE } from "./PaymentsManagement";
+// import { ADHESION_PRICE } from "./sPaymentsManagement";
 import swal from "sweetalert2";
 import { Fragment } from "@fullcalendar/react";
 import { MONTHS } from "../../tools/constants";

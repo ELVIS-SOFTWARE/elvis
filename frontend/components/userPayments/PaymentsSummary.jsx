@@ -61,6 +61,105 @@ class PaymentsSummary extends React.Component {
             });
     }
 
+    // Helper method to check if an activity is part of a formula
+    isActivityInFormula(activity) {
+        return activity.des &&
+            activity.des.activity_application &&
+            activity.des.activity_application.formule_id;
+    }
+
+    // Helper method to get formula ID from an activity
+    getFormulaIdFromActivity(activity) {
+        return activity.des &&
+            activity.des.activity_application &&
+            activity.des.activity_application.formule_id;
+    }
+
+    // Process data to group activities by formula
+    processDataWithFormulas(data) {
+        // Deep clone pour éviter de muter l'original
+        const processedData = _.cloneDeep(data);
+
+        // Regroupement des activités par formule
+        const activitiesByFormula = {};
+        const formulaIds = new Set();
+
+        processedData.forEach(item => {
+            const formulaId = this.getFormulaIdFromActivity(item);
+            if (formulaId) {
+                formulaIds.add(formulaId);
+                if (!activitiesByFormula[formulaId]) {
+                    activitiesByFormula[formulaId] = [];
+                }
+                activitiesByFormula[formulaId].push(item);
+            }
+        });
+
+        if (formulaIds.size === 0) {
+            return processedData;
+        }
+
+        const result = [];
+
+        // Pour chaque formule trouvée, créer une ligne d'en-tête enrichie
+        formulaIds.forEach(formulaId => {
+            const formulaActivities = activitiesByFormula[formulaId];
+            if (formulaActivities.length > 0) {
+                const firstActivity = formulaActivities[0];
+                // Lookup des détails de la formule dans this.props.formulas, avec fallback
+                const formulaDetails = this.props.formulas
+                    ? _.find(this.props.formulas, f => f.id == formulaId) || { id: formulaId, name: `Formule inconnue`, description: "" }
+                    : { id: formulaId, name: `Formule #${formulaId}`, description: "" };
+
+                // Récupérer le prix depuis formule_pricings (on prend ici le premier prix trouvé)
+                const formulaPrice = (formulaDetails.formule_pricings && formulaDetails.formule_pricings.length > 0)
+                    ? formulaDetails.formule_pricings[0].price
+                    : 0;
+
+                // Récupérer le coupon appliqué sur la formule
+                // On suppose ici que le coupon de la formule est géré dans le state de PaymentManagement et appliqué via handleChangePercentOffChoice.
+                // Par défaut, on utilise le coupon de la première activité de la formule.
+                const coupon = firstActivity.coupon || {};
+
+                // Calcul du montant remisé de la formule
+                let discountedTotal = formulaPrice;
+                if (coupon.percent_off) {
+                    discountedTotal = _.round(formulaPrice * (1 - coupon.percent_off / 100), 2);
+                }
+
+                const formulaHeaderRow = {
+                    id: `formula-${formulaId}`,
+                    isFormula: true,
+                    activity: formulaDetails.name, // Affiche le vrai nom
+                    user: firstActivity.user,
+                    unitPrice: formulaPrice,           // Prix brut de la formule
+                    discountedTotal: discountedTotal,  // Prix après remise
+                    due_total: discountedTotal,        // On utilise ici le montant remisé
+                    coupon: coupon,
+                    formula: { ...formulaDetails, price: formulaPrice }
+                };
+
+                result.push(formulaHeaderRow);
+
+                // Ajouter chacune des activités de la formule en tant qu'éléments enfants
+                formulaActivities.forEach(activity => {
+                    activity.isFormulaItem = true;
+                    activity.formulaId = formulaId;
+                    result.push(activity);
+                });
+            }
+        });
+
+        // Ajouter les activités standalone (non regroupées dans une formule)
+        processedData.forEach(item => {
+            if (!this.isActivityInFormula(item)) {
+                result.push(item);
+            }
+        });
+
+        return result;
+    }
+
     render() {
         console.log("Données dans PaymentsSummary:", this.props.data);
 
@@ -72,7 +171,9 @@ class PaymentsSummary extends React.Component {
             totalPaymentsToDay,
             totalPayback,
         } = this.props;
-        const data = [...this.props.data];
+
+        // Process data to group by formulas
+        const data = this.processDataWithFormulas([...this.props.data]);
 
         const generalColumns = [
             {
@@ -97,15 +198,23 @@ class PaymentsSummary extends React.Component {
                         <div>
                             <div>
                                 {d.isFormula && (
-                                    <i className="fas fa-certificate mr-2" title="Formule" />
+                                    <i title="Formule" />
                                 )}
                                 {d.isFormulaItem && (
                                     <span className="ml-3" style={{ color: "#777" }}>
-                    ↳{" "}
-                  </span>
+                            ↳{" "}
+                        </span>
                                 )}
                                 {d.activity}
                             </div>
+                            {/* Affichage des sous-activités de la formule */}
+                            {d.isFormula && d.subActivities && (
+                                <div className="ml-4 text-sm" style={{ color: "#555" }}>
+                                    {d.subActivities.map((activity, index) => (
+                                        <div key={index}>• {activity}</div>
+                                    ))}
+                                </div>
+                            )}
                             {d.stopped_at ? (
                                 <div className="text-danger">
                                     {`(Arrêt le : ${moment(d.stopped_at).format("DD/MM/YYYY")})`}
@@ -121,7 +230,7 @@ class PaymentsSummary extends React.Component {
                 accessor: d => {
                     return (
                         <div>
-                            {d.isFormula && <i className="fas fa-certificate mr-2" title="Formule" />}
+                            {d.isFormula && <i title="Formule" />}
                             {d.formula ? (
                                 <div>
                                     {d.formula.name}
@@ -159,6 +268,16 @@ class PaymentsSummary extends React.Component {
                 id: "tarif",
                 maxWidth: 100,
                 Cell: props => {
+                    // Si c'est une formule, on n'affiche pas de tarif individuel
+                    if (props.original.isFormula) {
+                        return <p>Tarif formule</p>;
+                    }
+
+                    // Si c'est un élément de formule, on n'affiche pas de tarif individuel
+                    if (props.original.isFormulaItem) {
+                        return <p>Inclus dans la formule</p>;
+                    }
+
                     if (props.original.packId) {
                         return (
                             <p>
@@ -263,7 +382,7 @@ class PaymentsSummary extends React.Component {
                 id: "prorata",
                 maxWidth: 75,
                 Cell: props => {
-                    if (props.original.id === 0) return null;
+                    if (props.original.id === 0 || props.original.isFormula) return null;
                     const intendedNbLessons = props.original.intended_nb_lessons;
                     return <p>{props.original.prorata || intendedNbLessons} sur {intendedNbLessons}</p>;
                 },
@@ -291,10 +410,14 @@ class PaymentsSummary extends React.Component {
                 id: "coupon",
                 maxWidth: 100,
                 accessor: d => {
-                    // Ce getter n'est pas utilisé, le rendu se fait dans Cell
-                    d.coupon.percent_off ? <p>{d.coupon.percent_off + " %"}</p> : null;
+                    return d.coupon?.percent_off ? `${d.coupon.percent_off} %` : '-';
                 },
+
                 Cell: props => {
+                    if (props.original.isFormulaItem) {
+                        return <p>-</p>;
+                    }
+
                     if (this.props.isStudentView) {
                         return (
                             <p>
@@ -307,13 +430,23 @@ class PaymentsSummary extends React.Component {
                     return (
                         <SelectCoupon
                             coupons={this.state.coupons}
-                            onChange={value =>
-                                this.props.handleChangePercentOffChoice(
-                                    props.original.adhesionId || props.original.packId || props.original.id,
-                                    props.original.adhesionId ? "Adhesion" : props.original.packId ? "Pack" : "DesiredActivity",
-                                    value
-                                )
-                            }
+                            onChange={value => {
+
+                                console.log("Applying coupon:", value);
+                                if (props.original.isFormula) {
+                                    this.props.handleChangePercentOffChoice(
+                                        props.original.formula.id,
+                                        "Formula",
+                                        value
+                                    );
+                                } else {
+                                    this.props.handleChangePercentOffChoice(
+                                        props.original.adhesionId || props.original.packId || props.original.id,
+                                        props.original.adhesionId ? "Adhesion" : props.original.packId ? "Pack" : "DesiredActivity",
+                                        value
+                                    );
+                                }
+                            }}
                             value={props.original.coupon.id}
                         />
                     );
@@ -345,62 +478,62 @@ class PaymentsSummary extends React.Component {
                 },
                 Footer: (
                     <span>
-            <span style={{ fontSize: "16px" }}>
-              Total:
-              <strong>
-                {` ${
-                    totalDue == null
-                        ? "--"
-                        : totalDue.toLocaleString("fr-FR", {
-                            style: "currency",
-                            currency: "EUR",
-                        })
-                } `}
-              </strong>
-            </span>
-            <br />
-            <span style={{ fontSize: "16px" }}>
-              Total échéancier:
-              <strong>
-                {` ${
-                    previsionalTotal == null
-                        ? "--"
-                        : previsionalTotal.toLocaleString("fr-FR", {
-                            style: "currency",
-                            currency: "EUR",
-                        })
-                } `}
-              </strong>
-            </span>
-            <br />
-            <span style={{ fontSize: "16px" }}>
-              Total réglé à ce jour:
-              <strong>
-                {` ${
-                    totalPaymentsToDay == 0 && previsionalTotal == null
-                        ? "--"
-                        : totalPaymentsToDay.toLocaleString("fr-FR", {
-                            style: "currency",
-                            currency: "EUR",
-                        })
-                } `}
-              </strong>
-            </span>
-            <br />
-            <span style={{ fontSize: "16px" }}>
-              Solde:
-              <strong>
-                {` ${
-                    totalPayments == 0 && previsionalTotal == null
-                        ? "--"
-                        : (previsionalTotal - totalPayments).toLocaleString("fr-FR", {
-                            style: "currency",
-                            currency: "EUR",
-                        })
-                } `}
-              </strong>
-            </span>
-          </span>
+                        <span style={{ fontSize: "16px" }}>
+                          Total:
+                          <strong>
+                            {` ${
+                                totalDue == null
+                                    ? "--"
+                                    : totalDue.toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
+                                    })
+                            } `}
+                          </strong>
+                        </span>
+                        <br />
+                        <span style={{ fontSize: "16px" }}>
+                          Total échéancier:
+                          <strong>
+                            {` ${
+                                previsionalTotal == null
+                                    ? "--"
+                                    : previsionalTotal.toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
+                                    })
+                            } `}
+                          </strong>
+                        </span>
+                        <br />
+                        <span style={{ fontSize: "16px" }}>
+                          Total réglé à ce jour:
+                          <strong>
+                            {` ${
+                                totalPaymentsToDay == 0 && previsionalTotal == null
+                                    ? "--"
+                                    : totalPaymentsToDay.toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
+                                    })
+                            } `}
+                          </strong>
+                        </span>
+                        <br />
+                        <span style={{ fontSize: "16px" }}>
+                          Solde:
+                          <strong>
+                            {` ${
+                                totalPayments == 0 && previsionalTotal == null
+                                    ? "--"
+                                    : (previsionalTotal - totalPayments).toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
+                                    })
+                            } `}
+                          </strong>
+                        </span>
+                    </span>
                 ),
             },
         ];
@@ -428,6 +561,16 @@ class PaymentsSummary extends React.Component {
                             </div>
                         </div>
                     ) : null}
+                    {!this.props.isStudentView && (
+                        <div className="m-b-sm">
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => this.showCreateCouponModal()}
+                            >
+                                <i className="fas fa-plus" /> Ajouter un taux de remise
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="ibox-title">

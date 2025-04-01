@@ -429,9 +429,10 @@ class Wizard extends React.Component {
         console.log("Raw selectedFormulas:", this.state.selectedFormulas);
 
 
-        const formulaActivities = Array.isArray(state.selectedFormulaActivities)
-            ? state.selectedFormulaActivities
-            : Object.values(state.selectedFormulaActivities).flat();
+        const formulaActivities = Object.values(state.selectedFormulaActivities || {}).flat();
+        formulaActivities.forEach(activity => {
+            console.log("🔎 Activité de formule traitée :", activity);
+        });
 
         state.selectedFormulas = Array.isArray(this.state.selectedFormulas)
             ? this.state.selectedFormulas.map(f => (typeof f === "object" ? f.id : f))

@@ -826,6 +826,11 @@ class ActivitiesApplicationsController < ApplicationController
             .execute
         end
 
+
+
+        # Récupère la structure des activités par formule
+        formula_activities = params[:application][:selectedFormulaActivities] || {}
+
         params[:application][:selectedActivities].each do |act|
           # Création de l'inscription
           @activity_application = ActivityApplication.create!(
@@ -833,7 +838,22 @@ class ActivitiesApplicationsController < ApplicationController
             activity_application_status: initial_aa_status,
             season: season,
             begin_at: params[:application][:begin_at] || season.start,
-          )
+            )
+
+          # Vérifier si cette activité fait partie d'une formule
+          formula_id = nil
+          formula_activities.each do |formula_id_key, activities|
+            # Convert act to string for comparison since it might be a number
+            if activities.include?(act.to_s) || activities.include?(act)
+              formula_id = formula_id_key
+              break
+            end
+          end
+
+          # Si l'activité fait partie d'une formule, associe la formule à l'application
+          if formula_id
+            @activity_application.update(formule_id: formula_id)
+          end
 
           # Ajout, à l'inscription, des activités souhaitées
           #  Here, additionalStudenst are indexed incrementaly by their position in family, because they may not be already created
@@ -931,6 +951,7 @@ class ActivitiesApplicationsController < ApplicationController
         end
 
         formules_ids = params[:application][:selectedFormulas] || []
+        formula_activities = params[:application][:selectedFormulaActivities] || {}
         unless formules_ids.empty?
           Rails.logger.info "Updating application with formule_id: #{formules_ids.first}"
           @activity_application.update(formule_id: formules_ids.first)
