@@ -170,7 +170,7 @@ RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT
 
 # ~ 147mb
-COPY --from=build /usr/local/bundle /usr/local/bundle
+COPY --from=build --chown=elvis:elvis /usr/local/bundle /usr/local/bundle
 
 # ~ 60mb => because of bootsnap precompile. It is bigger for more speed
 COPY --from=build --chown=elvis:elvis $RAILS_ROOT $RAILS_ROOT
