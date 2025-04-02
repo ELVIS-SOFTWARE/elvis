@@ -18,9 +18,8 @@ import * as api from "../../tools/api";
 const SEASON_STORED_KEY = "PaymentsSummarySelectedSeason";
 
 function calculateTotals(duePayments, payments, itemsForPayment) {
-    // Corriger le calcul de totalDue pour éviter de compter deux fois les activités incluses dans des formules
     const totalDue = _.reduce(
-        _.filter(itemsForPayment, item => !item.isFormulaItem), // Filtrer pour exclure les éléments des formules
+        _.filter(itemsForPayment, item => !item.isFormulaItem),
         (sum, item) => sum + (item.discountedTotal || 0),
         0.0
     );
@@ -28,21 +27,21 @@ function calculateTotals(duePayments, payments, itemsForPayment) {
     const previsionalTotal = _.chain(duePayments)
         .values()
         .flatten()
-        .map(dp => parseFloat(dp.adjusted_amount)) // Corriger le nom de la propriété
+        .map(dp => parseFloat(dp.adjusted_amount))
         .reduce((sum, n) => (sum + n), 0)
         .value();
 
     const totalPayments = _.chain(payments)
         .values()
         .flatten()
-        .map(p => parseFloat(p.adjusted_amount)) // Corriger le nom de la propriété
+        .map(p => parseFloat(p.adjusted_amount))
         .reduce((sum, n) => (sum + n), 0)
         .value();
 
     const totalPayback = _.chain(payments)
         .values()
         .flatten()
-        .map(p => parseFloat(p.adjusted_amount)) // Corriger le nom de la propriété
+        .map(p => parseFloat(p.adjusted_amount))
         .compact()
         .reduce((sum, n) => (sum + n), 0)
         .value();
@@ -52,7 +51,7 @@ function calculateTotals(duePayments, payments, itemsForPayment) {
         .flatten()
         .filter(
             p =>
-                !p.payment_status_id && Date.parse(p.cashing_date) <= Date.now() // Corriger le nom de la propriété
+                !p.payment_status_id && Date.parse(p.cashing_date) <= Date.now()
         )
         .map(p => parseFloat(p.adjusted_amount))
         .reduce((sum, n) => (sum + n), 0)
@@ -82,24 +81,17 @@ function generateDataForPaymentSummaryTable({
                                                 options,
                                                 seasonId,
                                                 seasons,
-                                                adhesions,
-                                                adhesionPrices,
-                                                adhesionEnabled,
-                                                packs,
-                                                user,
                                                 formulas = []
                                             }) {
     let data = [];
 
-    const formulaActivities = {}; // Stocker les activités par formule
-    const nonFormulaActivities = []; // Pour stocker les activités qui ne font pas partie d'une formule
+    const formulaActivities = {};
+    const nonFormulaActivities = [];
     const seasonActivities = activities.filter(a =>
         desired.find(d => d.activity_id === a.activity.id)
     );
 
-    console.log("Formulas in generation:", formulas);
 
-    // Première passe : trier les activités entre formules et individuelles
     seasonActivities.forEach(act => {
         const a = act.activity;
         const des = desired.find(
@@ -109,7 +101,6 @@ function generateDataForPaymentSummaryTable({
         );
 
         if (des) {
-            // Récupération de l'ID de formule depuis activity_application
             const formulaId = des.activity_application.formule_id;
             if (formulaId) {
                 if (!formulaActivities[formulaId]) {
@@ -117,13 +108,11 @@ function generateDataForPaymentSummaryTable({
                 }
                 formulaActivities[formulaId].push({ act, des, activity: a });
             } else {
-                // Si l'activité ne fait pas partie d'une formule, on la traite individuellement
                 nonFormulaActivities.push({ act, des, activity: a });
             }
         }
     });
 
-    // Traitement des activités individuelles (qui ne font pas partie d'une formule)
     nonFormulaActivities.forEach(({ act, des, activity: a }) => {
         const activityNbLessons = a.intended_nb_lessons;
         const season = seasons.find(s => s.id === seasonId);
@@ -169,41 +158,33 @@ function generateDataForPaymentSummaryTable({
                 priceAssociation && priceAssociation.price
                     ? _.round(priceAssociation.price / activityNbLessons, 2)
                     : 0,
-            formula: null, // Pas de formule pour cette activité
+            formula: null,
             isFormula: false
         });
     });
 
-    // Traitement des formules
     _.forEach(formulaActivities, (activitiesArray, formulaId) => {
-        console.log(`Searching for formula with ID: ${formulaId}`);
-        console.log("Available formulas:", formulas);
         const formula = _.find(formulas, f => String(f.id) === String(formulaId));
-        if (!formula) {
-            console.warn(`Formule non trouvée pour l'ID ${formulaId}`);
-            return;
-        }
+
         const user = activitiesArray[0].act.user;
         const formulaPricing = formula.formule_pricings && formula.formule_pricings[0];
         const formulaPrice = formulaPricing ? formulaPricing.price : 0;
 
-        // Utiliser la même logique que pour les activités individuelles
         const coupon = _.get(formula, "discount.coupon", {});
         const percentOff = _.get(formula, "discount.coupon.percent_off", 0);
         const discountedFormulaPrice = getDiscountedAmount(formulaPrice, percentOff);
 
-        // Créer une seule ligne pour la formule
         data.push({
             id: `formula-${formula.id}`,
-            activity: `${formula.name}`, // Affiche uniquement le nom de la formule
+            activity: `${formula.name}`,
             subActivities: activitiesArray.map(
                 ({ activity: a }) => `${a.activity_ref.label} (${a.activity_ref.kind})`
             ),
             frequency: 1,
-            initial_total: formulaPrice,         // Prix de base de la formule (avant remise)
-            due_total: formulaPrice,             // Affiche le prix de base
-            coupon: coupon,                      // Coupon tel qu'enregistré (avec percent_off, label, id, etc.)
-            discountedTotal: discountedFormulaPrice, // Prix après remise
+            initial_total: formulaPrice,
+            due_total: formulaPrice,
+            coupon: coupon,
+            discountedTotal: discountedFormulaPrice,
             unitPrice: formulaPrice,
             user: user,
             studentId: user.id,
@@ -310,7 +291,6 @@ class PaymentsManagement extends React.Component {
             .value();
 
         return {
-            // adhesions,
             payments,
             duePayments,
             schedules,
@@ -490,9 +470,7 @@ class PaymentsManagement extends React.Component {
         let oldCoupon = null;
 
         switch (discountable_type) {
-            // si mise à jour de la remise sur une adhésion
             case "Adhesion":
-                // retrouver l'adhésion dans le state et mettre à jour la remise
                 const adhesions = [...this.state.adhesions];
                 const index = this.state.adhesions.findIndex(
                     adh => adh.id === discountable_id
@@ -509,9 +487,7 @@ class PaymentsManagement extends React.Component {
                 this.setState({adhesions});
                 break;
 
-            // si mise à jour de la remise sur une activité
             case "DesiredActivity":
-                // retrouver l'activité dans le state et mettre à jour la remise
                 let dess = [...this.state.desiredActivities];
                 const des = this.state.desiredActivities.find(
                     i => i.id === discountable_id
@@ -524,17 +500,13 @@ class PaymentsManagement extends React.Component {
                 this.setState({desiredActivities: dess});
                 break;
 
-            // Ajouter un cas pour les formules
                 case "Formula":
-                // Récupérer les formules du state
                 let formulas = [...this.state.formulas];
                 const formulaIndex = formulas.findIndex(f => f.id === discountable_id);
                 if (formulaIndex === -1) return null;
                 oldCoupon = _.get(formulas[formulaIndex], "discount.coupon", null);
 
-                // Si coupon est indéfini (aucune remise), on stocke un objet vide
                 const updatedCoupon = coupon ? { ...coupon } : {};
-                // Si un coupon est défini et qu'il n'a pas d'id, le créer via un fallback
                 if (coupon && !updatedCoupon.id) {
                     updatedCoupon.id = coupon.id || coupon.coupon_id || coupon.label;
                 }
@@ -551,30 +523,24 @@ class PaymentsManagement extends React.Component {
         return oldCoupon;
     }
     handleChangePercentOffChoice(discountable_id, discountable_type, couponId) {
-        // Corriger l'utilisation de Lodash
         const coupon = _.find(this.props.coupons, c => c.id == couponId);
 
-        // Stocker l'ancien coupon pour pouvoir le restaurer en cas d'erreur
         const oldCoupon = this.setStateWithCoupon(discountable_id, discountable_type, coupon);
-        console.log("State après ajout de la remise :", this.state.formulas);
 
 
         const fetcher = api.set()
             .error((e) => {
                 console.error(e);
-                // Erreur -> on restaure la valeur précédente
                 this.setStateWithCoupon(discountable_id, discountable_type, oldCoupon);
                 swal("Erreur", "Une erreur est survenue", "error");
             });
 
         if (parseInt(couponId) === 0) {
-            // si pas de remise sélectionnée, supprimer la remise
             fetcher.del(`/discounts`, {
                 discountable_id: discountable_id,
                 discountable_type: discountable_type === "Formula" ? "Formule" : discountable_type
             });
         } else {
-            // sinon, mettre à jour la remise
             fetcher.post(`/discounts/upsert`, {
                 discountable_id: discountable_id,
                 discountable_type: discountable_type === "Formula" ? "Formule" : discountable_type,
@@ -1302,7 +1268,6 @@ class PaymentsManagement extends React.Component {
             formulas: this.state.formulas,
         });
 
-        console.log("Items for payment calculation:", itemsForPayment);
 
 
         const {

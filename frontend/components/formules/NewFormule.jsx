@@ -143,54 +143,67 @@ export default function NewFormule() {
     function handleActivityChange(selectedOptions) {
         if (!selectedOptions) {
             setSelectedActivities([]);
+            setFormattedActivities([]);
+            setNbActivitiesToSelect(0);
             setValidationError(prevState => ({
                 ...prevState,
                 selectedActivities: 'Veuillez sélectionner au moins une activité.'
             }));
             return;
         }
+
         const selected = [];
         const formattedFamily = [];
         const formattedActivity = [];
+        let totalActivitiesCount = 0;
 
         selectedOptions.forEach(option => {
-                if (option.isFamily) {   // Ajouter toutes les activités de la famille sélectionnée
-                    const familyActivities = activities
-                        .filter(activity => activity.activity_ref_kind_id === option.value)
-                        .map(activity => ({
-                            label: activity.label,
-                            value: activity.id,
-                        }));
-                    selected.push(...familyActivities);
+            if (option.isFamily) {   // Ajouter toutes les activités de la famille sélectionnée
+                const familyActivities = activities
+                    .filter(activity => activity.activity_ref_kind_id === option.value)
+                    .map(activity => ({
+                        label: activity.label,
+                        value: activity.id,
+                    }));
+                selected.push(...familyActivities);
 
-                    formattedFamily.push({
-                        itemId: option.value,
-                        isFamily: true
-                    });
+                // Ajouter le nombre d'activités dans cette famille
+                totalActivitiesCount += familyActivities.length;
 
-                } else { // Ajouter une activité spécifique
-                    selected.push({
-                        ...option,
-                        isFamily: false
-                    });
-                    formattedActivity.push({
-                        itemId: option.value,
-                        isFamily: false
-                    });
-                }
+                formattedFamily.push({
+                    itemId: option.value,
+                    isFamily: true
+                });
+
+            } else { // Ajouter une activité spécifique
+                selected.push({
+                    ...option,
+                    isFamily: false
+                });
+                formattedActivity.push({
+                    itemId: option.value,
+                    isFamily: false
+                });
+                totalActivitiesCount += 1;
+            }
         });
+
         const uniqueSelectedActivities = Array.from(
             new Map(selected.map(item => [item.value, item])).values()
         );
 
         setSelectedActivities(uniqueSelectedActivities);
         setFormattedActivities([...formattedFamily, ...formattedActivity]);
+
+        // Mettre à jour automatiquement le nombre d'activités à sélectionner
+        // basé sur le nombre total d'activités disponibles
+        setNbActivitiesToSelect(totalActivitiesCount);
+
         setValidationError(prevState => ({
             ...prevState,
             selectedActivities: ''
         }));
     }
-
     function handleNbActivitiesToSelectChange(e) {
         const value = e.target.value;
         if (isNaN(value)) {

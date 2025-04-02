@@ -1023,8 +1023,6 @@ class PaymentsController < ApplicationController
     data = []
     desired = @desired_activities[season_id.to_s]
     season_activities = @activities_json.select { |act| desired.select { |d| d["activity_id"] == act["activity_id"] } }
-
-    # Stocker les activités par formule pour les regrouper plus tard
     formula_activities = {}
 
     season_activities.each do |act|
@@ -1072,19 +1070,14 @@ class PaymentsController < ApplicationController
       end
     end
 
-    # Traitement des formules
     formula_activities.each do |formula_id, activities|
-      # Récupérer les infos de la formule
       formula = Formula.find(formula_id)
-      # On prend l'utilisateur du premier élément (tous devraient avoir le même utilisateur)
       user = activities.first[:act]["user"]
 
-      # Calculer le prix de la formule en utilisant la fonction calculate_formula_price (Ruby)
       formula_price = calculate_formula_price(formula, activities, season_id)
 
-      # Ajouter la formule comme une ligne dans le tableau des paiements
       data.push({
-                  id: 0, # ID temporaire pour la formule
+                  id: 0,
                   activity: "Formule #{formula.name} de #{user['first_name']} #{user['last_name']}",
                   frequency: 1,
                   initial_total: formula_price,
@@ -1093,12 +1086,10 @@ class PaymentsController < ApplicationController
                   user: user,
                   studentId: user["id"],
                   formulaId: formula.id,
-                  formula_activities: activities.map { |item| item[:des]["id"] }, # Pour référencer les activités incluses
-                  # Ajout d'un indicateur pour différencier les formules dans l'UI
+                  formula_activities: activities.map { |item| item[:des]["id"] },
                   isFormula: true
                 })
 
-      # On peut aussi ajouter les activités individuelles avec prix à 0 pour montrer ce qui est inclus
       activities.each do |item|
         a = item[:activity]
         des = item[:des]
@@ -1116,9 +1107,9 @@ class PaymentsController < ApplicationController
                     pricingCategoryId: des["pricing_category_id"],
                     activityId: a["id"],
                     paymentLocation: act["payment_location"],
-                    due_total: 0, # Prix à 0 car inclus dans la formule
-                    formulaId: formula.id, # Référence à la formule parente
-                    isFormulaItem: true # Pour identifier comme élément d'une formule
+                    due_total: 0,
+                    formulaId: formula.id,
+                    isFormulaItem: true
                   })
       end
     end
@@ -1236,10 +1227,8 @@ class PaymentsController < ApplicationController
 
   def calculate_formula_price(formula, activities, season_id)
     if formula.fixed_price
-      # Si la formule a un prix fixe
       return formula.price
     else
-      # Sinon, calculer le prix basé sur les activités avec la réduction
       total = 0
       activities.each do |item|
         a = item[:activity]
@@ -1259,7 +1248,6 @@ class PaymentsController < ApplicationController
         end
       end
 
-      # Appliquer la réduction de la formule
       discount_amount = (total * formula.discount_percent / 100).round(2)
       return total - discount_amount
     end

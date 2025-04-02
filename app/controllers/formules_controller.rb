@@ -54,32 +54,38 @@ class FormulesController < ApplicationController
     ActiveRecord::Base.transaction do
       # Save formule items
       formule_items_params = params.permit(formuleItems: [:itemId, :isFamily])[:formuleItems]
-      formule_items_params.each do |formule_item|
-        formule.formule_items.new(
-          item_type: formule_item[:isFamily] ? ActivityRefKind.name : ActivityRef.name,
-          item_id: formule_item[:itemId]
-        )
+
+      if formule_items_params.present?
+        formule_items_params.each do |formule_item|
+          formule.formule_items.new(
+            item_type: formule_item[:isFamily] ? ActivityRefKind.name : ActivityRef.name,
+            item_id: formule_item[:itemId]
+          )
+        end
       end
 
       # Save formule prices
-      formule_prices_params = params.permit(formulePricings: [:priceCategoryId, :price, :fromSeasonId, :toSeasonId])[:formulePricings]
-      formule_prices_params.each do |formule_price|
-        to_season = Season.find_by(id: formule_price[:toSeasonId])
-        from_season = Season.find(formule_price[:fromSeasonId])
-        pricing_category = PricingCategory.find(formule_price[:priceCategoryId])
+      formule_prices_params = params.permit(formulePrices: [:priceCategoryId, :price, :fromSeasonId, :toSeasonId])[:formulePrices]
 
-        formule.formule_pricings.new(
-          pricing_category_id: pricing_category.id,
-          price: formule_price[:price],
-          from_season_id: from_season.id,
-          to_season_id: to_season&.id
-        )
+      if formule_prices_params.present?
+        formule_prices_params.each do |formule_price|
+          to_season = Season.find_by(id: formule_price[:toSeasonId])
+          from_season = Season.find(formule_price[:fromSeasonId])
+          pricing_category = PricingCategory.find(formule_price[:priceCategoryId])
+
+          formule.formule_pricings.new(
+            pricing_category_id: pricing_category.id,
+            price: formule_price[:price],
+            from_season_id: from_season.id,
+            to_season_id: to_season&.id
+          )
+        end
       end
 
       if formule.save
         render json: formule.as_json
       else
-        render json: { errors: formule.errors.full_messages }, status: 422
+        render json: { error: formule.errors.full_messages.join(", ") }, status: 422
         raise ActiveRecord::Rollback
       end
     end

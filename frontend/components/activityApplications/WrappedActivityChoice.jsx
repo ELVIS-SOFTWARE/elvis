@@ -12,7 +12,6 @@ class WrappedActivityChoice extends React.Component {
     isValidated() {
         const { selectedActivities, selectedFormulas, selectedPacks } = this.props;
 
-        // Si aucune formule n'a été sélectionnée, on impose le choix d'au moins une activité
         if (Object.keys(selectedFormulas).length === 0 && selectedActivities.length === 0 && Object.keys(selectedPacks).length === 0) {
             toast.error("Vous devez choisir au moins une activité si vous n'avez pas sélectionné de formule", { autoClose: 3000 });
             return false;

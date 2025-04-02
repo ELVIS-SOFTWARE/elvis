@@ -42,7 +42,6 @@ class Wizard extends React.Component {
         const user = this.props.user;
 
         const intervals = this.props.availabilities || [];
-        console.log("Formules passées au wizard:", this.props.formulas);
 
         this.state = {
             user: user,
@@ -97,7 +96,6 @@ class Wizard extends React.Component {
 
     componentDidMount() {
         if (!this.props.season) return;
-        console.log("Props dans Wizard :", this.props);
 
 
         if (this.props.preSelectedUser) {
@@ -157,7 +155,6 @@ class Wizard extends React.Component {
         }
 
         this.setState({ selectedFormulas: newSelectedFormulas }, () => {
-            // Calculer le total estimé après ajout ou suppression de la formule
             const newTotalPrice = newSelectedFormulas.reduce(
                 (acc, f) => acc + parseFloat(f.display_price || 0),
                 0
@@ -169,18 +166,14 @@ class Wizard extends React.Component {
     handleRemoveFormula(formulaId) {
         let newSelectedFormulas = [...this.state.selectedFormulas];
 
-        // Retirer la formule par son ID
         _.pull(newSelectedFormulas, formulaId);
 
-        // Mettre à jour l'état avec la nouvelle liste de formules sélectionnées
         this.setState({ selectedFormulas: newSelectedFormulas });
 
-        // Supprimer les activités associées à cette formule
         const newSelectedFormulaActivities = { ...this.state.selectedFormulaActivities };
         delete newSelectedFormulaActivities[formulaId];
         this.setState({ selectedFormulaActivities: newSelectedFormulaActivities });
 
-        // Optionnel : mettre à jour le total estimé si tu le calcules quelque part
         const newTotalPrice = newSelectedFormulas.reduce(
             (acc, f) => acc + parseFloat(f.display_price || 0),
             0
@@ -426,13 +419,9 @@ class Wizard extends React.Component {
         const individualActivities = Array.isArray(state.selectedActivities)
             ? state.selectedActivities
             : [];
-        console.log("Raw selectedFormulas:", this.state.selectedFormulas);
 
 
         const formulaActivities = Object.values(state.selectedFormulaActivities || {}).flat();
-        formulaActivities.forEach(activity => {
-            console.log("🔎 Activité de formule traitée :", activity);
-        });
 
         state.selectedFormulas = Array.isArray(this.state.selectedFormulas)
             ? this.state.selectedFormulas.map(f => (typeof f === "object" ? f.id : f))
@@ -444,7 +433,6 @@ class Wizard extends React.Component {
 
         state.selectedFormulaActivities = {};
 
-        console.log("Selected formulas to send:", state.selectedFormulas);
 
         const authToken = _.get(this.state, "infos.authenticationtoken");
 
@@ -476,7 +464,7 @@ class Wizard extends React.Component {
                 Swal.fire({
                     title: title,
                     html: htmltext,
-                    timer: 1000000,
+                    timer: 10000,
                     allowOutsideClick: false,
                     confirmButtonText: confirmtext,
                 })
@@ -711,10 +699,8 @@ class Wizard extends React.Component {
 
 
     getLabelsFromSelectedActivities() {
-        // Récupérer les activités directement sélectionnées
         let selectedActivityRefIds = this.state.selectedActivities.slice();
 
-        // Ajouter les activités sélectionnées dans les formules
         if (this.state.selectedFormulaActivities) {
             Object.values(this.state.selectedFormulaActivities).forEach(activities => {
                 activities.forEach(activityId => {
@@ -731,7 +717,6 @@ class Wizard extends React.Component {
             .map(ref => ref.id);
 
         // Filtrer notre sélection pour ne conserver que les activités qui ne nécessitent pas de préférences
-        // Gardons le fonctionnement original avec !prefsReqActivityRefIds.includes(activity)
         selectedActivityRefIds = selectedActivityRefIds.filter(activity => !prefsReqActivityRefIds.includes(activity));
 
         // Retourner un tableau avec les noms des activités sélectionnées
@@ -926,7 +911,7 @@ class Wizard extends React.Component {
                         }
                         handleAddPack={(key, id) => this.handleAddPack(key, id)}
                         handleRemovePack={(key, id) => this.handleRemovePack(key, id)}
-                        selectedFormulas={this.state.selectedFormulas} // <-- ajoute cette ligne
+                        selectedFormulas={this.state.selectedFormulas}
                         selectedPacks={this.state.selectedPacks}
                         validation={null}
                         infoText={this.props.activityChoiceDisplayText}
