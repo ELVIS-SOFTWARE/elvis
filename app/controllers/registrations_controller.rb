@@ -10,7 +10,8 @@ class RegistrationsController < Devise::RegistrationsController
   end
 
   def create
-    valid = verify_recaptcha(action: "sign_up")
+    recaptcha_token = params[:recaptcha_token]
+    valid = verify_recaptcha(response: recaptcha_token, action: "sign_up")
     score = if recaptcha_reply.present? # nil == recaptcha not configured
               (recaptcha_reply["score"] || 0)
             else
@@ -37,7 +38,6 @@ class RegistrationsController < Devise::RegistrationsController
 
       respond_with resource and return
     end
-
 
     resource.first_connection = has_mdp
     resource.has_verified_infos = !has_mdp
@@ -93,6 +93,32 @@ class RegistrationsController < Devise::RegistrationsController
       end
     end
     # TODO send mail to user giving him credentials (adherent number)
+  end
+
+  def check_uniqueness
+    unless request.user_agent =~ /Mozilla|Chrome|Safari/
+      render json: { error: 'Invalid request' }, status: :bad_request and return
+    end
+
+    user = User.where(first_name: params[:first_name], last_name: params[:last_name], birthday: params[:birthday])
+               .or(User.where(email: params[:email])).first
+    errors = {}
+
+    # Vérifie s'il existe une combinaison prénom, nom, date de naissance
+    if user && user.first_name == params[:first_name] && user.last_name == params[:last_name] && user.birthday.to_s == params[:birthday]
+      errors[:user] = { field: 'user', message: "Un compte existe déjà avec cette combinaison Nom - Prénom - Date de Naissance." }
+    end
+
+    # Vérifie si l'email existe
+    if user && user.email == params[:email]
+      errors[:email] = { field: 'email', message: "Un compte existe déjà avec cet email." }
+    end
+
+    if errors.any?
+      render json: { exists: true, errors: errors }
+    else
+      render json: { exists: false }
+    end
   end
 
   def update_resource(resource, params)
