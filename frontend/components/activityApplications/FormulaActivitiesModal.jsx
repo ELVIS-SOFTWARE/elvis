@@ -68,20 +68,20 @@ const FormulaActivitiesModal = ({
 
         const processedActivities = [];
 
-        // Fonction pour traiter les éléments de formule
         const processFormulaItems = () => {
             if (!activeFormula.formule_items || !activeFormula.formule_items.length) return [];
 
-            // Pour chaque élément de la formule
             activeFormula.formule_items.forEach(item => {
+
+                console.log("Item de formule:", item);
                 if (item.is_for_kind) {
-                    // C'est une famille d'activités, on ajoute toutes les activités de cette famille
+                    // Log pour vérifier l'id de la famille
+                    console.log("Traitement d'une famille d'activités:", item.item.id);
                     const familyActivities = allActivityRefs.filter(activity =>
                         activity.activity_ref_kind_id === item.item.id
                     );
-
+                    console.log("Activités trouvées pour cette famille:", familyActivities);
                     familyActivities.forEach(activity => {
-                        // Ajout d'une propriété pour indiquer que cette activité appartient à une famille
                         processedActivities.push({
                             ...activity,
                             fromFamily: true,
@@ -90,7 +90,8 @@ const FormulaActivitiesModal = ({
                         });
                     });
                 } else {
-                    // C'est une activité individuelle
+                    console.log("Cet item est une activité individuelle. Id:", item.item.id);
+
                     const activity = allActivityRefs.find(a => a.id === item.item.id);
                     if (activity) {
                         processedActivities.push({
@@ -100,11 +101,11 @@ const FormulaActivitiesModal = ({
                     }
                 }
             });
-
             return processedActivities;
         };
 
         const activities = processFormulaItems();
+        console.log("Liste finale des activités disponibles:", activities);
         setAvailableActivities(activities);
     }, [activeFormula, allActivityRefs]);
 
