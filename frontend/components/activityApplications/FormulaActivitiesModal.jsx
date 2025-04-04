@@ -57,12 +57,10 @@ const FormulaActivitiesModal = ({
     const [errorMessage, setErrorMessage] = useState("");
     const [availableActivities, setAvailableActivities] = useState([]);
 
-    // Synchronize with parent component
     useEffect(() => {
         setTempSelectedActivities(initialSelectedActivities);
     }, [initialSelectedActivities, activeFormula]);
 
-    // Process formule items to extract all available activities
     useEffect(() => {
         if (!activeFormula || !allActivityRefs) return;
 
@@ -145,7 +143,6 @@ const FormulaActivitiesModal = ({
         return activity.display_name.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
-    // Grouper les activités par famille pour un affichage plus organisé
     const groupedActivities = filteredActivities.reduce((acc, activity) => {
         if (activity.fromFamily) {
             if (!acc[activity.familyId]) {

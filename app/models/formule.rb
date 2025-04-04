@@ -46,21 +46,17 @@ class Formule < ApplicationRecord
 
     formule_items.each do |item|
       if item.item_type == "ActivityRefKind"
-        # Pour chaque famille, compter le nombre d'activités qu'elle contient
         kind = ActivityRefKind.find(item.item_id)
         total_activities_count += ActivityRef.where(activity_ref_kind_id: kind.id).count
       else
-        # Pour les activités individuelles, compter 1
         total_activities_count += 1
       end
     end
 
-    # Vérifier que le nombre d'activités à choisir ne dépasse pas le total des activités disponibles
     if number_of_items > total_activities_count
       errors.add(:number_of_items, "ne peut pas dépasser le nombre total d'activités disponibles (#{total_activities_count})")
     end
 
-    # Vérifier qu'il y a au moins une activité
     if formule_items.empty?
       errors.add(:base, "La formule doit contenir au moins une activité ou famille d'activités")
     end

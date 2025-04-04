@@ -191,7 +191,6 @@ class PaymentsSummary extends React.Component {
                                 )}
                                 {d.activity}
                             </div>
-                            {/* Affichage des sous-activités de la formule */}
                             {d.isFormula && d.subActivities && (
                                 <div className="ml-4 text-sm" style={{ color: "#555" }}>
                                     {d.subActivities.map((activity, index) => (
