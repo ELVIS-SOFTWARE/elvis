@@ -73,14 +73,10 @@ const FormulaActivitiesModal = ({
 
             activeFormula.formule_items.forEach(item => {
 
-                console.log("Item de formule:", item);
-                if (item.is_for_kind) {
-                    // Log pour vérifier l'id de la famille
-                    console.log("Traitement d'une famille d'activités:", item.item.id);
+                if (item.item_type === "ActivityRefKind") {
                     const familyActivities = allActivityRefs.filter(activity =>
                         activity.activity_ref_kind_id === item.item.id
                     );
-                    console.log("Activités trouvées pour cette famille:", familyActivities);
                     familyActivities.forEach(activity => {
                         processedActivities.push({
                             ...activity,
@@ -90,7 +86,6 @@ const FormulaActivitiesModal = ({
                         });
                     });
                 } else {
-                    console.log("Cet item est une activité individuelle. Id:", item.item.id);
 
                     const activity = allActivityRefs.find(a => a.id === item.item.id);
                     if (activity) {
@@ -105,7 +100,6 @@ const FormulaActivitiesModal = ({
         };
 
         const activities = processFormulaItems();
-        console.log("Liste finale des activités disponibles:", activities);
         setAvailableActivities(activities);
     }, [activeFormula, allActivityRefs]);
 

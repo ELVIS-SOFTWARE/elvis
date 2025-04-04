@@ -475,7 +475,12 @@ export default function EditFormule({formule})
                             components={{Option}}
                             isOptionDisabled={(option) => !option.isFamily && reactSelectActivitiesSelected.find(a => a.value === option.familyValue) !== undefined}
                             value={reactSelectActivitiesSelected}
-                            onChange={setReactSelectActivitiesSelected}
+                            onChange={(selectedOptions) => {
+                                setReactSelectActivitiesSelected([]);
+                                setTimeout(() => {
+                                    setReactSelectActivitiesSelected(selectedOptions);
+                                }, 0);
+                        }}
                             closeMenuOnSelect={false}
                             hideSelectedOptions={false}
                             required

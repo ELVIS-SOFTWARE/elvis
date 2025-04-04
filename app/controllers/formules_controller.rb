@@ -37,17 +37,7 @@ class FormulesController < ApplicationController
         }
       }
     )
-
-    # Ajouter les activités de chaque famille sélectionnée
-    @formule["additional_activities"] = formule.formule_items.select(&:is_for_kind).flat_map do |fi|
-      ActivityRef.where(activity_ref_kind_id: fi.item_id).pluck(:id, :display_name).map do |id, name|
-        { id: id, display_name: name }
-      end
-    end
-
-    render json: @formule
   end
-
 
   def create
     formule_params = params.permit(:name, :description, :number_of_items)
