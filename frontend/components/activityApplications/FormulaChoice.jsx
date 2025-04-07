@@ -77,9 +77,7 @@ const FormulaChoice = ({
             <tr key={formula.id} style={{ color: "rgb(0, 51, 74)" }}>
                 <td style={{ fontWeight: "bold" }}>{formula.name}</td>
                 <td className="text-center">
-                    {(formula.formule_items || [])
-                        .map((item) => item.item.display_name)
-                        .join(", ") || "--"}
+                    {formula.description || "--"}
                 </td>
                 <td className="text-center">
                     {formula.formule_pricings && formula.formule_pricings[0]
@@ -268,7 +266,7 @@ const FormulaChoice = ({
                             }}
                         >
                             <th>Formule</th>
-                            <th>Activités incluses</th>
+                            <th>Description</th>
                             <th>Tarif estimé</th>
                             <th></th>
                         </tr>
