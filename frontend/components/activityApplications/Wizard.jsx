@@ -470,24 +470,24 @@ class Wizard extends React.Component {
                 })
                     .then((result) => {
                         if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
-                            window.location.href = `/new_application/${this.state.user.id || _.get(data, "activityapplication.user_id")}`;
+                            window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
                         } else {
                             window.location.href = `/inscriptions/${data.activity_application.id}`;
                         }
                     });
             })
             .error(data => {
-                this.setState({ buttonDisabled: false });
+                this.setState({buttonDisabled: false });
 
                 Swal({
                     title: "Erreur",
-                    text: [...data].join(",") || "Une erreur est survenue lors de la création de votre demande d'inscription",
+                    text: [...data].join(",") || "Une erreur est survenue lors de la création de votre demande d\'inscription",
                     type: "error",
                 });
 
                 console.error([...data].join("\n"));
             })
-            .post(`/inscriptions${authToken ? `?authtoken=${authToken}` : ""}`, {
+            .post(`/inscriptions${authToken ? `?auth_token=${authToken}` : ""}`, {
                 application: state,
                 actionType: this.props.actionType,
                 preApplicationActivityId: _.get(this.props.preApplicationActivity, "id"),

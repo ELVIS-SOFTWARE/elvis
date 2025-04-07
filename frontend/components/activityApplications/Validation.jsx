@@ -13,7 +13,6 @@ const Validation = ({
                         application,
                         activityRefs,
                         allActivityRefs,
-                        allActivityRefKinds,
                         handleSubmit,
                         additionalStudents,
                         buttonDisabled,
@@ -24,8 +23,6 @@ const Validation = ({
                         paymentTerms,
                         availPaymentScheduleOptions,
                         availPaymentMethods,
-                        selectedFormulas,
-                        selectedFormulaActivities,
                     }) => {
     const addStudents = [...additionalStudents];
 
@@ -169,12 +166,10 @@ const Validation = ({
         }
     }
 
-    // Calcul du coût total des activités sélectionnées
     const totalActivitiesCost = selectedActivities.reduce((total, act) => {
         return total + (act && act.display_price ? parseFloat(act.display_price) : 0);
     }, 0);
 
-// Calcul du coût total des formules sélectionnées
     const totalFormulasCost = application.selectedFormulas.reduce((total, formulaId) => {
         const formula = (application.formulas || formulas || []).find(f => f.id === formulaId);
         return total + (formula && formula.formule_pricings && formula.formule_pricings[0]
@@ -182,7 +177,6 @@ const Validation = ({
             : 0);
     }, 0);
 
-// Coût total global
     const totalEstimatedCost = totalActivitiesCost + totalFormulasCost;
 
 
@@ -324,8 +318,20 @@ const Validation = ({
                                         const chosenActivities = (application.selectedFormulaActivities && application.selectedFormulaActivities[formula.id]) || [];
                                         const activitiesLabel = chosenActivities
                                             .map(activityId => {
-                                                const activityItem = formula.formule_items.find(item => item.item.id === activityId);
-                                                return activityItem ? activityItem.item.display_name : null;
+                                                // Recherche dans formule_items
+                                                let activityItem = formula.formule_items.find(item => item.item.id === activityId);
+                                                if (!activityItem) {
+                                                    // Si non trouvé, il s'agit d'une activité issue d'une famille : recherche dans allActivityRefs
+                                                    const fullActivity = allActivityRefs.find(activity => activity.id === activityId);
+                                                    if (!fullActivity) return null;
+                                                    activityItem = {
+                                                        item: {
+                                                            id: fullActivity.id,
+                                                            display_name: fullActivity.display_name || fullActivity.label,
+                                                        },
+                                                    };
+                                                }
+                                                return activityItem.item.display_name || activityItem.item.label;
                                             })
                                             .filter(Boolean)
                                             .join(", ");
@@ -364,6 +370,7 @@ const Validation = ({
                             </div>
                         </div>
                     )}
+
 
                     <div className="d-flex justify-content-end mt-2">
                         <div className="p-2 bg-light" style={{ borderRadius: "5px", fontWeight: "bold" }}>

@@ -1753,7 +1753,7 @@ class PaymentsManagement extends React.Component {
                                                     className="col-lg-12 col-md-12 d-flex justify-content-between m-b-sm">
                                                     <button
                                                         type="button"
-                                                        className="btn b    tn-primary btn-xs"
+                                                        className="btn btn-primary btn-xs"
                                                         onClick={() => window.open(`/payments/summary/${this.props.user.id}.pdf?season_id=${this.state.season}&payer_id=${payer.id}`)}>
                                                         <i className="fas fa-print text-primary mr-1"/>
                                                         Imprimer une attestation de paiement

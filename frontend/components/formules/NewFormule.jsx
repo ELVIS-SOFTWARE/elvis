@@ -158,7 +158,7 @@ export default function NewFormule() {
         let totalActivitiesCount = 0;
 
         selectedOptions.forEach(option => {
-            if (option.isFamily) {   // Ajouter toutes les activités de la famille sélectionnée
+            if (option.isFamily) {
                 const familyActivities = activities
                     .filter(activity => activity.activity_ref_kind_id === option.value)
                     .map(activity => ({
@@ -167,7 +167,6 @@ export default function NewFormule() {
                     }));
                 selected.push(...familyActivities);
 
-                // Ajouter le nombre d'activités dans cette famille
                 totalActivitiesCount += familyActivities.length;
 
                 formattedFamily.push({
@@ -195,8 +194,7 @@ export default function NewFormule() {
         setSelectedActivities(uniqueSelectedActivities);
         setFormattedActivities([...formattedFamily, ...formattedActivity]);
 
-        // Mettre à jour automatiquement le nombre d'activités à sélectionner
-        // basé sur le nombre total d'activités disponibles
+
         setNbActivitiesToSelect(totalActivitiesCount);
 
         setValidationError(prevState => ({

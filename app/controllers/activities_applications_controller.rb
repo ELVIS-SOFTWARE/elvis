@@ -331,7 +331,10 @@ class ActivitiesApplicationsController < ApplicationController
     # when current_user is nil and params[:user_id] is nil => cannot create inscription for nothing
     redirect_to "/" and return if @pre_selected_user.nil?
 
-    # Récupération unique des activity_refs pour le front afin d'éviter des appels multiples à la BDD
+    # etant donnée que l'on récupère toutes les activity_refs pour le front
+    # Autant le faire une fois pour toute et ne travailler qu'avec les activity_refs
+    # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
+
     if MaxActivityRefPriceForSeason.all.empty?
       ActivityRefMaxPricesCalculatorJob.perform_now(nil)
     end
@@ -352,7 +355,9 @@ class ActivitiesApplicationsController < ApplicationController
         .as_json
     end
 
-    # Méthode interne pour récupérer le prix max pour une cible donnée
+    # do not add display_prices_by_season and display_price to @all_activity_refs.as_json
+    # because this can be a huge amount of data && sql queries
+    # So add them to activity_refs in a bulk operation
     def get_max_price_for_target_id(all_max_prices, target_id, target_type, season_id)
       all_max_prices
         .find { |mp|
@@ -380,7 +385,7 @@ class ActivitiesApplicationsController < ApplicationController
       end
     end
 
-    # On souhaite récupérer uniquement la référence d'activité la mieux tarifée pour chaque type
+    # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
                               .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and ar["substitutable"] }
                               .group_by { |ar| ar["kind"] }
@@ -434,15 +439,17 @@ class ActivitiesApplicationsController < ApplicationController
       pack["activity_ref"] = @all_activity_refs.find { |ar| ar["id"] == pack["activity_ref_id"] }
     end
 
-    # Regroupement des activity_ref_pricings par label
+    # on regroupe les activity_ref_pricings par label
     @packs = @packs.group_by { |arp| arp["activity_ref"]["label"] }
-    # Ne garder que ceux qui correspondent à un pack
+    # pick only the is_a_pack activity_ref_pricings
     @packs = @packs.each do |key, value|
       @packs[key] = value.select { |arp| arp["pricing_category"]["is_a_pack"] }
     end
+
+    # on retire les packs qui n'ont pas de tarifs
     @packs = @packs.select { |_key, value| value.any? }
 
-    # === Ajout de la récupération des formules pour le wizard d'inscription ===
+    # on retire les packs qui n'ont pas de tarifs
     @formules = Formule.all.as_json(
       include: {
         formule_items: { include: { item: { only: %i[id display_name] } } },
@@ -463,6 +470,9 @@ class ActivitiesApplicationsController < ApplicationController
     # ==========================================================================
 
     if @current_user.nil?
+      # @current_user = User.new
+      # @current_user.first_connection = true
+      # @hide_navigation = true
       render layout: "simple"
     end
   end
@@ -607,8 +617,6 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def create
-    Rails.logger.info "Params selectedFormulas: #{params[:application][:selectedFormulas].inspect}"
-    Rails.logger.info "Params selectedFormulaActivities: #{params[:application][:selectedFormulaActivities].inspect}"
 
     authorize! :create, ActivityApplication.new(user_id: params[:application][:infos][:id])
     begin
@@ -828,7 +836,7 @@ class ActivitiesApplicationsController < ApplicationController
 
 
 
-        # Récupère la structure des activités par formule
+
         formula_activities = params[:application][:selectedFormulaActivities] || {}
 
         params[:application][:selectedActivities].each do |act|
@@ -840,7 +848,7 @@ class ActivitiesApplicationsController < ApplicationController
             begin_at: params[:application][:begin_at] || season.start,
             )
 
-          # Vérifier si cette activité fait partie d'une formule
+
           formula_id = nil
           formula_activities.each do |formula_id_key, activities|
             # Convert act to string for comparison since it might be a number
@@ -850,7 +858,7 @@ class ActivitiesApplicationsController < ApplicationController
             end
           end
 
-          # Si l'activité fait partie d'une formule, associe la formule à l'application
+
           if formula_id
             @activity_application.update(formule_id: formula_id)
           end
@@ -953,9 +961,7 @@ class ActivitiesApplicationsController < ApplicationController
         formules_ids = params[:application][:selectedFormulas] || []
         formula_activities = params[:application][:selectedFormulaActivities] || {}
         unless formules_ids.empty?
-          Rails.logger.info "Updating application with formule_id: #{formules_ids.first}"
           @activity_application.update(formule_id: formules_ids.first)
-          # Vous pouvez ajouter ici d'autres traitements si besoin
         end
 
         @pack_created = false

@@ -29,7 +29,6 @@ export default function TimePreferencesStep({
         if (mode === PLANNING_MODE && !defaultFetched && (intervals || []).length === 0) {
             api.set()
                 .success(intervals => {
-                    // S'assurer que tous les intervals sont valides avec _.compact
                     onAvailabilityAdd(_.compact(intervals).map((interval, i) => ({...interval, tabId: interval.id || i})));
                     availabilityRef.current.componentDidMount();
                     setDefaultFetched(true);
@@ -37,27 +36,6 @@ export default function TimePreferencesStep({
                 .get(`/planning/${planningId}/availabilities/defaults?season_id=${season.id}&save_defaults_to_planning=${!disableLiveReload}`)
         }
     }, [defaultFetched]);
-
-    const renderAvailabilityManager = () => {
-        return (
-            <AvailabilityManager
-                selectionLabels={selectionLabels} // Inclut maintenant les labels des activités des formules
-                ref={availabilityRef}
-                day={season.start}
-                intervals={intervals}
-                authToken={authToken}
-                isTeacher={false}
-                locked={false}
-                kinds={["p"]} // Types d'intervalles autorisés pour les plannings
-                seasonId={season.id}
-                forSeason
-                disableLiveReload={disableLiveReload}
-                planningId={planningId}
-                onAdd={onAvailabilityAdd}
-                onDelete={onAvailabilityDelete}
-            />
-        );
-    };
 
     switch (mode)
     {
