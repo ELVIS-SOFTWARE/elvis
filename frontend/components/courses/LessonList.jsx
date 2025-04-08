@@ -667,8 +667,8 @@ export default class LessonList extends React.Component {
                         onChange={e =>
                             e.target.checked
                                 ? this.setState({
-                                      targets: this.state.data.map(r => r.id),
-                                  })
+                                    targets: this.state.data.map(r => r.id),
+                                })
                                 : this.setState({ targets: [] })
                         }
                     />
@@ -998,10 +998,10 @@ export default class LessonList extends React.Component {
                             href={
                                 c.original.time_interval
                                     ? `/planning/${
-                                          c.original.teacher.planning.id
-                                      }/${moment(
-                                          c.original.time_interval.start
-                                      ).format(ISO_DATE_FORMAT)}`
+                                        c.original.teacher.planning.id
+                                    }/${moment(
+                                        c.original.time_interval.start
+                                    ).format(ISO_DATE_FORMAT)}`
                                     : "/activities"
                             }
                         >
@@ -1149,11 +1149,12 @@ export default class LessonList extends React.Component {
                             this.fetchData({
                                 ...this.state.filter,
                                 filtered,
+                                page: 0,
                             })
                         }
                         filterable
                         sortable
-                        resizable={false}
+                        resizable={true}
                         previousText="Précédent"
                         nextText="Suivant"
                         loadingText="Chargement..."
@@ -1327,6 +1328,8 @@ const UserRow = ({
         "NON ASSIGNÉ";
 
     const [desiredActivityId, setDesiredActivityId] = React.useState(null);
+    const [studentLevel, setStudentLevel] = React.useState(null);
+    const [activityApplicationId, setActivityApplicationId] = React.useState(null);
 
     React.useEffect(() => {
         api
@@ -1335,34 +1338,51 @@ const UserRow = ({
                 console.error("Erreur lors de la récupération de la demande d'inscription:", error);
             })
             .success((data) => {
-                setDesiredActivityId(data.activity_application_id);
+                setDesiredActivityId(data.id);
+                if (data && data.evaluation_level_ref) {
+                    setStudentLevel(data.evaluation_level_ref.label);
+                }
+
+                setActivityApplicationId(data.activity_application_id);
             })
             .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
     }, [user.id, activity.id]);
 
-    const inscriptionUrl = desiredActivityId ? `/inscriptions/${desiredActivityId}` : "#";
+    const inscriptionUrl = activityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
+
+    // Modification principale : priorité à studentLevel, puis vérification explicite
+    const displayLevel = () => {
+        if (studentLevel === "NON INDIQUÉ") {
+            return "NON INDIQUÉ";
+        }
+        if (studentLevel) {
+            return studentLevel;
+        }
+
+        const computedLevel = TimeIntervalHelpers.levelDisplayForActivity(
+            {
+                users,
+                activity_ref_id,
+                time_interval,
+                activity_ref: activityRef,
+            },
+            seasons
+        );
+
+        return computedLevel && computedLevel !== "À PRÉCISER"
+            ? computedLevel
+            : "NON INDIQUÉ";
+    };
 
     return (
         <tr style={customStyle}>
             <td>
-                <a
-                    href={inscriptionUrl}
-                >
+                <a href={inscriptionUrl}>
                     {user.first_name} {user.last_name}
                 </a>
             </td>
             <td>{TimeIntervalHelpers.age(user.birthday)} ans</td>
-            <td>
-                {TimeIntervalHelpers.levelDisplayForActivity(
-                    {
-                        users,
-                        activity_ref_id,
-                        time_interval,
-                        activity_ref: activityRef,
-                    },
-                    seasons
-                )}
-            </td>
+            <td>{displayLevel()}</td>
             {isWorkGroup && <td>{userInstrument}</td>}
             <td>
                 {(user.begin_at &&
