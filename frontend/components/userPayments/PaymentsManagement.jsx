@@ -81,6 +81,11 @@ function generateDataForPaymentSummaryTable({
                                                 options,
                                                 seasonId,
                                                 seasons,
+                                                adhesions,
+                                                adhesionPrices,
+                                                adhesionEnabled,
+                                                packs,
+                                                user,
                                                 formulas = []
                                             }) {
     let data = [];
@@ -90,7 +95,6 @@ function generateDataForPaymentSummaryTable({
     const seasonActivities = activities.filter(a =>
         desired.find(d => d.activity_id === a.activity.id)
     );
-
 
     seasonActivities.forEach(act => {
         const a = act.activity;
@@ -194,6 +198,118 @@ function generateDataForPaymentSummaryTable({
             formula: formula
         });
     });
+
+
+    if (options && options.length > 0) {
+        const taken = seasonActivities.map(act => act.activity.id);
+        const takenDesired = data
+            .filter(d => !d.isFormula)
+            .map(d => d.id)
+            .filter(id => typeof id === 'number');
+
+        options.forEach(option => {
+            if (taken.includes(option.activity.id)) return;
+
+            const a = option.activity;
+            const des = desired.find(d => d.id === option.desired_activity_id);
+
+            if (!des || takenDesired.includes(des.id)) return;
+
+            takenDesired.push(des.id);
+
+            const activity_nb_lessons = a.intended_nb_lessons;
+            const season = seasons.find(s => s.id === seasonId);
+            const priceAssociations = [];
+
+            a.activity_ref.activity_ref_pricing.forEach(arp => {
+                if (new Date(arp.from_season.start) <= new Date(season.start) &&
+                    (!arp.to_season || new Date(arp.to_season.end) >= new Date(season.end))) {
+                    priceAssociations.push(arp);
+                }
+            });
+
+            const priceAssociation = priceAssociations.find(pa => pa.pricing_category_id === des.pricing_category_id);
+
+            let amount = 0;
+            if (priceAssociation && priceAssociation.price) {
+                amount = _.round((priceAssociation.price / activity_nb_lessons) * (des.prorata || activity_nb_lessons), 2);
+            }
+
+            const coupon = _.get(des, "discount.coupon", 0);
+            const percentOff = _.get(des, "discount.coupon.percent_off", 0);
+
+            data.push({
+                id: des.id,
+                activity: `${a.activity_ref.label} (${a.activity_ref.kind})`,
+                intended_nb_lessons: a.intended_nb_lessons,
+                des,
+                ref: a.activity_ref,
+                prorata: des.prorata,
+                coupon: coupon,
+                studentId: option.id,
+                user: option.desired_activity.activity_application.user,
+                pricingCategoryId: des.pricing_category_id,
+                paymentLocation: option.payment_location,
+                due_total: amount || 0,
+                discountedTotal: getDiscountedAmount(amount, percentOff),
+                isOption: true,
+                unitPrice: priceAssociation && priceAssociation.price ? _.round((priceAssociation.price / activity_nb_lessons), 2) : 0
+            });
+        });
+    }
+
+    if (adhesionEnabled && adhesions && adhesions.length > 0) {
+        adhesions.forEach(adhesion => {
+            const adhesionPrice = adhesionPrices.find(p => p.id === adhesion.adhesion_price_id) || {};
+
+            if (adhesionPrice) {
+                const coupon = _.get(adhesion, "discount.coupon", 0);
+                const percentOff = _.get(adhesion, "discount.coupon.percent_off", 0);
+
+                data.push({
+                    id: 0,
+                    activity: `Adhésion de ${adhesion.user.first_name} ${adhesion.user.last_name}`,
+                    frequency: 1,
+                    initial_total: 1,
+                    due_total: adhesionPrice.price || 0,
+                    coupon: coupon,
+                    discountedTotal: getDiscountedAmount(adhesionPrice.price, percentOff),
+                    unitPrice: adhesionPrice.price || 0,
+                    user: adhesion.user,
+                    studentId: adhesion.user.id,
+                    adhesionPriceId: adhesionPrice.id,
+                    adhesionId: adhesion.id
+                });
+            }
+        });
+    }
+
+    if (packs && packs.length > 0) {
+        const userPacks = packs.filter(p => p);
+
+        if (userPacks.length > 0) {
+            userPacks.forEach(pack => {
+                const pack_price = pack.activity_ref_pricing.price;
+                const coupon = _.get(pack, "discount.coupon", 0);
+                const percentOff = _.get(pack, "discount.coupon.percent_off", 0);
+
+                data.push({
+                    id: 0,
+                    activity: `Pack de ${user.first_name} ${user.last_name} pour ${pack.activity_ref.label} (${pack.activity_ref.kind})`,
+                    frequency: 1,
+                    initial_total: 1,
+                    due_total: pack_price || 0,
+                    coupon: coupon,
+                    discountedTotal: getDiscountedAmount(pack_price || 0, percentOff),
+                    unitPrice: pack_price || 0,
+                    user: user,
+                    studentId: user.id,
+                    packPrice: pack.activity_ref_pricing,
+                    packId: pack.id
+                });
+            });
+        }
+    }
 
     return data;
 }
