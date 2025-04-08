@@ -18,11 +18,16 @@ class ActivityRefKind < ApplicationRecord
 
   has_many :activity_refs
 
+  has_many :formule_items, as: :item, dependent: :destroy
+  has_many :formules, through: :formule_items
+
   belongs_to :default_activity_ref, class_name: "ActivityRef", optional: true
 
   validate :verify_default_activity_ref_is_for_same_activity_ref_kind
 
   has_many :max_prices, as: :target, dependent: :destroy, class_name: "MaxActivityRefPriceForSeason"
+
+  attribute :display_name
 
   def self.display_class_name(singular = true)
     singular ? "famille d'activité" : "familles d'activités"
@@ -30,6 +35,10 @@ class ActivityRefKind < ApplicationRecord
 
   def self.class_name_gender
     return :F
+  end
+
+  def display_name
+    name
   end
 
   private

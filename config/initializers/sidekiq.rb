@@ -28,7 +28,8 @@ end
 Rails.application.config.after_initialize do
   if Rails.env.development? || (Rails.env.kubernetes? && ENV["kube_env"] == "start")
     begin
-      MaxPricesCalculatorJob.perform_later(nil)
+      ActivityRefMaxPricesCalculatorJob.perform_later(nil)
+      FormulesMaxPriceCalculator.perform_later(nil)
     rescue StandardError
       # Ignored
     end

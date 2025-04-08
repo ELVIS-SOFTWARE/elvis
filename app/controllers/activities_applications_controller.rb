@@ -336,7 +336,7 @@ class ActivitiesApplicationsController < ApplicationController
     # Cela évite les appels multiples à la base de données et surtout de recalculer les prix à chaque fois (surtout display_prices_by_season)
 
     if MaxActivityRefPriceForSeason.all.empty?
-      MaxPricesCalculatorJob.perform_now(nil)
+      ActivityRefMaxPricesCalculatorJob.perform_now(nil)
     end
 
     @all_activity_refs = ActivityRef.all.includes(:activity_ref_kind, :max_prices).as_json(
@@ -347,7 +347,6 @@ class ActivitiesApplicationsController < ApplicationController
     )
 
     activity_refs = @all_activity_refs.filter { |ar| ar["is_lesson"] || ar["is_visible_to_admin"] }
-
     activity_refs = activity_refs.filter { |ar| (ar["is_visible_to_admin"] || false) == false } unless current_user&.is_admin
 
     all_max_prices = Elvis::CacheUtils.cache_block_if_enabled("wizard:activity_ref_max_prices") do
@@ -393,7 +392,6 @@ class ActivitiesApplicationsController < ApplicationController
                               .transform_values do |values|
       default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
       default_activity = values.find { |ar| ar["id"] == default_activity_id }
-
       default_activity || values.max_by { |ar| ar["display_price"] }
     end
                               .values
@@ -403,9 +401,7 @@ class ActivitiesApplicationsController < ApplicationController
                        .flatten
                        .sort_by { |a| a["kind"] }
 
-    @activity_refs_childhood = activity_refs
-                                 .select { |ar| ar["activity_type"] == "child" }
-
+    @activity_refs_childhood = activity_refs.select { |ar| ar["activity_type"] == "child" }
     @activity_refs_cham = activity_refs.filter { |ar| ar["activity_type"] == "cham" }
 
     @application_change_questions = Question.application_change_questionnaire.to_a
@@ -445,7 +441,6 @@ class ActivitiesApplicationsController < ApplicationController
 
     # on regroupe les activity_ref_pricings par label
     @packs = @packs.group_by { |arp| arp["activity_ref"]["label"] }
-
     # pick only the is_a_pack activity_ref_pricings
     @packs = @packs.each do |key, value|
       @packs[key] = value.select { |arp| arp["pricing_category"]["is_a_pack"] }
@@ -454,6 +449,25 @@ class ActivitiesApplicationsController < ApplicationController
     # on retire les packs qui n'ont pas de tarifs
     @packs = @packs.select { |_key, value| value.any? }
 
+    @formules = Formule.all.as_json(
+      include: {
+        formule_items: { include: { item: { only: %i[id display_name] } } },
+        formule_pricings: {
+          only: %i[id price],
+          include: {
+            pricing_category: { only: %i[id name] },
+            from_season: { only: %i[id name] },
+            to_season: { only: %i[id name] }
+          }
+        }
+      }
+    )
+
+    @formula_prices = @formules.map do |f|
+      { id: f["id"], display_price: f["display_price"] || 0 }
+    end
+    # ==========================================================================
+
     if @current_user.nil?
       # @current_user = User.new
       # @current_user.first_connection = true
@@ -461,6 +475,7 @@ class ActivitiesApplicationsController < ApplicationController
       render layout: "simple"
     end
   end
+
 
   # (pour élève/admin) pour un élève déjà inscrit et possédant une préinscription, renvoie vers le Wizard
   def new_for_existing_user
@@ -601,6 +616,7 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def create
+
     authorize! :create, ActivityApplication.new(user_id: params[:application][:infos][:id])
     begin
       new_applications = []
@@ -817,6 +833,11 @@ class ActivitiesApplicationsController < ApplicationController
             .execute
         end
 
+
+
+
+        formula_activities = params[:application][:selectedFormulaActivities] || {}
+
         params[:application][:selectedActivities].each do |act|
           # Création de l'inscription
           @activity_application = ActivityApplication.create!(
@@ -824,7 +845,21 @@ class ActivitiesApplicationsController < ApplicationController
             activity_application_status: initial_aa_status,
             season: season,
             begin_at: params[:application][:begin_at] || season.start,
-          )
+            )
+
+
+          formula_id = nil
+          formula_activities.each do |formula_id_key, activities|
+            if activities.include?(act.to_s) || activities.include?(act)
+              formula_id = formula_id_key
+              break
+            end
+          end
+
+
+          if formula_id
+            @activity_application.update(formule_id: formula_id)
+          end
 
           # Ajout, à l'inscription, des activités souhaitées
           #  Here, additionalStudenst are indexed incrementaly by their position in family, because they may not be already created
@@ -919,6 +954,12 @@ class ActivitiesApplicationsController < ApplicationController
             )
                                                  .execute
           end
+        end
+
+        formules_ids = params[:application][:selectedFormulas] || []
+        formula_activities = params[:application][:selectedFormulaActivities] || {}
+        unless formules_ids.empty?
+          @activity_application.update(formule_id: formules_ids.first)
         end
 
         @pack_created = false

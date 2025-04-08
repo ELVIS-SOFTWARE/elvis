@@ -16,6 +16,10 @@ class ApplicationRecord < ActiveRecord::Base
     return :M
   end
 
+  def class_name
+    self.class.name
+  end
+
   # Récupère les associations qui pointent vers le modèle courant
   # exemple: si on est dans PaymentMethod, on récupère les associations qui pointent vers PaymentMethod (like: DuePayment, Payment)
   # @return [Array<ActiveRecord::Reflection::BelongsToReflection>]

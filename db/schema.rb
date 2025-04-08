@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_11_19_143119) do
+ActiveRecord::Schema.define(version: 2024_11_29_094656) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -88,6 +88,7 @@ ActiveRecord::Schema.define(version: 2024_11_19_143119) do
     t.datetime "begin_at"
     t.string "reason_of_refusal"
     t.datetime "mail_sent_at"
+    t.integer "formule_id"
     t.index ["activity_application_status_id"], name: "index_activity_applications_on_activity_application_status_id"
     t.index ["deleted_at"], name: "index_activity_applications_on_deleted_at"
     t.index ["user_id"], name: "index_activity_applications_on_user_id"
@@ -533,6 +534,40 @@ ActiveRecord::Schema.define(version: 2024_11_19_143119) do
     t.integer "group_rate", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "formule_items", force: :cascade do |t|
+    t.bigint "formule_id"
+    t.string "item_type"
+    t.bigint "item_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["formule_id"], name: "index_formule_items_on_formule_id"
+    t.index ["item_type", "item_id"], name: "index_formule_items_on_item"
+  end
+
+  create_table "formule_pricings", force: :cascade do |t|
+    t.bigint "formule_id"
+    t.bigint "pricing_category_id"
+    t.bigint "from_season_id"
+    t.bigint "to_season_id"
+    t.float "price"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["formule_id"], name: "index_formule_pricings_on_formule_id"
+    t.index ["from_season_id"], name: "index_formule_pricings_on_from_season_id"
+    t.index ["pricing_category_id"], name: "index_formule_pricings_on_pricing_category_id"
+    t.index ["to_season_id"], name: "index_formule_pricings_on_to_season_id"
+  end
+
+  create_table "formules", force: :cascade do |t|
+    t.string "name"
+    t.string "description"
+    t.boolean "active", default: true
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.datetime "deleted_at"
+    t.integer "number_of_items"
   end
 
   create_table "holidays", force: :cascade do |t|
@@ -1260,6 +1295,7 @@ ActiveRecord::Schema.define(version: 2024_11_19_143119) do
   end
 
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activity_applications", "formules"
   add_foreign_key "activity_instances", "activities"
   add_foreign_key "activity_instances", "locations"
   add_foreign_key "activity_instances", "rooms"
@@ -1282,6 +1318,11 @@ ActiveRecord::Schema.define(version: 2024_11_19_143119) do
   add_foreign_key "error_histories", "error_codes"
   add_foreign_key "evaluation_appointments", "activity_applications"
   add_foreign_key "export_templates", "users"
+  add_foreign_key "formule_items", "formules"
+  add_foreign_key "formule_pricings", "formules"
+  add_foreign_key "formule_pricings", "pricing_categories"
+  add_foreign_key "formule_pricings", "seasons", column: "from_season_id"
+  add_foreign_key "formule_pricings", "seasons", column: "to_season_id"
   add_foreign_key "holidays", "seasons"
   add_foreign_key "levels", "seasons"
   add_foreign_key "max_activity_ref_price_for_seasons", "seasons"

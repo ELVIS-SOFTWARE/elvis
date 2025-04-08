@@ -1037,7 +1037,9 @@ class Summary extends React.Component
 
             otherApplications = _.map(applications, (a, i) =>
             {
-                const activityRef = _.head(a.desired_activities).activity_ref;
+                const firstDesired = _.head(a.desired_activities);
+                const activityRef = firstDesired ? firstDesired.activity_ref : {};
+
                 let actionLabel = "Nouvelle demande";
                 if (a.pre_application_activity)
                 {

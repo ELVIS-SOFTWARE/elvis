@@ -1,4 +1,4 @@
-import React, {Fragment} from "react";
+import React, { Fragment } from "react";
 import _ from "lodash";
 import ReactTable from "react-table";
 import SelectCoupon from "../utils/SelectCoupon";
@@ -9,9 +9,7 @@ import CreateCouponModal from "../common/baseDataTable/ItemFormModal";
 const moment = require("moment");
 require("moment/locale/fr");
 
-
 class PaymentsSummary extends React.Component {
-
     constructor(props) {
         super(props);
 
@@ -25,10 +23,8 @@ class PaymentsSummary extends React.Component {
 
     showCreateCouponModal() {
         this.setState({
-                showCreateCouponModal: true,
-            }
-        );
-
+            showCreateCouponModal: true,
+        });
     }
 
     closeCreateCouponModal() {
@@ -47,17 +43,14 @@ class PaymentsSummary extends React.Component {
     }
 
     createCoupon(coupon) {
-        return this.dataService.createData(coupon)
+        return this.dataService
+            .createData(coupon)
             .then((newCoupon) => {
                 alert("Le taux de remise a été créé avec succès");
                 this.setState((prevState) => {
-                        // ajouter le nouveau coupon aux coupons existants
-                        this.insertCoupon(prevState.coupons, newCoupon);
-                        return [
-                            ...prevState
-                        ]
-                    }
-                )
+                    this.insertCoupon(prevState.coupons, newCoupon);
+                    return { coupons: prevState.coupons };
+                });
             })
             .catch((err) => {
                 console.error(err);
@@ -68,18 +61,103 @@ class PaymentsSummary extends React.Component {
             });
     }
 
+    isActivityInFormula(activity) {
+        return activity.des &&
+            activity.des.activity_application &&
+            activity.des.activity_application.formule_id;
+    }
+
+    getFormulaIdFromActivity(activity) {
+        return activity.des &&
+            activity.des.activity_application &&
+            activity.des.activity_application.formule_id;
+    }
+
+    processDataWithFormulas(data) {
+        const processedData = _.cloneDeep(data);
+
+        const activitiesByFormula = {};
+        const formulaIds = new Set();
+
+        processedData.forEach(item => {
+            const formulaId = this.getFormulaIdFromActivity(item);
+            if (formulaId) {
+                formulaIds.add(formulaId);
+                if (!activitiesByFormula[formulaId]) {
+                    activitiesByFormula[formulaId] = [];
+                }
+                activitiesByFormula[formulaId].push(item);
+            }
+        });
+
+        if (formulaIds.size === 0) {
+            return processedData;
+        }
+
+        const result = [];
+
+        formulaIds.forEach(formulaId => {
+            const formulaActivities = activitiesByFormula[formulaId];
+            if (formulaActivities.length > 0) {
+                const firstActivity = formulaActivities[0];
+                const formulaDetails = this.props.formulas
+                    ? _.find(this.props.formulas, f => f.id == formulaId) || { id: formulaId, name: `Formule inconnue`, description: "" }
+                    : { id: formulaId, name: `Formule #${formulaId}`, description: "" };
+
+                const formulaPrice = (formulaDetails.formule_pricings && formulaDetails.formule_pricings.length > 0)
+                    ? formulaDetails.formule_pricings[0].price
+                    : 0;
+
+
+                const coupon = firstActivity.coupon || {};
+
+                let discountedTotal = formulaPrice;
+                if (coupon.percent_off) {
+                    discountedTotal = _.round(formulaPrice * (1 - coupon.percent_off / 100), 2);
+                }
+
+                const formulaHeaderRow = {
+                    id: `formula-${formulaId}`,
+                    isFormula: true,
+                    activity: formulaDetails.name,
+                    user: firstActivity.user,
+                    unitPrice: formulaPrice,
+                    discountedTotal: discountedTotal,
+                    due_total: discountedTotal,
+                    coupon: coupon,
+                    formula: { ...formulaDetails, price: formulaPrice }
+                };
+
+                result.push(formulaHeaderRow);
+
+                formulaActivities.forEach(activity => {
+                    activity.isFormulaItem = true;
+                    activity.formulaId = formulaId;
+                    result.push(activity);
+                });
+            }
+        });
+
+        processedData.forEach(item => {
+            if (!this.isActivityInFormula(item)) {
+                result.push(item);
+            }
+        });
+
+        return result;
+    }
 
     render() {
+
         const {
             payers,
             totalDue,
             previsionalTotal,
             totalPayments,
             totalPaymentsToDay,
-            totalPayback,
         } = this.props;
 
-        const data = [...this.props.data];
+        const data = this.processDataWithFormulas([...this.props.data]);
 
         const generalColumns = [
             {
@@ -87,13 +165,10 @@ class PaymentsSummary extends React.Component {
                 maxWidth: 30,
                 sortable: false,
                 accessor: d => {
-                    if (
-                        d.user &&
-                        _.includes(_.map(payers, p => p.id), d.user.id)
-                    ) {
-                        return <i className="fas fa-euro-sign"/>;
+                    if (d.user && _.includes(_.map(payers, p => p.id), d.user.id)) {
+                        return <i className="fas fa-euro-sign" />;
                     } else if (d.isOption) {
-                        return <i className="fas  fa-hourglass"/>;
+                        return <i className="fas fa-hourglass" />;
                     } else {
                         return null;
                     }
@@ -105,15 +180,53 @@ class PaymentsSummary extends React.Component {
                 accessor: d => {
                     return (
                         <div>
-                            <div>{d.activity}</div>
+                            <div>
+                                {d.isFormula && (
+                                    <i title="Formule" />
+                                )}
+                                {d.isFormulaItem && (
+                                    <span className="ml-3" style={{ color: "#777" }}>
+                            ↳{" "}
+                        </span>
+                                )}
+                                {d.activity}
+                            </div>
+                            {d.isFormula && d.subActivities && (
+                                <div className="ml-4 text-sm" style={{ color: "#555" }}>
+                                    {d.subActivities.map((activity, index) => (
+                                        <div key={index}>• {activity}</div>
+                                    ))}
+                                </div>
+                            )}
                             {d.stopped_at ? (
                                 <div className="text-danger">
                                     {`(Arrêt le : ${moment(d.stopped_at).format("DD/MM/YYYY")})`}
                                 </div>
                             ) : null}
-                        </div>)
+                        </div>
+                    );
                 },
             },
+            {
+                Header: "Formule",
+                id: "formula",
+                accessor: d => {
+                    return (
+                        <div>
+                            {d.isFormula && <i title="Formule" />}
+                            {d.formula ? (
+                                <div>
+                                    {d.formula.name}
+                                    {d.formula.description && <p>{d.formula.description}</p>}
+                                </div>
+                            ) : (
+                                <span>Aucune formule</span>
+                            )}
+                        </div>
+                    );
+                },
+            },
+
             {
                 Header: "N° d'adhérent",
                 id: "adherent_number",
@@ -138,55 +251,69 @@ class PaymentsSummary extends React.Component {
                 id: "tarif",
                 maxWidth: 100,
                 Cell: props => {
-                    // Si il y as un packId
-                    if (props.original.packId)
-                    {
-                        // 15/03/24 on ne permet pas la modification du pack (pour l'instant)
-                        return <p>{_.get(props, ["original", "packPrice", "pricing_category", "name"]) || "Inconnue"}</p>;
+                    if (props.original.isFormula) {
+                        return <p>Tarif formule</p>;
                     }
 
+                    if (props.original.isFormulaItem) {
+                        return <p>Inclus dans la formule</p>;
+                    }
 
-                    // Sinon, si la ligne n'a pas d'id, c'est que c'est une adhésion
+                    if (props.original.packId) {
+                        return (
+                            <p>
+                                {_.get(props, ["original", "packPrice", "pricing_category", "name"]) ||
+                                    "Inconnue"}
+                            </p>
+                        );
+                    }
                     if (props.original.id === 0) {
                         if (this.props.isStudentView) {
-                            return <p>{(this.props.adhesionPrices.find(a => props.original.adhesionPriceId) || {}).label}</p>;
+                            return (
+                                <p>
+                                    {(this.props.adhesionPrices.find(a => props.original.adhesionPriceId) ||
+                                        {}).label}
+                                </p>
+                            );
                         }
-
-                        return <Fragment>
-                            <select
-                                className="form-control"
-                                value={props.original.adhesionPriceId || 0}
-                                onChange={e => this.props.handleChangeAdhesionPricingChoice(props.original.adhesionId, e.target.value)}
-                            >
-                                <option value="0" disabled>
-                                    Sélectionner un tarif
-                                </option>
-                                {(this.props.adhesionPrices || []).map(adhesionPrice => <option key={adhesionPrice.id}
-                                                                                                value={adhesionPrice.id}>
-                                    {adhesionPrice.label}
-                                </option>)}
-                            </select>
-                        </Fragment>
+                        return (
+                            <Fragment>
+                                <select
+                                    className="form-control"
+                                    value={props.original.adhesionPriceId || 0}
+                                    onChange={e =>
+                                        this.props.handleChangeAdhesionPricingChoice(
+                                            props.original.adhesionId,
+                                            e.target.value
+                                        )
+                                    }
+                                >
+                                    <option value="0" disabled>
+                                        Sélectionner un tarif
+                                    </option>
+                                    {(this.props.adhesionPrices || []).map(adhesionPrice => (
+                                        <option key={adhesionPrice.id} value={adhesionPrice.id}>
+                                            {adhesionPrice.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Fragment>
+                        );
                     }
-
-                    // Sinon, c'est une activité
                     if (this.props.isStudentView) {
                         const pricingCategory = this.props.pricingCategories.find(
                             p => p.id === props.original.pricingCategoryId
                         );
-
                         return <p>{pricingCategory ? pricingCategory.label : "aucun tarif défini"}</p>;
                     } else {
-                        let activity_ref_pricings = props.original.ref.activity_ref_pricing
-                        let season = this.props.seasons.find(s => s.id === this.props.season)
-                        let pricings = []
-
+                        let activity_ref_pricings = props.original.ref.activity_ref_pricing;
+                        let season = this.props.seasons.find(s => s.id === this.props.season);
+                        let pricings = [];
                         activity_ref_pricings.forEach(asp => {
                             if (asp.from_season.start <= season.start && (!asp.to_season || asp.to_season.end >= season.end)) {
                                 pricings.push(asp);
                             }
                         });
-
                         return (
                             <select
                                 className="form-control"
@@ -206,7 +333,6 @@ class PaymentsSummary extends React.Component {
                                     const pricingCategory = this.props.pricingCategories.find(
                                         p => p.id === assoc.pricing_category_id
                                     );
-
                                     if (pricingCategory) {
                                         return (
                                             <option key={pricingCategory.id} value={pricingCategory.id}>
@@ -219,15 +345,14 @@ class PaymentsSummary extends React.Component {
                         );
                     }
                 },
-                accessor: d => (this.props.pricingCategories.find(
-                    p => p.id === d.pricingCategoryId
-                ) || {}).label
+                accessor: d =>
+                    (this.props.pricingCategories.find(p => p.id === d.pricingCategoryId) || {}).label,
             },
             {
                 Header: "Prix unitaire",
                 id: "unitPrice",
                 maxWidth: 75,
-                accessor: d => <p> {d.unitPrice + " €"} </p>,
+                accessor: d => <p>{d.unitPrice + " €"}</p>,
                 style: {
                     textAlign: "right",
                     display: "block",
@@ -238,11 +363,8 @@ class PaymentsSummary extends React.Component {
                 id: "prorata",
                 maxWidth: 75,
                 Cell: props => {
-                    if (props.original.id === 0) {
-                        return null;
-                    }
-
-                    const intendedNbLessons = props.original.intended_nb_lessons
+                    if (props.original.id === 0 || props.original.isFormula) return null;
+                    const intendedNbLessons = props.original.intended_nb_lessons;
                     return <p>{props.original.prorata || intendedNbLessons} sur {intendedNbLessons}</p>;
                 },
             },
@@ -252,51 +374,62 @@ class PaymentsSummary extends React.Component {
                 maxWidth: 150,
                 accessor: d => {
                     let prorataTotal = 0;
-                    if (d.id == 0 || d.due_total >= 0) {
+                    if (d.id === 0 || d.due_total >= 0) {
                         prorataTotal = d.due_total;
                     } else {
                         prorataTotal = "--";
                     }
-                    return (
-                        <p>
-                            {prorataTotal + " €"}
-                        </p>
-                    );
+                    return <p>{prorataTotal + " €"}</p>;
                 },
                 style: {
                     textAlign: "right",
                     display: "block",
-                }
+                },
             },
             {
                 Header: "Remise",
                 id: "coupon",
                 maxWidth: 100,
                 accessor: d => {
-                    d.coupon.percent_off ? <p>{d.coupon.percent_off + " %"}</p> : null
+                    return d.coupon?.percent_off ? `${d.coupon.percent_off} %` : '-';
                 },
+
                 Cell: props => {
-                    if (this.props.isStudentView) {
-                        return <p>{
-                            props.original.coupon.percent_off ?
-                                `${props.original.coupon.percent_off}% (${props.original.coupon.label})`
-                                : '-'
-                        }</p>;
+                    if (props.original.isFormulaItem) {
+                        return <p>-</p>;
                     }
 
+                    if (this.props.isStudentView) {
+                        return (
+                            <p>
+                                {props.original.coupon.percent_off
+                                    ? `${props.original.coupon.percent_off}% (${props.original.coupon.label})`
+                                    : '-'}
+                            </p>
+                        );
+                    }
                     return (
                         <SelectCoupon
                             coupons={this.state.coupons}
-                            onChange={value =>
-                                this.props.handleChangePercentOffChoice(
-                                    props.original.adhesionId || props.original.packId || props.original.id,
-                                    props.original.adhesionId ? "Adhesion" : props.original.packId ? "Pack" : "DesiredActivity",
-                                    value
-                                )
-                            }
+                            onChange={value => {
+
+                                if (props.original.isFormula) {
+                                    this.props.handleChangePercentOffChoice(
+                                        props.original.formula.id,
+                                        "Formula",
+                                        value
+                                    );
+                                } else {
+                                    this.props.handleChangePercentOffChoice(
+                                        props.original.adhesionId || props.original.packId || props.original.id,
+                                        props.original.adhesionId ? "Adhesion" : props.original.packId ? "Pack" : "DesiredActivity",
+                                        value
+                                    );
+                                }
+                            }}
                             value={props.original.coupon.id}
                         />
-                    )
+                    );
                 },
                 style: {
                     textAlign: "right",
@@ -308,11 +441,14 @@ class PaymentsSummary extends React.Component {
                 id: "discounted total",
                 maxWidth: 150,
                 accessor: d => {
-
-                    return <p>{d.discountedTotal.toLocaleString('fr-FR', {
-                        style: 'currency',
-                        currency: 'EUR'
-                    })}</p>;
+                    return (
+                        <p>
+                            {d.discountedTotal.toLocaleString("fr-FR", {
+                                style: "currency",
+                                currency: "EUR",
+                            })}
+                        </p>
+                    );
                 },
                 style: {
                     textAlign: "right",
@@ -322,77 +458,69 @@ class PaymentsSummary extends React.Component {
                 },
                 Footer: (
                     <span>
-                        <span style={{fontSize: "16px"}}>
-                            Total:
-                            <strong>{` ${totalDue == null
-                                ? "--"
-                                : totalDue.toLocaleString('fr-FR', {
-                                    style: 'currency',
-                                    currency: 'EUR'
-                                })
-                            } `}</strong>
-                        </span>
-                        <br/>
-
-                        <span style={{fontSize: "16px"}}>
-                            Total échéancier:
-                            <strong>
-                                {` ${previsionalTotal == null
+                        <span style={{ fontSize: "16px" }}>
+                          Total:
+                          <strong>
+                            {` ${
+                                totalDue == null
                                     ? "--"
-                                    : previsionalTotal.toLocaleString('fr-FR', {
-                                        style: 'currency',
-                                        currency: 'EUR'
+                                    : totalDue.toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
                                     })
-                                } `}
-                            </strong>
+                            } `}
+                          </strong>
                         </span>
-                        <br/>
-
-                        <span style={{fontSize: "16px"}}>
-                            Total réglé à ce jour:
-                            <strong>
-                                {` ${totalPaymentsToDay == 0 &&
+                        <br />
+                        <span style={{ fontSize: "16px" }}>
+                          Total échéancier:
+                          <strong>
+                            {` ${
                                 previsionalTotal == null
                                     ? "--"
-                                    : totalPaymentsToDay.toLocaleString('fr-FR', {
-                                        style: 'currency',
-                                        currency: 'EUR'
+                                    : previsionalTotal.toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
                                     })
-                                } `}
-                            </strong>
+                            } `}
+                          </strong>
                         </span>
-
-                        <br/>
-
-                        <span style={{fontSize: "16px"}}>
-                            Solde:
-                            <strong>
-                                {` ${totalPayments == 0 &&
-                                previsionalTotal == null
+                        <br />
+                        <span style={{ fontSize: "16px" }}>
+                          Total réglé à ce jour:
+                          <strong>
+                            {` ${
+                                totalPaymentsToDay == 0 && previsionalTotal == null
                                     ? "--"
-                                    : (previsionalTotal - totalPayments).toLocaleString('fr-FR', {
-                                        style: 'currency',
-                                        currency: 'EUR'
+                                    : totalPaymentsToDay.toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
                                     })
-                                } `}
-                            </strong>
+                            } `}
+                          </strong>
+                        </span>
+                        <br />
+                        <span style={{ fontSize: "16px" }}>
+                          Solde:
+                          <strong>
+                            {` ${
+                                totalPayments == 0 && previsionalTotal == null
+                                    ? "--"
+                                    : (previsionalTotal - totalPayments).toLocaleString("fr-FR", {
+                                        style: "currency",
+                                        currency: "EUR",
+                                    })
+                            } `}
+                          </strong>
                         </span>
                     </span>
-                )
-            }
+                ),
+            },
         ];
 
-
         return (
-
             <div className="m-b-lg">
                 <div className="flex flex-space-between-justified">
-                    {/* <a href={`${this.props.payers[0].id}.pdf`}>
-                        <button className="btn btn-xs btn-primary pull-right">
-                            <i className="fas fa-file-pdf" /> Facture
-                    </button>
-                    </a>
-                    */}
                     {!this.props.isStudentView && _.values(this.props.schedules).length > 0 ? (
                         <div className="form-group">
                             <label>Emplacement global</label>
@@ -413,6 +541,16 @@ class PaymentsSummary extends React.Component {
                             </div>
                         </div>
                     ) : null}
+                    {!this.props.isStudentView && (
+                        <div className="m-b-sm">
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => this.showCreateCouponModal()}
+                            >
+                                <i className="fas fa-plus" /> Ajouter un taux de remise
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="ibox-title">
@@ -422,7 +560,7 @@ class PaymentsSummary extends React.Component {
                 <ReactTable
                     data={data}
                     columns={generalColumns}
-                    defaultSorted={[{id: "activity", desc: false}]}
+                    defaultSorted={[{ id: "activity", desc: false }]}
                     resizable={false}
                     previousText="Précedent"
                     nextText="Suivant"
@@ -443,12 +581,9 @@ class PaymentsSummary extends React.Component {
                     onRequestClose={() => this.closeCreateCouponModal()}
                     onSubmit={item => this.createCoupon(item)}
                 />
-
             </div>
         );
     }
-
-
 }
 
 export default PaymentsSummary;

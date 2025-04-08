@@ -667,8 +667,8 @@ export default class LessonList extends React.Component {
                         onChange={e =>
                             e.target.checked
                                 ? this.setState({
-                                      targets: this.state.data.map(r => r.id),
-                                  })
+                                    targets: this.state.data.map(r => r.id),
+                                })
                                 : this.setState({ targets: [] })
                         }
                     />
@@ -998,10 +998,10 @@ export default class LessonList extends React.Component {
                             href={
                                 c.original.time_interval
                                     ? `/planning/${
-                                          c.original.teacher.planning.id
-                                      }/${moment(
-                                          c.original.time_interval.start
-                                      ).format(ISO_DATE_FORMAT)}`
+                                        c.original.teacher.planning.id
+                                    }/${moment(
+                                        c.original.time_interval.start
+                                    ).format(ISO_DATE_FORMAT)}`
                                     : "/activities"
                             }
                         >

@@ -29,6 +29,7 @@ import Select from "react-select";
 import Swal from 'sweetalert2'
 import WrappedPayerPaymentTerms from "../WrappedPayerPaymentTerms";
 import WizardUserSelectMember from "./WizardUserSelectMember";
+import WrappedFormulaChoice from "./WrappedFormulaChoice";
 import WrappedActivityChoice from "./WrappedActivityChoice";
 
 const ALREADY_PRACTICED_INSTRUMENT_QUESTION_NAME =
@@ -49,6 +50,8 @@ class Wizard extends React.Component {
             possibleMatches: [],
             selectedActivities: [],
             selectedPacks: {},
+            selectedFormulas: [],
+            selectedFormulaActivities: {},
             intervals,
             additionalStudents: [],
             childhoodTimeAvailabilities: [],
@@ -94,6 +97,7 @@ class Wizard extends React.Component {
     componentDidMount() {
         if (!this.props.season) return;
 
+
         if (this.props.preSelectedUser) {
             api.post("/users/search?auth_token=" + this.props.user.authentication_token,
                 {
@@ -131,6 +135,52 @@ class Wizard extends React.Component {
             })
         }
     }
+
+    handleUpdateFormulaActivities(formulaId, activities) {
+        this.setState({
+            selectedFormulaActivities: {
+                ...this.state.selectedFormulaActivities,
+                [formulaId]: activities
+            }
+        });
+    }
+
+    handleAddFormula(formulaId) {
+        let newSelectedFormulas = [...this.state.selectedFormulas];
+
+        if (_.includes(newSelectedFormulas, formulaId)) {
+            _.pull(newSelectedFormulas, formulaId);
+        } else {
+            newSelectedFormulas = [...newSelectedFormulas, formulaId];
+        }
+
+        this.setState({ selectedFormulas: newSelectedFormulas }, () => {
+            const newTotalPrice = newSelectedFormulas.reduce(
+                (acc, f) => acc + parseFloat(f.display_price || 0),
+                0
+            );
+            this.setState({ totalPrice: newTotalPrice });
+        });
+    }
+
+    handleRemoveFormula(formulaId) {
+        let newSelectedFormulas = [...this.state.selectedFormulas];
+
+        _.pull(newSelectedFormulas, formulaId);
+
+        this.setState({ selectedFormulas: newSelectedFormulas });
+
+        const newSelectedFormulaActivities = { ...this.state.selectedFormulaActivities };
+        delete newSelectedFormulaActivities[formulaId];
+        this.setState({ selectedFormulaActivities: newSelectedFormulaActivities });
+
+        const newTotalPrice = newSelectedFormulas.reduce(
+            (acc, f) => acc + parseFloat(f.display_price || 0),
+            0
+        );
+        this.setState({ totalPrice: newTotalPrice });
+    }
+
 
     handleSelectActivities(activityId) {
         let newSelectedActivities = [...this.state.selectedActivities];
@@ -362,37 +412,52 @@ class Wizard extends React.Component {
     }
 
     handleSubmit() {
-        this.setState({buttonDisabled: true});
+        this.setState({ buttonDisabled: true });
 
-        const state = {...this.state};
+        const state = { ...this.state };
 
-        const authToken = _.get(this.state, "infos.authentication_token");
+        const individualActivities = Array.isArray(state.selectedActivities)
+            ? state.selectedActivities
+            : [];
+
+
+        const formulaActivities = Object.values(state.selectedFormulaActivities || {}).flat();
+
+        state.selectedFormulas = Array.isArray(this.state.selectedFormulas)
+            ? this.state.selectedFormulas.map(f => (typeof f === "object" ? f.id : f))
+            : [];
+
+
+        const allSelectedActivities = Array.from(new Set([...individualActivities, ...formulaActivities]));
+        state.selectedActivities = allSelectedActivities;
+
+
+
+        const authToken = _.get(this.state, "infos.authenticationtoken");
 
         api.set()
-            .success((data) =>
-            {
-                this.setState({buttonDisabled: false});
+            .success((data) => {
+                this.setState({ buttonDisabled: false });
 
-                let user = this.state.user;
-                let title = '<h5>Bonjour <b>' + user.first_name + ' ' + user.last_name + '</b></h5>';
+                const user = this.state.user;
+                const title = `<h5>Bonjour <b>${user.first_name} ${user.last_name}</b></h5>`;
                 let htmltext = '';
-                let confirmtext = 'Redirection';
-
+                const confirmtext = 'Redirection';
 
                 if (data.activity_application !== null) {
                     htmltext += '<p>'
-                        + '<b>' + 'Votre demande d\'inscription a bien été prise en compte' + '</b>' + '<br/>'
-                        + 'Le numéro d\'identification de votre demande d\'inscription est :' + '<br/>'
-                        + '<b>' + data.activity_application.id + '</b>' + '<br/>'
-                        + 'Un email récapitulatif de votre inscription va vous être envoyé sur votre adresse mail ' + '<br/>'
+                        + '<b>Votre demande d\'inscription a bien été prise en compte</b><br/>'
+                        + 'Le numéro d\'identification de votre demande d\'inscription est :<br/>'
+                        + `<b>${data.activity_application.id}</b><br/>`
+                        + 'Un email récapitulatif de votre inscription va vous être envoyé sur votre adresse mail<br/>'
                         + 'Vous allez être automatiquement redirigé vers l\'accueil du site'
-                        + '</p>'
+                        + '</p>';
                 }
 
                 if (data.pack_created || data.pack_created !== false) {
                     htmltext += '<p>'
-                        + '<b>' + 'Vos packs de séances vous ont bien été attribués' + '</b>' + '<br/>'
-                        + '</p>'
+                        + '<b>Vos packs de séances vous ont bien été attribués</b><br/>'
+                        + '</p>';
                 }
 
                 Swal.fire({
@@ -402,17 +467,16 @@ class Wizard extends React.Component {
                     allowOutsideClick: false,
                     confirmButtonText: confirmtext,
                 })
-                    .then((result) =>
-                    {
+                    .then((result) => {
                         if (this.props.newApplicationForExistingUser || !this.props.currentUserIsAdmin || data.activity_application === null) {
                             window.location.href = `/new_application/${this.state.user.id || _.get(data, "activity_application.user_id")}`;
                         } else {
                             window.location.href = `/inscriptions/${data.activity_application.id}`;
                         }
-                    })
+                    });
             })
             .error(data => {
-                this.setState({buttonDisabled: false});
+                this.setState({buttonDisabled: false });
 
                 Swal({
                     title: "Erreur",
@@ -636,6 +700,16 @@ class Wizard extends React.Component {
     getLabelsFromSelectedActivities() {
         let selectedActivityRefIds = this.state.selectedActivities.slice();
 
+        if (this.state.selectedFormulaActivities) {
+            Object.values(this.state.selectedFormulaActivities).forEach(activities => {
+                activities.forEach(activityId => {
+                    if (!selectedActivityRefIds.includes(activityId)) {
+                        selectedActivityRefIds.push(activityId);
+                    }
+                });
+            });
+        }
+
         // Lister les activités qui nécessitent une sélection de préférences
         const prefsReqActivityRefIds = this.props.allActivityRefs
             .filter(ref => ref.allows_timeslot_selection)
@@ -652,7 +726,6 @@ class Wizard extends React.Component {
             }
             return labels;
         }, []);
-
     }
 
     isApplicationAuthorized(season_id)
@@ -711,18 +784,25 @@ class Wizard extends React.Component {
             .filter(ref => ref.allows_timeslot_selection)
             .map(ref => ref.id);
 
+        const allSelectedActivities = [
+            ...this.state.selectedActivities,
+            ...Object.values(this.state.selectedFormulaActivities || {}).flat()
+        ];
+
         const preferencesActivities = _.intersection(
             activitiesThatRequirePreferencesSelection,
-            this.state.selectedActivities
+            allSelectedActivities
         );
 
-        const timePrefsMode = preferencesActivities.length>0
-            ? preferencesActivities.length<this.state.selectedActivities.length ? PLANNING_AND_PREFERENCES_MODE : PREFERENCES_MODE
+        const timePrefsMode = preferencesActivities.length > 0
+            ? preferencesActivities.length < allSelectedActivities.length ? PLANNING_AND_PREFERENCES_MODE : PREFERENCES_MODE
             : PLANNING_MODE;
 
+
+        const formulaActivitiesIds = Object.values(this.state.selectedFormulaActivities || {}).flat();
         const refsToEvaluate = this.state.activityRefs.filter(
             ref => ref.is_evaluable &&
-                this.state.selectedActivities.includes(ref.id) &&
+                (this.state.selectedActivities.includes(ref.id) || formulaActivitiesIds.includes(ref.id)) &&
                 !_.find(this.state.learnedActivities, aId => aId === ref.id)
         );
 
@@ -781,6 +861,28 @@ class Wizard extends React.Component {
                 ),
             },
 
+            !this.state.skipFormulaChoice && {
+                name: "Choix de la formule",
+                component: (
+                    <WrappedFormulaChoice
+                        schoolName={this.props.schoolName}
+                        formulaPrices={this.props.formula_prices}
+                        season={this.state.season}
+                        selectedFormulas={this.state.selectedFormulas}
+                        selectedFormulaActivities={this.state.selectedFormulaActivities}
+                        formulas={this.props.formulas}
+                        currentUserIsAdmin={this.props.currentUserIsAdmin}
+                        handleAddFormula={id => this.handleAddFormula(id)}
+                        handleRemoveFormula={id => this.handleRemoveFormula(id)}
+                        handleUpdateFormulaActivities={(id, activities) => this.handleUpdateFormulaActivities(id, activities)}
+                        validation={null}
+                        infoText={this.props.formulaChoiceDisplayText}
+                        selectedActivities={this.state.selectedActivities}
+                        allActivityRefs={this.props.allActivityRefs}
+                    />
+                ),
+            },
+
             !this.state.skipActivityChoice &&
             activityChoiceActionTypes.includes(this.props.actionType) && {
                 name: "Choix de l'activité",
@@ -808,13 +910,14 @@ class Wizard extends React.Component {
                         }
                         handleAddPack={(key, id) => this.handleAddPack(key, id)}
                         handleRemovePack={(key, id) => this.handleRemovePack(key, id)}
+                        selectedFormulas={this.state.selectedFormulas}
                         selectedPacks={this.state.selectedPacks}
                         validation={null}
                         infoText={this.props.activityChoiceDisplayText}
                     />
                 ),
             },
-            this.props.allActivityRefs.find(ar => ar.is_work_group && this.state.selectedActivities.includes(ar.id)) !== undefined && {
+            this.props.allActivityRefs.find(ar => ar.is_work_group && (this.state.selectedActivities.includes(ar.id) || Object.values(this.state.selectedFormulaActivities || {}).flat().includes(ar.id))) !== undefined && {
                 name: "Instruments",
                 component: (
                     <div>
@@ -828,8 +931,8 @@ class Wizard extends React.Component {
                 )
             },
             //this.props.actionType !== PRE_APPLICATION_ACTIONS.RENEW &&
-            this.state.selectedActivities.length > 0 &&
-            {
+            (this.state.selectedActivities.length > 0 ||
+                Object.values(this.state.selectedFormulaActivities || {}).flat().length > 0) && {
                 name: "Disponibilités",
                 component: (
                     <TimePreferencesStep
@@ -941,6 +1044,9 @@ class Wizard extends React.Component {
                         paymentTerms={(this.state.infos.payer_payment_terms || [])}
                         availPaymentScheduleOptions={this.state.availPaymentScheduleOptions}
                         availPaymentMethods={this.state.availPaymentMethods}
+                        selectedFormulas={this.state.selectedFormulas}
+                        selectedFormulaActivities={this.state.selectedFormulaActivities}
+                        formulas={this.props.formulas}
                     />
                 ),
             },
