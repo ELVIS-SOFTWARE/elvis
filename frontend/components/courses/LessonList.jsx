@@ -1116,6 +1116,7 @@ export default class LessonList extends React.Component {
                 <div className="ibox-content">
                     {this.state.targets.length > 0 ? this.renderTargetsAlert() : null}
                     <ReactTable
+                        key={this.state.filter.filtered.map(f => f.id).join('-')}
                         style={{ backgroundColor: "white" }}
                         data={this.state.data}
                         manual
