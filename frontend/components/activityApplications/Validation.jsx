@@ -13,6 +13,7 @@ const Validation = ({
                         application,
                         activityRefs,
                         allActivityRefs,
+                        allActivityRefKinds,
                         handleSubmit,
                         additionalStudents,
                         buttonDisabled,
@@ -23,8 +24,11 @@ const Validation = ({
                         paymentTerms,
                         availPaymentScheduleOptions,
                         availPaymentMethods,
+                        selectedFormulas,
+                        selectedFormulaActivities,
                     }) => {
     const addStudents = [...additionalStudents];
+
 
     const activitiesWithEveilIds = _.chain(activityRefs)
         .filter(ref => ref.activity_type == "eveil_musical")

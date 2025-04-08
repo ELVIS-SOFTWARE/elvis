@@ -449,7 +449,6 @@ class ActivitiesApplicationsController < ApplicationController
     # on retire les packs qui n'ont pas de tarifs
     @packs = @packs.select { |_key, value| value.any? }
 
-    # on retire les packs qui n'ont pas de tarifs
     @formules = Formule.all.as_json(
       include: {
         formule_items: { include: { item: { only: %i[id display_name] } } },
@@ -851,7 +850,6 @@ class ActivitiesApplicationsController < ApplicationController
 
           formula_id = nil
           formula_activities.each do |formula_id_key, activities|
-            # Convert act to string for comparison since it might be a number
             if activities.include?(act.to_s) || activities.include?(act)
               formula_id = formula_id_key
               break

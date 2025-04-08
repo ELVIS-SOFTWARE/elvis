@@ -431,7 +431,6 @@ class Wizard extends React.Component {
         const allSelectedActivities = Array.from(new Set([...individualActivities, ...formulaActivities]));
         state.selectedActivities = allSelectedActivities;
 
-        state.selectedFormulaActivities = {};
 
 
         const authToken = _.get(this.state, "infos.authenticationtoken");
@@ -1130,24 +1129,22 @@ class Wizard extends React.Component {
                     ) : null}
                 </div>
                 <div className="step-progress" style={{ marginBottom: "75px" }}>
-                    <div className="wizard-steps-container" style={{ overflowX: "auto" }}>
-                        <StepZilla
-                            steps={steps}
-                            showSteps={true}
-                            stepsNavigation={true}
-                            nextButtonText={"Suivant"}
-                            backButtonText={"Précédent"}
-                            nextButtonCls={
-                                "btn btn-prev btn-primary btn-md pull-right font-weight-bold"
-                            }
-                            backButtonCls={
-                                "btn btn-prev btn-primary btn-md pull-left font-weight-bold"
-                            }
-                            onStepChange={(step) => {
-                                window.scrollTo({ top: 0, behavior: "instant" });
-                            }}
-                        />
-                    </div>
+                    <StepZilla
+                        steps={steps}
+                        showSteps={true}
+                        stepsNavigation={true}
+                        nextButtonText={"Suivant"}
+                        backButtonText={"Précédent"}
+                        nextButtonCls={
+                            "btn btn-prev btn-primary btn-md pull-right font-weight-bold"
+                        }
+                        backButtonCls={
+                            "btn btn-prev btn-primary btn-md pull-left font-weight-bold"
+                        }
+                        onStepChange={(step) => {
+                            window.scrollTo({ top: 0, behavior: "instant" });
+                        }}
+                    />
                 </div>
             </div>
         );
