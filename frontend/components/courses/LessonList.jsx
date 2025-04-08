@@ -940,7 +940,6 @@ export default class LessonList extends React.Component {
                     >
                         <option value="" />
                         <option value="TBD">À PRÉCISER</option>
-                        <option value="NON INDIQUÉ">NON INDIQUÉ</option>
                         {this.props.evaluationLevelRefs.map(r => (
                             <option key={r.id} value={r.id}>
                                 {r.label}
