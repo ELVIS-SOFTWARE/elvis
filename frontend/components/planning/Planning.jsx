@@ -1019,9 +1019,18 @@ class Planning extends React.Component {
     }
 
     handleOpenPauseDetail(interval) {
-        console.log("Interval sélectionné pour la modal : ", interval);  // Vérification des données
+        const start = interval.start?.toDate ? interval.start.toDate() : interval.start;
+        const end = interval.end?.toDate ? interval.end.toDate() : interval.end;
+
+        const cleanedInterval = {
+            ...interval,
+            start,
+            end,
+        };
+
+        console.log("Interval sélectionné pour la modal : ", cleanedInterval);  // Vérification des données
         this.setState({
-            selectedPauseInterval: interval,
+            selectedPauseInterval: cleanedInterval,
             isPauseDetailModalOpen: true,
         });
     }
