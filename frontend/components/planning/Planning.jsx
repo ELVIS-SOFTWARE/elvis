@@ -305,8 +305,15 @@ class Planning extends React.Component {
     // ======================================
     // Availability Time Interval
     handleCreateInterval(newInterval, seasonId) {
-        let newIntervals = [newInterval];
+        // We can only now select only one interval
+        //const { selectedIntervals } = this.state;
 
+        let newIntervals = [newInterval];
+        // if (this.props.user && this.props.user.is_teacher) {
+        //     newIntervals = TimeIntervalHelpers.cutInterval(newInterval);
+        // }
+
+        //const { intervalStore } = this.state;
         const intervals = newIntervals.map((interval) => ({
             start: moment.isMoment(interval.start)
                 ? interval.start.toISOString()
@@ -320,12 +327,15 @@ class Planning extends React.Component {
         }));
 
         if (this.props.updateTimePreferences) {
+            //On flagge cet intervalle comme nouveau
+            //pour éviter les colisions
             newIntervals = newIntervals.map(i => ({
                 ...i,
                 isNew: true,
             }));
             let formattedIntervals = TimeIntervalHelpers.momentify(newIntervals);
             let allIntervals = [...this.props.intervals, ...formattedIntervals];
+            //L'indexage donne des faux ids, flaggage au dessus pour éviter colisions
             const intervalStore = TimeIntervalHelpers.indexById(
                 allIntervals,
                 this.state.intervalStore
@@ -337,13 +347,10 @@ class Planning extends React.Component {
             });
         } else {
             this.commitIntervals(intervals, seasonId).then(results => {
-                // On récupère le premier intervalle créé dans les résultats
                 const createdInterval = results.intervals[0];
-                // Pour les créneaux non "pause", on ouvre systématiquement la modal des détails
                 if (newInterval.kind !== "p") {
                     this.handleOpenDetail(createdInterval);
                 }
-                // Pour les pauses, on ne fait rien d'autre
             });
         }
     }

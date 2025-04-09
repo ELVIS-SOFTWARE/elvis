@@ -114,13 +114,12 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
         let borderColor = color;
         let activity = undefined;
 
-        // Ajout d'une condition spécifique pour les pauses
         if (int.kind === "p") {
-            // Couleur spécifique pour les pauses
             bgColor = "#3F51B5";
-            color = "white";  // Texte blanc pour un bon contraste
+            color = "white";
             borderColor = bgColor;
         }
+
         // Condition existante pour les autres types
         else if (Object.keys(kindColors).includes(int.kind)) {
             color = int.is_validated ? "white" : kindColors[int.kind].color;

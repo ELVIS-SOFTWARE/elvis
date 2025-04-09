@@ -42,11 +42,9 @@ class CreateIntervalModal extends React.Component {
         };
 
         if (kind === "p") {
-            // Créneau pause : création directe
             this.props.onSave(interval, this.state.season);
             this.props.closeModal();
         } else {
-            // Autres types : on passe par la modal détaillée
             this.props.handleCloseAndOpenDetails(interval);
         }
     }
