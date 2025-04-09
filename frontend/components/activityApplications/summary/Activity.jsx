@@ -14,16 +14,35 @@ import {radioValue} from "../../evaluation/question/radio_question";
 import {PRE_APPLICATION_ACTION_LABELS, modalStyle, WEEKDAYS} from "../../../tools/constants.js";
 import {displayActivityRef, formatActivityHeadcount, occupationInfos, toAge} from "../../../tools/format";
 import WorkGroupEditor from "./WorkGroupEditor";
-import UserWithInfos from "../../common/UserWithInfos";
 
 // SUB COMPONENTS
-const StudentItem = ({ user, color }) => (
-    <td style={color ? { color } : undefined}>
-        <UserWithInfos userId={user.id}>
-            {user.first_name} {user.last_name}
-        </UserWithInfos>
-    </td>
-);
+const StudentItem = ({ user, activityId, color }) => {
+    const [activityApplicationId, setActivityApplicationId] = React.useState(null);
+
+    React.useEffect(() => {
+        api
+            .set()
+            .error((error) => {
+                console.error("Erreur lors de la récupération de la demande d'inscription:", error);
+            })
+            .success((data) => {
+                setActivityApplicationId(data.activity_application_id);
+            })
+            .get(`/desired_activities/user/${user.id}/activity/${activityId}`);
+    }, [user.id, activityId]);
+
+
+    const inscriptionUrl = activityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
+
+    return (
+        <td style={color ? { color } : undefined}>
+            <a href={inscriptionUrl}>
+                {user.first_name} {user.last_name}
+            </a>
+        </td>
+    );
+};
+
 
 const SubStudentList = ({ row, seasons }) => {
 
@@ -65,7 +84,6 @@ const SubStudentList = ({ row, seasons }) => {
                 <tr>
                     <th>Nom</th>
                     <th>Âge</th>
-
                     <th>Niveau</th>
                     {isWorkGroup && <th>Instrument</th>}
                     <th>Début le</th>
@@ -87,7 +105,11 @@ const SubStudentList = ({ row, seasons }) => {
 
                     return (
                         <tr key={u.id || index} style={customStyle}>
-                            <StudentItem user={u} color={customStyle.color} application={u.application} />
+                            <StudentItem
+                                user={u}
+                                activityId={row.original.id}
+                                color={customStyle.color}
+                            />
                             <td>{TimeIntervalHelpers.age(u.birthday)} ans</td>
                             <td>
                                 {TimeIntervalHelpers.levelDisplayForActivity(
@@ -101,53 +123,45 @@ const SubStudentList = ({ row, seasons }) => {
                                 )}
                             </td>
                             {isWorkGroup && <td>{userInstrument}</td>}
-
                             <td>
                                 {(() => {
                                     if (u.type === 'active' || u.type === 'option') {
                                         const application = u.activity_applications?.find(app =>
                                             app.desired_activities?.some(da => da.activity_id === row.original.id)
                                         );
-
                                         if (application?.begin_at) {
                                             return Intl.DateTimeFormat("fr").format(new Date(application.begin_at));
                                         }
-                                    }
-                                    else if (u.application?.begin_at) {
+                                    } else if (u.application?.begin_at) {
                                         return Intl.DateTimeFormat("fr").format(new Date(u.application.begin_at));
                                     }
-
                                     return "";
                                 })()}
                             </td>
-
                             <td>
                                 {(() => {
                                     if (u.type === 'active' || u.type === 'option') {
                                         const application = u.activity_applications?.find(app =>
                                             app.desired_activities?.some(da => da.activity_id === row.original.id)
                                         );
-
                                         if (application?.stopped_at) {
                                             return Intl.DateTimeFormat("fr").format(new Date(application.stopped_at));
                                         }
-                                    }
-                                    else if (u.application?.stopped_at) {
+                                    } else if (u.application?.stopped_at) {
                                         return Intl.DateTimeFormat("fr").format(new Date(u.application.stopped_at));
                                     }
-
                                     return "";
                                 })()}
                             </td>
                         </tr>
                     );
                 })}
-
                 </tbody>
             </table>
         </div>
     );
 };
+
 
 
 const createAllExpanded = pageSize => _.zipObject(_.range(pageSize), _.times(pageSize, () => ({})));
