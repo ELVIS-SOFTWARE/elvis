@@ -24,6 +24,7 @@ import {csrfToken} from "../utils";
 import EvaluationModal from "./EvaluationModal";
 import CreateIntervalModal from "./CreateActivityModal";
 import RoomActivitiesListModal from "./RoomActivitiesListModal";
+import PauseDetailModal from "./PauseDetailModal";
 
 const idGenerator = (function* () {
     let i = 1;
@@ -65,6 +66,8 @@ class Planning extends React.Component {
             isCreationModalOpen: false,
             isDetailModalOpen: false,
             newInterval: {},
+            isPauseModalOpen: false,
+            newPauseInterval: null,
             selectedSchedule: undefined,
             lastReinitialize: null,
             selectedPlannings: [
@@ -302,15 +305,8 @@ class Planning extends React.Component {
     // ======================================
     // Availability Time Interval
     handleCreateInterval(newInterval, seasonId) {
-        // We can only now select only one interval
-        //const { selectedIntervals } = this.state;
-
         let newIntervals = [newInterval];
-        // if (this.props.user && this.props.user.is_teacher) {
-        //     newIntervals = TimeIntervalHelpers.cutInterval(newInterval);
-        // }
 
-        //const { intervalStore } = this.state;
         const intervals = newIntervals.map((interval) => ({
             start: moment.isMoment(interval.start)
                 ? interval.start.toISOString()
@@ -318,23 +314,18 @@ class Planning extends React.Component {
             end: moment.isMoment(interval.end)
                 ? interval.end.toISOString()
                 : interval.end,
-            kind: interval.kind || "p",
+            kind: interval.kind || "o",
             uid: idGenerator.next().value,
             recurrentType: interval.recurrentType,
         }));
 
         if (this.props.updateTimePreferences) {
-            //On flagge cet intervalle comme nouveau
-            //pour éviter les colisions
             newIntervals = newIntervals.map(i => ({
                 ...i,
                 isNew: true,
             }));
-            let formattedIntervals = TimeIntervalHelpers.momentify(
-                newIntervals
-            );
+            let formattedIntervals = TimeIntervalHelpers.momentify(newIntervals);
             let allIntervals = [...this.props.intervals, ...formattedIntervals];
-            //L'indexage donne des faux ids, flaggage au dessus pour éviter colisions
             const intervalStore = TimeIntervalHelpers.indexById(
                 allIntervals,
                 this.state.intervalStore
@@ -346,10 +337,14 @@ class Planning extends React.Component {
             });
         } else {
             this.commitIntervals(intervals, seasonId).then(results => {
-                if (results.intervals.length === 1 && (this.props.isTeacher || this.props.isAdmin)) {
-                    this.handleOpenDetail(results.intervals[0]);
+                // On récupère le premier intervalle créé dans les résultats
+                const createdInterval = results.intervals[0];
+                // Pour les créneaux non "pause", on ouvre systématiquement la modal des détails
+                if (newInterval.kind !== "p") {
+                    this.handleOpenDetail(createdInterval);
                 }
-            })
+                // Pour les pauses, on ne fait rien d'autre
+            });
         }
     }
 
@@ -1006,8 +1001,47 @@ class Planning extends React.Component {
     }
 
     // =============================
+    // PAUSE MODAL
+    // =============================
+
+    handleOpenPauseCreation(newInterval) {
+        this.setState({
+            isPauseCreationModalOpen: true,
+            newInterval,
+        });
+    }
+
+    closePauseCreationModal() {
+        this.setState({
+            isPauseCreationModalOpen: false,
+            newInterval: {},
+        });
+    }
+
+    handleOpenPauseDetail(interval) {
+        console.log("Interval sélectionné pour la modal : ", interval);  // Vérification des données
+        this.setState({
+            selectedPauseInterval: interval,
+            isPauseDetailModalOpen: true,
+        });
+    }
+
+
+    closePauseDetailModal() {
+        this.setState({
+            isPauseDetailModalOpen: false,  // Ferme la modal
+            selectedPause: undefined,  // Réinitialise l'intervalle sélectionné
+        });
+    }
+
+
+
+
+
+    // =============================
     // MULTIVIEW MODAL
     // =============================
+
     handleOpenEvaluationModal(schedule) {
         this.setState({isEvaluationModalOpen: true, selectedSchedule: schedule});
     }
@@ -1460,7 +1494,13 @@ class Planning extends React.Component {
                             return false;
                         }
 
-                        return this.props.show_availabilities && (this.props.modal || (!this.props.displayOnly && this.props.isTeacher))
+
+                        if (this.state.isPauseMode || interval.kind === "p") {
+                            return this.handleCreateInterval(interval);
+                        }
+
+                        return this.props.show_availabilities &&
+                        (this.props.modal || (!this.props.displayOnly && this.props.isTeacher))
                             ? this.handleOpenCreation(interval)
                             : this.handleCreateInterval(interval);
                     } : e => e.guide.clearGuideElement()}
@@ -1486,21 +1526,25 @@ class Planning extends React.Component {
                             ? e => {
                                 if (e.schedule.isAllDay) return;
 
-                                // If evaluation
+                                // Si c'est un créneau d'évaluation, ouvrir la modal d'évaluation
                                 if (e.schedule.kind === "e") {
                                     this.handleOpenEvaluationModal(e.schedule.raw);
                                     return;
                                 }
 
-                                return (!this.props.displayOnly ||
-                                    e.schedule.isValidated) &&
+                                if (e.schedule.kind === "p") {
+                                    return this.handleOpenPauseDetail(e.schedule);
+                                }
+
+                                return (!this.props.displayOnly || e.schedule.isValidated) &&
                                 this.props.detailsModal
-                                    ? this.props.user.is_teacher ? this.handleOpenDetail(e.schedule) : e.schedule.activity ? null : this.handleDeleteInterval(e.schedule.id)
+                                    ? this.props.user.is_teacher
+                                        ? this.handleOpenDetail(e.schedule)
+                                        : e.schedule.activity ? null : this.handleDeleteInterval(e.schedule.id)
                                     : null;
                             }
                             : e => this.handleOpenMultiViewModal(e.schedule)
-                    }
-                />
+                    }/>
 
                 {this.props.displayRaw ? (
                     <Fragment>
@@ -1707,6 +1751,23 @@ class Planning extends React.Component {
                         currentUserId={this.props.currentUserId}
                     />
                 </Modal>
+
+                <Modal
+                    ariaHideApp={false}
+                    isOpen={this.state.isPauseDetailModalOpen}
+                    onRequestClose={() => this.closePauseDetailModal()}
+                    className="test"
+                    contentLabel="Détail de la pause"
+                >
+                    <PauseDetailModal
+                        pauseInterval={this.state.selectedPauseInterval}
+                        closeModal={() => this.closePauseDetailModal()}
+                        onDelete={(pauseInterval) => this.handleDeletePauseInterval(pauseInterval)}
+                        onEdit={(pauseInterval) => this.handleOpenPauseEdition(pauseInterval)}
+                    />
+                </Modal>
+
+
             </div>
         );
     }

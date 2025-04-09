@@ -104,7 +104,10 @@ function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=fa
                 title = "Dispo. Cours";
                 break;
             case "e":
-                title = "Dispo. Evaluation"
+                title = "Dispo. Evaluation";
+                break;
+            case "p":
+                title = "Pause";
                 break;
         }
         if (schedule.isValidated) {

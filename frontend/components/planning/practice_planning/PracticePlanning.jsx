@@ -406,8 +406,9 @@ export default class PracticePlanning extends React.Component {
                 start: session.time_interval.start,
                 end: session.time_interval.end,
                 resourceId: session.room_id,
-                backgroundColor: "blue",
-                borderColor: "blue",
+                backgroundColor: session.is_pause ? "grey" : "blue", // Couleur spécifique pause
+                borderColor: session.is_pause ? "grey" : "blue",
+                isPause: session.is_pause, // Flag pause
             }
         })
     }
@@ -433,22 +434,36 @@ export default class PracticePlanning extends React.Component {
     };
 
     handleDateSelect = selectInfo => {
-        moment.locale();
-        this.setState({
-            isMultiViewModalOpen: true,
-            selectedSchedule: selectInfo,
-            room: selectInfo.resource.id
-        });
+        if (this.state.isAddingBreak) {
+            this.setState({
+                isPauseModalOpen: true,
+                selectedSchedule: selectInfo,
+                room: selectInfo.resource.id
+            });
+        } else {
+            this.setState({
+                isMultiViewModalOpen: true,
+                selectedSchedule: selectInfo,
+                room: selectInfo.resource.id
+            });
+        }
 
         let calendarApi = selectInfo.view.calendar;
-        calendarApi.unselect(); // clear date selection
+        calendarApi.unselect();
     };
 
     handleEventClick = clickInfo => {
+        const event = this.state.events.find(e => e.id == clickInfo.event.id);
+
+        if (event.isPause) {
+            // Ne rien faire si c'est un créneau de pause
+            return;
+        }
+
         this.setState({
             isHandleSessionsOpen: true,
-            eventSelected: this.state.events.find(e => e.id == clickInfo.event.id),
-        })
+            eventSelected: event,
+        });
     };
 
     handleEvents = events => {
