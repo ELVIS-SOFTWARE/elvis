@@ -730,24 +730,25 @@ class Planning extends React.Component {
             const toastUpdate = (
                 <div>
                     <p>
-                        {event.schedule.activity
+                        {event.schedule.kind === "c"
                             ? "Le cours est mis-à-jour!"
-                            : "La disponibilité est à jour"}
+                            : event.schedule.kind === "p"
+                                ? "La pause est à jour"
+                                : "La disponibilité est à jour"}
                     </p>
-                    {event.schedule.activity ? (
+                    {event.schedule.kind === "c" && (
                         <button
                             className="btn btn-primary"
                             onClick={() =>
-                                this.handleSimulateUpdateAllActivityInstances(
-                                    event
-                                )
+                                this.handleSimulateUpdateAllActivityInstances(event)
                             }
                         >
                             Mettre à jour tous les cours suivants
                         </button>
-                    ) : null}
+                    )}
                 </div>
             );
+
 
             const conflictResolution = (
                 <div>
@@ -797,6 +798,7 @@ class Planning extends React.Component {
         // Delete specific interval
         const {intervalStore} = this.state;
 
+
         // the distinction is between teacher planning and ActivityApplication
         if (this.props.updateTimePreferences) {
             const updatedStore = _.omit(intervalStore, id);
@@ -821,6 +823,8 @@ class Planning extends React.Component {
                         selectedIntervals: _.values(intervalStore),
                         intervalStore,
                     });
+
+                    this.closePauseDetailModal();
                 }
             });
         }
@@ -1004,17 +1008,11 @@ class Planning extends React.Component {
     // PAUSE MODAL
     // =============================
 
-    handleOpenPauseCreation(newInterval) {
-        this.setState({
-            isPauseCreationModalOpen: true,
-            newInterval,
-        });
-    }
 
-    closePauseCreationModal() {
+    closePauseDetailModal() {
         this.setState({
-            isPauseCreationModalOpen: false,
-            newInterval: {},
+            isPauseDetailModalOpen: false,
+            selectedPauseInterval: undefined,
         });
     }
 
@@ -1028,7 +1026,6 @@ class Planning extends React.Component {
             end,
         };
 
-        console.log("Interval sélectionné pour la modal : ", cleanedInterval);  // Vérification des données
         this.setState({
             selectedPauseInterval: cleanedInterval,
             isPauseDetailModalOpen: true,
@@ -1038,8 +1035,8 @@ class Planning extends React.Component {
 
     closePauseDetailModal() {
         this.setState({
-            isPauseDetailModalOpen: false,  // Ferme la modal
-            selectedPause: undefined,  // Réinitialise l'intervalle sélectionné
+            isPauseDetailModalOpen: false,
+            selectedPauseInterval: undefined,
         });
     }
 
@@ -1763,17 +1760,19 @@ class Planning extends React.Component {
 
                 <Modal
                     ariaHideApp={false}
-                    isOpen={this.state.isPauseDetailModalOpen}
-                    onRequestClose={() => this.closePauseDetailModal()}
+                    isOpen={this.state.isPauseDetailModalOpen && this.state.selectedPauseInterval}
+                    onRequestClose={this.closePauseDetailModal.bind(this)}
                     className="test"
                     contentLabel="Détail de la pause"
                 >
-                    <PauseDetailModal
-                        pauseInterval={this.state.selectedPauseInterval}
-                        closeModal={() => this.closePauseDetailModal()}
-                        onDelete={(pauseInterval) => this.handleDeletePauseInterval(pauseInterval)}
-                        onEdit={(pauseInterval) => this.handleOpenPauseEdition(pauseInterval)}
-                    />
+                    {this.state.selectedPauseInterval && (
+                        <PauseDetailModal
+                            pauseInterval={this.state.selectedPauseInterval}
+                            closeModal={this.closePauseDetailModal.bind(this)}
+                            onDelete={this.handleDeleteInterval.bind(this)}
+                            onEdit={this.handleOpenPauseEdition ? this.handleOpenPauseEdition.bind(this) : undefined}
+                        />
+                    )}
                 </Modal>
 
 

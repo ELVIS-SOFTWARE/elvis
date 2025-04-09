@@ -1,40 +1,33 @@
 import React from "react";
+import moment from "moment";
 
 const PauseDetailModal = ({
                               pauseInterval,
                               closeModal,
                               onDelete,
-                              onEdit,
                           }) => {
     if (!pauseInterval) {
-        console.error("Aucun intervalle de pause fourni");
+        if (closeModal) {
+            setTimeout(() => closeModal(), 0);
+        }
         return null;
     }
 
-    // Vérification des propriétés start et end pour voir leur contenu
-    console.log("Pause Interval:", pauseInterval);
 
-    const start = pauseEvent.start.toDate ? pauseEvent.start.toDate() : pauseEvent.start;
-    const end = pauseEvent.end.toDate ? pauseEvent.end.toDate() : pauseEvent.end;
-    console.log(pauseEvent.start, pauseEvent.start instanceof Date)
-    console.log(pauseEvent.end, pauseEvent.end instanceof Date)
+    const formatTimeIfValid = (dateValue) => {
+        try {
+            if (dateValue && moment(dateValue).isValid()) {
+                return moment(dateValue).format("HH[h]mm");
+            }
+            return "Non défini";
+        } catch (error) {
+            console.error("Erreur de formatage de date:", error);
+            return "Non défini";
+        }
+    };
 
-
-    let startDate = "Non défini";
-    let endDate = "Non défini";
-
-    // Assurer que start et end sont des objets Date valides
-    if (pauseInterval.start && pauseInterval.start instanceof Date && !isNaN(pauseInterval.start)) {
-        startDate = pauseInterval.start.toLocaleString();
-    } else {
-        console.error("La date de début est invalide:", pauseInterval.start);
-    }
-
-    if (pauseInterval.end && pauseInterval.end instanceof Date && !isNaN(pauseInterval.end)) {
-        endDate = pauseInterval.end.toLocaleString();
-    } else {
-        console.error("La date de fin est invalide:", pauseInterval.end);
-    }
+    const startTime = formatTimeIfValid(pauseInterval.start);
+    const endTime = formatTimeIfValid(pauseInterval.end);
 
     return (
         <div>
@@ -42,33 +35,37 @@ const PauseDetailModal = ({
             <hr/>
 
             <p>
-                Début : <b>{moment(this.props.interval.start).format("HH[h]mm")}</b><br/>
-                Fin : <b>{moment(this.props.interval.end).format("HH[h]mm")}</b>
+                Début : <b>{startTime}</b><br/>
+                Fin : <b>{endTime}</b>
             </p>
 
-            {this.props.interval.comment && (
+            {pauseInterval.comment && (
                 <div className="alert alert-info">
                     <strong>Commentaire</strong><br/>
-                    {this.props.interval.comment.content}
+                    {pauseInterval.comment.content}
                 </div>
             )}
 
             <hr/>
 
             <div className="flex flex-space-between-justified">
-                <button className="btn" onClick={this.props.closeModal} type="button">
+                <button className="btn" onClick={closeModal} type="button">
                     <i className="fas fa-times m-r-sm"/>
                     Fermer
                 </button>
 
-                <button
-                    className="btn btn-warning"
-                    onClick={() => this.props.handleDeleteInterval(this.props.interval.id)}
-                    type="button"
-                >
-                    <i className="fas fa-trash m-r-sm"/>
-                    Supprimer la pause
-                </button>
+                {pauseInterval.id && (
+                    <button
+                        className="btn btn-warning"
+                        onClick={() => {
+                            onDelete(pauseInterval.id);
+                        }}
+                        type="button"
+                    >
+                        <i className="fas fa-trash m-r-sm" />
+                        Supprimer la pause
+                    </button>
+                )}
             </div>
         </div>
     );
