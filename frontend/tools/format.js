@@ -143,21 +143,14 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
     let headCount, validatedHeadCount, headCountLimit = 0;
     let hasOption = false;
 
-    if(_.get(activity, "activity_ref.is_work_group")) {
-        hasOption = _.some(activity.activities_instruments, ai => Boolean(ai.user_id) && !ai.is_validated);
+    if (_.get(activity, "activity_ref.is_work_group")) {
         headCount = activity.activities_instruments.filter(ai => Boolean(ai.user_id)).length;
+        validatedHeadCount = activity.activities_instruments.filter(ai => Boolean(ai.user_id) && ai.is_validated).length;
         headCountLimit = activity.activities_instruments.length;
-        validatedHeadCount = headCount;
-    }
-    else {
-        const optionsUserIds = _(activity.options)
-            .map("desired_activity.activity_application.user_id")
-            .compact()
-            .value();
-
+        hasOption = headCount > validatedHeadCount;
+    } else {
+        const optionsUserIds = activity.options.map(o => o.user?.id).filter(Boolean);
         hasOption = Boolean(optionsUserIds.length);
-
-        // ne pas mettre === car stopped_at et referenceDate peut-être undefined ou null ou chaine vide
         const activeUsers = activity.users.filter(u =>
             referenceDate == undefined ||
             (u.begin_at <= referenceDate && (u.stopped_at == undefined || u.stopped_at > referenceDate))
@@ -165,11 +158,11 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
 
         headCount = activeUsers.length + optionsUserIds.length;
         headCountLimit = activity.activity_ref.occupation_limit;
-        validatedHeadCount = activeUsers.length;
+        validatedHeadCount = activeUsers.filter(u => !optionsUserIds.includes(u.id)).length;
     }
 
-    return {headCount, validatedHeadCount, headCountLimit, hasOption};
-}
+    return { headCount, validatedHeadCount, headCountLimit, hasOption };
+};
 
 export const formatActivityHeadcount = (activity, referenceDate = undefined) => {
     let { headCount, validatedHeadCount, headCountLimit, hasOption } = occupationInfos(activity, referenceDate);
@@ -203,9 +196,15 @@ export const formatActivityHeadcount = (activity, referenceDate = undefined) => 
 
     return (
         <p style={styles}>
-            {validatedHeadCount}
-            {options > 0 && (
-                <span style={{ color: "#9575CD" }}> + {options}</span>
+            {validatedHeadCount === 0 && options > 0 ? (
+                <span style={{ color: "#9575CD" }}>{options}</span>
+            ) : (
+                <>
+                    {validatedHeadCount}
+                    {options > 0 && (
+                        <span style={{ color: "#9575CD" }}> + {options}</span>
+                    )}
+                </>
             )}
             {" / "}
             {headCountLimit}
@@ -213,6 +212,7 @@ export const formatActivityHeadcount = (activity, referenceDate = undefined) => 
         </p>
     );
 };
+
 
 // export const formatActivityHeadcount = (activity, referenceDate = undefined) => {
 //     let headCount, validatedHeadCount, headCountLimit = 0;
