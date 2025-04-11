@@ -78,6 +78,9 @@ class AvailabilityInput extends React.PureComponent {
                         }
                     </div>}
                 <div className="ibox-content">
+                    <p className="text-info" style={{ marginBottom: "15px" }}>
+                        Sélectionner plusieurs créneaux de disponibilités, vous aurez ainsi plus de possibilités d'inscription.
+                    </p>
                     {kinds.length > 1 ? (
                         <div className="form-group">
                             {kinds.map(k => (
@@ -122,7 +125,7 @@ class AvailabilityInput extends React.PureComponent {
                             >
                                 <span
                                     className="input-group-addon font-bold bg-muted"
-                                    style={{minWidth: "50px"}}
+                                    style={{ minWidth: "50px" }}
                                 >
                                     {"De"}
                                 </span>
