@@ -17,48 +17,53 @@ class CreateIntervalModal extends React.Component {
         const detectedSeason = getSeasonFromDate(this.props.newInterval.start.toDate(), this.props.seasons);
 
         this.state = {
-            kind: this.props.kind || "p",
-            season: detectedSeason && detectedSeason.id || "",
+            // Par défaut, c'est une disponibilité ("o")
+            kind: this.props.kind || "o",
+            season: detectedSeason?.id || "",
             isAdminSelectIntervalRecurrence: false,
             isRecurrent: false,
-            recurrentType: RECURRENCE_TYPES.getDefault()
+            recurrentType: RECURRENCE_TYPES.getDefault(),
         };
-
     }
 
     handleOptionChange(e) {
         this.setState({ kind: e.target.value });
-
     }
 
     handleSave() {
-        const interval = { ...this.props.newInterval, kind: this.state.kind, recurrentType: this.state.isRecurrent ? this.state.recurrentType : null };
-        this.props.onSave(interval, this.state.season);
-        this.props.closeModal();
-    }
+        let kind = this.state.kind;
+        if (kind === "c" && !this.props.newInterval.activity) {
+            kind = "o";
+        }
+        const interval = {
+            ...this.props.newInterval,
+            kind,
+            recurrentType: this.state.isRecurrent ? this.state.recurrentType : null,
+        };
 
+        if (kind === "p") {
+            this.props.onSave(interval, this.state.season);
+            this.props.closeModal();
+        } else {
+            this.props.handleCloseAndOpenDetails(interval);
+        }
+    }
     handleChangeSeason(season) {
         this.setState({ season });
     }
 
-
-    render()
-    {
+    render() {
         let component;
 
-        if (this.props.currentUserIsAdmin && this.props.recurrenceActivated)
-        {
-            if (this.state.isAdminSelectIntervalRecurrence)
-            {
-
-
+        if (this.props.currentUserIsAdmin && this.props.recurrenceActivated) {
+            if (this.state.isAdminSelectIntervalRecurrence) {
                 component = <div className="mb-3">
-                    <h3>Création d'une disponibilité</h3>
+                    <h3>Création d'une {this.state.kind === "p" ? "pause" : "disponibilité"}</h3>
                     <hr />
 
                     <div className="row">
                         <div className="col-sm-12">
-                            La disponibilité sera ajoutée pour le créneau suivant : <br />
+                            Ce créneau sera ajouté pour : <br />
                             <strong>{toFullDateFr(this.props.newInterval.start)}</strong> de &nbsp;
                             <strong>{new Date(this.props.newInterval.start).toLocaleTimeString()}</strong> à &nbsp;
                             <strong>{new Date(this.props.newInterval.end).toLocaleTimeString()}</strong>
@@ -69,10 +74,10 @@ class CreateIntervalModal extends React.Component {
                         <div className="col-sm-12 py-3">
                             <Checkbox
                                 id="isRecurrent"
-                                label="Cette disponibilité est récurrente"
+                                label="Ce créneau est récurrent"
                                 input={{
                                     checked: this.state.isRecurrent,
-                                    onChange: e => this.setState({ isRecurrent: e.target.checked })
+                                    onChange: e => this.setState({ isRecurrent: e.target.checked }),
                                 }}
                             />
                         </div>
@@ -88,17 +93,16 @@ class CreateIntervalModal extends React.Component {
                             </select>
                         </div>}
                     </div>
-                </div>
-            }
-            else
-            {
+                </div>;
+            } else {
                 const date = new Date(this.props.newInterval.start);
 
                 component = <div className="mb-3">
                     <h3>{toFullDateFr(date)}</h3>
                     <hr />
 
-                    <div className="row btn w-100 p-4 border-hover" onClick={() => this.props.handleCloseAndOpenDetails(this.props.newInterval)}>
+                    <div className="row btn w-100 p-4 border-hover"
+                         onClick={() => this.props.handleCloseAndOpenDetails(this.props.newInterval)}>
                         <div className="col-sm-1">
                             <i className="fas fa-calendar-day"></i>
                         </div>
@@ -107,7 +111,8 @@ class CreateIntervalModal extends React.Component {
                         </div>
                     </div>
 
-                    <div className="row btn w-100 p-4 border-hover" onClick={() => this.setState({isAdminSelectIntervalRecurrence: true})}>
+                    <div className="row btn w-100 p-4 border-hover"
+                         onClick={() => this.setState({ isAdminSelectIntervalRecurrence: true, kind: "o" })}>
                         <div className="col-sm-1">
                             <i className="far fa-calendar-check"></i>
                         </div>
@@ -115,16 +120,24 @@ class CreateIntervalModal extends React.Component {
                             Ajout d'une disponibilité
                         </div>
                     </div>
-                </div>
+
+                    <div className="row btn w-100 p-4 border-hover"
+                         onClick={() => this.setState({ isAdminSelectIntervalRecurrence: true, kind: "p" })}>
+                        <div className="col-sm-1">
+                            <i className="fas fa-coffee"></i>
+                        </div>
+                        <div className="col-md-11 text-left">
+                            Ajout d'une pause
+                        </div>
+                    </div>
+                </div>;
             }
-        }
-        else
-        {
+        } else {
             component = <Fragment>
                 <h3>Création d'un créneau de disponibilité</h3>
                 <hr />
                 <form className="m-b">
-                <label className="label-control">Créer la disponibilité :</label>
+                    <label className="label-control">Créer la disponibilité :</label>
                     <select
                         className="form-control"
                         value={this.state.season}
@@ -132,31 +145,26 @@ class CreateIntervalModal extends React.Component {
                         <option key={-1} value="">
                             sur le créneau sélectionné
                         </option>
-                        {
-                            this
-                                .props
-                                .seasons
-                                .map((s, i) =>
-                                    <option key={i} value={s.id}>{s.label}</option>
-                                )
-                        }
+                        {this.props.seasons.map((s, i) =>
+                            <option key={i} value={s.id}>{s.label}</option>
+                        )}
                     </select>
-                    <p style={{ margin: '10px' }}><i className="fas fa-info-circle m-r-sm"></i>
-                        {this.state.season === "" ?
-                            'La disponibilité sera ajoutée au créneau sélectionné.'
-                            :
-                            'La disponibilité sera ajoutée à la 1ère semaine de la saison.'}
+                    <p style={{ margin: "10px" }}>
+                        <i className="fas fa-info-circle m-r-sm"></i>
+                        {this.state.season === ""
+                            ? "La disponibilité sera ajoutée au créneau sélectionné."
+                            : "La disponibilité sera ajoutée à la 1ère semaine de la saison."}
                     </p>
 
-
                     <label className="label-control">Type</label>
+
                     <span className="radio radio-primary">
                         <input
                             type="radio"
                             name="dispo"
                             id="c"
                             value="c"
-                            checked={this.state.kind == "c"}
+                            checked={this.state.kind === "c"}
                             onChange={e => this.handleOptionChange(e)}
                         />
                         <label htmlFor="c">
@@ -170,7 +178,7 @@ class CreateIntervalModal extends React.Component {
                             name="dispo"
                             type="radio"
                             value="o"
-                            checked={this.state.kind == "o"}
+                            checked={this.state.kind === "o"}
                             onChange={e => this.handleOptionChange(e)}
                         />
                         <label htmlFor="o">
@@ -184,32 +192,48 @@ class CreateIntervalModal extends React.Component {
                             name="dispo"
                             id="e"
                             value="e"
-                            checked={this.state.kind == "e"}
+                            checked={this.state.kind === "e"}
                             onChange={e => this.handleOptionChange(e)}
                         />
                         <label htmlFor="e">
                             <span>Evaluation</span>
                         </label>
                     </span>
+
+                    <span className="radio radio-primary">
+                        <input
+                            type="radio"
+                            name="dispo"
+                            id="p"
+                            value="p"
+                            checked={this.state.kind === "p"}
+                            onChange={e => this.handleOptionChange(e)}
+                        />
+                        <label htmlFor="p">
+                            <span>Pause</span>
+                        </label>
+                    </span>
                 </form>
-            </Fragment>
+            </Fragment>;
         }
 
-        return <div>
-            {component}
-            <div className="flex flex-space-between-justified">
-                <button type="button" onClick={this.props.closeModal} className="btn">
-                    <i className="fas fa-times m-r-sm"></i>
-                    Annuler
-                </button>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => this.handleSave()}
-                >
-                    Enregistrer
-                </button>
+        return (
+            <div>
+                {component}
+                <div className="flex flex-space-between-justified">
+                    <button type="button" onClick={this.props.closeModal} className="btn">
+                        <i className="fas fa-times m-r-sm"></i>
+                        Annuler
+                    </button>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => this.handleSave()}
+                    >
+                        Enregistrer
+                    </button>
+                </div>
             </div>
-        </div>
+        );
     }
 }
 
@@ -221,7 +245,7 @@ CreateIntervalModal.propTypes = {
     kind: PropTypes.string,
     handleCloseAndOpenDetails: PropTypes.func,
     currentUserIsAdmin: PropTypes.bool,
-    recurrenceActivated: PropTypes.bool
+    recurrenceActivated: PropTypes.bool,
 };
 
 export default CreateIntervalModal;

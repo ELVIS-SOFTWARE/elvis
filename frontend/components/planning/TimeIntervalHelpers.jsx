@@ -114,7 +114,14 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
         let borderColor = color;
         let activity = undefined;
 
-        if (Object.keys(kindColors).includes(int.kind)) {
+        if (int.kind === "p") {
+            bgColor = "#3F51B5";
+            color = "white";
+            borderColor = bgColor;
+        }
+
+        // Condition existante pour les autres types
+        else if (Object.keys(kindColors).includes(int.kind)) {
             color = int.is_validated ? "white" : kindColors[int.kind].color;
             bgColor = int.is_validated ? kindColors[int.kind].validated : kindColors[int.kind].bgColor;
             borderColor = bgColor;
