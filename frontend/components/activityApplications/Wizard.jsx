@@ -861,7 +861,8 @@ class Wizard extends React.Component {
                 ),
             },
 
-            !this.state.skipFormulaChoice && {
+            !this.state.skipFormulaChoice &&
+            this.props.formulas && this.props.formulas.length > 0 && {
                 name: "Choix de la formule",
                 component: (
                     <WrappedFormulaChoice
@@ -874,7 +875,9 @@ class Wizard extends React.Component {
                         currentUserIsAdmin={this.props.currentUserIsAdmin}
                         handleAddFormula={id => this.handleAddFormula(id)}
                         handleRemoveFormula={id => this.handleRemoveFormula(id)}
-                        handleUpdateFormulaActivities={(id, activities) => this.handleUpdateFormulaActivities(id, activities)}
+                        handleUpdateFormulaActivities={(id, activities) =>
+                            this.handleUpdateFormulaActivities(id, activities)
+                        }
                         validation={null}
                         infoText={this.props.formulaChoiceDisplayText}
                         selectedActivities={this.state.selectedActivities}
@@ -882,6 +885,7 @@ class Wizard extends React.Component {
                     />
                 ),
             },
+
 
             !this.state.skipActivityChoice &&
             activityChoiceActionTypes.includes(this.props.actionType) && {
