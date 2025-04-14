@@ -14,7 +14,6 @@ class WrappedFormulaChoice extends React.Component {
     }
 
     render() {
-        console.log("Props passées à FormulaChoice :", this.props);
         return (
             <FormulaChoice
                 {...this.props}
