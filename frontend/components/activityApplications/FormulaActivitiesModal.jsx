@@ -129,8 +129,8 @@ const FormulaActivitiesModal = ({
     };
 
     const handleSaveActivities = () => {
-        if (tempSelectedActivities.length === 0) {
-            setErrorMessage("Veuillez sélectionner au moins une activité.");
+        if (tempSelectedActivities.length < activeFormula.number_of_items) {
+            setErrorMessage(`Veuillez sélectionner ${activeFormula.number_of_items} activité${activeFormula.number_of_items > 1 ? "s" : ""} pour valider cette formule.`);
             return;
         }
 
