@@ -21,7 +21,7 @@ import {
     csrfToken,
     findAndGet,
 } from "../utils";
-import { formatActivityHeadcount } from "../../tools/format";
+import { formatActivityHeadcount, isActivityWithOnlyOneOption } from "../../tools/format";
 import UserWithInfos from "../common/UserWithInfos";
 import _ from "lodash";
 import { averageAgeDisplay } from "../planning/TimeIntervalHelpers";
@@ -346,18 +346,31 @@ export default class LessonList extends React.Component {
         });
 
         debounce(() =>
-            fetchInstancesList(filter).then(({ data, pages, total }) =>
+            fetchInstancesList(filter).then(({ data, pages, total }) => {
+                const processedData = data.map(activity => {
+                    const referenceDate = findAndGet(
+                        filter.filtered,
+                        f => f.id === "reference_date",
+                        "value"
+                    );
+
+                    const isOnlyOneOption = isActivityWithOnlyOneOption(activity, referenceDate);
+
+                    return {
+                        ...activity,
+                        isOnlyOneOption
+                    };
+                });
+
                 this.setState({
                     loading: false,
-                    data,
+                    data: processedData,
                     pages,
                     total,
-                }),
-            ),
+                });
+            }),
         );
-    }
-
-    downloadExport() {
+    }downloadExport() {
         fetchInstancesList(this.state.filter, "csv").then(file => {
             const download = document.createElement("a");
             download.download = `${moment().format("DD_MM_YYYY-HH_mm_ss")}.csv`;
@@ -1164,10 +1177,16 @@ export default class LessonList extends React.Component {
                         rowsText="résultats"
                         minRows={10}
                         getTrProps={(state, rowInfo, column) => {
-                            if (
-                                rowInfo &&
-                                rowInfo.original.options.length != 0
-                            ) {
+                            if (rowInfo) {
+                                if (rowInfo.original.isOnlyOneOption) {
+                                    return {
+                                        style: {
+                                            color: "#9575CD"
+                                        }
+                                    };
+                                }
+                                if (rowInfo.original.options.length != 0) {
+                                }
                             }
                             return {};
                         }}
