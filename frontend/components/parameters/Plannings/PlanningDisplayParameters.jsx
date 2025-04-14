@@ -2,21 +2,19 @@ import React, { useEffect } from "react";
 import * as api from "../../../tools/api";
 import swal from "sweetalert2";
 
-export default function PlanningDisplayParameters()
-{
+export default function PlanningDisplayParameters() {
     const [showActivityCode, setShowActivityCode] = React.useState(false);
     const [recurrenceActivated, setRecurrenceActivated] = React.useState(false);
+    const [availabilityMessage, setAvailabilityMessage] = React.useState("");
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         api.set()
-            .success((data) =>
-            {
+            .success((data) => {
                 setShowActivityCode(data.show_activity_code);
                 setRecurrenceActivated(data.recurrence_activated);
+                setAvailabilityMessage(data.availability_message || "");
             })
-            .error(() =>
-            {
+            .error(() => {
                 swal({
                     title: "Erreur lors du chargement des paramètres",
                     type: "error",
@@ -25,18 +23,15 @@ export default function PlanningDisplayParameters()
             .get("/parameters/planning/school_planning_params", {});
     }, []);
 
-    const onSubmit = (e) =>
-    {
+    const onSubmit = (e) => {
         api.set()
-            .success(() =>
-            {
+            .success(() => {
                 swal({
                     title: "Paramètres modifiés",
                     type: "success",
                 });
             })
-            .error(() =>
-            {
+            .error(() => {
                 swal({
                     title: "Erreur lors de la modification des paramètres",
                     type: "error",
@@ -44,29 +39,57 @@ export default function PlanningDisplayParameters()
             })
             .post("/parameters/planning/school_planning_params", {
                 show_activity_code: showActivityCode,
-                recurrence_activated: recurrenceActivated
+                recurrence_activated: recurrenceActivated,
+                availability_message: availabilityMessage
             });
     };
 
-    return <div className="row">
-        <div className="col-md-5">
-            <h3>Paramètres d'affichage des plannings</h3>
+    return (
+        <div className="row">
+            <div className="col-md-5">
+                <h3>Paramètres d'affichage des plannings</h3>
 
-            <div className="form-group mb-3">
+                <div className="form-group mb-3">
+                    <input
+                        id="show_activity_code"
+                        type="checkbox"
+                        checked={showActivityCode}
+                        onChange={() => setShowActivityCode(!showActivityCode)}
+                    />
+                    <label htmlFor="show_activity_code" className="ml-2 font-normal">
+                        Afficher le code de l'activité
+                    </label>
+                </div>
 
-                <input id="show_activity_code" type="checkbox" checked={showActivityCode}
-                       onChange={() => setShowActivityCode(!showActivityCode)} />
-                <label htmlFor="show_activity_code" className="ml-2 font-normal">Afficher le code de l'activité</label>
+                <div className="form-group mb-3">
+                    <input
+                        id="recurrence_activated"
+                        type="checkbox"
+                        checked={recurrenceActivated}
+                        onChange={() => setRecurrenceActivated(!recurrenceActivated)}
+                    />
+                    <label htmlFor="recurrence_activated" className="ml-2 font-normal">
+                        Permettre la récurrence des disponibilités
+                    </label>
+                </div>
+
+                <div className="form-group mb-3">
+                    <label htmlFor="availability_message" className="font-normal">
+                        Message de disponibilités affiché aux élèves
+                    </label>
+                    <input
+                        id="availability_message"
+                        type="text"
+                        className="form-control"
+                        value={availabilityMessage}
+                        onChange={(e) => setAvailabilityMessage(e.target.value)}
+                    />
+                </div>
+
+                <button className="btn btn-success pull-right mt-5" onClick={onSubmit}>
+                    Valider
+                </button>
             </div>
-
-            <div className="form-group mb-3">
-
-                <input id="recurrence_activated" type="checkbox" checked={recurrenceActivated}
-                       onChange={() => setRecurrenceActivated(!recurrenceActivated)} />
-                <label htmlFor="recurrence_activated" className="ml-2 font-normal">Permettre la récurrence des disponibilités</label>
-            </div>
-
-            <button className="btn btn-success pull-right mt-5" onClick={onSubmit}>Valider</button>
         </div>
-    </div>;
+    );
 }

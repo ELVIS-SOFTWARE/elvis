@@ -19,7 +19,8 @@ export default function TimePreferencesStep({
                                                 activityRefs,
                                                 childhoodPreferences,
                                                 selectionLabels,
-                                                disableLiveReload = true
+                                                disableLiveReload = true,
+                                                availabilityMessage
                                             })
 {
     const availabilityRef = useRef();
@@ -55,6 +56,7 @@ export default function TimePreferencesStep({
                 planningId={planningId}
                 onAdd={onAvailabilityAdd}
                 onDelete={onAvailabilityDelete}
+                availabilityMessage={availabilityMessage}
             />;
         case PREFERENCES_MODE:
             return <IntervalPreferencesEditor
@@ -84,6 +86,7 @@ export default function TimePreferencesStep({
                     planningId={planningId}
                     onAdd={onAvailabilityAdd}
                     onDelete={onAvailabilityDelete}
+                    availabilityMessage={availabilityMessage}
                 />
             </React.Fragment>;
         default:

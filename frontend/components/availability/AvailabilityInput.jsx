@@ -69,17 +69,24 @@ class AvailabilityInput extends React.PureComponent {
 
         return (
             <div className="ibox">
-                {this.props.selectionLabels &&
+                {this.props.selectionLabels && (
                     <div className="ibox-title bg-primary">
-                        {this.props.selectionLabels.length === 1 ?
-                            <h3>Préférences horaires pour l'activité {this.props.selectionLabels[0]}</h3>
-                            :
-                            <h3>Préférences horaires pour les activités ({this.props.selectionLabels.join(', ')})</h3>
-                        }
-                    </div>}
+                        {this.props.selectionLabels.length === 1 ? (
+                            <h3>
+                                Préférences horaires pour l'activité{" "}
+                                {this.props.selectionLabels[0]}
+                            </h3>
+                        ) : (
+                            <h3>
+                                Préférences horaires pour les activités (
+                                {this.props.selectionLabels.join(", ")})
+                            </h3>
+                        )}
+                    </div>
+                )}
                 <div className="ibox-content">
                     <p className="text-info" style={{ marginBottom: "15px" }}>
-                        Sélectionner plusieurs créneaux de disponibilités, vous aurez ainsi plus de possibilités d'inscription.
+                        {this.props.availabilityMessage}
                     </p>
                     {kinds.length > 1 ? (
                         <div className="form-group">
@@ -151,7 +158,7 @@ class AvailabilityInput extends React.PureComponent {
                             >
                                 <span
                                     className="input-group-addon font-bold bg-muted"
-                                    style={{minWidth: "50px"}}
+                                    style={{ minWidth: "50px" }}
                                 >
                                     {"à"}
                                 </span>
@@ -170,8 +177,8 @@ class AvailabilityInput extends React.PureComponent {
                         </div>
                     </div>
 
-                    {
-                        showComment && <div className="input-group m-b">
+                    {showComment && (
+                        <div className="input-group m-b">
                             <span className="input-group-addon bg-muted font-bold">
                                 Commentaire
                             </span>
@@ -179,9 +186,10 @@ class AvailabilityInput extends React.PureComponent {
                                 defaultValue=""
                                 className="form-control"
                                 placeholder="Vous pouvez renseigner quelques précisions ici..."
-                                onChange={e => this.handleChangeComment(e)}/>
+                                onChange={e => this.handleChangeComment(e)}
+                            />
                         </div>
-                    }
+                    )}
 
                     <div className="clearfix">
                         <button
@@ -190,7 +198,8 @@ class AvailabilityInput extends React.PureComponent {
                             disabled={disabled || isInvalidInterval}
                             onClick={this.handleAdd}
                         >
-                            <i className="fas fa-plus"/> {"Créer la disponibilité"}
+                            <i className="fas fa-plus" />{" "}
+                            {"Créer la disponibilité"}
                         </button>
                     </div>
                 </div>

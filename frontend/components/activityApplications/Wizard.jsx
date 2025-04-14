@@ -965,6 +965,7 @@ class Wizard extends React.Component {
                         handleUpdateChildhoodPreferences={prefs =>
                             this.handleUpdateChildhoodPreferences(prefs)
                         }
+                        availabilityMessage={this.props.availabilityMessage}
                     />
                 ),
             },
