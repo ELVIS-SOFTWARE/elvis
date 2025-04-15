@@ -215,7 +215,9 @@ class AvailabilityManager extends PureComponent {
                                     disabled={isFetching}
                                     showDates={!this.props.forSeason}
                                     kinds={kinds}
-                                    showComment={isTeacher}/>
+                                    showComment={isTeacher}
+                                    availabilityMessage={this.props.availabilityMessage}
+                                />
                             </div>
                         </div>
                     ) : null}

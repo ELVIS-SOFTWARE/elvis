@@ -446,6 +446,9 @@ class ActivitiesApplicationsController < ApplicationController
       @packs[key] = value.select { |arp| arp["pricing_category"]["is_a_pack"] }
     end
 
+    @availability_message = Parameter.find_by(label: 'availability_message')&.value ||
+      "Sélectionner plusieurs créneaux de disponibilités, vous aurez ainsi plus de possibilités d'inscription."
+
     # on retire les packs qui n'ont pas de tarifs
     @packs = @packs.select { |_key, value| value.any? }
 

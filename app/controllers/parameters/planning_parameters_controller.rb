@@ -95,19 +95,22 @@ class Parameters::PlanningParametersController < ApplicationController
       label: "planning.card.show_activity_code",
       value_type: "boolean"
     )
-
     show_activity_code.value = (params[:show_activity_code]&.to_s == "true").to_s
-
     show_activity_code.save!
 
     recurrence_activated = Parameter.find_or_create_by(
       label: "planning.recurrence_activated",
       value_type: "boolean"
     )
-
     recurrence_activated.value = (params[:recurrence_activated]&.to_s == "true").to_s
-
     recurrence_activated.save!
+
+    availability_message = Parameter.find_or_create_by(
+      label: "availability_message",
+      value_type: "string"
+    )
+    availability_message.value = params[:availability_message]
+    availability_message.save!
 
     respond_to do |format|
       format.json { render json: { success: true } }
