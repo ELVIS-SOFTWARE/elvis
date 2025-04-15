@@ -36,7 +36,7 @@ const StudentItem = ({ user, activityId, color }) => {
 
     return (
         <td style={color ? { color } : undefined}>
-            <a href={inscriptionUrl}>
+            <a href={inscriptionUrl} target="_blank">
                 {user.first_name} {user.last_name}
             </a>
         </td>
