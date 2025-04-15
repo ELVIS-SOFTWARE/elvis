@@ -34,7 +34,9 @@ const FormulaChoice = ({
         filteredFormulas = formulas.filter((f) => {
             const nameMatch = f.name.toLowerCase().includes(searchTerm.toLowerCase());
             const activitiesMatch = (f.formule_items || []).some((item) =>
-                (item.item.display_name || item.item.label).toLowerCase().includes(searchTerm.toLowerCase())
+                (item.item.display_name || item.item.label)
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
             );
             return nameMatch || activitiesMatch;
         });
@@ -53,6 +55,10 @@ const FormulaChoice = ({
         const isSelected = isFormulaSelected(formula.id);
         const iconClass = isSelected ? "fas fa-check" : "fas fa-plus";
         const buttonStyle = {
+            position: "absolute",
+            right: "10px",
+            top: "50%",
+            transform: "translateY(-50%)",
             borderRadius: "50%",
             color: "white",
             backgroundColor: isSelected ? "#86D69E" : "#0079BF",
@@ -69,18 +75,18 @@ const FormulaChoice = ({
 
         return (
             <tr key={formula.id} style={{ color: "rgb(0, 51, 74)" }}>
-                <td style={{ fontWeight: "bold" }}>{formula.name}</td>
-                <td className="text-center">
-                    {(formula.formule_items || [])
-                        .map((item) => item.item.display_name || item.item.label)
-                        .join(", ") || "--"}
+                <td>
+                    <div style={{ fontWeight: "bold" }}>{formula.name}</div>
+                    <div style={{ fontSize: "1.1em", color: "#555" }}>
+                        {formula.description || "Aucune description"}
+                    </div>
                 </td>
-                <td className="text-center">
-                    {formula.formule_pricings && formula.formule_pricings[0]
-                        ? `${formula.formule_pricings[0].price} €`
-                        : "--"}
-                </td>
-                <td className="text-center">
+                <td style={{ position: "relative" }}>
+                    <div style={{ position: "absolute",  whiteSpace: "nowrap" }}>
+                        {formula.formule_pricings && formula.formule_pricings[0]
+                            ? `${formula.formule_pricings[0].price} €`
+                            : "--"}
+                    </div>
                     <button onClick={handleAction} style={buttonStyle}>
                         <i className={iconClass}></i>
                     </button>
@@ -97,10 +103,20 @@ const FormulaChoice = ({
         return (
             <Fragment key={formula.id}>
                 <tr style={{ backgroundColor: "#f5f5f5" }}>
-                    <td style={{ fontWeight: "bold" }} colSpan="2">
+                    <td
+                        style={{
+                            fontWeight: "bold",
+                            color: "#00334A",
+                            verticalAlign: "middle",
+                        }}
+                        colSpan="2"
+                    >
                         {formula.name}
                     </td>
-                    <td className="text-center">
+                    <td
+                        className="text-center"
+                        style={{ verticalAlign: "middle" }}
+                    >
                         {formula.formule_pricings && formula.formule_pricings[0]
                             ? `${formula.formule_pricings[0].price} €`
                             : "--"}
@@ -122,33 +138,36 @@ const FormulaChoice = ({
                     </td>
                 </tr>
                 {chosenActivities.length > 0 ? (
-                    chosenActivities.map((activityId) => {
-                        // Recherche dans formule_items
+                    chosenActivities.map(activityId => {
                         let activityItem = formula.formule_items.find(
-                            (item) => item.item.id === activityId
+                            item => item.item.id === activityId
                         );
                         if (!activityItem) {
-                            // Si non trouvé, il s'agit d'une activité issue d'une famille
                             const fullActivity = allActivityRefs.find(
-                                (activity) => activity.id === activityId
+                                activity => activity.id === activityId
                             );
                             if (!fullActivity) return null;
                             activityItem = {
                                 item: {
                                     id: fullActivity.id,
-                                    display_name: fullActivity.display_name || fullActivity.label,
+                                    display_name:
+                                        fullActivity.display_name ||
+                                        fullActivity.label,
                                 },
                             };
                         }
-                        // Recherche pour la durée dans allActivityRefs
                         const fullActivity = allActivityRefs.find(
-                            (activity) => activity.id === activityItem.item.id
+                            activity => activity.id === activityItem.item.id
                         );
                         const duration = fullActivity?.duration || "--";
                         return (
-                            <tr key={`${formula.id}-${activityItem.item.id}`} style={{ backgroundColor: "#ffffff" }}>
+                            <tr
+                                key={`${formula.id}-${activityItem.item.id}`}
+                                style={{ backgroundColor: "#ffffff" }}
+                            >
                                 <td style={{ paddingLeft: "30px" }}>
-                                    {activityItem.item.display_name || activityItem.item.label}
+                                    {activityItem.item.display_name ||
+                                        activityItem.item.label}
                                 </td>
                                 <td className="text-center">
                                     {duration} {duration !== "--" ? "min" : ""}
@@ -184,7 +203,7 @@ const FormulaChoice = ({
 
     const calculateTotalPrice = () => {
         return selectedFormulas.reduce((total, formulaId) => {
-            const formula = formulas.find(f => f.id === formulaId);
+            const formula = formulas.find((f) => f.id === formulaId);
             if (formula?.formule_pricings?.[0]?.price) {
                 return total + parseFloat(formula.formule_pricings[0].price);
             }
@@ -268,23 +287,36 @@ const FormulaChoice = ({
                         style={{ borderRadius: "12px", overflow: "hidden" }}
                     >
                         <thead>
-                        <tr style={{ backgroundColor: "#00334A", color: "white" }}>
-                            <th>Formule</th>
-                            <th>Activités incluses</th>
-                            <th>Tarif estimé</th>
-                            <th></th>
-                        </tr>
+                            <tr
+                                style={{
+                                    backgroundColor: "#00334A",
+                                    color: "white",
+                                }}
+                            >
+                                <th>Formule</th>
+
+                                <th
+                                    style={{
+                                        position: "relative",
+                                        textAlign: "right",
+                                        paddingRight: "80px",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    Tarif estimé
+                                </th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {availableRows.length > 0 ? (
-                            availableRows
-                        ) : (
-                            <tr>
-                                <td colSpan="4" className="text-center">
-                                    Aucune formule disponible
-                                </td>
-                            </tr>
-                        )}
+                            {availableRows.length > 0 ? (
+                                availableRows
+                            ) : (
+                                <tr>
+                                    <td colSpan="2" className="text-center">
+                                        Aucune formule disponible
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -296,32 +328,50 @@ const FormulaChoice = ({
                         style={{ borderRadius: "12px", overflow: "hidden" }}
                     >
                         <thead>
-                        <tr style={{ backgroundColor: "#00334A", color: "white" }}>
-                            <th>Formule</th>
-                            <th>Durée</th>
-                            <th>Tarif estimé</th>
-                            <th></th>
-                        </tr>
+                            <tr
+                                style={{
+                                    backgroundColor: "#00334A",
+                                    color: "white",
+                                }}
+                            >
+                                <th>Formule</th>
+                                <th>Durée</th>
+                                <th
+                                    style={{
+                                        position: "relative",
+                                        textAlign: "right",
+                                        paddingRight: "80px",
+                                        whiteSpace: "nowrap",
+                                    }}
+                                >
+                                    Tarif estimé
+                                </th>
+                                <th></th>
+                            </tr>
                         </thead>
                         <tbody>
-                        {selectedRows.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" className="text-center">
-                                    Aucune formule sélectionnée
-                                </td>
-                            </tr>
-                        ) : (
-                            selectedRows
-                        )}
+                            {selectedRows.length === 0 ? (
+                                <tr>
+                                    <td colSpan="4" className="text-center">
+                                        Aucune formule sélectionnée
+                                    </td>
+                                </tr>
+                            ) : (
+                                selectedRows
+                            )}
                         </tbody>
                     </table>
                     {selectedFormulas.length > 0 && (
                         <div className="d-flex justify-content-end mt-2">
                             <div
                                 className="p-2 bg-light"
-                                style={{ borderRadius: "5px", fontWeight: "bold" }}
+                                style={{
+                                    borderRadius: "5px",
+                                    fontWeight: "bold",
+                                }}
                             >
-                                Total estimé: {calculateTotalPrice().toFixed(2)} €
+                                Total estimé: {calculateTotalPrice().toFixed(2)}{" "}
+                                €
                             </div>
                         </div>
                     )}
@@ -333,7 +383,11 @@ const FormulaChoice = ({
                 isOpen={isModalOpen}
                 isNewFormula={isNewFormula}
                 allActivityRefs={allActivityRefs}
-                initialSelectedActivities={activeFormula ? selectedFormulaActivities[activeFormula.id] || [] : []}
+                initialSelectedActivities={
+                    activeFormula
+                        ? selectedFormulaActivities[activeFormula.id] || []
+                        : []
+                }
                 onCancel={handleCloseModal}
                 onSave={handleSaveModalActivities}
                 onRemoveFormula={handleRemoveFormula}
