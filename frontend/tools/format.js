@@ -164,6 +164,12 @@ export const occupationInfos = (activity, referenceDate = undefined) => {
     return { headCount, validatedHeadCount, headCountLimit, hasOption };
 };
 
+export const isActivityWithOnlyOneOption = (activity, referenceDate = undefined) => {
+    let { validatedHeadCount, headCount } = occupationInfos(activity, referenceDate);
+    const options = headCount - validatedHeadCount;
+    return validatedHeadCount === 0 && options === 1;
+};
+
 export const formatActivityHeadcount = (activity, referenceDate = undefined) => {
     let { headCount, validatedHeadCount, headCountLimit, hasOption } = occupationInfos(activity, referenceDate);
 
