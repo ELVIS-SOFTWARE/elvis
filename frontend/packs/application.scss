@@ -3444,8 +3444,11 @@ body {
 
 @media (max-width: 600px) {
     .activity-cards {
-        justify-content: center!important;
-        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+        margin-top: 12px;
     }
     .placeholder-card {
         width: 100% !important;
@@ -3459,7 +3462,8 @@ body {
     }
     .activity-card {
         width: 100% !important;
-        height: 250px;
+        max-width: 250px !important;
+        margin: 0 !important;
     }
     div.card-img-wrapper {
         height: 100px !important;
@@ -3557,3 +3561,32 @@ body {
     }
 }
 
+.inscription-btn-container {
+    display: inline-block;
+}
+
+.inscription-btn {
+    background-color: #00334A;
+    border-color: #00334A;
+}
+
+@media (max-width: 600px) {
+    .inscription-btn-container {
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin: 10px 0;
+        padding: 0;
+        gap: 15px;
+    }
+
+    .inscription-btn {
+        background-color: #00334A;
+        border-color: #00334A;
+        min-height: 44px;
+        padding: 10px 20px;
+        font-size: 2rem;
+        line-height: -1;
+    }
+
+}
