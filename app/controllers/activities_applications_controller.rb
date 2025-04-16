@@ -612,6 +612,10 @@ class ActivitiesApplicationsController < ApplicationController
     @avail_payment_schedule_options = show_payment_schedule_options ? PaymentScheduleOptions.all.as_json : []
     @avail_payment_methods = show_payment_schedule_options ? PaymentMethod.displayable.as_json(only: [:id, :label]) : []
     @payment_step_display_text = show_payment_schedule_options ? Parameter.find_or_create_by(label: "payment_step.display_text", value_type: "string").parse : ""
+
+    @availability_message = Parameter.find_by(label: 'availability_message')&.value ||
+      "Sélectionner plusieurs créneaux de disponibilités, vous aurez ainsi plus de possibilités d'inscription."
+
     @adhesion_prices = Adhesion.all.as_json
 
     show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
