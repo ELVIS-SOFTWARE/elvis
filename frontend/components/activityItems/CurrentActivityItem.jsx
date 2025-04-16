@@ -164,8 +164,8 @@ class CurrentActivityItem extends React.Component {
         let StopButton =
             <button
                 onClick={() => this.openStopModal()}
-                className="btn btn-danger btn-sm font-weight-bold"
-                style={ {borderRadius: "8px"} }
+                className="btn btn-danger btn-sm font-weight-bold mr-2" // ajout de mr-2 pour marger à droite
+                style={{ borderRadius: "8px" }}
             >
                 S'arrêter
             </button>
@@ -205,9 +205,10 @@ class CurrentActivityItem extends React.Component {
                 actionButtons =
                     <React.Fragment>
                         {StopButton}
-                        <a href={`/inscriptions/new/${user.id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
-                            className="btn btn-info btn-sm ml-2 font-weight-bold"
-                            style={{borderRadius: "8px"}}
+                        <a
+                            href={`/inscriptions/new/${user.id}/${pre_application_activity.id}/${data.activity_ref_id}/${PRE_APPLICATION_ACTIONS.RENEW}?auth_token=${csrfToken}`}
+                            className="btn btn-info btn-sm ml-2 mt-2 mt-md-0 font-weight-bold"
+                            style={{ borderRadius: "8px" }}
                         >
                             Se réinscrire
                         </a>
