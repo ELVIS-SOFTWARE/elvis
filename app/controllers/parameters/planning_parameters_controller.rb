@@ -84,7 +84,8 @@ class Parameters::PlanningParametersController < ApplicationController
 
     render json: {
       show_activity_code: Parameter.get_value("planning.card.show_activity_code", default: false),
-      recurrence_activated: Parameter.get_value("planning.recurrence_activated", default: false)
+      recurrence_activated: Parameter.get_value("planning.recurrence_activated", default: false),
+      availability_message: Parameter.get_value("availability_message", default: "")
     }
   end
 
