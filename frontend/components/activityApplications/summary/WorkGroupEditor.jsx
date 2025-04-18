@@ -8,18 +8,19 @@ import { optionMapper, ISO_DATE_FORMAT } from "../../utils";
 import _ from "lodash";
 
 function WorkGroupRow({
-    activitiesInstrument,
-    instruments,
-    desiredActivity,
-    activity,
-    userId,
-    onUpdate,
-    onDelete,
-    onAddOption,
-    onRemoveOption,
-    onValidate,
-    onInvalidate,
-}) {
+                          activitiesInstrument,
+                          instruments,
+                          desiredActivity,
+                          activity,
+                          userId,
+                          onUpdate,
+                          onDelete,
+                          onAddOption,
+                          onRemoveOption,
+                          onValidate,
+                          onInvalidate,
+                          isStudentAlreadyAssignedElsewhere,
+                      }) {
     const { user } = activitiesInstrument;
 
     const disabledDeletion = activitiesInstrument.user_id !== null;
@@ -28,6 +29,8 @@ function WorkGroupRow({
     const isOption = !isAssigned && activitiesInstrument.user_id !== null;
 
     const isDesiredValidatedOnOtherActivity = Boolean(desiredActivity.activity_id) && desiredActivity.activity_id !== activity.id;
+
+    const disableOptions = isStudentAlreadyAssignedElsewhere && !isAssigned && !isOption;
 
     let studentCellStyle = {};
 
@@ -66,11 +69,11 @@ function WorkGroupRow({
         <td>
             {
                 (activitiesInstrument.attempt_date || isOption) &&
-                    <input
-                        type="date"
-                        className="form-control"
-                        onChange={e => onUpdate({ ...activitiesInstrument, attempt_date: e.target.value || null })}
-                        value={activitiesInstrument.attempt_date ? moment(activitiesInstrument.attempt_date).format(ISO_DATE_FORMAT) : ""} />
+                <input
+                    type="date"
+                    className="form-control"
+                    onChange={e => onUpdate({ ...activitiesInstrument, attempt_date: e.target.value || null })}
+                    value={activitiesInstrument.attempt_date ? moment(activitiesInstrument.attempt_date).format(ISO_DATE_FORMAT) : ""} />
             }
         </td>
         <td style={{ width: "250px" }}>
@@ -83,15 +86,17 @@ function WorkGroupRow({
                     <i className="fas fa-minus"/>
                 </button>
                 {
-                    (!Boolean(activitiesInstrument.user_id) || userId === activitiesInstrument.user_id) && 
+                    (!Boolean(activitiesInstrument.user_id) || userId === activitiesInstrument.user_id) &&
                     <div>
                         {!isAssigned &&
                             <button
+                                disabled={disableOptions}
                                 onClick={() => isOption ? onRemoveOption() : onAddOption()}
+                                data-tippy-content={disableOptions ? "Impossible d'ajouter plusieurs rôle et option à un seul élève" : ""}
                                 className="btn btn-sm m-r-sm"
                                 style={{
                                     color: "#FFF",
-                                    backgroundColor: "#9575CD",
+                                    backgroundColor: disableOptions ? "#cccccc" : "#9575CD",
                                 }}>
                                 Option
                             </button>
@@ -99,12 +104,14 @@ function WorkGroupRow({
 
                         {(isOption || isAssigned) &&
                             <span {
-                                    ...(isDesiredValidatedOnOtherActivity ?
-                                        {["data-tippy-content"]: "L'élève est déjà inscrit dans un autre atelier"} :
-                                        {})
-                                }>
+                                      ...(isDesiredValidatedOnOtherActivity || disableOptions ?
+                                          {["data-tippy-content"]: isDesiredValidatedOnOtherActivity ?
+                                                  "L'élève est déjà inscrit dans un autre atelier" :
+                                                  "Impossible d'ajouter plusieurs rôle et option à un seul élève"} :
+                                          {})
+                                  }>
                                 <button
-                                    disabled={ !isAssigned && isDesiredValidatedOnOtherActivity}
+                                    disabled={(!isAssigned && isDesiredValidatedOnOtherActivity) || disableOptions}
                                     onClick={() => isAssigned ? onInvalidate() : onValidate()}
                                     className="btn btn-sm btn-primary">
                                     {isAssigned ?
@@ -126,6 +133,8 @@ export default class WorkGroupEditor extends Component {
 
         this.state = {
             instruments: [],
+            errorMessage: null,
+            showError: false,
         };
     }
 
@@ -133,6 +142,13 @@ export default class WorkGroupEditor extends Component {
         set()
             .success(instruments => this.setState({ instruments }))
             .get(`/instruments.json`);
+    }
+
+    showErrorMessage(message) {
+        this.setState({ errorMessage: message, showError: true });
+        setTimeout(() => {
+            this.setState({ showError: false });
+        }, 5000);
     }
 
     updateActivitiesInstrument(activitiesInstrument) {
@@ -206,10 +222,25 @@ export default class WorkGroupEditor extends Component {
     }
 
     handleAddOption(aiId) {
-        const { desiredActivity } = this.props;
+        const { desiredActivity, activity } = this.props;
+
+        const studentId = desiredActivity.user_id;
+        const isAlreadyAssigned = activity.activities_instruments.some(ai =>
+            ai.id !== aiId &&
+            ai.user_id === studentId &&
+            (ai.is_validated || ai.user_id !== null)
+        );
+
+        if (isAlreadyAssigned) {
+            this.showErrorMessage("Impossible d'ajouter plusieurs rôle et option à un seul élève");
+            return;
+        }
 
         set()
             .success(this.props.onUpdateActivity)
+            .error(error => {
+                this.showErrorMessage("Impossible d'ajouter plusieurs rôle et option à un seul élève");
+            })
             .post(`/activities_instruments/${aiId}/option/${desiredActivity.id}`);
     }
 
@@ -218,14 +249,32 @@ export default class WorkGroupEditor extends Component {
 
         set()
             .success(this.props.onUpdateActivity)
+            .error(error => {
+                this.showErrorMessage("Une erreur est survenue lors de la suppression de l'option");
+            })
             .del(`/activities_instruments/${aiId}/option/${desiredActivity.id}`);
     }
 
     handleValidate(aiId) {
-        const { desiredActivity } = this.props;
+        const { desiredActivity, activity } = this.props;
+
+        const studentId = desiredActivity.user_id;
+        const isAlreadyAssigned = activity.activities_instruments.some(ai =>
+            ai.id !== aiId &&
+            ai.user_id === studentId &&
+            (ai.is_validated || ai.user_id !== null)
+        );
+
+        if (isAlreadyAssigned) {
+            this.showErrorMessage("Impossible d'ajouter plusieurs rôle et option à un seul élève");
+            return;
+        }
 
         set()
             .success(this.props.onUpdateActivity)
+            .error(error => {
+                this.showErrorMessage("Impossible d'ajouter plusieurs rôle et option à un seul élève");
+            })
             .post(`/activities_instruments/${aiId}/student/${desiredActivity.id}`);
     }
 
@@ -234,47 +283,79 @@ export default class WorkGroupEditor extends Component {
 
         set()
             .success(this.props.onUpdateActivity)
+            .error(error => {
+                this.showErrorMessage("Une erreur est survenue lors du retrait de l'élève");
+            })
             .del(`/activities_instruments/${aiId}/student/${desiredActivity.id}`);
+    }
+
+    // Fonction pour vérifier si un élève est déjà assigné ailleurs dans cet atelier
+    isStudentAssignedElsewhere(currentAI) {
+        const { activity } = this.props;
+
+        if (!currentAI.user || !currentAI.user.id) return false;
+
+        return activity.activities_instruments.some(ai =>
+            ai.id !== currentAI.id &&
+            ai.user &&
+            ai.user.id === currentAI.user.id &&
+            (ai.is_validated || ai.user_id !== null)
+        );
     }
 
     render() {
         const { userId, activity, desiredActivity } = this.props;
-        const { instruments } = this.state;
+        const { instruments, errorMessage, showError } = this.state;
 
         return <div>
+            {showError && errorMessage && (
+                <div className="alert alert-danger alert-dismissible" role="alert">
+                    <button
+                        type="button"
+                        className="close"
+                        data-dismiss="alert"
+                        aria-label="Close"
+                        onClick={() => this.setState({ showError: false })}>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    {errorMessage}
+                </div>
+            )}
+
             <table className="table table-bordered" style={{margin: "0"}}>
                 <thead>
-                    <tr>
-                        <th>Élève</th>
-                        <th>Instrument</th>
-                        <th>Essai le</th>
-                        <th className="flex flex-space-between-justified">
-                            <p>
-                                Actions
-                            </p>
-                            <button
-                                onClick={() => this.handleCreateRole()}
-                                className="btn btn-xs btn-primary">
-                                <i className="fas fa-plus"/> Ajouter rôle
-                            </button>
-                        </th>
-                    </tr>
+                <tr>
+                    <th>Élève</th>
+                    <th>Instrument</th>
+                    <th>Essai le</th>
+                    <th className="flex flex-space-between-justified">
+                        <p>
+                            Actions
+                        </p>
+                        <button
+                            onClick={() => this.handleCreateRole()}
+                            className="btn btn-xs btn-primary">
+                            <i className="fas fa-plus"/> Ajouter rôle
+                        </button>
+                    </th>
+                </tr>
                 </thead>
                 <tbody>
-                    {_(activity.activities_instruments)
-                        .map(ai => <WorkGroupRow key={ai.id}
-                            userId={userId}
-                            activitiesInstrument={ai}
-                            activity={activity}
-                            desiredActivity={desiredActivity}
-                            instruments={instruments}
-                            onUpdate={ai => this.handleUpdateRole(ai)}
-                            onDelete={() => this.handleDeleteRole(ai.id)}
-                            onAddOption={() => this.handleAddOption(ai.id)}
-                            onRemoveOption={() => this.handleRemoveOption(ai.id)}
-                            onValidate={() => this.handleValidate(ai.id)}
-                            onInvalidate={() => this.handleInvalidate(ai.id)} />)
-                        .value()}
+                {_(activity.activities_instruments)
+                    .map(ai => <WorkGroupRow key={ai.id}
+                                             userId={userId}
+                                             activitiesInstrument={ai}
+                                             activity={activity}
+                                             desiredActivity={desiredActivity}
+                                             instruments={instruments}
+                                             isStudentAlreadyAssignedElsewhere={this.isStudentAssignedElsewhere(ai)}
+                                             onUpdate={ai => this.handleUpdateRole(ai)}
+                                             onDelete={() => this.handleDeleteRole(ai.id)}
+                                             onAddOption={() => this.handleAddOption(ai.id)}
+                                             onRemoveOption={() => this.handleRemoveOption(ai.id)}
+                                             onValidate={() => this.handleValidate(ai.id)}
+                                             onInvalidate={() => this.handleInvalidate(ai.id)} />)
+                    .value()}
                 </tbody>
             </table>
         </div>
