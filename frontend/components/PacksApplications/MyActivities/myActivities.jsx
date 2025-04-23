@@ -15,6 +15,7 @@ export default function myActivities() {
     const [userActivities, setUserActivities] = useState(null);
     const [regularActivities, setRegularActivities] = useState([]);
     const [showTeacherContacts, setShowTeacherContacts] = useState(false);
+    const [familyUsers, setFamilyUsers] = useState([]);
 
     const allowPreApplication = true;
 
@@ -64,26 +65,33 @@ export default function myActivities() {
         return isOpen;
     };
 
-    function isActivityReinscriptible(activity, allowPreApplication, isDesiredActivitySet) {
+    function isActivityReinscriptible(activity) {
         if (activity.pre_application_activity !== undefined) {
-            const result = !activity.pre_application_activity.status && allowPreApplication;
-            return result;
+            return !activity.pre_application_activity.status && allowPreApplication;
         }
         if (activity.desired_activities) {
-            const result = isDesiredActivitySet(activity.desired_activities);
-            return result;
+            return isDesiredActivitySet(activity.desired_activities);
         }
         return false;
     }
 
     function canReRegister() {
-        const fromUserActivities = (userActivities || []).some(activity =>
-            isActivityReinscriptible(activity, allowPreApplication, isDesiredActivitySet)
-        );
-        const fromRegularActivities = (regularActivities || []).some(activity =>
-            isActivityReinscriptible(activity, allowPreApplication, isDesiredActivitySet)
-        );
-        return fromUserActivities || fromRegularActivities;
+        const fromUser = (userActivities || []).some(isActivityReinscriptible);
+        const fromRegular = (regularActivities || []).some(isActivityReinscriptible);
+        return fromUser || fromRegular;
+    }
+
+    function canChildReRegister(familyMember) {
+        return familyMember.pre_application !== null && familyMember.pre_application !== undefined;
+    }
+
+    function canAnyFamilyMemberReRegister() {
+        if (!isReRegistrationPeriodOpen()) return false;
+
+        const self = canReRegister();
+        const children = (familyUsers || []).some(canChildReRegister);
+
+        return self || children;
     }
 
     const fetchSeason = async () => {
@@ -109,6 +117,7 @@ export default function myActivities() {
                 setUserActivities(res.userActivities);
                 setRegularActivities(res.regular_user_activities);
                 setShowTeacherContacts(res.config.show_teacher_contacts || false);
+                setFamilyUsers(res.family_users || []);
                 setLoading(false);
             })
             .error(res => {
@@ -149,9 +158,7 @@ export default function myActivities() {
                         <div className="col-xl-8 col-lg-11 no-padding h-100">
                             <div className="d-flex justify-content-between align-items-center mb-2 mx-4 mx-lg-0 flex-wrap activity-header">
                                 <div className="px-lg-4">
-                                    <h4 className="title font-bold">
-                                        MES ACTIVITÉS
-                                    </h4>
+                                    <h4 className="title font-bold">MES ACTIVITÉS</h4>
                                 </div>
                                 <div className="d-flex flex-column inscription-btn-container">
                                     {season_list.length > 1 && (
@@ -160,9 +167,7 @@ export default function myActivities() {
                                             value={selectedSeason}
                                             onChange={handleSeasonChange}
                                         >
-                                            <option value="">
-                                                Sélectionner une saison
-                                            </option>
+                                            <option value="">Sélectionner une saison</option>
                                             {season_list.map(season => (
                                                 <option key={season.id} value={season.id}>
                                                     {season.label}
@@ -170,7 +175,7 @@ export default function myActivities() {
                                             ))}
                                         </select>
                                     )}
-                                    {(isReRegistrationPeriodOpen() && canReRegister()) && (
+                                    {canAnyFamilyMemberReRegister() && (
                                         <a
                                             href={`/new_application/${user.id}`}
                                             className="btn btn-primary mt-2 inscription-btn"

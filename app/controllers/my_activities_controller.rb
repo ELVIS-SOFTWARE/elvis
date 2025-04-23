@@ -118,58 +118,86 @@ class MyActivitiesController < ApplicationController
 
   ###### Page Principale ######
   def get_own_and_possible_user_activities
-    user_packs = !params[:id].nil? ?
-                   Pack.where(user_id: params[:user_id])
-                   :
-                   Pack.where(user_id: params[:user_id], season_id: params[:season_id])
     user = User.find(params[:user_id])
-
+    user_packs = params[:id].nil? ? Pack.where(user_id: user.id, season_id: params[:season_id]) : Pack.where(user_id: user.id)
+    season = Season.find(params[:season_id])
     show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
 
-    respond_to do |format|
-      format.json {
-        render json: {
-      regular_user_activities: user.activity_applications.where(season_id: params[:season_id]).as_json(
-        include: {
-          activity_application_status: {},
-          desired_activities: {
-            include: {
-              activity_ref: {},
-              activity: {
-                methods: [:closest_instance_from_now],
-                include: {
-                  activity_ref: {},
-                  teacher: { include: { telephones: { only: [:number] } } },
-                  room: {},
-                  time_interval: {}
+    family_users = user.get_users_self_is_paying_for(season) || []
+
+    family_users += user.attached_accounts if user.respond_to?(:attached_accounts)
+
+    family_users += [user.attached_to] if user.attached_to.present?
+    child_accounts = User.where(attached_to_id: user.id)
+    family_users += child_accounts if child_accounts.present?
+
+    family_users.uniq!
+
+    family_users_json = family_users.map do |u|
+      pre_app = u.pre_applications.includes(:pre_application_activities, :user).find_by(season_id: season.id)
+      {
+        id: u.id,
+        full_name: u.full_name,
+        avatar: u.avatar_url,
+        pre_application: pre_app&.as_json(
+          include: {
+            pre_application_activities: {
+              include: {
+                activity: {
+                  include: [:teacher, :room, :time_interval]
                 }
               }
             }
           }
-        }
-      ),
-      userActivities: user_packs.as_json(
-        include: {
-          activity_ref: {
-            methods: [:picture_path],
+        )
+      }
+    end
+
+    respond_to do |format|
+      format.json {
+        render json: {
+          regular_user_activities: user.activity_applications.where(season_id: season.id).as_json(
             include: {
-              activities: {
+              activity_application_status: {},
+              desired_activities: {
                 include: {
-                  teacher: { include: { telephones: { only: [:number] } } },
-                  room: {},
-                  time_interval: {},
-                  closest_instance_from_now: {
-                    include: { time_interval: {} }
+                  activity_ref: {},
+                  activity: {
+                    methods: [:closest_instance_from_now],
+                    include: {
+                      activity_ref: {},
+                      teacher: { include: { telephones: { only: [:number] } } },
+                      room: {},
+                      time_interval: {}
+                    }
                   }
                 }
               }
-            },
-            season: {},
-            pricing: {}
-          }
-        }
-      ),
+            }
+          ),
+          userActivities: user_packs.as_json(
+            include: {
+              activity_ref: {
+                methods: [:picture_path],
+                include: {
+                  activities: {
+                    include: {
+                      teacher: { include: { telephones: { only: [:number] } } },
+                      room: {},
+                      time_interval: {},
+                      closest_instance_from_now: {
+                        include: { time_interval: {} }
+                      }
+                    }
+                  }
+                },
+                season: {},
+                pricing: {}
+              }
+            }
+          ),
           user: user.as_json,
+          family_users: family_users_json,
           config: {
             show_teacher_contacts: show_teacher_contacts
           }
