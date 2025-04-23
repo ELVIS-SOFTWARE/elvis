@@ -7,6 +7,7 @@ import WeekSelector from "./WeekSelector";
 import {INTERVAL_KINDS} from "../../tools/constants";
 import AvailabilityCommentModal from "./AvailabilityCommentModal";
 import moment from "moment";
+import _ from "lodash";
 
 const kindsForSeason = [
     INTERVAL_KINDS.LESSON,
@@ -40,8 +41,18 @@ class AvailabilityManager extends PureComponent {
     }
 
     componentDidMount() {
+        const fixedIntervals = (this.props.intervals || []).map(interval => {
+            if (!interval.id && !interval.tabId) {
+                return {
+                    ...interval,
+                    tabId: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                };
+            }
+            return interval;
+        });
+
         this.setState({
-            list: this.props.intervals,
+            list: fixedIntervals,
         });
     }
 
