@@ -1606,49 +1606,37 @@ class ActivitiesApplicationsController < ApplicationController
   def applications_list_json(query, filter = params)
     total = query.count
 
-    pending_total = ActivityApplication
+    pending_total = query
                       .joins(:activity_application_status)
-                      .merge(
-                        ActivityApplicationStatus.where(id: ActivityApplicationStatus::TREATMENT_PENDING_ID)
-                      ).count
+                      .where(activity_application_statuses: { id: ActivityApplicationStatus::TREATMENT_PENDING_ID })
+                      .count
 
+    paginated = query.page(filter[:page] + 1)
+                     .per(filter[:pageSize])
+    pages = paginated.total_pages
 
-    query = query
-              .page(filter[:page] + 1)
-              .per(filter[:pageSize])
-
-    pages = query.total_pages
-
-    activity_applications = query.to_a
+    activity_applications = paginated.to_a
 
     activity_applications.each do |app|
       raise Cancan::AccessDenied unless can? :read, app
     end
 
-    applications = activity_applications.as_json(include: {
-      activity_refs: {
-        only: %i[id label kind],
-      },
-      user: {
-        only: %i[first_name last_name adherent_number birthday],
-        include: {
-          levels: {
-            include: {
-              evaluation_level_ref: {},
-            },
-          },
+    applications = activity_applications.as_json(
+      include: {
+        activity_refs: { only: %i[id label kind] },
+        user: {
+          only: %i[first_name last_name adherent_number birthday],
+          include: {
+            levels: { include: { evaluation_level_ref: {} } }
+          }
         },
+        pre_application_activity: { only: [:action] },
+        pre_application_desired_activity: { only: [:action] },
+        season: {},
+        referent: {}
       },
-      pre_application_activity: {
-        only: [:action],
-      },
-      pre_application_desired_activity: {
-        only: [:action],
-      },
-      season: {},
-      referent: {},
-    },
-                                                 methods: :availabilities)
+      methods: :availabilities
+    )
 
     response = {
       applications: applications,
