@@ -120,12 +120,16 @@ class MyActivitiesController < ApplicationController
   def get_own_and_possible_user_activities
     user = User.find(params[:user_id])
     user_packs = params[:id].nil? ? Pack.where(user_id: user.id, season_id: params[:season_id]) : Pack.where(user_id: user.id)
-    season = Season.find(params[:season_id])
+    season = if params[:season_id].present?
+               Season.find_by(id: params[:season_id]) || Season.current_season
+             else
+               Season.current_season
+             end
     show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
 
     family_users = user.get_users_self_is_paying_for(season) || []
 
-    family_users += user.attached_accounts if user.respond_to?(:attached_accounts)
+    family_users += user.attached_accounts
 
     family_users += [user.attached_to] if user.attached_to.present?
     child_accounts = User.where(attached_to_id: user.id)
