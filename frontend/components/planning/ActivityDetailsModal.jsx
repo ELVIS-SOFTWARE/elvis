@@ -1561,7 +1561,7 @@ const ActivitySelection = ({
                 {_.map(activities.sort((a, b) => a.label.localeCompare(b.label)), (activity, i) => {
                     return (
                         <option key={i} value={activity.id}>
-                            {activity.label} ({activity.kind})
+                            {activity.label} ({activity.kind}) {activity.duration ? `- ${activity.duration} min` : ''}
                         </option>
                     );
                 })}

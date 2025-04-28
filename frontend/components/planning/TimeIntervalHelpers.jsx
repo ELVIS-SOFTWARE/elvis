@@ -135,64 +135,39 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
             borderColor = color;
         }
 
-        if (int.activity_instance) activity = int.activity_instance.activity;
-        else if (int.activity) activity = int.activity;
+        activity = int.activity_instance ? int.activity_instance.activity : int.activity;
+        let room = activity && ((int.activity_instance && int.activity_instance.room) || activity.room);
 
-        let room = null;
+        if (!isMultiView && activity) {
+            const customColor = activity.activity_ref && activity.activity_ref.color_code;
 
-        if (int.activity_instance && int.activity_instance.room)
-            room = int.activity_instance.room;
-        else if (activity) room = activity.room;
-
-        if (!isMultiView && activity != undefined) {
-            switch (activity.activity_ref.kind) {
-                case "Enfance":
-                    bgColor = "#FFC314";
-                    color = "white";
-                    borderColor = "#d63031";
-                    break;
-                case "CHAM":
-                    bgColor = "#5A676F";
-                    color = "white";
-                    borderColor = "#d63031";
-                    break;
-                case "ATELIERS":
-                    bgColor = "#FF9846";
-                    color = "white";
-                    borderColor = "#d63031";
-                    break;
-                default:
-                    bgColor = "#E96469";
-                    color = "white";
-                    borderColor = "#d63031";
-            }
+            const defaultColor = (() => {
+                switch (activity.activity_ref.kind) {
+                    case "Enfance": return "#FFC314";
+                    case "CHAM":    return "#5A676F";
+                    case "ATELIERS":return "#FF9846";
+                    default:        return "#E96469";
+                }
+            })();
+            bgColor     = customColor || defaultColor;
+            color       = "white";
+            borderColor = bgColor;
         }
 
-        // Exclude disponibility if in multiView
-        // if (isMultiView && !activity) {
-        //     return null;
-        // }
-
-        if (int.isAllDay) {
-            // If the interval is all day, it's a holiday and needs no further
-            // formatting
-            return int;
-        }
+        if (int.isAllDay) return int;
 
         if (resourceType === "teacher") {
             const coverTeacher = _.get(int, "activity_instance.cover_teacher");
+            const teacherId = _.get(activity, "teacher.id");
 
-            if(coverTeacher) {
-                const teacher = _.get(activity, "teacher.id");
-    
+            if (coverTeacher) {
                 if (isMultiView) {
                     bgColor = colors[coverTeacher.id];
-                } else if(teacher === user.id) {
+                } else if (teacherId === user.id) {
                     bgColor = "gainsboro";
                     color = "slategray";
-                    //color border if hours are counted
                     borderColor = _.get(int, "activity_instance.are_hours_counted") ? "#d63031" : "slategray";
-                } else if(coverTeacher.id === user.id) {
+                } else if (coverTeacher.id === user.id) {
                     bgColor = "slategray";
                     color = "gainsboro";
                     borderColor = "gainsboro";
@@ -203,15 +178,8 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
         color = int.color || color;
         borderColor = int.borderColor || borderColor;
 
-        let title = "Disponibilité";
-        if (activity) {
-            title = activity.activity_ref.label;
-        } else if (int.kind === "e") {
-            title = !int.is_validated ? "Dispo. Evaluation" : "Evaluation";
-        }
-
-        const locationLabel = _.get(activity, "location.label");
-        let locationIndicator = `<b>${capitalFirstLetters(locationLabel)}</b> - `;
+        let title = activity ? activity.activity_ref.label : (int.kind === "e" ? (!int.is_validated ? "Dispo. Evaluation" : "Evaluation") : "Disponibilité");
+        const locationIndicator = `<b>${capitalFirstLetters(_.get(activity, "location.label", ""))}</b> - `;
 
         return {
             id: int.id || int.uid,
@@ -222,27 +190,23 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
             category: "time",
             start: int.start,
             end: int.end,
-            borderColor: borderColor,
-            color: color,
-            bgColor: bgColor,
+            borderColor,
+            color,
+            bgColor,
             dragBgColor: bgColor,
             attendees: activity ? activity.users : [],
             kind: int.kind,
-            teacher: (int.activity_instance && int.activity_instance.teacher) || (activity && activity.teacher || {}),
+            teacher: (int.activity_instance && int.activity_instance.teacher) || (activity && activity.teacher) || {},
             isValidated: int.is_validated,
-            activity_instance: int.activity_instance
-                ? int.activity_instance
-                : undefined,
+            activity_instance: int.activity_instance || undefined,
             raw: int,
-            activity: activity ? activity : undefined,
+            activity: activity || undefined,
         };
     });
 
     if (conflict) {
-        // Si l'on est sur le planning pour une résolution de conflict,
-        // on grise et lock tous les autre intervals
         formattedIntervals = _.map(formattedIntervals, interval => {
-            if (interval.id != conflict.activity_instance.time_interval_id) {
+            if (interval.id !== conflict.activity_instance.time_interval_id) {
                 interval.bgColor = "#EEE";
                 interval.color = "#EEE";
                 interval.borderColor = "#EEE";

@@ -48,9 +48,18 @@
 #
 
 class UserSerializer < ActiveModel::Serializer
-  # include FastJsonapi::ObjectSerializer
-  has_many :activity_refs
   has_many :levels
 
-  attributes :id, :first_name, :last_name, :adherent_number, :birthday, :is_teacher
+  attributes :id, :first_name, :last_name, :adherent_number, :birthday, :is_teacher, :activity_refs
+
+  def activity_refs
+    object.activity_refs.map do |activity_ref|
+      {
+        id: activity_ref.id,
+        label: activity_ref.label,
+        kind: activity_ref.kind,
+        duration: activity_ref.duration
+      }
+    end
+  end
 end

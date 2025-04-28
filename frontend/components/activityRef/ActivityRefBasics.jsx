@@ -275,7 +275,24 @@ export default class ActivityRefBasics extends React.Component {
                         </div>
                     </div>
 
-                    <hr/>
+                    <div className="row">
+                        <div className="col-sm-6">
+                            <Field
+                                label="Code couleur"
+                                name="activityRef.color_code"
+                                render={({ input }) => (
+                                    <input
+                                        type="color"
+                                        {...input}
+                                        style={{ width: 50, height: 30, padding: 0, border: 0 }}
+                                    />
+                                )}
+                            />
+                        </div>
+                    </div>
+
+
+                    <hr />
 
                     <div className="row">
                         <div className="col-sm-6">

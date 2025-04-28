@@ -283,6 +283,7 @@ class ActivityRefController < ApplicationController
       :users,
       :nb_lessons,
       :duration,
-    )
+      :color_code,
+      )
   end
 end
