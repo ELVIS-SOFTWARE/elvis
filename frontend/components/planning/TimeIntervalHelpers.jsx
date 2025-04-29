@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { ISO_DATE_FORMAT } from "../utils";
+import { getActivityColor } from "../../tools/utils";
 import { capitalFirstLetters } from "../../tools/format";
 const moment = require("moment-timezone");
 require("moment/locale/fr");
@@ -135,24 +136,17 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
             borderColor = color;
         }
 
-        activity = int.activity_instance ? int.activity_instance.activity : int.activity;
+        if (int.activity_instance) activity = int.activity_instance.activity;
+        else if (int.activity) activity = int.activity;
         let room = activity && ((int.activity_instance && int.activity_instance.room) || activity.room);
 
         if (!isMultiView && activity) {
-            const customColor = activity.activity_ref && activity.activity_ref.color_code;
-
-            const defaultColor = (() => {
-                switch (activity.activity_ref.kind) {
-                    case "Enfance": return "#FFC314";
-                    case "CHAM":    return "#5A676F";
-                    case "ATELIERS":return "#FF9846";
-                    default:        return "#E96469";
-                }
-            })();
-            bgColor     = customColor || defaultColor;
-            color       = "white";
-            borderColor = bgColor;
+            const bg = getActivityColor(activity);
+            bgColor = bg;
+            color = "white";
+            borderColor = bg;
         }
+
 
         if (int.isAllDay) return int;
 
@@ -178,7 +172,15 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
         color = int.color || color;
         borderColor = int.borderColor || borderColor;
 
-        let title = activity ? activity.activity_ref.label : (int.kind === "e" ? (!int.is_validated ? "Dispo. Evaluation" : "Evaluation") : "Disponibilité");
+        let title;
+
+        if (activity) {
+            title = activity.activity_ref.label;
+        } else if (int.kind === "e") {
+            title = int.is_validated ? "Evaluation" : "Dispo. Evaluation";
+        } else {
+            title = "Disponibilité";
+        }
         const locationIndicator = `<b>${capitalFirstLetters(_.get(activity, "location.label", ""))}</b> - `;
 
         return {
@@ -205,6 +207,8 @@ export const formatIntervalsForSchedule = (rawIntervals, conflict, user, resourc
     });
 
     if (conflict) {
+        // Si l'on est sur le planning pour une résolution de conflict,
+        // on grise et lock tous les autre intervals
         formattedIntervals = _.map(formattedIntervals, interval => {
             if (interval.id !== conflict.activity_instance.time_interval_id) {
                 interval.bgColor = "#EEE";

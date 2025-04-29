@@ -20,7 +20,7 @@ export default class ActivityRefContainer extends React.Component {
         this.initialValues = {
             activityRef: {
                 ...this.props.activityRef,
-                color_code: this.props.activityRef.color_code || "", // ← ajouté
+                color_code: this.props.activityRef.color_code,
             },
             applicationOptions,
             substitutable: this.props.activityRef.substitutable.toString(),

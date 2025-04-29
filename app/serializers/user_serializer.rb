@@ -53,13 +53,7 @@ class UserSerializer < ActiveModel::Serializer
   attributes :id, :first_name, :last_name, :adherent_number, :birthday, :is_teacher, :activity_refs
 
   def activity_refs
-    object.activity_refs.map do |activity_ref|
-      {
-        id: activity_ref.id,
-        label: activity_ref.label,
-        kind: activity_ref.kind,
-        duration: activity_ref.duration
-      }
-    end
+    object.activity_refs.as_json(only: [:id, :label, :kind, :duration])
   end
 end
+
