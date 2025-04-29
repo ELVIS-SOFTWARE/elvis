@@ -102,7 +102,7 @@ const FormulaChoice = ({
         const chosenActivities = selectedFormulaActivities[formula.id] || [];
         return (
             <Fragment key={formula.id}>
-                <tr style={{ backgroundColor: "#f5f5f5" }}>
+                <tr>
                     <td
                         style={{
                             fontWeight: "bold",
@@ -163,7 +163,6 @@ const FormulaChoice = ({
                         return (
                             <tr
                                 key={`${formula.id}-${activityItem.item.id}`}
-                                style={{ backgroundColor: "#ffffff" }}
                             >
                                 <td style={{ paddingLeft: "30px" }}>
                                     {activityItem.item.display_name ||
