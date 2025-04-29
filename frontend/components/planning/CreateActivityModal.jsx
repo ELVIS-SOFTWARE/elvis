@@ -16,16 +16,19 @@ class CreateIntervalModal extends React.Component {
 
         const detectedSeason = getSeasonFromDate(this.props.newInterval.start.toDate(), this.props.seasons);
 
+        // Trouvez la saison actuelle (celle en cours aujourd'hui)
+        const currentDate = new Date();
+        const currentSeason = getSeasonFromDate(currentDate, this.props.seasons);
+
         this.state = {
             // Par défaut, c'est une disponibilité ("o")
             kind: this.props.kind || "o",
-            season: detectedSeason?.id || "",
+            season: detectedSeason?.id || (currentSeason?.id || ""),
             isAdminSelectIntervalRecurrence: false,
             isRecurrent: false,
             recurrentType: RECURRENCE_TYPES.getDefault(),
         };
     }
-
     handleOptionChange(e) {
         this.setState({ kind: e.target.value });
     }
@@ -35,22 +38,18 @@ class CreateIntervalModal extends React.Component {
         if (kind === "c" && !this.props.newInterval.activity) {
             kind = "o";
         }
+
         const interval = {
             ...this.props.newInterval,
             kind,
             recurrentType: this.state.isRecurrent ? this.state.recurrentType : null,
         };
 
-        if (kind === "p") {
-            this.props.onSave(interval, this.state.season);
-            this.props.closeModal();
-        } else {
-            this.props.handleCloseAndOpenDetails(interval);
-        }
+        this.props.handleCloseAndOpenDetails(interval);
     }
     handleChangeSeason(season) {
-        this.setState({ season });
-    }
+            this.setState({ season });
+        }
 
     render() {
         let component;
