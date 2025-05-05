@@ -21,7 +21,7 @@ RailsPerformance.setup do |config|
   # config.verify_access_proc = proc { |controller| controller.current_user && controller.current_user.admin? }
 
   # You can ignore endpoints with Rails standard notation controller#action
-  # config.ignored_endpoints = ['HomeController#contact']
+  config.ignored_endpoints = %w[HealthcheckController#index PingController#index]
 
   # store custom data for the request
   # config.custom_data_proc = proc do |env|
@@ -34,7 +34,7 @@ RailsPerformance.setup do |config|
 
   # config home button link
   config.home_link = '/'
-  config.skipable_rake_tasks = ['shakapacker:compile', 'assets:precompile']
+  config.skipable_rake_tasks = %w[shakapacker:compile assets:precompile db:prepare elvis:plugins:discover elvis:plugins:migrate chewy:upgrade]
   config.include_rake_tasks = false
   config.include_custom_events = true
 end if defined?(RailsPerformance)
