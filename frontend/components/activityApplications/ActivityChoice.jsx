@@ -53,6 +53,9 @@ const ActivityChoice = ({
                             handleAddPack,
                             selectedPacks,
                             infoText,
+                            selectedFormulas,
+                            formulas,
+                            selectedFormulaActivities,
                         }) => {
     const seasonStart = moment(season.start);
     const isInAgeRange = a => {
@@ -278,15 +281,64 @@ const ActivityChoice = ({
             isSelected: true,
         };
     }));
+
+    const selectedFormulasArray = selectedFormulas.map(formulaId => {
+        const formula = formulas.find(f => f.id === formulaId);
+        if (!formula) return null;
+
+        return {
+            id: formula.id,
+            key: null,
+            label: formula.name,
+            duration: "",
+            price: formula.formule_pricings && formula.formule_pricings[0]
+                ? `${formula.formule_pricings[0].price} €`
+                : "--",
+            isFormula: true,
+            isSelected: true,
+            formulaActivities: selectedFormulaActivities[formula.id] || []
+        };
+    }).filter(Boolean);
+
     const selectedActivitiesAndPacks = [...selectedActivitiesArray, ...selectedPacksArray];
-    const totalSelectedPrice = selectedActivitiesAndPacks.reduce((acc, item) => {
-        return acc + parseFloat(item.price);
+    const allSelectedItems = [...selectedActivitiesAndPacks, ...selectedFormulasArray];
+
+    const totalSelectedPrice = allSelectedItems.reduce((acc, item) => {
+        const price = parseFloat(item.price.replace(" €", "").replace("--", "0"));
+        return isNaN(price) ? acc : acc + price;
     }, 0);
 
-    const selectedActivitiesAndPacksDisplay = selectedActivitiesAndPacks.map((item, i) => {
+    const selectedActivitiesAndPacksDisplay = selectedActivitiesAndPacks.map((item) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
-    const availableActivitiesAndPacksDisplay = availableActivitiesAndPacks.map((item, i) => {
+
+    const selectedFormulasDisplay = selectedFormulasArray.map((formula) => (
+        <Fragment key={`formula-${formula.id}`}>
+            <tr style={{ color: "rgb(0, 51, 74)", backgroundColor: "#f5f5f5" }}>
+                <td style={{ fontWeight: "bold" }}>
+                    Formule : {formula.label}
+                </td>
+                <td className="text-center">-</td>
+                <td className="text-center">{formula.price}</td>
+                <td></td>
+            </tr>
+            {formula.formulaActivities.map(activityId => {
+                const activityRef = allActivityRefs.find(a => a.id === activityId);
+                return (
+                    <tr key={`formula-activity-${formula.id}-${activityId}`} style={{ color: "rgb(0, 51, 74)" }}>
+                        <td style={{ paddingLeft: "30px" }}>
+                            {activityRef.display_name}
+                        </td>
+                        <td className="text-center">{getDisplayDuration(activityRef)}</td>
+                        <td className="text-center">-</td>
+                        <td></td>
+                    </tr>
+                );
+            })}
+        </Fragment>
+    ));
+
+    const availableActivitiesAndPacksDisplay = availableActivitiesAndPacks.map((item) => {
         return generateActivityRow(item, item.key, item.isPack, item.isSelected);
     });
 
@@ -364,7 +416,7 @@ const ActivityChoice = ({
                 <div className="col-xs-12 col-lg-6">
 
                     <div>
-                        <h3 style={{color: "#8AA4B1"}}>Activités sélectionnées</h3>
+                        <h3 style={{color: "#8AA4B1"}}>Récapitulatif</h3>
                     </div>
                     <div>
                         <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
@@ -377,7 +429,7 @@ const ActivityChoice = ({
                             </tr>
                             </thead>
 
-                            {selectedActivitiesAndPacksDisplay.length === 0 ? (
+                            {selectedActivitiesAndPacksDisplay.length === 0 && selectedFormulasDisplay.length === 0 ? (
                                 <tbody>
                                 <tr>
                                     <td colSpan="4" className="text-center">aucune activité sélectionnée</td>
@@ -385,18 +437,20 @@ const ActivityChoice = ({
                                 </tbody>
                             ) : (
                                 <tbody>
+                                {selectedFormulasDisplay}
+
                                 {selectedActivitiesAndPacksDisplay}
+
                                 <tr>
-                                    <td colSpan="3" style={{fontWeight: "bold"}} className="text-right">Total
+                                    <td colSpan="2" style={{fontWeight: "bold"}} className="text-right">Total
                                         estimé
                                     </td>
-                                    <td colSpan="3"
+                                    <td colSpan="2"
                                         className="text-center">{isNaN(totalSelectedPrice) ? "--" : totalSelectedPrice} €
                                     </td>
                                 </tr>
                                 </tbody>
                             )}
-
                         </table>
                     </div>
                 </div>
