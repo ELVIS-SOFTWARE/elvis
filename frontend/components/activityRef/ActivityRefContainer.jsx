@@ -18,7 +18,10 @@ export default class ActivityRefContainer extends React.Component {
         const applicationOptions = this.buildApplicationOptions(this.props.activityRef);
 
         this.initialValues = {
-            activityRef: this.props.activityRef,
+            activityRef: {
+                ...this.props.activityRef,
+                color_code: this.props.activityRef.color_code,
+            },
             applicationOptions,
             substitutable: this.props.activityRef.substitutable.toString(),
             allowsTimeslotSelection:
@@ -152,6 +155,7 @@ export default class ActivityRefContainer extends React.Component {
             users: values.teachers,
             pricings: this.state.pricingCategoriesToSave,
             duration: values.activityRef.duration,
+            color_code: values.activityRef.color_code,
         };
 
         api
@@ -190,21 +194,17 @@ export default class ActivityRefContainer extends React.Component {
 
         const errors = {};
 
-        if (isIntStrInf(values.activityRef.occupation_hard_limit, values.activityRef.occupation_limit))
-        {
+        if (isIntStrInf(values.activityRef.occupation_hard_limit, values.activityRef.occupation_limit)) {
             errors.activityRef = errors.activityRef || {};
-
             errors.activityRef.occupation_hard_limit = "doit être supérieur au nombre de places";
         }
 
-        if (isIntStrInf(values.activityRef.to_age, values.activityRef.from_age))
-        {
+        if (isIntStrInf(values.activityRef.to_age, values.activityRef.from_age)) {
             errors.activityRef = errors.activityRef || {};
-
             errors.activityRef.to_age = "doit être supérieur à l'âge min";
         }
 
-        if(!values.teachers || values.teachers.length === 0)
+        if (!values.teachers || values.teachers.length === 0)
             errors.teachers = "doit être renseigné";
 
         return errors;

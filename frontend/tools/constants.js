@@ -116,6 +116,14 @@ export const modalStyle = {
     },
 };
 
+export const ACTIVITY_KIND_COLORS = {
+    Enfance: "#FFC314",
+    CHAM: "#5A676F",
+    ATELIERS: "#FF9846",
+    DEFAULT: "#E96469",
+};
+
+
 export const MESSAGES = {
     no_answer: "PAS DE RÉPONSE",
     err_min_length: length => `Ce champ doit comporter au minimum ${length} caractères`,
