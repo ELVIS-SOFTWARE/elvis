@@ -40,7 +40,7 @@ class FormulesController < ApplicationController
   end
 
   def create
-    formule_params = params.permit(:name, :description, :number_of_items)
+    formule_params = params.permit(:name, :description, :number_of_items, :active)
     formule = Formule.new(formule_params)
 
     authorize! :create, formule
@@ -59,7 +59,7 @@ class FormulesController < ApplicationController
       end
 
       # Save formule prices
-      formule_prices_params = params.permit(formulePrices: [:priceCategoryId, :price, :fromSeasonId, :toSeasonId])[:formulePrices]
+      formule_prices_params = params.permit(formulePricings: [:priceCategoryId, :price, :fromSeasonId, :toSeasonId])[:formulePricings]
 
       if formule_prices_params.present?
         formule_prices_params.each do |formule_price|
