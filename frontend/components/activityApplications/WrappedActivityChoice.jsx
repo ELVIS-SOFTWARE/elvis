@@ -25,7 +25,6 @@ class WrappedActivityChoice extends React.Component {
         return (
             <ActivityChoice
                 {...this.props}
-                selectedFormulaActivities={this.props.selectedFormulaActivities}
             />
         );
     }
