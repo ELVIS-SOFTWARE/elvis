@@ -43,27 +43,72 @@ const StudentItem = ({ user, activityId, color }) => {
     );
 };
 
+const LevelCell = ({
+                       user,
+                       activityId,
+                       seasons,
+                       activityRefId,
+                       timeInterval,
+                       activityRef,
+                       initialLevel = null
+                   }) => {
+    const [studentLevel, setStudentLevel] = React.useState(initialLevel);
+
+    React.useEffect(() => {
+        if (initialLevel) return;
+        let isMounted = true;
+
+        api
+            .set()
+            .error(err => console.error('[LevelCell] Erreur récupération level :', err))
+            .success(data => {
+                if (isMounted && data.evaluation_level_ref) {
+                    setStudentLevel(data.evaluation_level_ref);
+                }
+            })
+            .get(`/desired_activities/user/${user.id}/activity/${activityId}`);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [user.id, activityId, initialLevel]);
+
+    const computedLevel = TimeIntervalHelpers.levelDisplayForActivity(
+        { users: [user], activity_ref_id: activityRefId, time_interval: timeInterval, activity_ref: activityRef },
+        seasons
+    );
+
+    if (studentLevel === 'NON INDIQUÉ') {
+        return <>NON INDIQUÉ</>;
+    }
+    if (studentLevel) {
+        return <>{studentLevel}</>;
+    }
+
+    return <>{computedLevel && computedLevel !== 'À PRÉCISER' ? computedLevel : 'NON INDIQUÉ'}</>;
+};
 
 const SubStudentList = ({ row, seasons }) => {
+    const activeStudents = row.original.users.map(u => ({ ...u, type: 'active' }));
 
-    const activeStudents = row.original.users.map(u => ({ ...u, type: 'active', application: null }));
     const inactiveStudents = row.original.inactive_users
         .map(u => {
             const application = _.find(
                 u.activity_applications,
                 app => app.desired_activities.map(da => da.activity_id).includes(row.original.id)
             );
-            const beginAt = new Date(application.begin_at);
+            const beginAt = application && new Date(application.begin_at);
             const closestLesson = new Date(row.original.closest_lesson);
-            if (beginAt > closestLesson) return null;
+            if (!application || beginAt > closestLesson) return null;
             return { ...u, type: 'inactive', application };
         })
         .filter(u => u != null);
-    const optionStudents = row.original.options.map(o => ({
-        ..._.get(o, 'desired_activity.activity_application.user'),
-        type: 'option',
-        application: null
-    }));
+
+    const optionStudents = row.original.options.map(o => {
+        const user = _.get(o, 'desired_activity.activity_application.user');
+        const optionLevel = _.get(o, 'desired_activity.activity_application.evaluation_level_ref') || null;
+        return { ...user, type: 'option', optionLevel };
+    });
 
     const combinedUsers = _.orderBy(
         [...activeStudents, ...inactiveStudents, ...optionStudents],
@@ -72,11 +117,44 @@ const SubStudentList = ({ row, seasons }) => {
 
     const isWorkGroup = row.original.activity_ref.is_work_group;
 
+    const [levelsByUser, setLevelsByUser] = React.useState({});
+
+    React.useEffect(() => {
+        let isMounted = true;
+
+        const fetchAllLevels = async () => {
+            const entries = await Promise.all(
+                combinedUsers.map(async (u) => {
+                    if (u.type === 'option' && u.optionLevel) {
+                        return [u.id, u.optionLevel];
+                    }
+                    try {
+                        const data = await api
+                            .set()
+                            .get(`/desired_activities/user/${u.id}/activity/${row.original.id}`);
+                        return [u.id, data.evaluation_level_ref || null];
+                    } catch {
+                        return [u.id, null];
+                    }
+                })
+            );
+            if (isMounted) {
+                setLevelsByUser(Object.fromEntries(entries));
+            }
+        };
+
+        fetchAllLevels();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [combinedUsers, row.original.id]);
+
     return (
         <div className="flex-column">
-            <div className="flex" style={{ padding: "15px" }}>
+            <div className="flex" style={{ padding: '15px' }}>
                 <h3 className="m-r">
-                    Effectifs au : {moment(row.original.closest_lesson).format("DD/MM/YYYY")}
+                    Effectifs au : {moment(row.original.closest_lesson).format('DD/MM/YYYY')}
                 </h3>
             </div>
             <table className="table table-bordered">
@@ -93,64 +171,66 @@ const SubStudentList = ({ row, seasons }) => {
                 <tbody>
                 {combinedUsers.map((u, index) => {
                     let customStyle = {};
-                    if (u.type === "inactive") customStyle = { color: "#ff001a" };
-                    else if (u.type === "option") customStyle = { color: "#9575CD" };
+                    if (u.type === 'inactive') customStyle = { color: '#ff001a' };
+                    else if (u.type === 'option') customStyle = { color: '#9575CD' };
 
                     const userInstrument = isWorkGroup
                         ? row.original.activities_instruments
                         .filter(ai => ai.user_id === u.id)
-                        .map(ai => _.get(ai, "instrument.label"))
-                        .join(", ") || "NON ASSIGNÉ"
+                        .map(ai => _.get(ai, 'instrument.label'))
+                        .join(', ') || 'NON ASSIGNÉ'
                         : null;
+
+                    const initialLevel = levelsByUser[u.id] ?? null;
 
                     return (
                         <tr key={u.id || index} style={customStyle}>
-                            <StudentItem
-                                user={u}
-                                activityId={row.original.id}
-                                color={customStyle.color}
-                            />
+                            <td>
+                                <a href={
+                                    levelsByUser[u.id]
+                                        ? `/inscriptions/${u.activity_applications?.[0]?.id}`
+                                        : '#'
+                                } target="_blank">
+                                    {u.first_name} {u.last_name}
+                                </a>
+                            </td>
                             <td>{TimeIntervalHelpers.age(u.birthday)} ans</td>
                             <td>
-                                {TimeIntervalHelpers.levelDisplayForActivity(
-                                    {
-                                        users: [u],
-                                        activity_ref_id: row.original.activity_ref_id,
-                                        time_interval: row.original.time_interval,
-                                        activity_ref: row.original.activity_ref
-                                    },
-                                    seasons
-                                )}
+                                <LevelCell
+                                    user={u}
+                                    activityId={row.original.id}
+                                    seasons={seasons}
+                                    activityRefId={row.original.activity_ref_id}
+                                    timeInterval={row.original.time_interval}
+                                    activityRef={row.original.activity_ref}
+                                    initialLevel={initialLevel}
+                                />
                             </td>
                             {isWorkGroup && <td>{userInstrument}</td>}
                             <td>
                                 {(() => {
-                                    if (u.type === 'active' || u.type === 'option') {
-                                        const application = u.activity_applications?.find(app =>
-                                            app.desired_activities?.some(da => da.activity_id === row.original.id)
+                                    const app = u.application ||
+                                        u.activity_applications?.find(a =>
+                                            a.desired_activities.some(
+                                                da => da.activity_id === row.original.id
+                                            )
                                         );
-                                        if (application?.begin_at) {
-                                            return Intl.DateTimeFormat("fr").format(new Date(application.begin_at));
-                                        }
-                                    } else if (u.application?.begin_at) {
-                                        return Intl.DateTimeFormat("fr").format(new Date(u.application.begin_at));
-                                    }
-                                    return "";
+                                    return app?.begin_at
+                                        ? Intl.DateTimeFormat('fr').format(new Date(app.begin_at))
+                                        : '';
                                 })()}
                             </td>
                             <td>
                                 {(() => {
-                                    if (u.type === 'active' || u.type === 'option') {
-                                        const application = u.activity_applications?.find(app =>
-                                            app.desired_activities?.some(da => da.activity_id === row.original.id)
+                                    const app = u.application ||
+                                        u.activity_applications?.find(a =>
+                                            a.desired_activities.some(
+                                                da => da.activity_id === row.original.id
+                                            )
                                         );
-                                        if (application?.stopped_at) {
-                                            return Intl.DateTimeFormat("fr").format(new Date(application.stopped_at));
-                                        }
-                                    } else if (u.application?.stopped_at) {
-                                        return Intl.DateTimeFormat("fr").format(new Date(u.application.stopped_at));
-                                    }
-                                    return "";
+                                    return app?.stopped_at
+                                        ? Intl.DateTimeFormat('fr').format(new Date(app.stopped_at))
+                                        : '';
                                 })()}
                             </td>
                         </tr>
