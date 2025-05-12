@@ -3,6 +3,7 @@ import { retrieveUserLevel } from "./obj";
 import React from "react";
 import {findAndGet, ISO_DATE_FORMAT} from "../components/utils";
 import { WEEKDAYS } from "./constants";
+import _ from "lodash";
 
 export const twoDigits = n => (n < 10 ? `0${n}` : `${n}`);
 
@@ -139,30 +140,56 @@ export const formatIntervalHours = interval =>
 
 export const displayActivityRef = ref => ref.activity_type === "child" ? ref.label : ref.kind;
 
+
+
 export const occupationInfos = (activity, referenceDate = undefined) => {
-    let headCount, validatedHeadCount, headCountLimit = 0;
+    let headCount = 0;
+    let validatedHeadCount = 0;
+    let headCountLimit = 0;
     let hasOption = false;
 
     if (_.get(activity, "activity_ref.is_work_group")) {
-        headCount = activity.activities_instruments.filter(ai => Boolean(ai.user_id)).length;
-        validatedHeadCount = activity.activities_instruments.filter(ai => Boolean(ai.user_id) && ai.is_validated).length;
+        headCount = activity.activities_instruments.filter(ai =>
+            Boolean(ai.user_id)
+        ).length;
+
+        validatedHeadCount = activity.activities_instruments.filter(ai =>
+            Boolean(ai.user_id) && ai.is_validated
+        ).length;
+
         headCountLimit = activity.activities_instruments.length;
         hasOption = headCount > validatedHeadCount;
+
     } else {
-        const optionsUserIds = activity.options.map(o => o.user?.id).filter(Boolean);
-        hasOption = Boolean(optionsUserIds.length);
-        const activeUsers = activity.users.filter(u =>
+        const optionsUserIds = (activity.options || [])
+            .map(o =>
+                o.user?.id
+                ||
+                _.get(o, "desired_activity.activity_application.user.id")
+            )
+            .filter(Boolean);
+
+        hasOption = optionsUserIds.length > 0;
+
+        const activeUsers = (activity.users || []).filter(u =>
             referenceDate == undefined ||
-            (u.begin_at <= referenceDate && (u.stopped_at == undefined || u.stopped_at > referenceDate))
+            (
+                u.begin_at <= referenceDate &&
+                (u.stopped_at == undefined || u.stopped_at > referenceDate)
+            )
         );
 
         headCount = activeUsers.length + optionsUserIds.length;
-        headCountLimit = activity.activity_ref.occupation_limit;
-        validatedHeadCount = activeUsers.filter(u => !optionsUserIds.includes(u.id)).length;
+        headCountLimit = _.get(activity, "activity_ref.occupation_limit", 0);
+
+        validatedHeadCount = activeUsers.filter(
+            u => !optionsUserIds.includes(u.id)
+        ).length;
     }
 
     return { headCount, validatedHeadCount, headCountLimit, hasOption };
 };
+
 
 export const isActivityWithOnlyOneOption = (activity, referenceDate = undefined) => {
     let { validatedHeadCount, headCount } = occupationInfos(activity, referenceDate);
