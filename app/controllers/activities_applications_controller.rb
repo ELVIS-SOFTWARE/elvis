@@ -387,14 +387,38 @@ class ActivitiesApplicationsController < ApplicationController
 
     # We want only the highest priced activity_ref for each kind
     display_activity_refs = activity_refs
-                              .select { |ar| ar["activity_type"] != "child" and ar["activity_type"] != "cham" and ar["substitutable"] }
+                              .select { |ar| ar["activity_type"] != "child" && ar["activity_type"] != "cham" && ar["substitutable"] }
                               .group_by { |ar| ar["kind"] }
                               .transform_values do |values|
-      default_activity_id = values.first&.dig("activity_ref_kind", "default_activity_ref_id")
-      default_activity = values.find { |ar| ar["id"] == default_activity_id }
-      default_activity || values.max_by { |ar| ar["display_price"] }
+      default_id = values.first.dig("activity_ref_kind", "default_activity_ref_id")
+      default_activity = default_id && values.find { |ar| ar["id"] == default_id }
+
+      selected = default_activity || values.max_by { |ar| ar["display_price"] }
+
+      if default_activity
+        # override du display_price pour qu'il soit bien celui de l'ActivityRef par défaut
+        selected["display_price"] = get_max_price_for_target_id(
+          all_max_prices,
+          default_id,
+          "ActivityRef",
+          @season["id"]
+        ) || 0
+
+        # même override pour chaque saison
+        selected["display_prices_by_season"] = @seasons.each_with_object({}) do |season, h|
+          h[season["id"]] = get_max_price_for_target_id(
+            all_max_prices,
+            default_id,
+            "ActivityRef",
+            season["id"]
+          )
+        end
+      end
+
+      selected
     end
                               .values
+
 
     @activity_refs = display_activity_refs
                        .append(activity_refs.select { |ar| ar["activity_type"] != "child" && ar["activity_type"] != "cham" && !ar["substitutable"] })
