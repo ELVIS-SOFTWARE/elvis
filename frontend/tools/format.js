@@ -3,6 +3,7 @@ import { retrieveUserLevel } from "./obj";
 import React from "react";
 import {findAndGet, ISO_DATE_FORMAT} from "../components/utils";
 import { WEEKDAYS } from "./constants";
+import _ from "lodash";
 
 export const twoDigits = n => (n < 10 ? `0${n}` : `${n}`);
 
@@ -139,7 +140,7 @@ export const formatIntervalHours = interval =>
 
 export const displayActivityRef = ref => ref.activity_type === "child" ? ref.label : ref.kind;
 
-import _ from "lodash";
+
 
 export const occupationInfos = (activity, referenceDate = undefined) => {
     let headCount = 0;
