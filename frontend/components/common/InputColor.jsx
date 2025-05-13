@@ -12,6 +12,9 @@ const InputColor = props => {
         disabled,
     } = props;
 
+
+    const colorValue = input.value || "#E96469";
+
     const hasError = meta.error && meta.touched;
 
     return (
@@ -38,6 +41,7 @@ const InputColor = props => {
             <input
                 type="color"
                 {...input}
+                value={colorValue}
                 disabled={disabled}
                 style={{
                     width: 50,
