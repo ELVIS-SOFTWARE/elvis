@@ -16,32 +16,6 @@ import {displayActivityRef, formatActivityHeadcount, occupationInfos, toAge} fro
 import WorkGroupEditor from "./WorkGroupEditor";
 
 // SUB COMPONENTS
-const StudentItem = ({ user, activityId, color }) => {
-    const [activityApplicationId, setActivityApplicationId] = React.useState(null);
-
-    React.useEffect(() => {
-        api
-            .set()
-            .error((error) => {
-                console.error("Erreur lors de la récupération de la demande d'inscription:", error);
-            })
-            .success((data) => {
-                setActivityApplicationId(data.activity_application_id);
-            })
-            .get(`/desired_activities/user/${user.id}/activity/${activityId}`);
-    }, [user.id, activityId]);
-
-
-    const inscriptionUrl = activityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
-
-    return (
-        <td style={color ? { color } : undefined}>
-            <a href={inscriptionUrl} target="_blank">
-                {user.first_name} {user.last_name}
-            </a>
-        </td>
-    );
-};
 
 const LevelCell = ({
                        user,
@@ -53,40 +27,74 @@ const LevelCell = ({
                        initialLevel = null
                    }) => {
     const [studentLevel, setStudentLevel] = React.useState(initialLevel);
+    const [isLoading, setIsLoading] = React.useState(!initialLevel);
 
     React.useEffect(() => {
         if (initialLevel) return;
+
         let isMounted = true;
+        setIsLoading(true);
 
         api
             .set()
-            .error(err => console.error('[LevelCell] Erreur récupération level :', err))
-            .success(data => {
-                if (isMounted && data.evaluation_level_ref) {
-                    setStudentLevel(data.evaluation_level_ref);
+            .get(`/desired_activities/user/${user.id}/activity/${activityId}`)
+            .then(response => {
+                if (isMounted) {
+                    const apiLevel = response?.data?.evaluation_level_ref;
+
+                    if (!apiLevel) {
+                        const computedLevel = TimeIntervalHelpers.levelDisplayForActivity(
+                            {
+                                users: [user],
+                                activity_ref_id: activityRefId,
+                                time_interval: timeInterval,
+                                activity_ref: activityRef
+                            },
+                            seasons
+                        );
+                        setStudentLevel(computedLevel || 'NON INDIQUÉ');
+                    } else {
+                        setStudentLevel(apiLevel);
+                    }
                 }
             })
-            .get(`/desired_activities/user/${user.id}/activity/${activityId}`);
+            .catch(error => {
+                console.error('[LevelCell] Erreur récupération level :', error);
+                if (isMounted) {
+                    const computedLevel = TimeIntervalHelpers.levelDisplayForActivity(
+                        {
+                            users: [user],
+                            activity_ref_id: activityRefId,
+                            time_interval: timeInterval,
+                            activity_ref: activityRef
+                        },
+                        seasons
+                    );
+                    setStudentLevel(computedLevel || 'NON INDIQUÉ');
+                }
+            })
+            .finally(() => {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
+            });
 
         return () => {
             isMounted = false;
         };
-    }, [user.id, activityId, initialLevel]);
+    }, [user.id, activityId, initialLevel, activityRefId, timeInterval, activityRef, seasons]);
 
-    const computedLevel = TimeIntervalHelpers.levelDisplayForActivity(
-        { users: [user], activity_ref_id: activityRefId, time_interval: timeInterval, activity_ref: activityRef },
-        seasons
-    );
+    if (isLoading) {
+        return <>Chargement...</>;
+    }
 
     if (studentLevel === 'NON INDIQUÉ') {
         return <>NON INDIQUÉ</>;
     }
-    if (studentLevel) {
-        return <>{studentLevel}</>;
-    }
 
-    return <>{computedLevel && computedLevel !== 'À PRÉCISER' ? computedLevel : 'NON INDIQUÉ'}</>;
+    return <>{studentLevel}</>;
 };
+
 
 const SubStudentList = ({ row, seasons }) => {
     const activeStudents = row.original.users.map(u => ({ ...u, type: 'active' }));
@@ -116,39 +124,6 @@ const SubStudentList = ({ row, seasons }) => {
     );
 
     const isWorkGroup = row.original.activity_ref.is_work_group;
-
-    const [levelsByUser, setLevelsByUser] = React.useState({});
-
-    React.useEffect(() => {
-        let isMounted = true;
-
-        const fetchAllLevels = async () => {
-            const entries = await Promise.all(
-                combinedUsers.map(async (u) => {
-                    if (u.type === 'option' && u.optionLevel) {
-                        return [u.id, u.optionLevel];
-                    }
-                    try {
-                        const data = await api
-                            .set()
-                            .get(`/desired_activities/user/${u.id}/activity/${row.original.id}`);
-                        return [u.id, data.evaluation_level_ref || null];
-                    } catch {
-                        return [u.id, null];
-                    }
-                })
-            );
-            if (isMounted) {
-                setLevelsByUser(Object.fromEntries(entries));
-            }
-        };
-
-        fetchAllLevels();
-
-        return () => {
-            isMounted = false;
-        };
-    }, [combinedUsers, row.original.id]);
 
     return (
         <div className="flex-column">
@@ -181,14 +156,12 @@ const SubStudentList = ({ row, seasons }) => {
                         .join(', ') || 'NON ASSIGNÉ'
                         : null;
 
-                    const initialLevel = levelsByUser[u.id] ?? null;
-
                     return (
                         <tr key={u.id || index} style={customStyle}>
                             <td>
                                 <a href={
-                                    levelsByUser[u.id]
-                                        ? `/inscriptions/${u.activity_applications?.[0]?.id}`
+                                    u.activity_applications?.[0]?.id
+                                        ? `/inscriptions/${u.activity_applications[0].id}`
                                         : '#'
                                 } target="_blank">
                                     {u.first_name} {u.last_name}
@@ -203,7 +176,6 @@ const SubStudentList = ({ row, seasons }) => {
                                     activityRefId={row.original.activity_ref_id}
                                     timeInterval={row.original.time_interval}
                                     activityRef={row.original.activity_ref}
-                                    initialLevel={initialLevel}
                                 />
                             </td>
                             {isWorkGroup && <td>{userInstrument}</td>}
@@ -241,7 +213,6 @@ const SubStudentList = ({ row, seasons }) => {
         </div>
     );
 };
-
 
 
 const createAllExpanded = pageSize => _.zipObject(_.range(pageSize), _.times(pageSize, () => ({})));
