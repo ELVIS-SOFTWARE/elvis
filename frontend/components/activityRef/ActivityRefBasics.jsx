@@ -4,6 +4,7 @@ import swal from "sweetalert2";
 import { Form, Field, FormSpy } from "react-final-form";
 import Input from "../common/Input";
 import InputSelect from "../common/InputSelect";
+import InputColor from "../common/InputColor";
 import DragAndDrop from "../editParameters/DragAndDrop";
 import BaseDataTable from "../common/baseDataTable/BaseDataTable";
 import ActivityRefPricingModal from "./ActivityRefPricingModal";
@@ -278,15 +279,9 @@ export default class ActivityRefBasics extends React.Component {
                     <div className="row">
                         <div className="col-sm-6">
                             <Field
-                                label="Code couleur"
                                 name="activityRef.color_code"
-                                render={({ input }) => (
-                                    <input
-                                        type="color"
-                                        {...input}
-                                        style={{ width: 50, height: 30, padding: 0, border: 0 }}
-                                    />
-                                )}
+                                label="Couleur du créneau dans le planning"
+                                component={InputColor}
                             />
                         </div>
                     </div>
