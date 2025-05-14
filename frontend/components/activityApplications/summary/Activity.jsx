@@ -156,14 +156,29 @@ const SubStudentList = ({ row, seasons }) => {
                         .join(', ') || 'NON ASSIGNÉ'
                         : null;
 
+                    const app = u.application || u.activity_applications?.find(a =>
+                        a.desired_activities.some(da => da.activity_id === row.original.id)
+                    );
+
+                    const formattedBeginAt = app?.begin_at
+                        ? Intl.DateTimeFormat('fr').format(new Date(app.begin_at))
+                        : '';
+
+                    const formattedStoppedAt = app?.stopped_at
+                        ? Intl.DateTimeFormat('fr').format(new Date(app.stopped_at))
+                        : '';
+
                     return (
                         <tr key={u.id || index} style={customStyle}>
                             <td>
-                                <a href={
-                                    u.activity_applications?.[0]?.id
-                                        ? `/inscriptions/${u.activity_applications[0].id}`
-                                        : '#'
-                                } target="_blank">
+                                <a
+                                    href={
+                                        u.activity_applications?.[0]?.id
+                                            ? `/inscriptions/${u.activity_applications[0].id}`
+                                            : '#'
+                                    }
+                                    target="_blank"
+                                >
                                     {u.first_name} {u.last_name}
                                 </a>
                             </td>
@@ -179,32 +194,8 @@ const SubStudentList = ({ row, seasons }) => {
                                 />
                             </td>
                             {isWorkGroup && <td>{userInstrument}</td>}
-                            <td>
-                                {(() => {
-                                    const app = u.application ||
-                                        u.activity_applications?.find(a =>
-                                            a.desired_activities.some(
-                                                da => da.activity_id === row.original.id
-                                            )
-                                        );
-                                    return app?.begin_at
-                                        ? Intl.DateTimeFormat('fr').format(new Date(app.begin_at))
-                                        : '';
-                                })()}
-                            </td>
-                            <td>
-                                {(() => {
-                                    const app = u.application ||
-                                        u.activity_applications?.find(a =>
-                                            a.desired_activities.some(
-                                                da => da.activity_id === row.original.id
-                                            )
-                                        );
-                                    return app?.stopped_at
-                                        ? Intl.DateTimeFormat('fr').format(new Date(app.stopped_at))
-                                        : '';
-                                })()}
-                            </td>
+                            <td>{formattedBeginAt}</td>
+                            <td>{formattedStoppedAt}</td>
                         </tr>
                     );
                 })}
@@ -213,6 +204,7 @@ const SubStudentList = ({ row, seasons }) => {
         </div>
     );
 };
+
 
 
 const createAllExpanded = pageSize => _.zipObject(_.range(pageSize), _.times(pageSize, () => ({})));
