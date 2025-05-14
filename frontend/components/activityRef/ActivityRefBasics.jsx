@@ -4,6 +4,7 @@ import swal from "sweetalert2";
 import { Form, Field, FormSpy } from "react-final-form";
 import Input from "../common/Input";
 import InputSelect from "../common/InputSelect";
+import InputColor from "../common/InputColor";
 import DragAndDrop from "../editParameters/DragAndDrop";
 import BaseDataTable from "../common/baseDataTable/BaseDataTable";
 import ActivityRefPricingModal from "./ActivityRefPricingModal";
@@ -277,17 +278,21 @@ export default class ActivityRefBasics extends React.Component {
 
                     <div className="row">
                         <div className="col-sm-6">
-                            <Field
-                                label="Code couleur"
-                                name="activityRef.color_code"
-                                render={({ input }) => (
-                                    <input
-                                        type="color"
-                                        {...input}
-                                        style={{ width: 50, height: 30, padding: 0, border: 0 }}
-                                    />
-                                )}
-                            />
+                            <div className="form-group">
+                                <label className="small d-block mb-1" style={{ color: "#003E5C" }}>
+                                    Couleur du créneau dans le planning
+                                </label>
+
+                                <p className="text-muted small mb-2">
+                                    Choisissez une couleur pour identifier facilement cette activité sur le planning
+                                </p>
+
+                                <Field
+                                    name="activityRef.color_code"
+                                    component={InputColor}
+                                    label={null}
+                                />
+                            </div>
                         </div>
                     </div>
 
