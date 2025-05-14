@@ -34,9 +34,7 @@ const InputColor = props => {
             )}
 
 
-            <p className="small text-muted mb-2" style={{ marginTop: "3px" }}>
-                Choisissez une couleur pour identifier facilement cette activité sur le planning
-            </p>
+
 
             <input
                 type="color"

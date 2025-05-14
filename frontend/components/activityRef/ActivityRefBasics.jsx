@@ -278,11 +278,21 @@ export default class ActivityRefBasics extends React.Component {
 
                     <div className="row">
                         <div className="col-sm-6">
-                            <Field
-                                name="activityRef.color_code"
-                                label="Couleur du créneau dans le planning"
-                                component={InputColor}
-                            />
+                            <div className="form-group">
+                                <label className="small d-block mb-1" style={{ color: "#003E5C" }}>
+                                    Couleur du créneau dans le planning
+                                </label>
+
+                                <p className="text-muted small mb-2">
+                                    Choisissez une couleur pour identifier facilement cette activité sur le planning
+                                </p>
+
+                                <Field
+                                    name="activityRef.color_code"
+                                    component={InputColor}
+                                    label={null}
+                                />
+                            </div>
                         </div>
                     </div>
 
