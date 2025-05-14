@@ -44,23 +44,35 @@ class DesiredActivityController < ApplicationController
     end
 
     def find_by_user_and_activity
-        user_id = params[:user_id]
+        user_id     = params[:user_id]
         activity_id = params[:activity_id]
 
+        # On récupère la DesiredActivity, qu’elle vienne d’une inscription « active »
+        # ou d’une option
         desired_activity = DesiredActivity
                              .joins(:activity_application)
                              .where("activity_applications.user_id = ? AND desired_activities.activity_id = ?", user_id, activity_id)
                              .first
 
-        if !desired_activity
+        if desired_activity.nil?
             option = Option.find_by(activity_id: activity_id)
             desired_activity = option&.desired_activity
         end
 
         if desired_activity
+            # On cherche, pour cet utilisateur / saison / activité, son objet Level
+            # qui contient evaluation_level_ref
+            application = desired_activity.activity_application
+            level = Level.find_by(
+              user:      application.user,
+              season:    application.season,
+              activity_ref: desired_activity.activity_ref
+            )
+
             render json: {
-              id: desired_activity.id,
-              activity_application_id: desired_activity.activity_application_id,
+              id:                       desired_activity.id,
+              activity_application_id:  desired_activity.activity_application_id,
+              evaluation_level_ref:     level&.evaluation_level_ref&.label  # <-- on ajoute cette ligne
             }
         else
             render json: { error: "Demande d'inscription introuvable" }, status: 404
