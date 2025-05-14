@@ -355,6 +355,41 @@ class ActivitiesApplicationsController < ApplicationController
         .as_json
     end
 
+    default_activity_ref_ids = @all_activity_refs
+                                 .map { |ar| ar.dig("activity_ref_kind", "default_activity_ref_id") }
+                                 .compact
+                                 .uniq
+
+    default_activity_prices = {}
+    if default_activity_ref_ids.any?
+      prices = ActivityRefPricing
+                 .select("activity_ref_pricings.id, activity_ref_pricings.activity_ref_id, activity_ref_pricings.price, activity_ref_pricings.from_season_id, activity_ref_pricings.to_season_id")
+                 .where(activity_ref_id: default_activity_ref_ids, deleted_at: nil)
+                 .joins("inner join seasons as from_seasons on activity_ref_pricings.from_season_id = from_seasons.id")
+                 .joins("left join seasons as to_seasons on activity_ref_pricings.to_season_id = to_seasons.id or activity_ref_pricings.to_season_id is null")
+                 .includes(:from_season, :to_season)
+
+      @seasons.each do |season|
+        season_obj = Season.find(season["id"])
+        season_start = season_obj.start
+
+        default_activity_ref_ids.each do |activity_ref_id|
+          valid_prices = prices
+                           .select { |p|
+                             p.activity_ref_id == activity_ref_id &&
+                               p.from_season.start <= season_start &&
+                               (p.to_season_id.nil? || p.to_season.end >= season_start)
+                           }
+                           .map(&:price)
+
+          max_price = valid_prices.max || 0
+
+          default_activity_prices[activity_ref_id] ||= {}
+          default_activity_prices[activity_ref_id][season["id"]] = max_price
+        end
+      end
+    end
+
     # do not add display_prices_by_season and display_price to @all_activity_refs.as_json
     # because this can be a huge amount of data && sql queries
     # So add them to activity_refs in a bulk operation
@@ -395,23 +430,11 @@ class ActivitiesApplicationsController < ApplicationController
 
       selected = default_activity || values.max_by { |ar| ar["display_price"] }
 
-      if default_activity
-        # override du display_price pour qu'il soit bien celui de l'ActivityRef par défaut
-        selected["display_price"] = get_max_price_for_target_id(
-          all_max_prices,
-          default_id,
-          "ActivityRef",
-          @season["id"]
-        ) || 0
+      if default_activity && default_id
+        selected["display_price"] = default_activity_prices.dig(default_id, @season["id"]) || 0
 
-        # même override pour chaque saison
         selected["display_prices_by_season"] = @seasons.each_with_object({}) do |season, h|
-          h[season["id"]] = get_max_price_for_target_id(
-            all_max_prices,
-            default_id,
-            "ActivityRef",
-            season["id"]
-          )
+          h[season["id"]] = default_activity_prices.dig(default_id, season["id"]) || 0
         end
       end
 
