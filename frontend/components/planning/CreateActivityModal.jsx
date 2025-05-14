@@ -85,12 +85,23 @@ class CreateIntervalModal extends React.Component {
                             <select
                                 className="form-control"
                                 value={this.state.recurrentType}
-                                onChange={e => this.setState({ recurrentType: e.target.value })}>
-                                {RECURRENCE_TYPES.getAll().map((type, i) =>
-                                    <option key={i} value={type}>{RECURRENCE_TYPES.toString(type)}</option>
-                                )}
+                                onChange={e => this.setState({ recurrentType: e.target.value })}
+                            >
+                                {RECURRENCE_TYPES.getAll()
+                                    .filter(type => {
+                                        if (this.state.kind === "p") {
+                                            return type !== "daily" && type !== "yearly";
+                                        }
+                                        return true;
+                                    })
+                                    .map((type, i) => (
+                                        <option key={i} value={type}>
+                                            {RECURRENCE_TYPES.toString(type)}
+                                        </option>
+                                    ))}
                             </select>
                         </div>}
+
                     </div>
                 </div>;
             } else {
