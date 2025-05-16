@@ -387,47 +387,99 @@ export default function EditFormule({formule})
                                   onChange={e => setDescription(e.target.value)} />
                     </div>
 
-                    <div className="row">
-                        <div className="col-sm-10">
-                            <label htmlFor="activites">Activités</label>
-                        </div>
-                        <div className="col-sm-2 text-right">
-                            <button type="button" className="btn btn-primary" onClick={() => setActivityModalIsOpen(true)}>
-                                Ajouter une activité
-                            </button>
+                        <div className="row">
+                            <div className="col-sm-10">
+                                <label htmlFor="activites">Activités</label>
+                            </div>
+                            <div className="col-sm-2 text-right">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => setActivityModalIsOpen(true)}
+                                >
+                                    Ajouter une activité
+                                </button>
+                            </div>
                         </div>
 
+                        <div className="row">
+                            <div className="col-12 mt-2 mb-3">
+                                <p style={{ color: "#555" }}>
+                                    Ajouter les activités ou une famille
+                                    d’activité qui composent votre parcours
+                                </p>
+                            </div>
+                        </div>
+
+                        {(selectedKinds.length + selectedActivities.length) === 0 ? (
+                            <div className="form-group mt-3 m-0">
+                                <div
+                                    className="form-control p-5 d-flex flex-column align-items-center justify-content-center"
+                                    style={{
+                                        backgroundColor: "#fff",
+                                        border: "1px solid #dee2e6",
+                                        borderRadius: "1rem",
+                                        minHeight: "200px",
+                                        width: "115.5%",
+                                    }}
+                                >
+                                    <p className="h6 mb-2 font-weight-bold" style={{ color: "#000000" }}>
+                                        Aucune activité renseignée
+                                    </p>
+                                    <button
+                                        type="button"
+                                        className="btn btn-link p-0"
+                                        onClick={() => setActivityModalIsOpen(true)}
+                                    >
+                                        Ajouter une activité à la formule
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                {selectedKinds.map(kind => (
+                                    <div key={`kind_${kind.id}`} className="form-group mt-3 m-0">
+                                        <div className="form-control d-inline-flex align-items-center justify-content-between p-5">
+                                            <label style={{ color: "#00334A" }}>
+                                                {kind.display_name}
+                                            </label>
+                                            <button
+                                                type="button"
+                                                className="btn"
+                                                onClick={() =>
+                                                    setSelectedKinds(selectedKinds.filter(a => a.id !== kind.id))
+                                                }
+                                            >
+                                                <i className="fas fa-trash" style={{ color: "#00334A" }} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {selectedActivities.map(activity => (
+                                    <div key={`activity_${activity.id}`} className="form-group mt-3 m-0">
+                                        <div className="form-control d-inline-flex align-items-center justify-content-between p-5">
+                                            <label style={{ color: "#00334A" }}>
+                                                {activity.display_name}
+                                            </label>
+                                            <button
+                                                type="button"
+                                                className="btn"
+                                                onClick={() =>
+                                                    setSelectedActivities(
+                                                        selectedActivities.filter(a => a.id !== activity.id)
+                                                    )
+                                                }
+                                            >
+                                                <i className="fas fa-trash" style={{ color: "#00334A" }} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                     </div>
-
-                    {selectedKinds.map(kind => (
-                        <div key={`kind_${kind.id}`} className="form-group mt-3 m-0">
-                            <div
-                                className="form-control d-inline-flex align-items-center justify-content-between p-5">
-                                <label style={{ color: "#00334A" }}> {kind.display_name}</label>
-                                <button type="button" className="btn"
-                                        onClick={() => setSelectedKinds(selectedKinds.filter(a => a.id !== kind.id))}>
-                                    <i className="fas fa-trash" style={{ color: "#00334A" }} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-
-                    {selectedActivities.map(activity => (
-                        <div key={`activity_${activity.id}`} className="form-group mt-3 m-0">
-                            <div
-                                className="form-control d-inline-flex align-items-center justify-content-between p-5">
-                                <label style={{ color: "#00334A" }}>{activity.display_name}
-                                </label>
-                                <button type="button" className="btn"
-                                        onClick={() => setSelectedActivities(selectedActivities.filter(a => a.id !== activity.id))}>
-                                    <i className="fas fa-trash" style={{ color: "#00334A" }} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-
                 </div>
-            </div>
 
             <div className="col-md-10 col-xs-12 pl-0 mt-5">
                 <div className="ibox mt-3">
