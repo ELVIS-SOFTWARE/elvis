@@ -172,11 +172,7 @@ const SubStudentList = ({ row, seasons }) => {
                         <tr key={u.id || index} style={customStyle}>
                             <td>
                                 <a
-                                    href={
-                                        u.activity_applications?.[0]?.id
-                                            ? `/inscriptions/${u.activity_applications[0].id}`
-                                            : '#'
-                                    }
+                                    href={app ? `/inscriptions/${app.id}` : "#"}
                                     target="_blank"
                                 >
                                     {u.first_name} {u.last_name}
