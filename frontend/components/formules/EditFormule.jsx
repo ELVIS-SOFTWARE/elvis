@@ -221,58 +221,56 @@ export default function EditFormule({formule})
         setActivityModalIsOpen(false);
     }
 
-    async function handleSubmit(e)
-    {
+    async function handleSubmit(e) {
         e.preventDefault();
 
-        if (selectedPricings.length === 0)
-        {
+        const isCreating = !formule.id;
+        const actionType = isCreating ? "création" : "modification";
+
+        if (selectedPricings.length === 0) {
             setValidationError(prevState => ({
                 ...prevState,
                 priceCategory: 'Vous devez ajouter au moins un tarif.'
             }));
+
+            swal(`Erreur de ${actionType}`, "Vous devez ajouter au moins un tarif.", "error");
             return;
         }
 
-        if (selectedPricings.some(p => p.price === 0))
-        {
+        if (selectedPricings.some(p => p.price === 0)) {
             setValidationError(prevState => ({
                 ...prevState,
                 price: 'Le prix ne peut pas être nul.'
             }));
+
+            swal(`Erreur de ${actionType}`, "Le prix ne peut pas être nul.", "error");
             return;
         }
 
         const request = api.set()
-            .success(res =>
-            {
+            .success(res => {
                 swal({
-                    title: "La formule a été modifiée avec succès",
+                    title: `La formule a été ${isCreating ? 'créée' : 'modifiée'} avec succès`,
                     type: "success",
                     timer: 1500,
-                })
+                });
 
-                if(formule.id)
-                {
+                if(formule.id) {
                     setName(res.name);
                     setDescription(res.description);
                     setActive(res.active);
-                }
-                else
-                {
+                } else {
                     window.location.href = '/formules';
                 }
             })
-            .error(res =>
-            {
+            .error(res => {
                 if(res.errors)
-                    swal("Une erreur est survenue lors de la modification de la formule", res.error, "error");
+                    swal(`Une erreur est survenue lors de la ${actionType} de la formule`, res.error, "error");
                 else
-                    swal("Une erreur est survenue lors de la modification de la formule", "", "error");
+                    swal(`Une erreur est survenue lors de la ${actionType} de la formule`, "", "error");
             });
 
-        if(formule.id)
-        {
+        if(formule.id) {
             await request.patch(`/formules/${formule.id}`, {
                 name,
                 description,
@@ -281,11 +279,15 @@ export default function EditFormule({formule})
                 formuleItems: [
                     ...selectedActivities.map(a => ({ itemId: a.id, isFamily: false })),
                     ...selectedKinds.map(k => ({ itemId: k.id, isFamily: true }))
-                ]
-            })
-        }
-        else
-        {
+                ],
+                formulePricings: selectedPricings.map(p => ({
+                    priceCategoryId: p.pricing_category.id,
+                    price: p.price,
+                    fromSeasonId: p.from_season_id,
+                    toSeasonId: p.to_season_id ? p.to_season_id : null
+                }))
+            });
+        } else {
             await request.post(`/formules`, {
                 name,
                 description,
