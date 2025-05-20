@@ -962,20 +962,28 @@ class ActivityDetailsModal extends React.Component {
                         onSave: async () => {
                             this.setState({ isEditing: true });
 
-                            swal({
-                                title: "Modification en cours",
-                                text: "Veuillez patienter...",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                                allowEnterKey: false,
-                            });
-                            swal.showLoading();
+                            let popupTimer = setTimeout(() => {
+                                swal({
+                                    title: "Modification en cours",
+                                    text: "Veuillez patienter...",
+                                    allowOutsideClick: false,
+                                    allowEscapeKey: false,
+                                    allowEnterKey: false,
+                                });
+                                swal.showLoading();
+                            }, 500);
 
                             try {
                                 await this.props.handleEditActivityInstance(this.state.changes.instance);
-                                swal.close();
+                                clearTimeout(popupTimer);
+                                if (swal.isVisible()) {
+                                    swal.close();
+                                }
                             } catch (error) {
-                                swal.close();
+                                clearTimeout(popupTimer);
+                                if (swal.isVisible()) {
+                                    swal.close();
+                                }
                                 swal({
                                     title: "Erreur",
                                     text: "Une erreur est survenue lors de la modification",
