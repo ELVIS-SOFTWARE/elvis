@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Elvis
-  VERSION = "2.11.10"
+  VERSION = "2.11.11"
 end
