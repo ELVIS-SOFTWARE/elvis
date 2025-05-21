@@ -172,11 +172,7 @@ const SubStudentList = ({ row, seasons }) => {
                         <tr key={u.id || index} style={customStyle}>
                             <td>
                                 <a
-                                    href={
-                                        u.activity_applications?.[0]?.id
-                                            ? `/inscriptions/${u.activity_applications[0].id}`
-                                            : '#'
-                                    }
+                                    href={app ? `/inscriptions/${app.id}` : "#"}
                                     target="_blank"
                                 >
                                     {u.first_name} {u.last_name}
@@ -316,23 +312,37 @@ class Activity extends React.Component {
         return duration < 60 ? `- ${minutes} min` : `- ${hours}h${minutes}`;
     }
 
-    async handleOptionButton(suggestion) {
-        try {
-            const isOption = this.isSuggestionInDesiredActivityOptions(suggestion);
-            if (isOption) {
-                await this.props.handleRemoveSuggestionOption(suggestion.id, this.props.desiredActivity);
-                this.props.desiredActivity.options = this.props.desiredActivity.options.filter(opt => opt.activity_id !== suggestion.id);
-            } else {
-                await this.props.handleSelectSuggestionOption(suggestion.id, this.props.desiredActivity.id);
-                this.props.desiredActivity.options.push({activity_id: suggestion.id});
-            }
-            this.forceUpdate();
-        } catch (error) {
-            console.error("Erreur lors de la modification de l'option", error);
-        } finally {
-            this.setState({ submittingOptionId: 0 });
-        }
+    handleOptionButton(suggestion) {
+        const isOption = this.isSuggestionInDesiredActivityOptions(suggestion);
+        this.setState({ submittingOptionId: suggestion.id });
+
+        const promise = isOption
+            ? this.props.handleRemoveSuggestionOption(suggestion.id, this.props.desiredActivity)
+            : this.props.handleSelectSuggestionOption(suggestion.id, this.props.desiredActivity.id);
+
+        return promise
+            .then(() => {
+                if (isOption) {
+                    this.props.desiredActivity.options = this.props.desiredActivity.options.filter(
+                        opt => opt.activity_id !== suggestion.id
+                    );
+                } else {
+                    this.props.desiredActivity.options.push({ activity_id: suggestion.id });
+                }
+                this.setState({});
+
+                this.loadSuggestions();
+            })
+            .catch(error => {
+                console.error("Erreur lors de la modification de l'option", error);
+                this.loadSuggestions();
+            })
+            .finally(() => {
+                this.setState({ submittingOptionId: null });
+            });
     }
+
+
 
     handleOpenLevelEditModal() {
         this.setState({
@@ -717,26 +727,21 @@ class Activity extends React.Component {
                                     color: "#FFF",
                                     backgroundColor: "#9575CD",
                                 }}
-                                onClick={async () => {
-                                    // Définir l'ID de l'option en cours de traitement
+                                onClick={() => {
                                     this.setState({
                                         submittingOptionId: act.id,
                                     });
-
-                                    try {
-                                        // Appeler handleOptionButton avec l'option spécifique
-                                        await this.handleOptionButton(act);
-                                    } catch (error) {
-                                        console.error(
-                                            "Erreur lors du traitement de l'option :",
-                                            error
+                                    this.handleOptionButton(act)
+                                        .then(() =>
+                                            this.setState({
+                                                submittingOptionId: 0,
+                                            })
+                                        )
+                                        .catch(() =>
+                                            this.setState({
+                                                submittingOptionId: 0,
+                                            })
                                         );
-                                    } finally {
-                                        // Réinitialiser submittingOptionId pour permettre d'autres clics
-                                        this.setState({
-                                            submittingOptionId: null,
-                                        });
-                                    }
                                 }}
                             >
                                 {this.isSuggestionInDesiredActivityOptions(act)

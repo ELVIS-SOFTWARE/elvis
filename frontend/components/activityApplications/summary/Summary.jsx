@@ -291,11 +291,10 @@ class Summary extends React.Component
         });
     }
 
-    handleSelectSuggestionOption(activityId, desiredActivityId)
-    {
+    handleSelectSuggestionOption(activityId, desiredActivityId) {
         const desiredActivities = this.state.desiredActivities;
 
-        fetch(`/activity/${activityId}/desired_option/${desiredActivityId}`, {
+        return fetch(`/activity/${activityId}/desired_option/${desiredActivityId}`, {
             method: "POST",
             credentials: "same-origin",
             headers: {
@@ -305,8 +304,7 @@ class Summary extends React.Component
             },
         })
             .then(response => response.json())
-            .then(desiredActivity =>
-            {
+            .then(desiredActivity => {
                 const indexDesired = _.findKey(
                     desiredActivities,
                     da => da.id == desiredActivity.id,
@@ -316,15 +314,12 @@ class Summary extends React.Component
                     desiredActivity.activity_ref_id
                     ];
 
-                // Update state's suggestions with new data
-                _.forEach(desiredActivity.options, o =>
-                {
+                _.forEach(desiredActivity.options, o => {
                     const index = _.findIndex(
                         suggestions,
                         s => s.id == o.activity_id,
                     );
 
-                    // Check if option is not already here
                     if (!_.find(suggestions[index].options, o => o.desired_activity_id === desiredActivity.id))
                         suggestions[index].options = [
                             ...suggestions[index].options,
@@ -342,18 +337,20 @@ class Summary extends React.Component
                         [indexDesired]: desiredActivity,
                     },
                 });
+
+                return desiredActivity;
             });
     }
 
-    handleRemoveSuggestionOption(suggestionId, desiredActivity)
-    {
+
+    handleRemoveSuggestionOption(suggestionId, desiredActivity) {
         const desiredActivities = this.state.desiredActivities;
         const suggestion = _.find(
             this.state.suggestions[desiredActivity.activity_ref_id],
             s => s.id == suggestionId,
         );
 
-        fetch(
+        return fetch(
             `/activity/${suggestionId}/desired_option/${desiredActivity.id}`,
             {
                 method: "DELETE",
@@ -366,8 +363,7 @@ class Summary extends React.Component
             },
         )
             .then(response => response.json())
-            .then(desiredActivity =>
-            {
+            .then(desiredActivity => {
                 const indexDesired = _.findKey(
                     desiredActivities,
                     da => da.id == desiredActivity.id,
@@ -381,7 +377,6 @@ class Summary extends React.Component
                     s => s.id == suggestion.id,
                 );
 
-                // Remove option from this suggestion
                 actSuggestions[suggIndex].options = actSuggestions[suggIndex]
                     .options
                     .filter(o => o.desired_activity_id !== desiredActivity.id);
@@ -396,6 +391,8 @@ class Summary extends React.Component
                         [indexDesired]: desiredActivity,
                     },
                 });
+
+                return desiredActivity;
             });
     }
 

@@ -75,14 +75,21 @@ const FormulaChoice = ({
 
         return (
             <tr key={formula.id} style={{ color: "rgb(0, 51, 74)" }}>
-                <td>
-                    <div style={{ fontWeight: "bold" }}>{formula.name}</div>
+                <td style={{ padding: "16px 12px" }}>
+                    <div style={{ fontWeight: "bold", marginBottom: "10px" }}>{formula.name}</div>
                     <div style={{ fontSize: "1.1em", color: "#555" }}>
                         {formula.description || "Aucune description"}
                     </div>
                 </td>
-                <td style={{ position: "relative" }}>
-                    <div style={{ position: "absolute",  whiteSpace: "nowrap" }}>
+                <td style={{ position: "relative", textAlign: "center", verticalAlign: "middle" }}>
+                    <div style={{
+                        whiteSpace: "nowrap",
+                        marginRight: "40px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        height: "100%"
+                    }}>
                         {formula.formule_pricings && formula.formule_pricings[0]
                             ? `${formula.formule_pricings[0].price} €`
                             : "--"}
@@ -108,6 +115,7 @@ const FormulaChoice = ({
                             fontWeight: "bold",
                             color: "#00334A",
                             verticalAlign: "middle",
+                            padding: "16px 12px"
                         }}
                         colSpan="2"
                     >
@@ -286,36 +294,36 @@ const FormulaChoice = ({
                         style={{ borderRadius: "12px", overflow: "hidden" }}
                     >
                         <thead>
-                            <tr
+                        <tr
+                            style={{
+                                backgroundColor: "#00334A",
+                                color: "white",
+                            }}
+                        >
+                            <th style={{ padding: "12px 16px" }}>Formule</th>
+
+                            <th
                                 style={{
-                                    backgroundColor: "#00334A",
-                                    color: "white",
+                                    textAlign: "center",
+                                    paddingRight: "40px",
+                                    whiteSpace: "nowrap",
+                                    padding: "12px 16px"
                                 }}
                             >
-                                <th>Formule</th>
-
-                                <th
-                                    style={{
-                                        position: "relative",
-                                        textAlign: "right",
-                                        paddingRight: "80px",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                >
-                                    Tarif estimé
-                                </th>
-                            </tr>
+                                Tarif estimé
+                            </th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {availableRows.length > 0 ? (
-                                availableRows
-                            ) : (
-                                <tr>
-                                    <td colSpan="2" className="text-center">
-                                        Aucune formule disponible
-                                    </td>
-                                </tr>
-                            )}
+                        {availableRows.length > 0 ? (
+                            availableRows
+                        ) : (
+                            <tr>
+                                <td colSpan="2" className="text-center">
+                                    Aucune formule disponible
+                                </td>
+                            </tr>
+                        )}
                         </tbody>
                     </table>
                 </div>
@@ -327,37 +335,38 @@ const FormulaChoice = ({
                         style={{ borderRadius: "12px", overflow: "hidden" }}
                     >
                         <thead>
-                            <tr
+                        <tr
+                            style={{
+                                backgroundColor: "#00334A",
+                                color: "white",
+                            }}
+                        >
+                            <th style={{ padding: "12px 16px" }}>Formule</th>
+                            <th style={{ padding: "12px 16px" }}>Durée</th>
+                            <th
                                 style={{
-                                    backgroundColor: "#00334A",
-                                    color: "white",
+                                    position: "relative",
+                                    textAlign: "right",
+                                    paddingRight: "80px",
+                                    whiteSpace: "nowrap",
+                                    padding: "12px 16px"
                                 }}
                             >
-                                <th>Formule</th>
-                                <th>Durée</th>
-                                <th
-                                    style={{
-                                        position: "relative",
-                                        textAlign: "right",
-                                        paddingRight: "80px",
-                                        whiteSpace: "nowrap",
-                                    }}
-                                >
-                                    Tarif estimé
-                                </th>
-                                <th></th>
-                            </tr>
+                                Tarif estimé
+                            </th>
+                            <th style={{ padding: "12px 16px" }}></th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {selectedRows.length === 0 ? (
-                                <tr>
-                                    <td colSpan="4" className="text-center">
-                                        Aucune formule sélectionnée
-                                    </td>
-                                </tr>
-                            ) : (
-                                selectedRows
-                            )}
+                        {selectedRows.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="text-center">
+                                    Aucune formule sélectionnée
+                                </td>
+                            </tr>
+                        ) : (
+                            selectedRows
+                        )}
                         </tbody>
                     </table>
                     {selectedFormulas.length > 0 && (
