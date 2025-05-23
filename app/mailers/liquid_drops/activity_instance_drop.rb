@@ -14,6 +14,10 @@ module LiquidDrops
       I18n.l(DateTime.parse(@activity_instance["time_interval"]["start"]), format: "%A %d %B")
     end
 
+    def day_in_week
+      I18n.l(DateTime.parse(@activity["time_interval"]["end"]), format: "%A")
+    end
+
     def activity_start
       DateTime.parse(@activity_instance["time_interval"]["start"]).strftime("%H:%M")
     end
