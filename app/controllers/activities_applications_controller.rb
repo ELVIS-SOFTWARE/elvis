@@ -1601,7 +1601,11 @@ class ActivitiesApplicationsController < ApplicationController
         )
       elsif prop == "mail_sent"
         if val != "all"
-          query = val ? query.where.not(mail_sent_at: nil) : query.where(mail_sent_at: nil)
+          if val == "true"
+            query = query.where.not(mail_sent_at: nil)
+          elsif val == "false"
+            query = query.where(mail_sent_at: nil)
+          end
         end
       end
     end
