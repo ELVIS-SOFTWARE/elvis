@@ -521,7 +521,8 @@ class PaymentsSummary extends React.Component {
         return (
             <div className="m-b-lg">
                 <div className="flex flex-space-between-justified">
-                    {!this.props.isStudentView && _.values(this.props.schedules).length > 0 ? (
+                    {!this.props.isStudentView &&
+                    _.values(this.props.schedules).length > 0 ? (
                         <div className="form-group">
                             <label>Emplacement global</label>
                             <div>
@@ -532,8 +533,16 @@ class PaymentsSummary extends React.Component {
                                             name="location"
                                             key={l.id}
                                             value={l.id}
-                                            checked={this.props.globalLocation == l.id}
-                                            onChange={e => this.props.handleSwitchLocation(null, parseInt(l.id))}
+                                            checked={
+                                                this.props.globalLocation ==
+                                                l.id
+                                            }
+                                            onChange={e =>
+                                                this.props.handleSwitchLocation(
+                                                    null,
+                                                    parseInt(l.id)
+                                                )
+                                            }
                                         />
                                         {l.label}
                                     </label>
@@ -541,20 +550,21 @@ class PaymentsSummary extends React.Component {
                             </div>
                         </div>
                     ) : null}
-                    {!this.props.isStudentView && (
-                        <div className="m-b-sm">
-                            <button
-                                className="btn btn-primary"
-                                onClick={() => this.showCreateCouponModal()}
-                            >
-                                <i className="fas fa-plus" /> Ajouter un taux de remise
-                            </button>
-                        </div>
-                    )}
                 </div>
 
                 <div className="ibox-title">
                     <h2>Infos générales</h2>
+                    <div className="ibox-tools">
+
+                                <button
+                                    className="btn btn-primary btn-xs mr-2"
+                                    type="button"
+                                    id="addCoupon"
+                                    onClick={() => this.showCreateCouponModal()}>
+                                    <i className="fas fa-plus m-r-xs" />
+                                    Créer un taux de remise
+                                </button>
+                    </div>
                 </div>
 
                 <ReactTable
