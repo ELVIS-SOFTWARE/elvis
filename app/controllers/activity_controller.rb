@@ -756,19 +756,36 @@ class ActivityController < ApplicationController
       when "level"
         if val == "TBD"
           query = query.joins(:time_interval).where("
-                       activities.evaluation_level_ref_id IS NULL AND
-                        (
-                            select count(distinct l.evaluation_level_ref_id)
-                            from students s
-                            join users u on u.id = s.user_id
-                            join levels l on l.user_id = u.id
-                            where s.activity_id = activities.id
-                            and l.season_id = (select s.id from seasons s where time_intervals.start between s.start and s.end limit 1)
-                            and l.activity_ref_id = activities.activity_ref_id
-                        ) > 1")
+            (activities.evaluation_level_ref_id IS NULL) AND
+            (
+              (
+                select count(distinct l.evaluation_level_ref_id)
+                from students s
+                join users u on u.id = s.user_id
+                join levels l on l.user_id = u.id
+                where s.activity_id = activities.id
+                and l.season_id = (select s.id from seasons s where time_intervals.start between s.start and s.end limit 1)
+                and l.activity_ref_id = activities.activity_ref_id
+              ) > 1
+              OR
+              (
+                select count(distinct l.evaluation_level_ref_id)
+                from students s
+                join users u on u.id = s.user_id
+                join levels l on l.user_id = u.id
+                where s.activity_id = activities.id
+                and l.season_id = (select s.id from seasons s where time_intervals.start between s.start and s.end limit 1)
+                and l.activity_ref_id = activities.activity_ref_id
+              ) = 0
+            )")
         else
           query = query.joins(:time_interval, :activity_ref)
                        .where("
+            (
+              activities.evaluation_level_ref_id = ?
+            ) OR (
+              activities.evaluation_level_ref_id IS NULL AND
+              (
                 SELECT COUNT(*) = 1 FROM (
                   SELECT DISTINCT evaluation_level_ref_id FROM levels l WHERE l.user_id IN (
                     SELECT user_id FROM students
@@ -780,20 +797,22 @@ class ActivityController < ApplicationController
                     LIMIT 1
                   )
                   AND l.activity_ref_id = activities.activity_ref_id
-                ) as a")
-                       .where("
-                (SELECT MIN(l.evaluation_level_ref_id) FROM levels l
-                 WHERE l.user_id IN (
-                    SELECT user_id FROM students
-                    WHERE activity_id = activities.id
-                 )
-                 AND l.season_id = (
-                    SELECT id FROM seasons
-                    WHERE tsrange(seasons.start, seasons.end, '[]') @> time_intervals.start
-                    LIMIT 1
-                 )
-                 AND l.activity_ref_id = activities.activity_ref_id
-                ) = ?", val)
+                ) as a
+              ) AND
+              (
+                SELECT MIN(l.evaluation_level_ref_id) FROM levels l
+                WHERE l.user_id IN (
+                  SELECT user_id FROM students
+                  WHERE activity_id = activities.id
+                )
+                AND l.season_id = (
+                  SELECT id FROM seasons
+                  WHERE tsrange(seasons.start, seasons.end, '[]') @> time_intervals.start
+                  LIMIT 1
+                )
+                AND l.activity_ref_id = activities.activity_ref_id
+              ) = ?
+            )", val, val)
         end
       when "group_name"
         query = query.where("activities.group_name ILIKE (? || '%')", val)
