@@ -903,16 +903,24 @@ class ActivityController < ApplicationController
         query = query.joins(:location).order("locations.label #{direction}")
       when "level"
         query = query.joins(:time_interval).order(Arel.sql("
-                (SELECT MIN(l.evaluation_level_ref_id) FROM levels l
-                 WHERE l.user_id IN (
-                    SELECT user_id FROM students
-                    WHERE activity_id = activities.id
-                 )
-                 AND l.activity_ref_id = activities.activity_ref_id
-                 AND l.season_id = (
-                     SELECT id FROM seasons
-                     WHERE tsrange(seasons.start, seasons.end, '[]') @> time_intervals.start
-                 ))  " + direction))
+              COALESCE(
+                activities.evaluation_level_ref_id,
+                (SELECT MIN(l.evaluation_level_ref_id)
+                   FROM levels l
+                  WHERE l.user_id IN (
+                    SELECT user_id
+                      FROM students
+                     WHERE activity_id = activities.id
+                  )
+                    AND l.activity_ref_id = activities.activity_ref_id
+                    AND l.season_id = (
+                      SELECT id
+                        FROM seasons
+                       WHERE tsrange(seasons.start, seasons.end, '[]') @> time_intervals.start
+                    )
+                )
+              ) #{direction}
+            "))
       when "day"
         query = query
                   .joins(:time_interval)
