@@ -183,21 +183,20 @@ class ActivityController < ApplicationController
     activity_id = params[:id]
     desired_activity_id = params[:desired_activity_id]
 
-    desired_activity = DesiredActivity.includes({ activity_application: { user: [:adhesions] },
-                                                  user: {} }).find(desired_activity_id)
+    desired_activity = DesiredActivity.includes({ activity_application: { user: [:adhesions] }, user: {} }).find(desired_activity_id)
 
     authorize! :edit, desired_activity&.activity_application
 
     activity = Activity.includes(:activity_ref).find(activity_id)
 
-
+    application = desired_activity.activity_application
+    user = application.user
     error = nil
-    user = desired_activity.activity_application.user
 
     # Lock database so that students limit is respected for every
     # concurrent request
     activity.with_lock("FOR UPDATE") do
-      begin_at = desired_activity.activity_application.begin_at
+      begin_at = application.begin_at
 
       # calculate students count according to user's begin date
       # (do not include students who are yet to start
@@ -219,9 +218,7 @@ class ActivityController < ApplicationController
         a.remove_student(desired_activity_id, true)
       end
 
-      Activities::AddStudent
-        .new(activity_id, desired_activity_id)
-        .execute
+      Activities::AddStudent.new(activity_id, desired_activity_id).execute
 
       # Ici, on calcule le nombre de séances dues par l'utilisateur (parce qu'il n'a pas commencé en début de saison)
       # Le nombre de séances "manquées" est déduit du nombre de séances dues (calcul du prorata)
@@ -232,12 +229,8 @@ class ActivityController < ApplicationController
       # creating the adhesion for user if non-existing
       season = desired_activity.activity_application.season
       if user.adhesions.where(season_id: season.id).none?
-        validity_start_date = if Time.now.month == 6
-                                Time.new(Time.now.year, 7, 5, 0, 0, 0) # 5 JUILLET
-                              else
-                                Time.now
-                              end
-        user.adherent_number = User.maximum("adherent_number") + 1 if user.adherent_number.nil?
+        validity_start_date = Time.now.month == 6 ? Time.new(Time.now.year, 7, 5, 0, 0, 0) : Time.now
+        user.adherent_number ||= User.maximum("adherent_number") + 1
         Adhesion.create(
           validity_start_date: validity_start_date,
           validity_end_date: validity_start_date + 1.year,
@@ -250,13 +243,9 @@ class ActivityController < ApplicationController
       # creating the adhesion for accompanient for "Eveil" if non-existing
       if activity.activity_ref.kind == "Eveil Musical"
         accompanient = User.includes(:adhesions).find(desired_activity.user.id)
-        if accompanient.adhesions.length.zero? || (user.adhesions.length.positive? && !user.adhesions.last.is_active)
-          validity_start_date = if Time.now.month == 6
-                                  Time.new(Time.now.year, 7, 5, 0, 0, 0) # 5 JUILLET
-                                else
-                                  Time.now
-                                end
-          accompanient.adherent_number = User.maximum("adherent_number") + 1 if accompanient.adherent_number.nil?
+        if accompanient.adhesions.empty? || (user.adhesions.any? && !user.adhesions.last.is_active)
+          validity_start_date = Time.now.month == 6 ? Time.new(Time.now.year, 7, 5, 0, 0, 0) : Time.now
+          accompanient.adherent_number ||= User.maximum("adherent_number") + 1
           Adhesion.create(
             validity_start_date: validity_start_date,
             validity_end_date: validity_start_date + 1.year,
@@ -269,26 +258,42 @@ class ActivityController < ApplicationController
       # maj des preinscriptions
 
       if season.next
-        pre_application = user.pre_applications.includes(:pre_application_activities).where(season: season.next).first # ne peut en avoir qu'une par saison
+        pre_application = user.pre_applications.includes(:pre_application_activities).find_by(season: season.next)
 
-        if pre_application.present?
+        if pre_application
           pre_application.pre_application_activities.each do |pre_application_activity|
-            if pre_application_activity.activity.activity_ref_id == activity.activity_ref_id # on ne met a jour que les preinscriptions de la meme activite
+            if pre_application_activity.activity.activity_ref_id == activity.activity_ref_id
               pre_application_activity.update(activity_id: activity.id)
             end
           end
         end
       end
-
     end
 
     activity.reload
 
+    if Parameter.find_by(label: 'activityApplication.automatic_status')&.value
+      new_status = ActivityApplicationStatus.find_by(label: 'Cours attribué')
+      if new_status
+        application.update!(
+          activity_application_status: new_status,
+          status_updated_at: Time.current
+        )
+      end
+    end
+
     render json: {
       error: error,
-      activity: Utils.format_for_suggestion(user, activity, desired_activity.activity_application.begin_at)
+      activity: Utils.format_for_suggestion(user, activity, application.begin_at),
+      status: application.activity_application_status&.label,
+      status_updated_at: application.status_updated_at,
+      referent: application.referent ? {
+        first_name: application.referent&.first_name,
+        last_name: application.referent&.last_name
+      } : nil
     }
   end
+
 
   def remove_student
     activity_id = params[:id]
