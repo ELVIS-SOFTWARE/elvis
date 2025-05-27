@@ -924,6 +924,8 @@ class ActivityController < ApplicationController
       when "group_name"
         query = query.order("activities.group_name #{direction}")
       end
+
+      query = query.order("activities.id ASC")
     end
 
     query
