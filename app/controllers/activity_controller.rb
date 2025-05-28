@@ -183,7 +183,8 @@ class ActivityController < ApplicationController
     activity_id = params[:id]
     desired_activity_id = params[:desired_activity_id]
 
-    desired_activity = DesiredActivity.includes({ activity_application: { user: [:adhesions] }, user: {} }).find(desired_activity_id)
+    desired_activity = DesiredActivity.includes({ activity_application: { user: [:adhesions] },
+                                                  user: {} }).find(desired_activity_id)
 
     authorize! :edit, desired_activity&.activity_application
 
@@ -218,7 +219,9 @@ class ActivityController < ApplicationController
         a.remove_student(desired_activity_id, true)
       end
 
-      Activities::AddStudent.new(activity_id, desired_activity_id).execute
+      Activities::AddStudent
+        .new(activity_id, desired_activity_id)
+        .execute
 
       # Ici, on calcule le nombre de séances dues par l'utilisateur (parce qu'il n'a pas commencé en début de saison)
       # Le nombre de séances "manquées" est déduit du nombre de séances dues (calcul du prorata)
@@ -229,8 +232,12 @@ class ActivityController < ApplicationController
       # creating the adhesion for user if non-existing
       season = desired_activity.activity_application.season
       if user.adhesions.where(season_id: season.id).none?
-        validity_start_date = Time.now.month == 6 ? Time.new(Time.now.year, 7, 5, 0, 0, 0) : Time.now
-        user.adherent_number ||= User.maximum("adherent_number") + 1
+        validity_start_date = if Time.now.month == 6
+                                Time.new(Time.now.year, 7, 5, 0, 0, 0) # 5 JUILLET
+                              else
+                                Time.now
+                              end
+        user.adherent_number = User.maximum("adherent_number") + 1 if user.adherent_number.nil?
         Adhesion.create(
           validity_start_date: validity_start_date,
           validity_end_date: validity_start_date + 1.year,
@@ -243,9 +250,13 @@ class ActivityController < ApplicationController
       # creating the adhesion for accompanient for "Eveil" if non-existing
       if activity.activity_ref.kind == "Eveil Musical"
         accompanient = User.includes(:adhesions).find(desired_activity.user.id)
-        if accompanient.adhesions.empty? || (user.adhesions.any? && !user.adhesions.last.is_active)
-          validity_start_date = Time.now.month == 6 ? Time.new(Time.now.year, 7, 5, 0, 0, 0) : Time.now
-          accompanient.adherent_number ||= User.maximum("adherent_number") + 1
+        if accompanient.adhesions.length.zero? || (user.adhesions.length.positive? && !user.adhesions.last.is_active)
+          validity_start_date = if Time.now.month == 6
+                                  Time.new(Time.now.year, 7, 5, 0, 0, 0) # 5 JUILLET
+                                else
+                                  Time.now
+                                end
+          accompanient.adherent_number = User.maximum("adherent_number") + 1 if accompanient.adherent_number.nil?
           Adhesion.create(
             validity_start_date: validity_start_date,
             validity_end_date: validity_start_date + 1.year,
@@ -258,16 +269,17 @@ class ActivityController < ApplicationController
       # maj des preinscriptions
 
       if season.next
-        pre_application = user.pre_applications.includes(:pre_application_activities).find_by(season: season.next)
+        pre_application = user.pre_applications.includes(:pre_application_activities).where(season: season.next).first # ne peut en avoir qu'une par saison
 
-        if pre_application
+        if pre_application.present?
           pre_application.pre_application_activities.each do |pre_application_activity|
-            if pre_application_activity.activity.activity_ref_id == activity.activity_ref_id
+            if pre_application_activity.activity.activity_ref_id == activity.activity_ref_id # on ne met a jour que les preinscriptions de la meme activite
               pre_application_activity.update(activity_id: activity.id)
             end
           end
         end
       end
+
     end
 
     activity.reload
