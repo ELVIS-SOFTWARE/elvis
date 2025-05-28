@@ -1822,7 +1822,7 @@ class PaymentsManagement extends React.Component {
                                                         : "contacts"
                                                     }/${payer.id}`}
                                                 >
-                                                    {`${payer.first_name} ${payer.last_name} (${payer.class_name})`}
+                                                    {`${payer.first_name} ${payer.last_name}`}
                                                 </a>
 
                                                 {payer["payer_paying_for_current_season?"] ? "" : <span
