@@ -282,10 +282,14 @@ class Summary extends React.Component
         };
 
         if (!error && status) {
+            const statusObj = this.props.statuses.find(s => s.label === status);
             newState.status = { label: status };
+            newState.status_id = statusObj ? statusObj.id : null;
             newState.status_updated_at = status_updated_at;
             if (referent && referent.first_name && referent.last_name) {
                 newState.referent = referent;
+            } else {
+                newState.referent = null;
             }
         }
 
@@ -397,8 +401,7 @@ class Summary extends React.Component
             });
     }
 
-    async handleRemoveStudent(activityId, desiredActivityId, activityRefId)
-    {
+    async handleRemoveStudent(activityId, desiredActivityId, activityRefId) {
         const suggestions = this.state.suggestions[activityRefId];
         const desiredActivities = this.state.desiredActivities;
 
@@ -415,7 +418,8 @@ class Summary extends React.Component
                 Accept: "application/json",
             },
         });
-        const activity = await response.json();
+
+        const { activity, status, status_updated_at, referent } = await response.json();
 
         const index = _.findIndex(
             suggestions,
@@ -431,7 +435,13 @@ class Summary extends React.Component
         desiredActivity.is_validated = false;
         desiredActivity.activity_id = null;
 
-        this.setState({
+        if (status) {
+            desiredActivity.status = status;
+            desiredActivity.status_updated_at = status_updated_at;
+            desiredActivity.referent = referent;
+        }
+
+        const newState = {
             suggestions: {
                 ...this.state.suggestions,
                 [activityRefId]: suggestions,
@@ -440,9 +450,24 @@ class Summary extends React.Component
                 ...this.state.desiredActivities,
                 [indexDesired]: desiredActivity,
             },
-        });
-    }
+        };
 
+        if (status) {
+            const statusObj = this.props.statuses.find(s => s.label === status);
+
+            newState.status = { label: status };
+            newState.status_id = statusObj ? statusObj.id : null;
+            newState.status_updated_at = status_updated_at;
+
+            if (referent && referent.first_name && referent.last_name) {
+                newState.referent = referent;
+            } else {
+                newState.referent = null;
+            }
+        }
+
+        this.setState(newState);
+    }
     handleRemoveDesiredActivity(id)
     {
         fetch(`/inscriptions/${this.state.application.id}/add_activity/${id}`, {
