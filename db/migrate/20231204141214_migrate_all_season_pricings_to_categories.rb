@@ -1,6 +1,9 @@
 class MigrateAllSeasonPricingsToCategories < ActiveRecord::Migration[6.1]
   def up
 
+    # verify if table pricings exists. return if not
+    return unless ActiveRecord::Base.connection.table_exists?(:pricings)
+
     pricings = ActiveRecord::Base.connection.execute("SELECT * FROM pricings")
     pricings.each do |pricing|
       pc = PricingCategory.create!(id: pricing['id'], name: pricing['label'], is_a_pack: false)
@@ -14,8 +17,10 @@ class MigrateAllSeasonPricingsToCategories < ActiveRecord::Migration[6.1]
   end
 
   def down
-      ActiveRecord::Base.connection.execute("DELETE FROM activity_ref_pricings")
-      ActiveRecord::Base.connection.execute("DELETE FROM pricing_categories")
+    return unless ActiveRecord::Base.connection.table_exists?(:pricings)
+
+    ActiveRecord::Base.connection.execute("DELETE FROM activity_ref_pricings")
+    ActiveRecord::Base.connection.execute("DELETE FROM pricing_categories")
   end
 
 end
