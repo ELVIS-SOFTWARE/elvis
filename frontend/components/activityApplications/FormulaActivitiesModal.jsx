@@ -140,7 +140,7 @@ const FormulaActivitiesModal = ({
 
     const filteredActivities = availableActivities.filter(activity => {
         if (!searchTerm) return true;
-        return activity.display_name.toLowerCase().includes(searchTerm.toLowerCase());
+        return activity.label.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
     const groupedActivities = filteredActivities.reduce((acc, activity) => {
@@ -240,7 +240,7 @@ const FormulaActivitiesModal = ({
                                             style={{ color: "rgb(0, 51, 74)" }}
                                         >
                                             <td style={{ fontWeight: "bold" }}>
-                                                {activity.display_name}
+                                                {activity.label}
                                             </td>
                                             <td>
                                                 {duration}{" "}
