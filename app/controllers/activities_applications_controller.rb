@@ -1462,9 +1462,18 @@ class ActivitiesApplicationsController < ApplicationController
   end
 
   def get_activity_application_parameters
+    auto_assign_param = Parameter.find_by(label: "activityApplication.automatic_status")
+
+
+    auto_assign_enabled = auto_assign_param&.value == "true"
+
     render json: {
-      defaultActivityApplicationStatus: ActivityApplicationStatus.find(Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID),
+      defaultActivityApplicationStatus: ActivityApplicationStatus.find(
+        Parameter.get_value("activityApplication.default_status") || ActivityApplicationStatus::TREATMENT_PENDING_ID
+      ),
       activityApplicationStatusList: ActivityApplicationStatus.all.as_json(except: %i[created_at updated_at]),
+
+      autoAssignEnabled: auto_assign_enabled
     }
   end
 
@@ -1478,6 +1487,22 @@ class ActivitiesApplicationsController < ApplicationController
 
     status.value = params[:default_status_id]
     res = status.save
+
+
+    auto_assign_param = Parameter.find_or_create_by(
+      label: "activityApplication.automatic_status",
+      value_type: "boolean"
+    )
+
+    authorize! :edit, auto_assign_param
+
+    new_value = ActiveModel::Type::Boolean.new.cast(params[:auto_assign_enabled]).to_s
+
+    auto_assign_param.value = new_value
+    auto_assign_res = auto_assign_param.save
+
+
+    res = res && auto_assign_res
 
     respond_to do |format|
       format.json { render json: { success: res } }

@@ -190,14 +190,14 @@ class ActivityController < ApplicationController
 
     activity = Activity.includes(:activity_ref).find(activity_id)
 
-
+    application = desired_activity.activity_application
+    user = application.user
     error = nil
-    user = desired_activity.activity_application.user
 
     # Lock database so that students limit is respected for every
     # concurrent request
     activity.with_lock("FOR UPDATE") do
-      begin_at = desired_activity.activity_application.begin_at
+      begin_at = application.begin_at
 
       # calculate students count according to user's begin date
       # (do not include students who are yet to start
@@ -284,11 +284,29 @@ class ActivityController < ApplicationController
 
     activity.reload
 
+    automatic_status_param = Parameter.find_by(label: 'activityApplication.automatic_status')
+    if automatic_status_param&.value == 'true' || automatic_status_param&.value == true
+      new_status = ActivityApplicationStatus.find_by(label: 'Cours attribué')
+      if new_status
+        application.update!(
+          activity_application_status: new_status,
+          status_updated_at: Time.current
+        )
+      end
+    end
+
     render json: {
       error: error,
-      activity: Utils.format_for_suggestion(user, activity, desired_activity.activity_application.begin_at)
+      activity: Utils.format_for_suggestion(user, activity, application.begin_at),
+      status: application.activity_application_status&.label,
+      status_updated_at: application.status_updated_at,
+      referent: application.referent ? {
+        first_name: application.referent&.first_name,
+        last_name: application.referent&.last_name
+      } : nil
     }
   end
+
 
   def remove_student
     activity_id = params[:id]
@@ -299,14 +317,35 @@ class ActivityController < ApplicationController
     authorize! :edit, desired_activity&.activity_application
 
     activity = Activity.find(activity_id)
+    application = desired_activity.activity_application
 
     activity.remove_student(desired_activity_id)
 
-    render json: Utils.format_for_suggestion(
-      desired_activity.activity_application.user,
-      activity,
-      desired_activity.activity_application.begin_at
-    )
+
+    automatic_status_param = Parameter.find_by(label: 'activityApplication.automatic_status')
+    if automatic_status_param&.value == 'true' || automatic_status_param&.value == true
+      waiting_status = ActivityApplicationStatus.find_by(label: 'En attente de traitement')
+      if waiting_status
+        application.update!(
+          activity_application_status: waiting_status,
+          status_updated_at: Time.current
+        )
+      end
+    end
+
+    render json: {
+      activity: Utils.format_for_suggestion(
+        application.user,
+        activity,
+        application.begin_at
+      ),
+      status: application.activity_application_status&.label,
+      status_updated_at: application.status_updated_at,
+      referent: application.referent ? {
+        first_name: application.referent&.first_name,
+        last_name: application.referent&.last_name
+      } : nil
+    }
   end
 
   def add_student_option

@@ -224,16 +224,12 @@ class Summary extends React.Component
         });
     }
 
-    async handleSelectSuggestion(activityId, desiredActivityId, activityRefId)
-    {
+    async handleSelectSuggestion(activityId, desiredActivityId, activityRefId) {
         const suggestions = this.state.suggestions[activityRefId];
         const desiredActivities = this.state.desiredActivities;
 
         const desiredActivity = {
-            ..._.find(
-                desiredActivities,
-                da => da.id == desiredActivityId,
-            ),
+            ..._.find(desiredActivities, da => da.id == desiredActivityId),
         };
 
         const response = await fetch(`/activity/${activityId}/desired/${desiredActivityId}`, {
@@ -246,26 +242,22 @@ class Summary extends React.Component
             },
         });
 
-        const { activity, error } = await response.json();
+        const { activity, error, status, status_updated_at, referent } = await response.json();
 
-        const index = _.findIndex(
-            suggestions,
-            s => s.id == activity.id,
-        );
-        const indexDesired = _.findKey(
-            desiredActivities,
-            da => da.id == desiredActivity.id,
-        );
+
+        const index = _.findIndex(suggestions, s => s.id == activity.id);
+        const indexDesired = _.findKey(desiredActivities, da => da.id == desiredActivity.id);
 
         suggestions[index] = activity;
 
-        if (!error)
-        {
+        if (!error) {
             desiredActivity.is_validated = true;
             desiredActivity.activity_id = activity.id;
-        }
-        else
-        {
+            desiredActivity.status = status;
+            desiredActivity.status_updated_at = status_updated_at;
+            desiredActivity.referent = referent;
+
+        } else {
             swal({
                 title: "Erreur",
                 text: error,
@@ -274,12 +266,11 @@ class Summary extends React.Component
         }
 
         desiredActivity.options = [];
-        suggestions.forEach(s =>
-        {
+        suggestions.forEach(s => {
             s.options = [];
         });
 
-        this.setState({
+        const newState = {
             suggestions: {
                 ...this.state.suggestions,
                 [activityRefId]: suggestions,
@@ -288,7 +279,21 @@ class Summary extends React.Component
                 ...this.state.desiredActivities,
                 [indexDesired]: desiredActivity,
             },
-        });
+        };
+
+        if (!error && status) {
+            const statusObj = this.props.statuses.find(s => s.label === status);
+            newState.status = { label: status };
+            newState.status_id = statusObj ? statusObj.id : null;
+            newState.status_updated_at = status_updated_at;
+            if (referent && referent.first_name && referent.last_name) {
+                newState.referent = referent;
+            } else {
+                newState.referent = null;
+            }
+        }
+
+        this.setState(newState);
     }
 
     handleSelectSuggestionOption(activityId, desiredActivityId) {
@@ -396,8 +401,7 @@ class Summary extends React.Component
             });
     }
 
-    async handleRemoveStudent(activityId, desiredActivityId, activityRefId)
-    {
+    async handleRemoveStudent(activityId, desiredActivityId, activityRefId) {
         const suggestions = this.state.suggestions[activityRefId];
         const desiredActivities = this.state.desiredActivities;
 
@@ -414,7 +418,8 @@ class Summary extends React.Component
                 Accept: "application/json",
             },
         });
-        const activity = await response.json();
+
+        const { activity, status, status_updated_at, referent } = await response.json();
 
         const index = _.findIndex(
             suggestions,
@@ -430,7 +435,13 @@ class Summary extends React.Component
         desiredActivity.is_validated = false;
         desiredActivity.activity_id = null;
 
-        this.setState({
+        if (status) {
+            desiredActivity.status = status;
+            desiredActivity.status_updated_at = status_updated_at;
+            desiredActivity.referent = referent;
+        }
+
+        const newState = {
             suggestions: {
                 ...this.state.suggestions,
                 [activityRefId]: suggestions,
@@ -439,9 +450,24 @@ class Summary extends React.Component
                 ...this.state.desiredActivities,
                 [indexDesired]: desiredActivity,
             },
-        });
-    }
+        };
 
+        if (status) {
+            const statusObj = this.props.statuses.find(s => s.label === status);
+
+            newState.status = { label: status };
+            newState.status_id = statusObj ? statusObj.id : null;
+            newState.status_updated_at = status_updated_at;
+
+            if (referent && referent.first_name && referent.last_name) {
+                newState.referent = referent;
+            } else {
+                newState.referent = null;
+            }
+        }
+
+        this.setState(newState);
+    }
     handleRemoveDesiredActivity(id)
     {
         fetch(`/inscriptions/${this.state.application.id}/add_activity/${id}`, {
@@ -945,6 +971,9 @@ class Summary extends React.Component
                         }
                         handleChangeDesiredActivity={
                             (desiredId, refId) => this.handleChangeDesiredActivity(desiredId, refId)
+                        }
+                        onStatusChange={(status, status_updated_at, referent) =>
+                            this.setState({ status, status_updated_at, referent })
                         }
                     />
                 );
