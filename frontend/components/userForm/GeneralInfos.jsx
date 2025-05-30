@@ -121,7 +121,7 @@ const GeneralInfos = ({
 
         <div className="row">
         {displayIdentificationNumber &&
-                <div className="col-md-6 p-0">
+                <div className="col-md-6 pr-0">
                     <label className="small" style={{color: "#003E5C"}}>Numéro national d'identification</label><br/>
                     <Field
                         name="identification_number"
