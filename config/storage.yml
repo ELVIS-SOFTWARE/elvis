@@ -13,6 +13,15 @@ amazon:
   region: <%= ENV["AWS_REGION"] %>
   bucket: <%= ENV["AWS_BUCKET"] %>
 
+scaleway:
+  service: S3
+  access_key_id: <%= ENV["SCW_ACCESS_KEY_ID"] %>
+  secret_access_key: <%= ENV["SCW_SECRET_ACCESS_KEY"] %>
+  region: <%= ENV["SCW_REGION"] %>
+  bucket: <%= ENV["SCW_BUCKET"] %>
+  endpoint: <%= ENV["SCW_ENDPOINT"] %>
+  force_path_style: <%= ENV.fetch("SCW_FORCE_PATH_STYLE", "true") %>
+
 azure:
     service: AzureStorage
     storage_account_name: <%= ENV["AZURE_STORAGE_ACCOUNT"] %>
