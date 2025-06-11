@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-export default function PasswordInput({id, name, label, error, additional_attr = {}}) {
+export default function PasswordInput({id, name, label, error, onChange, additional_attr = {}}) {
     const [passwordVisible, setPasswordVisible] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -16,6 +16,7 @@ export default function PasswordInput({id, name, label, error, additional_attr =
                     className="form-control"
                     id={id}
                     name={name}
+                    onChange={onChange}
                     {...additional_attr}
                 />
                 <button
