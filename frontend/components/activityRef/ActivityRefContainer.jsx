@@ -205,7 +205,12 @@ export default class ActivityRefContainer extends React.Component {
         }
 
         if (!values.teachers || values.teachers.length === 0)
-            errors.teachers = "doit être renseigné";
+        {
+            // errors.teachers = "doit être renseigné";
+
+            // on n'enregistre pas l'erreur dans les erreurs pour ne pas bloquer le formulaire, mais on garde l'information pour l'affiché
+            this.teachersError = "doit être renseigné";
+        }
 
         return errors;
     }
@@ -272,7 +277,7 @@ export default class ActivityRefContainer extends React.Component {
                                 {
                                     id: "activity_ref_teachers",
                                     header: "Professeurs",
-                                    isInError: !!errors.teachers,
+                                    isInError: !!this.teachersError,
                                     body: <ActivityRefTeachers
                                         teachers={values.teachers}
                                         mutators={form.mutators}

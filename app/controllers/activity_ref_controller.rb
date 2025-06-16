@@ -153,7 +153,7 @@ class ActivityRefController < ApplicationController
       ActivityRef.transaction do
         @activity_ref.teachers_activity_refs.where.not(user_id: params[:activity_ref][:users]).destroy_all
 
-        params[:activity_ref][:users].each do |user_id|
+        (params[:activity_ref][:users] || []).each do |user_id|
           unless @activity_ref.users.where(id: user_id).any?
             @activity_ref.users << User.find(user_id)
           end
