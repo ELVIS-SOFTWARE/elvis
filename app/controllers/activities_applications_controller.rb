@@ -747,7 +747,11 @@ class ActivitiesApplicationsController < ApplicationController
         @user.checked_image_right = params[:application][:infos][:checked_image_right]
         @user.checked_newsletter = params[:application][:infos][:checked_newsletter]
         @user.is_paying = params[:application][:infos][:is_paying]
-        @user.identification_number = params[:application][:infos][:identification_number]
+        @user.identification_number = if !"#{params[:application][:infos][:identification_number]}".empty?
+                                        "#{params[:application][:infos][:identification_number]}"
+                                      else
+                                        nil
+                                      end
         @user.instruments = Instrument.where(id: params.dig(:application, :infos, :instruments)&.map do |i|
           i[:id]
         end || [])

@@ -1,5 +1,5 @@
 def create_season(year, is_current)
-  Season.create!(
+  Season.create_or_find_by!(
     label: "Saison #{year}-#{year + 1}",
     start: "#{year}-09-01",
     end: "#{year + 1}-06-01",

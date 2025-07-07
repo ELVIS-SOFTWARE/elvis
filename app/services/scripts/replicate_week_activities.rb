@@ -56,13 +56,13 @@ module Scripts
             new_instance.student_attendances << student_ids.map { |id| StudentAttendance.new(user_id: id) }
 
             teacher_id = inst_to_dup.teachers_activity_instances.pick(:user_id)
-            new_instance.teachers_activity_instances.new(user_id: teacher_id, is_main: true)
+            new_instance.teachers_activity_instances.new(user_id: teacher_id, is_main: true) if teacher_id
             new_instance.save!
 
             activity.activity_instances << new_instance
-            activity.save!
+            activity.save!(validate: false)
 
-            User.find(teacher_id).planning.time_intervals << new_instance.time_interval
+            User.find(teacher_id).planning.time_intervals << new_instance.time_interval if teacher_id
             User.find(student_ids).map(&:planning).each { |p| p.time_intervals << new_instance.time_interval }
 
             replicated_count += 1
