@@ -17,5 +17,5 @@ yarn-error.log
 coverage/
 .env
 Gemfile.lock
-Dockerfile
+Dockerfile.dev
 docker-compose.yml
