@@ -22,7 +22,7 @@ class PluginGemUtils
 
       rescue StandardError => e
         if ENV['LOG_PLUGINS_BACKTRACE_ERRORS'] == "true"
-          puts "Error while reading plugins.json: #{e.message}\n#{e.backtrace&.join("\n")}"
+          puts "Error while reading #{plugins_list_download_url} or plugins.json: #{e.message}\n#{e.backtrace&.join("\n")}"
         else
           if plugins_list_download_url.nil? || "#{plugins_list_download_url}".strip.length == 0
             puts "Error in plugins.json file (not found or invalid json or permission denied) ==> no plugins will be considered"
