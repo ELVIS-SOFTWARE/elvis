@@ -16,7 +16,8 @@ class PluginGemUtils
         if plugins_list_download_url.nil? || "#{plugins_list_download_url}".strip.length == 0
           plugins_json = JSON.parse(File.read("plugins.json"))
         else
-          plugins_json = JSON.parse(Net::HTTP.get(URI("#{plugins_list_download_url}#{plugins_list_download_url.split("/").last.include?("?") ? "&" : "?"}elvisVersion=#{Elvis::VERSION}")))
+          plugins_list_download_url = "#{plugins_list_download_url}#{plugins_list_download_url.split("/").last.include?("?") ? "&" : "?"}elvisVersion=#{Elvis::VERSION}"
+          plugins_json = JSON.parse(Net::HTTP.get(URI(plugins_list_download_url)))
         end
 
       rescue StandardError => e
