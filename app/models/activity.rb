@@ -359,31 +359,75 @@ class Activity < ApplicationRecord
       .count
   end
 
-  # Computes and returns the number of due activity instances of this activity for the specified student
-  # @param [Integer] user_id the id of the student to count activity instances for
-  # @return [Integer] the number of activity instances that are due by the student
-  def calculate_prorata_for_student(user_id)
-    # On calcule le nombre de séances manquées par l'utilisateur
-    # (parce qu'il a commencé plus tard que le début des cours ou parce qu'il s'est arrêté plus tôt)
+  # Computes and returns the prorata of activity instances for the specified student
+  #
+  # The calculation depends on whether the student has stopped their participation:
+  # - If the student is stopped (stopped_at is present): returns the number of instances
+  #   the student participated in during their actual participation period
+  # - If the student is not stopped: returns the full prorata calculation based on
+  #   total lessons minus missed lessons
+  #
+  # @param [Integer] user_id the id of the student to calculate prorata for
+  # @param [Date, nil] begin_date optional start date to filter instances (used when stopped_at is present)
+  # @param [Date, nil] stop_date optional end date to filter instances (used when stopped_at is present)
+  # @return [Integer] the number of activity instances that are due by the student (prorata)
+  def calculate_prorata_for_student(user_id, begin_date = nil, stop_date = nil)
+    activity_application = ActivityApplication.joins(:desired_activities)
+                                              .where(desired_activities: { activity_id: self.id })
+                                              .where(user_id: user_id)
+                                              .first
 
+    # Si l'étudiant est arrêté, calculer pour la période de participation
+    if activity_application&.stopped_at
+      actual_begin = begin_date || activity_application.begin_at
+      actual_stop = stop_date || activity_application.stopped_at
+      return count_registered_instances_for_student_in_period(user_id, actual_begin, actual_stop)
+    end
+
+    # Sinon, calcul complet normal
     nb_lessons = count_lessons
-
-    missed_lessons = nb_lessons - count_registered_instances_for_student(user_id)
-
-    # On déduit ce nombre de séances manquées du nombre de séances prévues pour ce cours
-    # NB : la référence n'est pas le nombre de séances dans le planning (count(activity_instances))
-    # mais le nombre de séances prévues pour l'activité (définition administrative, utilisée pour les calculs
-    # des montants dûs)
-
+    registered_instances = count_registered_instances_for_student(user_id)
+    missed_lessons = nb_lessons - registered_instances
     intended_lessons = intended_nb_lessons
 
     if intended_lessons >= nb_lessons
       intended_lessons - missed_lessons
     else
-      res = nb_lessons - missed_lessons
-
+      res = nb_lessons - registered_instances
       (res.to_f * intended_lessons / nb_lessons).ceil
     end
+  end
+
+  def count_lessons_in_period(begin_date, stop_date)
+    query = StudentAttendance
+              .joins(activity_instance: :time_interval)
+              .where(activity_instance: { activity_id: self.id })
+
+    if begin_date
+      query = query.where("time_intervals.start::date >= ?", begin_date.to_date)
+    end
+
+    if stop_date
+      query = query.where("time_intervals.start::date < ?", stop_date.to_date)
+    end
+
+    query.distinct.count("activity_instance.id")
+  end
+
+  def count_registered_instances_for_student_in_period(user_id, begin_date, stop_date)
+    query = activity_instances
+              .joins(:student_attendances, :time_interval)
+              .where(student_attendances: { user_id: user_id })
+
+    if begin_date
+      query = query.where("time_intervals.start::date >= ?", begin_date.to_date)
+    end
+
+    if stop_date
+      query = query.where("time_intervals.start::date < ?", stop_date.to_date)
+    end
+
+    query.count
   end
 
   def count_active_instruments
