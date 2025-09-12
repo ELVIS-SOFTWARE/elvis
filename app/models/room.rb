@@ -56,6 +56,8 @@ class Room < ApplicationRecord
   def self.for_user_activities(user)
     rooms = []
 
+    return rooms if user.nil? || user.activity_refs.empty?
+
     user.activity_refs.each do |a|
       rooms << all.select { |r| r.activity_refs.include?(a) }
     end
