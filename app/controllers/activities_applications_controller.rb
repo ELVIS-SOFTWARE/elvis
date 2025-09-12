@@ -1430,7 +1430,11 @@ class ActivitiesApplicationsController < ApplicationController
           # Enfin, on actualise le nombre de séances dues par l'utilisateur (parce qu'il n'a pas commencé en début de saison/terminé en fin de saison)
           user_id = activity_application.user.id
           des.update(
-            prorata: des.activity.calculate_prorata_for_student(user_id)
+            prorata: des.activity.calculate_prorata_for_student(
+              user_id,
+              activity_application.begin_at,
+              activity_application.stopped_at
+            )
           )
         end
       end
