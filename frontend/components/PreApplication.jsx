@@ -327,14 +327,6 @@ class PreApplication extends React.Component {
 
                     <div className="col-sm-12 p-0">
                         <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
-                            <thead>
-                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
-                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
-                                <th>Type</th>
-                                <th>Statut</th>
-                                <th style={{borderRadius: "0 12px 0 0"}}>Actions</th>
-                            </tr>
-                            </thead>
                             <tbody>
                             {displayActivityList(renewActivityList, newActivityList, `${this.props.user.first_name} ${this.props.user.last_name} n'a aucune demande d'inscription en cours`)}
                             </tbody>
