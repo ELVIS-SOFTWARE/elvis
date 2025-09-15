@@ -38,107 +38,19 @@ class PreApplication extends React.Component {
         const inscription_path = `/inscriptions/new`;
         const user_path = '/users/' + current_user.id;
 
-        // Liste les activités actuellement suivie par l'utilisateur
-        let currentActivityList = _.chain(
-            this.props.current_activity_applications
-        )
-            .sortBy(paa => paa.id)
-            .map((current_application_activity, i) => <Fragment>
-                {current_application_activity.desired_activities.map((desired_activity, j) => <CurrentActivityItem
-                    key={i}
-                    current_user={this.props.current_user}
-                    authToken={this.props.user.authentication_token}
-                    data={desired_activity}
-                    pre_application_activity={current_application_activity.pre_application_activity}
-                    user={this.props.user}
-                    allowPreApplication={allowPreApplication}
-                    current_activity_application={current_application_activity}
-                />)}
-            </Fragment>)
-            .value();
-
-        // Liste les activités où l'utilisateur à choisi de se réinscrire
-        const renewActivityList = _.chain(
-            this.props.pre_application.pre_application_activities
-        )
-            .sortBy(paa => paa.id)
-            .filter(paa => paa.action === "renew" || paa.action === "pursue_childhood")
-            .map((pre_application_activity, i) => (
-                <RenewActivityItem
-                    key={i}
-                    current_user={this.props.current_user}
-                    authToken={this.props.user.authentication_token}
-                    pre_application_activity={pre_application_activity}
-                    user={this.props.user}
-                    allowPreApplication={allowPreApplication}
-                    confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
-                    default_activity_status_id={this.props.default_activity_status_id}
-                />
-            ))
-            .value();
-
-        // Liste les nouvelles demandes d'inscription de l'utilisateur
-        let newActivityList = _.chain(
-            this.props.new_activities_applications
-        )
-            .sortBy(paa => paa.id)
-            .map((new_activity_application, i) => (
-                <NewActivityItem
-                    key={i}
-                    current_user={this.props.current_user}
-                    authToken={this.props.user.authentication_token}
-                    user_id={this.props.user.id}
-                    user={this.props.user}
-                    new_activity_application={new_activity_application}
-                    confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
-                    default_activity_status_id={this.props.default_activity_status_id}
-                />
-            ))
-            .value();
-
-        const othersActivities = _.chain(
-            this.props.family_users
-        )
-            //.sortBy(paf => paf.full_name)
-            .map((user, i) => {
-                return <OtherActivityItem
-                    key={i}
-                    //pre_application={pre_application}
-                    user={user}
-                    season={this.props.season}
-                />
-            })
-            .value();
+        const isMainAccount = this.props.is_main_account;
 
         let openingApplication = moment(this.props.season.opening_date_for_new_applications);
         let closingApplication = moment(this.props.season.closing_date_for_applications);
-
-        function displayActivityList(renewActivityList, newActivityList, emptyMessage) {
-            let result = [];
-            if (renewActivityList.length > 0) {
-                result.push(renewActivityList);
-            }
-            if (newActivityList.length > 0) {
-                result.push(newActivityList);
-            }
-            if (result.length === 0) {
-                result.push(
-                    <tr>
-                        <td colSpan="12" className="text-center">
-                            <i>{emptyMessage}</i>
-                        </td>
-                    </tr>
-                );
-            }
-            return result;
-        }
 
         return (
             <React.Fragment>
                 <div className="padding-page ml-4">
                     <div className="activity-header row mr-2">
                         <div className="d-inline-flex justify-content-between align-items-center w-100">
-                            <h1 style={{ color: "#00283B" }}>Mes demandes d'inscription</h1>
+                            <h1 style={{ color: "#00283B" }}>
+                                {isMainAccount ? "Demandes d'inscription de la famille" : "Mes demandes d'inscription"}
+                            </h1>
 
                             {hasChildhoodLesson ? null : (
                                 <a className={`btn btn-sm font-weight-bold ${!allowNewApplication && "disabled"}`}
@@ -205,49 +117,7 @@ class PreApplication extends React.Component {
                         </div>
                     </div>
 
-                    <div className="row col-md-12 mb-4 p-0">
-                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
-                            Activités actuelles
-                            (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
-                        </h3>
-                        <div className="col-sm-12 col-xl-6 p-0">
-                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
-                                <thead>
-                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
-                                    <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
-                                    <th>Membre</th>
-                                    <th style={{borderRadius: "0 12px 0 0"}}></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {currentActivityList.length > 0
-                                    ? currentActivityList
-                                    :
-                                    <tr>
-                                        <td colSpan="12" className="text-center">
-                                            <i>{this.props.user.first_name} {this.props.user.last_name} ne poursuit
-                                                actuellement aucune activité</i>
-                                        </td>
-                                    </tr>
-                                }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div className="row col-md-12 mb-4 p-0">
-                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Mes demandes pour {this.props.user.first_name} {this.props.user.last_name}</h3>
-
-                        {displayActivityList(renewActivityList, newActivityList, `${this.props.user.first_name} ${this.props.user.last_name} n'a aucune demande d'inscription en cours`)}
-                    </div>
-
-                    <div className="row col-md-12 p-0">
-                        {this.props.family_users.length > 0 ?
-                            <Fragment>
-                                <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Autres inscriptions dans la famille</h3>
-                                {othersActivities}
-                            </Fragment> : null}
-                    </div>
+                    {isMainAccount ? this.renderMainAccountView(allowPreApplication) : this.renderAttachedAccountView(allowPreApplication)}
 
                     <div className="row">
                         <a href={user_path} className="btn btn-primary btn-sm btn-outline mt-5"
@@ -257,6 +127,304 @@ class PreApplication extends React.Component {
                     </div>
                 </div>
             </React.Fragment>
+        );
+    }
+
+    renderMainAccountView(allowPreApplication) {
+        let allCurrentActivityList = _.chain(this.props.all_current_activities || [])
+            .sortBy(activity => [
+                activity.member_info.full_name,
+                activity.id
+            ])
+            .map((current_application_activity, i) => (
+                <Fragment key={`all-current-${i}`}>
+                    {current_application_activity.desired_activities.map((desired_activity, j) => (
+                        <CurrentActivityItem
+                            key={`${i}-${j}`}
+                            current_user={this.props.current_user}
+                            authToken={this.props.user.authentication_token}
+                            data={desired_activity}
+                            pre_application_activity={current_application_activity.pre_application_activity}
+                            user={{
+                                ...this.props.user,
+                                id: current_application_activity.member_info.id,
+                                first_name: current_application_activity.member_info.first_name,
+                                last_name: current_application_activity.member_info.last_name,
+                                full_name: current_application_activity.member_info.full_name
+                            }}
+                            allowPreApplication={allowPreApplication}
+                            current_activity_application={current_application_activity}
+                            member_info={current_application_activity.member_info} // Info du membre
+                        />
+                    ))}
+                </Fragment>
+            ))
+            .value();
+
+        const familyMembersSections = (this.props.family_members_data || []).map((memberData, index) => {
+            return this.renderMemberSection(memberData, allowPreApplication, index);
+        });
+
+        return (
+            <Fragment>
+                <div className="row col-md-12 mb-4 p-0">
+                    <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                        Activités actuelles de la famille
+                        (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
+                    </h3>
+                    <div className="col-sm-12 p-0">
+                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                            <thead>
+                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                <th>Membre</th>
+                                <th style={{borderRadius: "0 12px 0 0"}}></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {allCurrentActivityList.length > 0
+                                ? allCurrentActivityList
+                                :
+                                <tr>
+                                    <td colSpan="12" className="text-center">
+                                        <i>Aucune activité actuelle pour les membres de la famille</i>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {familyMembersSections}
+            </Fragment>
+        );
+    }
+
+    renderAttachedAccountView(allowPreApplication) {
+        let currentActivityList = _.chain(
+            this.props.current_activity_applications || []
+        )
+            .sortBy(paa => paa.id)
+            .map((current_application_activity, i) => <Fragment key={`current-${i}`}>
+                {current_application_activity.desired_activities.map((desired_activity, j) => <CurrentActivityItem
+                    key={`${i}-${j}`}
+                    current_user={this.props.current_user}
+                    authToken={this.props.user.authentication_token}
+                    data={desired_activity}
+                    pre_application_activity={current_application_activity.pre_application_activity}
+                    user={this.props.user}
+                    allowPreApplication={allowPreApplication}
+                    current_activity_application={current_application_activity}
+                />)}
+            </Fragment>)
+            .value();
+
+        const renewActivityList = _.chain(
+            this.props.pre_application && this.props.pre_application.pre_application_activities ?
+                this.props.pre_application.pre_application_activities : []
+        )
+            .sortBy(paa => paa.id)
+            .filter(paa => paa.action === "renew" || paa.action === "pursue_childhood")
+            .map((pre_application_activity, i) => (
+                <RenewActivityItem
+                    key={`renew-${i}`}
+                    current_user={this.props.current_user}
+                    authToken={this.props.user.authentication_token}
+                    pre_application_activity={pre_application_activity}
+                    user={this.props.user}
+                    allowPreApplication={allowPreApplication}
+                    confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
+                    default_activity_status_id={this.props.default_activity_status_id}
+                />
+            ))
+            .value();
+
+        let newActivityList = _.chain(
+            this.props.new_activities_applications || []
+        )
+            .sortBy(paa => paa.id)
+            .map((new_activity_application, i) => (
+                <NewActivityItem
+                    key={`new-${i}`}
+                    current_user={this.props.current_user}
+                    authToken={this.props.user.authentication_token}
+                    user_id={this.props.user.id}
+                    user={this.props.user}
+                    new_activity_application={new_activity_application}
+                    confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
+                    default_activity_status_id={this.props.default_activity_status_id}
+                />
+            ))
+            .value();
+
+        const othersActivities = _.chain(
+            this.props.family_users || []
+        )
+            .map((user, i) => {
+                return <OtherActivityItem
+                    key={`other-${i}`}
+                    user={user}
+                    season={this.props.season}
+                />
+            })
+            .value();
+
+        function displayActivityList(renewActivityList, newActivityList, emptyMessage) {
+            let result = [];
+            if (renewActivityList.length > 0) {
+                result.push(renewActivityList);
+            }
+            if (newActivityList.length > 0) {
+                result.push(newActivityList);
+            }
+            if (result.length === 0) {
+                result.push(
+                    <tr key="empty">
+                        <td colSpan="12" className="text-center">
+                            <i>{emptyMessage}</i>
+                        </td>
+                    </tr>
+                );
+            }
+            return result;
+        }
+
+        return (
+            <Fragment>
+                <div className="row col-md-12 mb-4 p-0">
+                    <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                        Activités actuelles
+                        (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
+                    </h3>
+                    <div className="col-sm-12 col-xl-6 p-0">
+                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                            <thead>
+                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                <th>Membre</th>
+                                <th style={{borderRadius: "0 12px 0 0"}}></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {currentActivityList.length > 0
+                                ? currentActivityList
+                                :
+                                <tr>
+                                    <td colSpan="12" className="text-center">
+                                        <i>{this.props.user.first_name} {this.props.user.last_name} ne poursuit
+                                            actuellement aucune activité</i>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="row col-md-12 mb-4 p-0">
+                    <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Mes demandes pour {this.props.user.first_name} {this.props.user.last_name}</h3>
+
+                    <div className="col-sm-12 p-0">
+                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                            <thead>
+                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                <th>Type</th>
+                                <th>Statut</th>
+                                <th style={{borderRadius: "0 12px 0 0"}}>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {displayActivityList(renewActivityList, newActivityList, `${this.props.user.first_name} ${this.props.user.last_name} n'a aucune demande d'inscription en cours`)}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div className="row col-md-12 p-0">
+                    {this.props.family_users && this.props.family_users.length > 0 ?
+                        <Fragment>
+                            <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Autres inscriptions dans la famille</h3>
+                            {othersActivities}
+                        </Fragment> : null}
+                </div>
+            </Fragment>
+        );
+    }
+
+    renderMemberSection(memberData, allowPreApplication, index) {
+        const { user, renew_activities, new_activities } = memberData;
+
+        const renewActivityList = _.chain(renew_activities || [])
+            .sortBy(paa => paa.id)
+            .map((pre_application_activity, i) => (
+                <RenewActivityItem
+                    key={`renew-${user.id}-${i}`}
+                    current_user={this.props.current_user}
+                    authToken={user.authentication_token}
+                    pre_application_activity={pre_application_activity}
+                    user={memberData} // Passer les données du membre
+                    allowPreApplication={allowPreApplication}
+                    confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
+                    default_activity_status_id={this.props.default_activity_status_id}
+                />
+            ))
+            .value();
+
+        const newActivityList = _.chain(new_activities || [])
+            .sortBy(activity => activity.id)
+            .map((new_activity_application, i) => (
+                <NewActivityItem
+                    key={`new-${user.id}-${i}`}
+                    current_user={this.props.current_user}
+                    authToken={user.authentication_token}
+                    user_id={user.id}
+                    user={memberData} // Passer les données du membre
+                    new_activity_application={new_activity_application}
+                    confirm_activity_text={this.props.confirm_activity_text ? this.props.confirm_activity_text.value : null}
+                    default_activity_status_id={this.props.default_activity_status_id}
+                />
+            ))
+            .value();
+
+        const displayActivityList = (renewList, newList, emptyMessage) => {
+            let result = [];
+            if (renewList.length > 0) {
+                result.push(...renewList);
+            }
+            if (newList.length > 0) {
+                result.push(...newList);
+            }
+            if (result.length === 0) {
+                result.push(
+                    <tr key={`empty-${user.id}`}>
+                        <td colSpan="12" className="text-center">
+                            <i>{emptyMessage}</i>
+                        </td>
+                    </tr>
+                );
+            }
+            return result;
+        };
+
+        return (
+            <div key={`member-section-${user.id}`} className="row col-md-12 mb-5 p-0">
+                <div className="d-flex align-items-center mb-3">
+                    <UserAvatar user={user} size={40} />
+                    <h3 className="ml-3 mb-0" style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                        Demandes de {user.full_name}
+                    </h3>
+                </div>
+
+                <div className="col-sm-12 p-0">
+                    {displayActivityList(
+                        renewActivityList,
+                        newActivityList,
+                        `${user.first_name} ${user.last_name} n'a aucune demande d'inscription en cours`
+                    )}
+                </div>
+            </div>
         );
     }
 }

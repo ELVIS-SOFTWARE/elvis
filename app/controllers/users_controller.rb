@@ -1324,141 +1324,336 @@ end
     # pour un admin connecté, l'utilisateur de référence (point d'entrée) est le user qui est passé en paramètre
     # lorsque l'utilisateur connecté n'est pas admin, l'utilisateur de référence est lui-même
     reference_user = @current_user.is_admin? ? user : current_user
-    family_users =
-      reference_user
-        .get_users_self_is_paying_for(@season)
-        .select do |u|
-        # on ne garde que les élèves qui ont une inscription validée au cours de la saison précédente
-        # 12/06/2023 retrait du filtre pour les nouvelles inscriptions car l'enfant ou la mère (otherActivityItem) n'était pas remonté
-        u.id != user.id #&&
-        # ActivityApplication.where(
-        #   user_id: u.id,
-        #   season: @season.previous.id,
-        #   activity_application_status_id: [ActivityApplicationStatus::ACTIVITY_ATTRIBUTED_ID,
-        #                                    ActivityApplicationStatus::PROPOSAL_ACCEPTED_ID]
-        # ).any?
+
+    @is_main_account = user.attached_to_id.nil?
+
+    if @is_main_account
+      all_family_members = get_all_family_members(reference_user)
+
+      all_family_members.each do |member|
+        ensure_pre_application_exists(member)
       end
 
-    family_users ||= []
-    users_paying_for = user.get_users_paying_for_self.reject { |u| u.id == user.id }
-    if @current_user.is_admin
-      family_users += users_paying_for
-    elsif users_paying_for&.include?(current_user)
-      family_users << current_user
-    end
+      @user = reference_user
+      @pre_application = jsonize_pre_application.call(
+        reference_user.pre_applications.where(season: @season).pick(:id)
+      )
 
-    family_users += user.attached_accounts
-    family_users += [user.attached_to] if user.attached_to&.id == @current_user.id || (user.attached_to && @current_user.is_admin)
+      @all_current_activities = []
+      all_family_members.each do |member|
+        member_activities = get_current_activities_for_user(member)
+        member_activities.each do |activity|
+          activity["member_info"] = {
+            id: member.id,
+            full_name: member.full_name,
+            first_name: member.first_name,
+            last_name: member.last_name
+          }
+        end
+        @all_current_activities.concat(member_activities)
+      end
 
-    @pre_application = jsonize_pre_application.call(pre_application_id)
+      @family_members_data = []
 
-    @family_users = []
-    family_users.uniq.each do |u|
-      user_json = User.find(u.id).as_json(methods: :full_name)
-      pre_app = u.pre_applications
-                 .includes(:pre_application_activities, :user)
-                 .where(season_id: @season.id)
-                 .first
-      user_json["pre_application"] = jsonize_pre_application.call(pre_app.id) if pre_app
-      user_json["avatar"] = u.avatar_url
-      @family_users << user_json
-    end
+      all_family_members.each do |member|
+        member_data = prepare_member_data(member, jsonize_pre_application)
 
-    @user = user
-    # if @pre_application['pre_application_activities'][0]['activity_application']
-    #   @next_activity = Activity.find(@pre_application['pre_application_activities'][0]['activity_application']['desired_activities'][0]['activity_id'])
-    #                            .as_json(include: {
-    #                                       teacher: {},
-    #                                       room: {},
-    #                                       time_interval: {},
-    #                                     })
-    # end
-
-    @pre_application["pre_application_activities"]&.each do |pa|
-      if pa["activity_application"]
-        pa["activity_application"]["desired_activities"].each do |da|
-          next if da["activity_id"].nil?
-
-          pa["next_activity"] = Activity.find(da["activity_id"]).as_json(include: {
-            teacher: {},
-            room: {},
-            time_interval: {}
-          })
+        # Ne conserver que les membres qui ont des demandes (renewals ou nouvelles)
+        if member_data[:renew_activities].any? || member_data[:new_activities].any?
+          @family_members_data << member_data
         end
       end
-    end
 
-    @current_activity_applications = user.activity_applications.where(season_id: @season.previous).as_json(include: { activity_application_status: {},
-                                                                                                                      desired_activities: {
-                                                                                                                        include: {
-                                                                                                                          activity_ref: {
-                                                                                                                            include: {
-                                                                                                                              next_cycles: {
-                                                                                                                                include: {
-                                                                                                                                  to: {
-                                                                                                                                    methods: %i[is_default_in_kind?]
-                                                                                                                                  }
-                                                                                                                                }
-                                                                                                                              }
-                                                                                                                            },
-                                                                                                                            methods: %i[is_default_in_kind?]
-                                                                                                                          },
-                                                                                                                          activity: {
-                                                                                                                            include: {
-                                                                                                                              activity_ref: {
-                                                                                                                                methods: %i[is_default_in_kind?]
-                                                                                                                              },
-                                                                                                                              teacher: {},
-                                                                                                                              room: {},
-                                                                                                                              time_interval: {}
-                                                                                                                            }
-                                                                                                                          }
-                                                                                                                        }
-                                                                                                                      }
-    })
-
-    @pre_application_activities = user.pre_applications.find_by(season_id: @season).pre_application_activities
-
-    @current_activity_applications.each do |activity_application|
-      @pre_application_activities.each do |pre_application_activity|
-        # Il n'y qu'une seule desiredActivity par ActivityApplication
-        if activity_application.dig("desired_activities", 0, "activity", "id") == pre_application_activity[:activity_id]
-          activity_application["pre_application_activity"] = pre_application_activity
+      @family_members_data.sort_by! do |member_data|
+        if member_data[:user][:id] == reference_user.id
+          "0"
+        else
+          "1#{member_data[:user][:full_name]}"
         end
       end
+    else
+      @user = user
+      @pre_application = jsonize_pre_application.call(pre_application_id)
+
+      @current_activity_applications = user.activity_applications.where(season_id: @season.previous).as_json(include: {
+        activity_application_status: {},
+        desired_activities: {
+          include: {
+            activity_ref: {
+              include: {
+                next_cycles: {
+                  include: {
+                    to: {
+                      methods: %i[is_default_in_kind?]
+                    }
+                  }
+                }
+              },
+              methods: %i[is_default_in_kind?]
+            },
+            activity: {
+              include: {
+                activity_ref: {
+                  methods: %i[is_default_in_kind?]
+                },
+                teacher: {},
+                room: {},
+                time_interval: {}
+              }
+            }
+          }
+        }
+      })
+
+      pre_application_activities = user.pre_applications.find_by(season_id: @season)&.pre_application_activities || []
+
+      @current_activity_applications.each do |activity_application|
+        pre_application_activities.each do |pre_application_activity|
+          if activity_application.dig("desired_activities", 0, "activity", "id") == pre_application_activity.activity_id
+            activity_application["pre_application_activity"] = pre_application_activity.as_json
+          end
+        end
+      end
+
+      user_activities_applications = user.activity_applications.where(season_id: @season).as_json(include: {
+        activity_application_status: {},
+        desired_activities: {
+          include: {
+            activity_ref: {
+              methods: %i[is_default_in_kind?]
+            },
+            activity: {
+              include: {
+                activity_ref: {
+                  methods: %i[is_default_in_kind?]
+                },
+                teacher: {},
+                room: {},
+                time_interval: {}
+              }
+            }
+          }
+        }
+      })
+
+      pre_applications_renew_ids = user.pre_applications.where(season_id: @season)
+                                       .map { |pa| pa.pre_application_activities }
+                                       .flatten
+                                       .map { |paa| paa.activity_application_id }
+                                       .compact
+
+      @new_activities_applications = user_activities_applications.reject { |activity| pre_applications_renew_ids.include?(activity["id"]) }
+
+      family_users =
+        reference_user
+          .get_users_self_is_paying_for(@season)
+          .select do |u|
+          u.id != user.id
+        end
+
+      family_users ||= []
+      users_paying_for = user.get_users_paying_for_self.reject { |u| u.id == user.id }
+      if @current_user.is_admin
+        family_users += users_paying_for
+      elsif users_paying_for&.include?(current_user)
+        family_users << current_user
+      end
+
+      family_users += user.attached_accounts
+      family_users += [user.attached_to] if user.attached_to&.id == @current_user.id || (user.attached_to && @current_user.is_admin)
+
+      @family_users = []
+      family_users.uniq.each do |u|
+        user_json = User.find(u.id).as_json(methods: :full_name)
+        pre_app = u.pre_applications
+                   .includes(:pre_application_activities, :user)
+                   .where(season_id: @season.id)
+                   .first
+        user_json["pre_application"] = jsonize_pre_application.call(pre_app.id) if pre_app
+        user_json["avatar"] = u.avatar_url
+        @family_users << user_json
+      end
+
+      @all_current_activities = []
+      @family_members_data = []
     end
 
-    @user_activities_applications = user.activity_applications.where(season_id: @season).as_json(include: { activity_application_status: {},
-                                                                                                            desired_activities: {
-                                                                                                              include: {
-                                                                                                                activity_ref: {
-                                                                                                                  methods: %i[is_default_in_kind?]
-                                                                                                                },
-                                                                                                                activity: {
-                                                                                                                  include: {
-                                                                                                                    activity_ref: {
-                                                                                                                      methods: %i[is_default_in_kind?]
-                                                                                                                    },
-                                                                                                                    teacher: {},
-                                                                                                                    room: {},
-                                                                                                                    time_interval: {}
-                                                                                                                  }
-                                                                                                                }
-                                                                                                              }
-                                                                                                            }
-    })
-
-    @pre_applications_renew_ids = user.pre_applications.where(season_id: @season).map { |pa| pa.pre_application_activities }
-                                      .flatten
-                                      .map { |paa| paa.activity_application_id }
-                                      .compact
-
-    set_status = Parameter.find_by(label: "activityApplication.default_status")
-
-    @default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID
-    @new_activities_applications = @user_activities_applications.reject { |activity| @pre_applications_renew_ids.include?(activity["id"]) }
     @previous_season = @season.previous
     @confirm_activity_text = Parameter.find_by(label: "confirm_activity_text")
+    set_status = Parameter.find_by(label: "activityApplication.default_status")
+    @default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID
+  end
+
+  def get_all_family_members(reference_user)
+    family_members = []
+
+    family_members << reference_user
+
+    family_member_ids = FamilyMemberUser.for_season_id(@season.id)
+                                        .where(user_id: reference_user.id)
+                                        .pluck(:member_id)
+
+    family_via_table = User.where(id: family_member_ids)
+                           .where.not(id: reference_user.id)
+
+    attached_accounts = reference_user.attached_accounts
+
+    if reference_user.attached_to && (@current_user.is_admin || reference_user.attached_to.id == @current_user.id)
+      family_members << reference_user.attached_to
+    end
+
+    users_paying_for = reference_user.get_users_paying_for_self.reject { |u| u.id == reference_user.id }
+    if @current_user.is_admin
+      family_members += users_paying_for
+    elsif users_paying_for.include?(@current_user)
+      family_members << @current_user
+    end
+
+    family_members += family_via_table.to_a
+    family_members += attached_accounts
+    family_members.uniq(&:id)
+  end
+
+  def ensure_pre_application_exists(user)
+    pre_application_id = user.pre_applications.where(season: @season).pick(:id)
+
+    unless pre_application_id
+      pre_application_id = user.pre_applications.create!(
+        user: user,
+        season: @season
+      ).id
+
+      statuses = ActivityApplicationStatus.where(is_stopping: false).pluck(:id)
+      activity_ids = Activity
+                       .joins([
+                                :activity_ref,
+                                { desired_activities: :activity_application }
+                              ])
+                       .includes([
+                                   :activity_ref,
+                                   { desired_activities: :activity_application }
+                                 ])
+                       .where({
+                                activity_application: {
+                                  activity_application_status_id: statuses,
+                                  season_id: @season.previous.id,
+                                  user_id: user.id
+                                }
+                              })
+                       .where({
+                                activity_ref: {
+                                  activity_type: ActivityRef.activity_types
+                                                            .except(:cham)
+                                                            .keys
+                                                            .append(nil)
+                                }
+                              })
+                       .pluck(:id)
+
+      activity_ids.each do |activity_id|
+        PreApplicationActivity.create!(
+          activity_id: activity_id,
+          pre_application_id: pre_application_id
+        )
+      end
+    end
+  end
+
+  def get_current_activities_for_user(user)
+    current_activities = user.activity_applications.where(season_id: @season.previous).as_json(include: {
+      activity_application_status: {},
+      desired_activities: {
+        include: {
+          activity_ref: {
+            include: {
+              next_cycles: {
+                include: {
+                  to: {
+                    methods: %i[is_default_in_kind?]
+                  }
+                }
+              }
+            },
+            methods: %i[is_default_in_kind?]
+          },
+          activity: {
+            include: {
+              activity_ref: {
+                methods: %i[is_default_in_kind?]
+              },
+              teacher: {},
+              room: {},
+              time_interval: {}
+            }
+          }
+        }
+      }
+    })
+
+    pre_application_activities = user.pre_applications.find_by(season_id: @season)&.pre_application_activities || []
+
+    current_activities.each do |activity_application|
+      pre_application_activities.each do |pre_application_activity|
+        if activity_application.dig("desired_activities", 0, "activity", "id") == pre_application_activity.activity_id
+          activity_application["pre_application_activity"] = pre_application_activity.as_json
+        end
+      end
+    end
+
+    current_activities
+  end
+
+  def prepare_member_data(user, jsonize_pre_application)
+    pre_application_id = user.pre_applications.where(season: @season).pick(:id)
+    pre_application_data = jsonize_pre_application.call(pre_application_id) if pre_application_id
+
+    renew_activities = []
+    if pre_application_data && pre_application_data["pre_application_activities"]
+      renew_activities = pre_application_data["pre_application_activities"]
+                           .select { |paa| paa["action"] == "renew" || paa["action"] == "pursue_childhood" }
+    end
+
+    user_activities_applications = user.activity_applications.where(season_id: @season).as_json(include: {
+      activity_application_status: {},
+      desired_activities: {
+        include: {
+          activity_ref: {
+            methods: %i[is_default_in_kind?]
+          },
+          activity: {
+            include: {
+              activity_ref: {
+                methods: %i[is_default_in_kind?]
+              },
+              teacher: {},
+              room: {},
+              time_interval: {}
+            }
+          }
+        }
+      }
+    })
+
+    pre_applications_renew_ids = user.pre_applications.where(season_id: @season)
+                                     .map { |pa| pa.pre_application_activities }
+                                     .flatten
+                                     .map { |paa| paa.activity_application_id }
+                                     .compact
+
+    new_activities = user_activities_applications.reject { |activity| pre_applications_renew_ids.include?(activity["id"]) }
+
+    {
+      user: {
+        id: user.id,
+        full_name: user.full_name,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        authentication_token: user.authentication_token
+      },
+      pre_application: pre_application_data,
+      renew_activities: renew_activities,
+      new_activities: new_activities
+    }
   end
 
   def exist

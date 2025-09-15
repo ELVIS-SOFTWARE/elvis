@@ -1,15 +1,17 @@
 <%= react_component('PreApplication', {
   user: @user,
+  season: @season,
+  previous_season: @previous_season,
+  current_user: current_user,
+  is_main_account: @is_main_account,
+  all_current_activities: @all_current_activities,
+  family_members_data: @family_members_data,
   current_activity_applications: @current_activity_applications,
   new_activities_applications: @new_activities_applications,
-  previous_season: @previous_season,
-  pre_application: @pre_application,
   family_users: @family_users,
-  pre_applications_for_family: @pre_applications_for_family,
-  season: @season,
-  current_user: current_user,
-  hasFamily: (@user.family.length > 0 && can?(:read, @user)),
+  pre_application: @pre_application,
   confirm_activity_text: @confirm_activity_text,
   default_activity_status_id: @default_activity_status_id,
+  hasFamily: ((@family_members_data&.length || 0) > 0 && can?(:read, @user)),
 })
 %>
