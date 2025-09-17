@@ -363,9 +363,9 @@ class Activity < ApplicationRecord
   #
   # The calculation depends on whether the student has stopped their participation:
   # - If the student is stopped (stopped_at is present): returns the number of instances
-  #   the student participated in during their actual participation period
-  # - If the student is not stopped: returns the full prorata calculation based on
-  #   total lessons minus missed lessons
+  #   the student participated in during their actual participation period (filtered by dates)
+  # - If the student is not stopped: returns the total number of instances the student
+  #   is enrolled in for this activity
   #
   # @param [Integer] user_id the id of the student to calculate prorata for
   # @param [Date, nil] begin_date optional start date to filter instances (used when stopped_at is present)
@@ -384,18 +384,9 @@ class Activity < ApplicationRecord
       return count_registered_instances_for_student_in_period(user_id, actual_begin, actual_stop)
     end
 
-    # Sinon, calcul complet normal
-    nb_lessons = count_lessons
-    registered_instances = count_registered_instances_for_student(user_id)
-    missed_lessons = nb_lessons - registered_instances
-    intended_lessons = intended_nb_lessons
-
-    if intended_lessons >= nb_lessons
-      intended_lessons - missed_lessons
-    else
-      res = nb_lessons - registered_instances
-      (res.to_f * intended_lessons / nb_lessons).ceil
-    end
+    # Pour les étudiants non arrêtés : le prorata = nombre de séances inscrites
+    # (c'est-à-dire toutes les séances de l'activité auxquelles il participe)
+    count_registered_instances_for_student(user_id)
   end
 
   def count_lessons_in_period(begin_date, stop_date)
