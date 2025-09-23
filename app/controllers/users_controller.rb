@@ -1325,7 +1325,7 @@ end
     # lorsque l'utilisateur connecté n'est pas admin, l'utilisateur de référence est lui-même
     reference_user = @current_user.is_admin? ? user : current_user
 
-    @is_main_account = user.attached_to_id.nil?
+    @is_main_account = reference_user.attached_to_id.nil?
 
     if @is_main_account
       all_family_members = get_all_family_members(reference_user)
@@ -1372,7 +1372,7 @@ end
         end
       end
     else
-      @user = user
+      @user = reference_user
       @pre_application = jsonize_pre_application.call(pre_application_id)
 
       @current_activity_applications = user.activity_applications.where(season_id: @season.previous).as_json(include: {
