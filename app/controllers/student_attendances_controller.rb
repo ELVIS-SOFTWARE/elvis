@@ -27,6 +27,15 @@ class StudentAttendancesController < ApplicationController
     }) }
   end
 
+  def update_remarks
+    attendance = StudentAttendance.find(params[:id])
+    attendance.update(remarks: params[:remarks])
+
+    render json: { status: 'success' }
+  rescue => e
+    render json: { status: 'error', message: e.message }
+  end
+
     private
   def attendance_params
     params.require(:student_attendance).permit(:attended)

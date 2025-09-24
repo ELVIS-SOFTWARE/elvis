@@ -19,6 +19,7 @@ export default class Absences extends React.Component
         this.confTabCols();
 
         this.fetchData = this.fetchData.bind(this);
+        this.updateRemarks = this.updateRemarks.bind(this);
     }
 
     confTabCols()
@@ -88,8 +89,63 @@ export default class Absences extends React.Component
                         <option value="-1">Non renseigné</option>
                     </select>
                 }
+            },
+            {
+                id: "remarks",
+                Header: "Remarques",
+                accessor: "remarks",
+                sortable: false,
+                Cell: row => {
+                    if (!row || !row.original) {
+                        return <span>-</span>;
+                    }
+
+                    return <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        defaultValue={row.original.remarks || ""}
+                        placeholder="Ajouter une remarque..."
+                        onBlur={(e) => this.updateRemarks(row.original.id, e.target.value)}
+                        style={{minWidth: "200px"}}
+                    />;
+                },
+                Filter: ({filter, onChange}) => {
+                    return <input
+                        type="text"
+                        placeholder="Filtrer par remarque..."
+                        defaultValue={filter ? filter.value : ""}
+                        onChange={event => onChange(event.target.value)}
+                        style={{width: "100%"}}
+                    />
+                }
             }
         ];
+    }
+
+    updateRemarks(attendanceId, remarks)
+    {
+        // Ne pas faire d'appel si la valeur n'a pas changé
+        const currentAbsence = this.state.absences.find(abs => abs.id === attendanceId);
+        if (currentAbsence && currentAbsence.remarks === remarks) {
+            return;
+        }
+
+        api.set()
+            .success(() => {
+                this.setState(prevState => ({
+                    absences: prevState.absences.map(absence =>
+                        absence.id === attendanceId
+                            ? {...absence, remarks: remarks}
+                            : absence
+                    )
+                }));
+            })
+            .error(err => {
+                console.error("Erreur lors de la mise à jour de la remarque:", err);
+            })
+            .patch(`/student_attendances/${attendanceId}/update_remarks`, {
+                remarks: remarks
+            });
     }
 
     render()

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_11_29_094656) do
+ActiveRecord::Schema.define(version: 2025_09_23_134054) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -1131,6 +1131,7 @@ ActiveRecord::Schema.define(version: 2024_11_29_094656) do
     t.text "comment"
     t.boolean "is_option", default: false
     t.boolean "is_pack", default: false
+    t.text "remarks"
     t.index ["id"], name: "index_student_attendances_on_id"
     t.index ["user_id", "activity_instance_id"], name: "index_student_attendances_on_user_id_and_activity_instance_id"
   end
