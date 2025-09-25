@@ -2,6 +2,7 @@ import React, {Fragment} from "react";
 import ReactTableFullScreen from "../ReactTableFullScreen";
 import * as api from "../../tools/api";
 import {isValidDate} from "@fullcalendar/react";
+import Swal from 'sweetalert2';
 
 export default class Absences extends React.Component
 {
@@ -139,9 +140,31 @@ export default class Absences extends React.Component
                             : absence
                     )
                 }));
+
+                Swal.fire({
+                    title: 'Enregistré !',
+                    text: 'La remarque a été enregistrée avec succès.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end',
+                    background: '#d4edda',
+                    iconColor: '#28a745'
+                });
             })
             .error(err => {
                 console.error("Erreur lors de la mise à jour de la remarque:", err);
+
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors de l\'enregistrement de la remarque. Veuillez réessayer.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545',
+                    background: '#f8d7da',
+                    iconColor: '#dc3545'
+                });
             })
             .patch(`/student_attendances/${attendanceId}/update_remarks`, {
                 remarks: remarks
@@ -162,7 +185,7 @@ export default class Absences extends React.Component
                         this.fetchData(this.state.filter, null);
                     });
                 }}>
-                    {this.props.seasons.map(season => <option key={season.id} value={season.id} selected={season.is_current}>{season.label}</option>)}
+                    {this.props.seasons.map(season => <option key={season.id} value={season.id} defaultValue={season.is_current}>{season.label}</option>)}
                 </select>
             </div>
             <div className="col-sm-12">
