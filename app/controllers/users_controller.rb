@@ -1328,11 +1328,22 @@ end
     @is_main_account = reference_user.attached_to_id.nil?
 
     if @is_main_account
-      all_family_members = get_all_family_members(reference_user)
-
-      all_family_members.each do |member|
-        ensure_pre_application_exists(member)
+      all_family_members = Elvis::CacheUtils.cache_block_if_enabled(
+        "family_members:user_#{reference_user.id}:season_#{@season.id}",
+        expires_in: 15.minutes
+      ) do
+        get_all_family_members(reference_user)
       end
+
+      member_ids = all_family_members.map(&:id)
+      existing_pre_app_user_ids = PreApplication.where(
+        user_id: member_ids,
+        season_id: @season.id
+      ).pluck(:user_id)
+
+      members_without_pre_app = all_family_members.reject { |m| existing_pre_app_user_ids.include?(m.id) }
+
+      create_pre_applications_with_activities(members_without_pre_app)
 
       @user = reference_user
       @pre_application = jsonize_pre_application.call(
@@ -1485,78 +1496,80 @@ end
   end
 
   def get_all_family_members(reference_user)
-    family_members = []
+    family_member_ids = Set.new([reference_user.id])
 
-    family_members << reference_user
+    family_member_ids.merge(
+      FamilyMemberUser.for_season_id(@season.id)
+                      .where(user_id: reference_user.id)
+                      .pluck(:member_id)
+    )
 
-    family_member_ids = FamilyMemberUser.for_season_id(@season.id)
-                                        .where(user_id: reference_user.id)
-                                        .pluck(:member_id)
+    family_member_ids.merge(
+      reference_user.attached_accounts.pluck(:id)
+    )
 
-    family_via_table = User.where(id: family_member_ids)
-                           .where.not(id: reference_user.id)
-
-    attached_accounts = reference_user.attached_accounts
-
-    if reference_user.attached_to && (@current_user.is_admin || reference_user.attached_to.id == @current_user.id)
-      family_members << reference_user.attached_to
+    if reference_user.attached_to_id && (@current_user.is_admin || reference_user.attached_to_id == @current_user.id)
+      family_member_ids.add(reference_user.attached_to_id)
     end
 
-    users_paying_for = reference_user.get_users_paying_for_self.reject { |u| u.id == reference_user.id }
+    paying_user_ids = reference_user.get_users_paying_for_self.pluck(:id) - [reference_user.id]
+
     if @current_user.is_admin
-      family_members += users_paying_for
-    elsif users_paying_for.include?(@current_user)
-      family_members << @current_user
+      family_member_ids.merge(paying_user_ids)
+    elsif paying_user_ids.include?(@current_user.id)
+      family_member_ids.add(@current_user.id)
     end
 
-    family_members += family_via_table.to_a
-    family_members += attached_accounts
-    family_members.uniq(&:id)
+    User.where(id: family_member_ids.to_a).to_a
   end
 
-  def ensure_pre_application_exists(user)
-    pre_application_id = user.pre_applications.where(season: @season).pick(:id)
+  def create_pre_applications_with_activities(members)
+    return if members.empty?
 
-    unless pre_application_id
-      pre_application_id = user.pre_applications.create!(
-        user: user,
-        season: @season
-      ).id
+    pre_apps_data = members.map do |member|
+      {
+        user_id: member.id,
+        season_id: @season.id,
+      }
+    end
 
-      statuses = ActivityApplicationStatus.where(is_stopping: false).pluck(:id)
-      activity_ids = Activity
-                       .joins([
-                                :activity_ref,
-                                { desired_activities: :activity_application }
-                              ])
-                       .includes([
-                                   :activity_ref,
-                                   { desired_activities: :activity_application }
-                                 ])
-                       .where({
-                                activity_application: {
-                                  activity_application_status_id: statuses,
-                                  season_id: @season.previous.id,
-                                  user_id: user.id
-                                }
-                              })
-                       .where({
-                                activity_ref: {
-                                  activity_type: ActivityRef.activity_types
-                                                            .except(:cham)
-                                                            .keys
-                                                            .append(nil)
-                                }
-                              })
-                       .pluck(:id)
+    PreApplication.insert_all(pre_apps_data)
 
-      activity_ids.each do |activity_id|
-        PreApplicationActivity.create!(
+    new_pre_apps = PreApplication.where(
+      user_id: members.map(&:id),
+      season_id: @season.id
+    ).pluck(:user_id, :id).to_h
+
+    @non_stopping_statuses ||= ActivityApplicationStatus.where(is_stopping: false).pluck(:id)
+
+    activities_by_user = Activity
+                           .joins([:activity_ref, { desired_activities: :activity_application }])
+                           .where(
+                             activity_application: {
+                               activity_application_status_id: @non_stopping_statuses,
+                               season_id: @season.previous.id,
+                               user_id: members.map(&:id)
+                             },
+                             activity_ref: {
+                               activity_type: ActivityRef.activity_types.except(:cham).keys.append(nil)
+                             }
+                           )
+                           .pluck('activity_applications.user_id', 'activities.id')
+                           .group_by(&:first)
+
+    all_pre_app_activities = []
+
+    activities_by_user.each do |user_id, activity_data|
+      pre_application_id = new_pre_apps[user_id]
+      activity_data.each do |_, activity_id|
+        all_pre_app_activities << {
           activity_id: activity_id,
-          pre_application_id: pre_application_id
-        )
+          pre_application_id: pre_application_id,
+        }
       end
     end
+
+    PreApplicationActivity.insert_all(all_pre_app_activities) if all_pre_app_activities.any?
   end
 
   def get_current_activities_for_user(user)
