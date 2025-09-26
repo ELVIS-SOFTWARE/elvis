@@ -2,6 +2,7 @@ import React, {Fragment} from "react";
 import ReactTableFullScreen from "../ReactTableFullScreen";
 import * as api from "../../tools/api";
 import {isValidDate} from "@fullcalendar/react";
+import Swal from 'sweetalert2';
 
 export default class Absences extends React.Component
 {
@@ -19,6 +20,7 @@ export default class Absences extends React.Component
         this.confTabCols();
 
         this.fetchData = this.fetchData.bind(this);
+        this.updateRemarks = this.updateRemarks.bind(this);
     }
 
     confTabCols()
@@ -88,8 +90,85 @@ export default class Absences extends React.Component
                         <option value="-1">Non renseigné</option>
                     </select>
                 }
+            },
+            {
+                id: "remarks",
+                Header: "Remarques",
+                accessor: "remarks",
+                sortable: false,
+                Cell: row => {
+                    if (!row || !row.original) {
+                        return <span>-</span>;
+                    }
+
+                    return <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        defaultValue={row.original.remarks || ""}
+                        placeholder="Ajouter une remarque..."
+                        onBlur={(e) => this.updateRemarks(row.original.id, e.target.value)}
+                        style={{minWidth: "200px"}}
+                    />;
+                },
+                Filter: ({filter, onChange}) => {
+                    return <input
+                        type="text"
+                        placeholder="Filtrer par remarque..."
+                        defaultValue={filter ? filter.value : ""}
+                        onChange={event => onChange(event.target.value)}
+                        style={{width: "100%"}}
+                    />
+                }
             }
         ];
+    }
+
+    updateRemarks(attendanceId, remarks)
+    {
+        // Ne pas faire d'appel si la valeur n'a pas changé
+        const currentAbsence = this.state.absences.find(abs => abs.id === attendanceId);
+        if (currentAbsence && currentAbsence.remarks === remarks) {
+            return;
+        }
+
+        api.set()
+            .success(() => {
+                this.setState(prevState => ({
+                    absences: prevState.absences.map(absence =>
+                        absence.id === attendanceId
+                            ? {...absence, remarks: remarks}
+                            : absence
+                    )
+                }));
+
+                Swal.fire({
+                    title: 'Enregistré !',
+                    text: 'La remarque a été enregistrée avec succès.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end',
+                    background: '#d4edda',
+                    iconColor: '#28a745'
+                });
+            })
+            .error(err => {
+                console.error("Erreur lors de la mise à jour de la remarque:", err);
+
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Une erreur est survenue lors de l\'enregistrement de la remarque. Veuillez réessayer.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545',
+                    background: '#f8d7da',
+                    iconColor: '#dc3545'
+                });
+            })
+            .patch(`/student_attendances/${attendanceId}/update_remarks`, {
+                remarks: remarks
+            });
     }
 
     render()
@@ -106,7 +185,7 @@ export default class Absences extends React.Component
                         this.fetchData(this.state.filter, null);
                     });
                 }}>
-                    {this.props.seasons.map(season => <option key={season.id} value={season.id} selected={season.is_current}>{season.label}</option>)}
+                    {this.props.seasons.map(season => <option key={season.id} value={season.id} defaultValue={season.is_current}>{season.label}</option>)}
                 </select>
             </div>
             <div className="col-sm-12">

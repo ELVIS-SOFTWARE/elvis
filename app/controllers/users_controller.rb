@@ -445,10 +445,12 @@ class UsersController < ApplicationController
 
     absences = absences.map do |abs|
       {
+        id: abs.id,
         date: abs.activity_instance.time_interval.start.in_time_zone("Europe/Paris").strftime("%d/%m/%Y"),
         teacher: abs.activity_instance.activity.teacher.full_name,
         activity: abs.activity_instance.activity.activity_ref.label,
-        type: abs.attended
+        type: abs.attended,
+        remarks: abs.remarks
       }
     end
 
