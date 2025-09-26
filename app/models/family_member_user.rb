@@ -39,6 +39,9 @@ class FamilyMemberUser < ApplicationRecord
                on family_member_users.user_id = last_fmus.user_id and family_member_users.member_id = last_fmus.member_id and family_member_users.season_id = last_fmus.season_id")
     }
 
+    after_save :invalidate_family_cache
+    after_destroy :invalidate_family_cache
+
 
     def self.display_class_name(singular = true)
         singular ? "membre de famille" : "membres de famille"
@@ -63,6 +66,12 @@ class FamilyMemberUser < ApplicationRecord
         else
             return nil
         end
+    end
+
+    def invalidate_family_cache
+      current_season_id = Season.current&.id
+      Rails.cache.delete("family_members:user_#{user_id}:season_#{current_season_id}") if current_season_id
+      Rails.cache.delete("family_members:user_#{member_id}:season_#{current_season_id}") if current_season_id
     end
 
 end
