@@ -154,12 +154,14 @@ class PreApplication extends React.Component {
                             }}
                             allowPreApplication={allowPreApplication}
                             current_activity_application={current_application_activity}
-                            member_info={current_application_activity.member_info} // Info du membre
+                            member_info={current_application_activity.member_info}
                         />
                     ))}
                 </Fragment>
             ))
             .value();
+
+        const hasFamilyCurrentActivities = allCurrentActivityList.length > 0;
 
         const familyMembersSections = (this.props.family_members_data || []).map((memberData, index) => {
             return this.renderMemberSection(memberData, allowPreApplication, index);
@@ -167,34 +169,28 @@ class PreApplication extends React.Component {
 
         return (
             <Fragment>
-                <div className="row col-md-12 mb-4 p-0">
-                    <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
-                        Activités actuelles de la famille
-                        (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
-                    </h3>
-                    <div className="col-sm-12 p-0">
-                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
-                            <thead>
-                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
-                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
-                                <th>Membre</th>
-                                <th style={{borderRadius: "0 12px 0 0"}}></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {allCurrentActivityList.length > 0
-                                ? allCurrentActivityList
-                                :
-                                <tr>
-                                    <td colSpan="12" className="text-center">
-                                        <i>Aucune activité actuelle pour les membres de la famille</i>
-                                    </td>
+                {hasFamilyCurrentActivities && (
+                    <div className="row col-md-12 mb-4 p-0">
+                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                            Activités actuelles de la famille
+                            (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
+                        </h3>
+                        <div className="col-sm-12 p-0">
+                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                                <thead>
+                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                    <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                    <th>Membre</th>
+                                    <th style={{borderRadius: "0 12px 0 0"}}></th>
                                 </tr>
-                            }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {allCurrentActivityList}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {familyMembersSections}
             </Fragment>
@@ -219,6 +215,8 @@ class PreApplication extends React.Component {
                 />)}
             </Fragment>)
             .value();
+
+        const hasCurrentActivities = currentActivityList.length > 0;
 
         const renewActivityList = _.chain(
             this.props.pre_application && this.props.pre_application.pre_application_activities ?
@@ -292,35 +290,28 @@ class PreApplication extends React.Component {
 
         return (
             <Fragment>
-                <div className="row col-md-12 mb-4 p-0">
-                    <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
-                        Activités actuelles
-                        (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
-                    </h3>
-                    <div className="col-sm-12 col-xl-6 p-0">
-                        <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
-                            <thead>
-                            <tr style={{backgroundColor: "#00334A", color: "white"}}>
-                                <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
-                                <th>Membre</th>
-                                <th style={{borderRadius: "0 12px 0 0"}}></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {currentActivityList.length > 0
-                                ? currentActivityList
-                                :
-                                <tr>
-                                    <td colSpan="12" className="text-center">
-                                        <i>{this.props.user.first_name} {this.props.user.last_name} ne poursuit
-                                            actuellement aucune activité</i>
-                                    </td>
+                {hasCurrentActivities && (
+                    <div className="row col-md-12 mb-4 p-0">
+                        <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                            Activités actuelles
+                            (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
+                        </h3>
+                        <div className="col-sm-12 col-xl-6 p-0">
+                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                                <thead>
+                                <tr style={{backgroundColor: "#00334A", color: "white"}}>
+                                    <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
+                                    <th>Membre</th>
+                                    <th style={{borderRadius: "0 12px 0 0"}}></th>
                                 </tr>
-                            }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {currentActivityList}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="row col-md-12 mb-4 p-0">
                     <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>Mes demandes pour {this.props.user.first_name} {this.props.user.last_name}</h3>
