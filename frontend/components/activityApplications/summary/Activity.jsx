@@ -479,7 +479,7 @@ class Activity extends React.Component {
                 Header: "Jour",
                 id: "day",
                 maxWidth: 150,
-                accessor: s => moment(s.time_interval.start).isoWeekday(),
+                accessor: s => moment(s.closest_lesson || s.time_interval.start).isoWeekday(),
                 Cell: ({ value }) =>
                     moment(value, "E")
                         .format("dddd")
