@@ -31,7 +31,7 @@ module MenuGenerator
       :inscriptions,
       "inscriptions",
       "",
-      { caption: "Inscriptions", icon: "fa-table", user_role: "admin", position: 1 }
+      { caption: "Inscriptions", icon: "fa-file-alt", user_role: "admin", position: 1 }
     )
     inscriptions.add(Elvis::MenuManager::MenuItem.new(
       :adherents,
