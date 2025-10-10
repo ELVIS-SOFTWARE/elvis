@@ -80,14 +80,16 @@ class PreApplication extends React.Component {
                                         }}>
                                         </div>
                                         <div>
-                                            <h5 className="card-title" style={{color: "#00283B"}}>Période de
-                                                ré-inscription <i className="fas fa-inf-circle"></i></h5>
-                                            <h6 className="card-subtitle mb-2 text-muted">Ferme le {closingApplication.format("DD MMMM YYYY")}</h6>
+                                            <h5 className="card-title" style={{color: "#00283B", fontSize: "14px"}}>
+                                                Période de ré-inscription <i className="fas fa-inf-circle"></i>
+                                            </h5>
+                                            <h6 className="card-subtitle mb-2 text-muted" style={{fontSize: "14px"}}>
+                                                Ferme le {closingApplication.format("DD MMMM YYYY")}
+                                            </h6>
                                             <div>{isPreApplicationOpened ?
                                                 <span className="badge badge-success">ouverte</span> :
                                                 <span className="badge badge-danger">fermée</span>}
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -103,9 +105,12 @@ class PreApplication extends React.Component {
                                         }}>
                                         </div>
                                         <div>
-                                            <h5 className="card-title" style={{color: "#00283B"}}>Période
-                                                d'inscription <i className="fas fa-info-circle"></i></h5>
-                                            <h6 className="card-subtitle mb-2 text-muted">Ouvre le {openingApplication.format("DD MMMM YYYY")}</h6>
+                                            <h5 className="card-title" style={{color: "#00283B", fontSize: "14px"}}>
+                                                Période d'inscription <i className="fas fa-info-circle"></i>
+                                            </h5>
+                                            <h6 className="card-subtitle mb-2 text-muted" style={{fontSize: "14px"}}>
+                                                Ouvre le {openingApplication.format("DD MMMM YYYY")}
+                                            </h6>
                                             <div>{isNewApplicationOpened ?
                                                 <span className="badge badge-success">ouverte</span> :
                                                 <span className="badge badge-danger">fermée</span>}
@@ -175,7 +180,7 @@ class PreApplication extends React.Component {
                             Activités actuelles de la famille
                             (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
                         </h3>
-                        <div className="col-sm-12 p-0">
+                        <div className="col-sm-12 col-xl-6 p-0">
                             <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
                                 <thead>
                                 <tr style={{backgroundColor: "#00334A", color: "white"}}>
@@ -394,8 +399,7 @@ class PreApplication extends React.Component {
         return (
             <div key={`member-section-${user.id}`} className="row col-md-12 mb-5 p-0">
                 <div className="d-flex align-items-center mb-3">
-                    <UserAvatar user={user} size={40} />
-                    <h3 className="ml-3 mb-0" style={{color: "#8AA4B1", fontWeight: "bold"}}>
+                    <h3 className="mb-0" style={{color: "#8AA4B1", fontWeight: "bold"}}>
                         Demandes de {user.full_name}
                     </h3>
                 </div>
