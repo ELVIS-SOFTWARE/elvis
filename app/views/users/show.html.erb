@@ -2,7 +2,7 @@
   <div class="ibox">
 
     <div class="profile-left-col">
-      <div class="ibox-heading ibox-content">
+      <div class="ibox-heading ibox-content" style="padding: 15px 15px 15px 15px;">
         <div class="profile-image">
           <% if @user.avatar.attached? %>
             <img alt="profile" class="img-circle" src="<%= url_for(@user.avatar) %>"/>
@@ -16,7 +16,7 @@
         </div>
 
         <div class="profile-info">
-          <h2 class="no-margins"><%= @user.first_name %> <b><%= @user.last_name %></b></h2>
+          <p class="no-margins" style="font-size: 15px; color: #222"><b><%= @user.first_name %> <%= @user.last_name %></b></p>
           <p>Adhérent n°<%= unless @user.adherent_number.nil?;
                               @user.adherent_number;
                             end %></p>
