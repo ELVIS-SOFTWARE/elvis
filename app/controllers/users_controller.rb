@@ -1528,10 +1528,14 @@ end
   def create_pre_applications_with_activities(members)
     return if members.empty?
 
+    now = Time.current
+
     pre_apps_data = members.map do |member|
       {
         user_id: member.id,
         season_id: @season.id,
+        created_at: now,
+        updated_at: now
       }
     end
 
@@ -1567,6 +1571,8 @@ end
         all_pre_app_activities << {
           activity_id: activity_id,
           pre_application_id: pre_application_id,
+          created_at: now,
+          updated_at: now
         }
       end
     end
