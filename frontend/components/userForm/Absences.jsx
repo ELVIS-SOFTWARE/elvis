@@ -51,11 +51,14 @@ export default class Absences extends React.Component
                 id: "teacher",
                 Header: "Professeur",
                 accessor: "teacher",
-            },
-            {
-                id: "activity",
-                Header: "Cours",
-                accessor: "activity",
+                Cell: row => {
+                    return (
+                        <div>
+                            <div className="font-weight-bold">{row.original.teacher}</div>
+                            <div className="text-muted small">{row.original.activity}</div>
+                        </div>
+                    );
+                }
             },
             {
                 id: "type",
@@ -68,10 +71,10 @@ export default class Absences extends React.Component
 
                     switch(row.original.type)
                     {
-                        case 0: text = "Absence injustifiée";break;
+                        case 0: text = "Injustifiée";break;
                         case 1: text = "Présent";break;
                         case 2: text = "???";break;
-                        case 3: text = "Absence justifiée";break;
+                        case 3: text = "Justifiée";break;
                         default: text = "Non renseigné";
                     }
 
@@ -85,8 +88,8 @@ export default class Absences extends React.Component
                         value={filter ? filter.value : "all"}
                     >
                         <option value="all">Tous</option>
-                        <option value="0">Absence injustifiée</option>
-                        <option value="3">Absence justifiée</option>
+                        <option value="0">Injustifiée</option>
+                        <option value="3">Justifiée</option>
                         <option value="-1">Non renseigné</option>
                     </select>
                 }
@@ -101,13 +104,16 @@ export default class Absences extends React.Component
                         return <span>-</span>;
                     }
 
-                    return <input
-                        type="text"
+                    return <textarea
                         className="form-control form-control-sm"
                         defaultValue={row.original.remarks || ""}
                         placeholder="Ajouter une remarque..."
                         onBlur={(e) => this.updateRemarks(row.original.id, e.target.value)}
-                        style={{minWidth: "200px"}}
+                        style={{
+                            minWidth: "250px",
+                            height: "70px",
+                            resize: "vertical"
+                        }}
                     />;
                 },
                 Filter: ({filter, onChange}) => {
@@ -177,7 +183,7 @@ export default class Absences extends React.Component
 
         return <div className="row">
             <div className="col-sm-6">
-                <h3 className="font-bold my-4">{this.state.absences.length} absences au total</h3>
+                <h4 className="font-bold my-4">{this.state.absences.length} absences au total</h4>
             </div>
             <div className="col-sm-6 text-right my-3">
                 <select className="custom-select" onChange={(event) => {
