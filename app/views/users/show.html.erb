@@ -16,7 +16,7 @@
         </div>
 
         <div class="profile-info">
-          <p class="no-margins" style="font-size: 15px; color: #222"><b><%= @user.first_name %> <%= @user.last_name %></b></p>
+          <p class="no-margins" style="font-size: 15px; color: #222"><b><%= @user.full_name %></b></p>
           <p>Adhérent n°<%= unless @user.adherent_number.nil?;
                               @user.adherent_number;
                             end %></p>
