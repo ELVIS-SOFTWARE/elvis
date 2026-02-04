@@ -57,6 +57,9 @@ gem "acts_as_paranoid"
 gem "chewy", "< 7.4"
 gem "sidekiq"
 
+# patch for "wrong number of arguments" error
+gem 'connection_pool', '< 3'
+
 gem "rqrcode"
 
 gem "recaptcha", require: "recaptcha/rails"
