@@ -3,6 +3,7 @@ import _ from "lodash";
 import * as api from "../../../tools/api";
 import swal from "sweetalert2";
 import PaymentTermsSettingModal from "./PaymentTermsSettingModal";
+import {csrfToken} from "../../utils";
 
 const LOCAL_STORAGE_KEY_SEASON = "user_payments_v2_season";
 
@@ -15,6 +16,39 @@ export default function UserPaymentsV2({seasons, user, is_current_user, onPayCli
     const [data, setData] = useState([]);
     const [duePaymentsData, setDuePaymentsData] = useState([]);
     const [paymentTerms, setPaymentTerms] = useState({});
+
+    function handleChangeProrataForDesiredActivity(id, prorata) {
+        const updatedData = data.map(item => {
+            if (item.id === id) {
+                return {...item, prorata: prorata};
+            }
+            return item;
+        });
+        setData(updatedData);
+
+        fetch(`/desired_activities/${id}/update_prorata`, {
+            method: "PATCH",
+            credentials: "same-origin",
+            headers: {
+                "X-CSRF-Token": csrfToken,
+                "Content-Type": "application/json",
+                Accept: "application/json",
+            },
+            body: JSON.stringify({
+                prorata: prorata
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                getDatas();
+                swal("Erreur", "Impossible de mettre à jour le prorata", "error");
+            }
+        })
+        .catch(() => {
+            getDatas();
+            swal("Erreur", "Une erreur est survenue lors de la mise à jour du prorata", "error");
+        });
+    }
 
     function getDatas()
     {
@@ -89,7 +123,39 @@ export default function UserPaymentsV2({seasons, user, is_current_user, onPayCli
                                     {data.map(d => <tr key={d.id}>
                                         <td>{d.activity}</td>
                                         <td>{d.user_full_name}</td>
-                                        <td>{d.prorata ? `${d.prorata} / ${d.intended_nb_lessons}` : ""}</td>
+                                        <td>
+                                            {d.intended_nb_lessons ? (
+                                                is_current_user ? (
+                                                    `${d.prorata || d.intended_nb_lessons} / ${d.intended_nb_lessons}`
+                                                ) : (
+                                                    <div style={{ display: "flex", alignItems: "center", fontSize: "14px" }}>
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            style={{
+                                                                width: "45px",
+                                                                height: "28px",
+                                                                padding: "2px 4px",
+                                                                fontSize: "12px",
+                                                                marginRight: "3px",
+                                                                textAlign: "center",
+                                                                border: "1px solid #ccc"
+                                                            }}
+                                                            value={d.prorata || d.intended_nb_lessons}
+                                                            min="0"
+                                                            max={d.intended_nb_lessons}
+                                                            onChange={e => {
+                                                                const newProrata = parseInt(e.target.value) || 0;
+                                                                if (newProrata <= d.intended_nb_lessons) {
+                                                                    handleChangeProrataForDesiredActivity(d.id, newProrata);
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span>/ {d.intended_nb_lessons}</span>
+                                                    </div>
+                                                )
+                                            ) : ""}
+                                        </td>
                                         <td>{d.amount} €</td>
                                     </tr>)}
                                     </tbody>

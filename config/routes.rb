@@ -410,7 +410,7 @@ Rails.application.routes.draw do
 
   post "/desired_activities/:id", to: "desired_activity#update"
   post "/desired_activities/:id/pricing", to: "desired_activity#set_pricing"
-  # post "/desired_activities/:id/prorata/:prorata", to: "desired_activity#set_prorata"
+  patch "/desired_activities/:id/update_prorata", to: "desired_activity#update_prorata"
 
   get "/import_users", to: "users#upload_csv"
   post "/import_users", to: "users#upload_csv"
