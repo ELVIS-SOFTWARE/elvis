@@ -1140,6 +1140,19 @@ class ActivitiesApplicationsController < ApplicationController
 
     edit_params[:status_updated_at] = Time.now if edit_params[:activity_application_status_id]
 
+    if edit_params[:activity_application_status_id] == ActivityApplicationStatus::CANCELED_ID
+      entries.includes(:user, :season).find_each(batch_size: 200) do |activity_application|
+        user = activity_application.user
+        current_season = activity_application.season
+
+        active_adhesion = user.adhesions.where(season_id: current_season.id, is_active: true).first
+
+        if active_adhesion
+          active_adhesion.destroy
+        end
+      end
+    end
+
     entries.update_all(edit_params.to_h)
 
     respond_to do |format|
@@ -1437,6 +1450,17 @@ class ActivitiesApplicationsController < ApplicationController
             )
           )
         end
+      end
+    end
+
+    if activity_application.activity_application_status_id == ActivityApplicationStatus::CANCELED_ID
+      user = activity_application.user
+      current_season = activity_application.season
+
+      active_adhesion = user.adhesions.where(season_id: current_season.id, is_active: true).first
+
+      if active_adhesion
+        active_adhesion.destroy
       end
     end
 

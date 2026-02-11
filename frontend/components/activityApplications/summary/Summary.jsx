@@ -133,7 +133,33 @@ class Summary extends React.Component
             return Promise.resolve(false);
         }
 
-        // Apply changes
+        if (parseInt(this.state.status_id, 10) === ActivityApplicationStatus.CANCELED_ID)
+        {
+            return new Promise((resolve) => {
+                swal.fire({
+                    title: 'Attention !',
+                    text: 'L\'adhésion associée va être supprimée en validant. Êtes-vous sûr de continuer ?',
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui, continuer',
+                    cancelButtonText: 'Annuler',
+                    confirmButtonColor: '#d33',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.value) {
+                        this.updateApplication({
+                            activity_application_status_id: this.state.status_id,
+                            referent_id: this.state.referent_id,
+                            stopped_at: stoppedAt,
+                        }).then(() => resolve(true))
+                          .catch(() => resolve(false));
+                    } else {
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
         return this.updateApplication({
             activity_application_status_id: this.state.status_id,
             referent_id: this.state.referent_id,
