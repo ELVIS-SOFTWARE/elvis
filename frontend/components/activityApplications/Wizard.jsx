@@ -480,7 +480,7 @@ class Wizard extends React.Component {
 
                 Swal({
                     title: "Erreur",
-                    text: [...data].join(",") || "Une erreur est survenue lors de la création de votre demande d\'inscription",
+                    text: [...data].join(",") || "Une erreur est survenue lors de la création de votre demande d'inscription. Veuillez contacter l'administrateur.",
                     type: "error",
                 });
 
