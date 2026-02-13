@@ -21,6 +21,7 @@ import {
     ACTIVITY_ATTRIBUTED_ID,
     ACTIVITY_PROPOSED_ID,
     PROPOSAL_ACCEPTED_ID,
+    CANCELED_ID,
 } from "./utils/ActivityApplicationsStatuses";
 import Swal from "sweetalert2";
 
@@ -204,6 +205,36 @@ class ActivitiesApplicationsList extends React.Component {
     }
 
     handleBulkEdit() {
+        // Vérification spéciale pour le statut "Annulé"
+        if (this.state.bulkEdit.activity_application_status_id === CANCELED_ID) {
+            const selectedCount = this.state.bulkTargets === "all"
+                ? this.state.total
+                : this.state.bulkTargets.length;
+
+            const confirmationText = selectedCount === 1
+                ? "Attention, l'adhésion associée à cette demande d'inscription va être supprimée. Êtes-vous sûr de continuer ?"
+                : `Attention, les adhésions associées aux ${selectedCount} demandes d'inscription sélectionnées vont être supprimées. Êtes-vous sûr de continuer ?`;
+
+            swal.fire({
+                title: 'Attention !',
+                text: confirmationText,
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, continuer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#d33',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.value) {
+                    this.performBulkEdit();
+                }
+            });
+        } else {
+            this.performBulkEdit();
+        }
+    }
+
+    performBulkEdit() {
         fetch("/inscriptions/bulk", {
             method: "POST",
             headers: {
