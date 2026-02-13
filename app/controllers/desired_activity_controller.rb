@@ -72,13 +72,35 @@ class DesiredActivityController < ApplicationController
             render json: {
               id:                       desired_activity.id,
               activity_application_id:  desired_activity.activity_application_id,
-              evaluation_level_ref:     level&.evaluation_level_ref&.label  # <-- on ajoute cette ligne
+              evaluation_level_ref:     level&.evaluation_level_ref&.label
             }
         else
             render json: { error: "Demande d'inscription introuvable" }, status: 404
         end
     end
 
+
+    def update_prorata
+        desired_activity = DesiredActivity.find(params[:id])
+
+        if desired_activity.nil?
+            return head :not_found
+        end
+
+        prorata = params[:prorata].to_i
+
+        if prorata < 0
+            return render json: { error: "Le prorata ne peut pas être négatif" }, status: :unprocessable_entity
+        end
+
+        activity = desired_activity.activity
+        if activity && prorata > activity.intended_nb_lessons
+            return render json: { error: "Le prorata ne peut pas dépasser le nombre de séances prévues" }, status: :unprocessable_entity
+        end
+
+        desired_activity.update!(prorata: prorata)
+        head :ok
+    end
 
     private
     def update_params
