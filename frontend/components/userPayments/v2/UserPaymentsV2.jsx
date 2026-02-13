@@ -3,7 +3,6 @@ import _ from "lodash";
 import * as api from "../../../tools/api";
 import swal from "sweetalert2";
 import PaymentTermsSettingModal from "./PaymentTermsSettingModal";
-import {csrfToken} from "../../utils";
 
 const LOCAL_STORAGE_KEY_SEASON = "user_payments_v2_season";
 
@@ -26,28 +25,16 @@ export default function UserPaymentsV2({seasons, user, is_current_user, onPayCli
         });
         setData(updatedData);
 
-        fetch(`/desired_activities/${id}/update_prorata`, {
-            method: "PATCH",
-            credentials: "same-origin",
-            headers: {
-                "X-CSRF-Token": csrfToken,
-                "Content-Type": "application/json",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({
+        api.set()
+            .success(() => {
+            })
+            .error(() => {
+                getDatas(); // Recharger les données en cas d'erreur
+                swal("Erreur", "Une erreur est survenue lors de la mise à jour du prorata", "error");
+            })
+            .patch(`/desired_activities/${id}/update_prorata`, {
                 prorata: prorata
-            }),
-        })
-        .then(response => {
-            if (!response.ok) {
-                getDatas();
-                swal("Erreur", "Impossible de mettre à jour le prorata", "error");
-            }
-        })
-        .catch(() => {
-            getDatas();
-            swal("Erreur", "Une erreur est survenue lors de la mise à jour du prorata", "error");
-        });
+            });
     }
 
     function getDatas()
