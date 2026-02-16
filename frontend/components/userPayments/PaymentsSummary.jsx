@@ -361,11 +361,43 @@ class PaymentsSummary extends React.Component {
             {
                 Header: "Prorata",
                 id: "prorata",
-                maxWidth: 75,
+                maxWidth: 100,
                 Cell: props => {
                     if (props.original.id === 0 || props.original.isFormula) return null;
                     const intendedNbLessons = props.original.intended_nb_lessons;
-                    return <p>{props.original.prorata || intendedNbLessons} sur {intendedNbLessons}</p>;
+                    const currentProrata = props.original.prorata || intendedNbLessons;
+
+                    if (this.props.isStudentView) {
+                        return <p>{currentProrata} sur {intendedNbLessons}</p>;
+                    }
+
+                    return (
+                        <div style={{ display: "flex", alignItems: "center", fontSize: "14px" }}>
+                            <input
+                                type="number"
+                                className="form-control"
+                                style={{
+                                    width: "45px",
+                                    height: "28px",
+                                    padding: "2px 4px",
+                                    fontSize: "12px",
+                                    marginRight: "3px",
+                                    textAlign: "center",
+                                    border: "1px solid #ccc"
+                                }}
+                                value={currentProrata}
+                                min="0"
+                                max={intendedNbLessons}
+                                onChange={e => {
+                                    const newProrata = parseInt(e.target.value) || 0;
+                                    if (newProrata <= intendedNbLessons && this.props.handleChangeProrataForDesiredActivity) {
+                                        this.props.handleChangeProrataForDesiredActivity(props.original.id, newProrata);
+                                    }
+                                }}
+                            />
+                            <span>/ {intendedNbLessons}</span>
+                        </div>
+                    );
                 },
             },
             {

@@ -701,6 +701,41 @@ class PaymentsManagement extends React.Component {
         });
     }
 
+    handleChangeProrataForDesiredActivity(id, prorata) {
+        let dess = {...this.state.desiredActivities};
+        let des = _.find(dess, i => i.id == id);
+
+        if (des) {
+            dess = _.filter(dess, i => i.id != des.id);
+            des.prorata = prorata;
+            dess = [...dess, des];
+
+            fetch(`/desired_activities/${id}/update_prorata`, {
+                method: "PATCH",
+                credentials: "same-origin",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify({
+                    prorata: prorata
+                }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    this.setState({desiredActivities: dess});
+                    this.forceUpdate();
+                } else {
+                    swal("Erreur", "Impossible de mettre à jour le prorata", "error");
+                }
+            })
+            .catch(() => {
+                swal("Erreur", "Une erreur est survenue lors de la mise à jour du prorata", "error");
+            });
+        }
+    }
+
     handleSaveNewDuePayment(duePayment) {
         const schedule = this.state.schedules[duePayment.payer.id];
 
@@ -1734,7 +1769,7 @@ class PaymentsManagement extends React.Component {
                                     adhesionPrices={this.props.adhesionPrices}
                                     handleChangeAdhesionPricingChoice={(userId, evt) => this.handleChangeAdhesionPricingChoice(userId, evt)}
                                     formulas={this.props.formulas}
-                                    // handleChangeProrataForDesiredActivity={(id, prorata) => this.handleChangeProrataForDesiredActivity(id, prorata)}
+                                    handleChangeProrataForDesiredActivity={(id, prorata) => this.handleChangeProrataForDesiredActivity(id, prorata)}
                                 />
                             </div>
                         </div>

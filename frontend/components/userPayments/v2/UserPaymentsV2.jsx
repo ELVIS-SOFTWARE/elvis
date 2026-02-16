@@ -16,6 +16,27 @@ export default function UserPaymentsV2({seasons, user, is_current_user, onPayCli
     const [duePaymentsData, setDuePaymentsData] = useState([]);
     const [paymentTerms, setPaymentTerms] = useState({});
 
+    function handleChangeProrataForDesiredActivity(id, prorata) {
+        const updatedData = data.map(item => {
+            if (item.id === id) {
+                return {...item, prorata: prorata};
+            }
+            return item;
+        });
+        setData(updatedData);
+
+        api.set()
+            .success(() => {
+            })
+            .error(() => {
+                getDatas(); // Recharger les données en cas d'erreur
+                swal("Erreur", "Une erreur est survenue lors de la mise à jour du prorata", "error");
+            })
+            .patch(`/desired_activities/${id}/update_prorata`, {
+                prorata: prorata
+            });
+    }
+
     function getDatas()
     {
         api.set()
@@ -89,7 +110,39 @@ export default function UserPaymentsV2({seasons, user, is_current_user, onPayCli
                                     {data.map(d => <tr key={d.id}>
                                         <td>{d.activity}</td>
                                         <td>{d.user_full_name}</td>
-                                        <td>{d.prorata ? `${d.prorata} / ${d.intended_nb_lessons}` : ""}</td>
+                                        <td>
+                                            {d.intended_nb_lessons ? (
+                                                is_current_user ? (
+                                                    `${d.prorata || d.intended_nb_lessons} / ${d.intended_nb_lessons}`
+                                                ) : (
+                                                    <div style={{ display: "flex", alignItems: "center", fontSize: "14px" }}>
+                                                        <input
+                                                            type="number"
+                                                            className="form-control"
+                                                            style={{
+                                                                width: "45px",
+                                                                height: "28px",
+                                                                padding: "2px 4px",
+                                                                fontSize: "12px",
+                                                                marginRight: "3px",
+                                                                textAlign: "center",
+                                                                border: "1px solid #ccc"
+                                                            }}
+                                                            value={d.prorata || d.intended_nb_lessons}
+                                                            min="0"
+                                                            max={d.intended_nb_lessons}
+                                                            onChange={e => {
+                                                                const newProrata = parseInt(e.target.value) || 0;
+                                                                if (newProrata <= d.intended_nb_lessons) {
+                                                                    handleChangeProrataForDesiredActivity(d.id, newProrata);
+                                                                }
+                                                            }}
+                                                        />
+                                                        <span>/ {d.intended_nb_lessons}</span>
+                                                    </div>
+                                                )
+                                            ) : ""}
+                                        </td>
                                         <td>{d.amount} €</td>
                                     </tr>)}
                                     </tbody>
