@@ -25,7 +25,7 @@ class MessageMailer < LayoutMailer
         mail(to: emails, subject: "#{name} - #{@message.title}")
       else
         emails = @message.recipients.map { |r| r.email }
-        mail(to: emails, subject: "#{name} - #{@message.title}")
+        mail(to: @from.email, bcc: emails, subject: "#{name} - #{@message.title}")
       end
     end
   end
