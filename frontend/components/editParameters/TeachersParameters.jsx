@@ -8,13 +8,15 @@ import swal from "sweetalert2";
  * @param {boolean} teacher_can_edit_planning
  * @param {boolean} authorize_teachers
  * @param {boolean} show_teacher_contacts
+ * @param {boolean} teacher_can_manage_courses
  * @returns {JSX.Element}
  * @constructor
  */
-export default function TeachersParameters({ teacher_can_edit_planning, authorize_teachers, show_teacher_contacts }) {
+export default function TeachersParameters({ teacher_can_edit_planning, authorize_teachers, show_teacher_contacts, teacher_can_manage_courses }) {
     const [planningChecked, setPlanningChecked] = useState(teacher_can_edit_planning);
     const [permitTeacherActivities, setPermitTeacherActivities] = useState(authorize_teachers);
     const [showTeacherContacts, setShowTeacherContacts] = useState(show_teacher_contacts);
+    const [teacherCanManageCourses, setTeacherCanManageCourses] = useState(teacher_can_manage_courses);
 
     function onSubmit() {
         swal.showLoading();
@@ -48,7 +50,8 @@ export default function TeachersParameters({ teacher_can_edit_planning, authoriz
             .post("/parameters/teachers", {
                 teacher_can_edit_planning: planningChecked,
                 authorize_teachers: permitTeacherActivities,
-                show_teacher_contacts: showTeacherContacts
+                show_teacher_contacts: showTeacherContacts,
+                teacher_can_manage_courses: teacherCanManageCourses
             }, {});
     }
 
@@ -98,6 +101,20 @@ export default function TeachersParameters({ teacher_can_edit_planning, authoriz
                 </label>
             </div>
 
+            <h3>Liste des cours</h3>
+            <div className="mb-sm-3 mt-3">
+                <input
+                    type="checkbox"
+                    id="teacherCanManageCoursesCheck"
+                    checked={teacherCanManageCourses}
+                    onChange={() => setTeacherCanManageCourses(!teacherCanManageCourses)}
+                />
+                &nbsp;
+                <label className="ml-2 font-normal" htmlFor="teacherCanManageCoursesCheck">
+                    Le professeur peut gérer la liste de ses cours
+                </label>
+            </div>
+
             <button className="btn btn-success no-margin pull-right" onClick={onSubmit}>
                 Sauvegarder
             </button>
@@ -108,5 +125,6 @@ export default function TeachersParameters({ teacher_can_edit_planning, authoriz
 TeachersParameters.propTypes = {
     teacher_can_edit_planning: PropTypes.bool,
     authorize_teachers: PropTypes.bool,
-    show_teacher_contacts: PropTypes.bool
+    show_teacher_contacts: PropTypes.bool,
+    teacher_can_manage_courses: PropTypes.bool
 };

@@ -10,17 +10,28 @@ class ActivityController < ApplicationController
     @activity_refs = ActivityRef.all.includes({ activities: [], activity_ref_kind: {} })
     @seasons = Season.all_seasons_cached
     @rooms = Room.all
-    @teachers = User.teachers.all
     @evaluation_level_refs = EvaluationLevelRef.all
     @locations = Location.all
 
-    authorize! :manage, @rooms, @seasons, @activity_refs, @evaluation_level_refs
+    if @current_user.is_admin
+      @teachers = User.teachers.all
+      authorize! :manage, @rooms, @seasons, @activity_refs, @evaluation_level_refs
+    elsif @current_user.is_teacher && Parameter.get_value("teachers.teacher_can_manage_courses", default: false)
+      @teachers = [@current_user]
+    else
+      redirect_to root_path and return
+    end
   end
 
   def list
     query = get_query_from_params
 
-    authorize! :manager, query
+    if current_user.is_admin
+      authorize! :manager, query
+    elsif current_user.is_teacher && Parameter.get_value("teachers.teacher_can_manage_courses", default: false)
+    else
+      redirect_to root_path and return
+    end
 
     respond_to do |format|
       format.json { render json: activities_list_json(query) }
@@ -755,6 +766,10 @@ class ActivityController < ApplicationController
               .includes(includes_h)
 
     query = query.joins(:time_interval).where(time_intervals: { is_validated: true })
+
+    if @current_user.is_teacher && !@current_user.is_admin && Parameter.get_value("teachers.teacher_can_manage_courses", default: false)
+      query = query.joins(:teachers_activities).where(teachers_activities: { user_id: @current_user.id, is_main: true })
+    end
 
     json_query[:filtered]&.each do |filter|
       prop = filter[:id]

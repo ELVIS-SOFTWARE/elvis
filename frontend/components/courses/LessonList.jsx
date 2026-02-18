@@ -173,23 +173,22 @@ export default class LessonList extends React.Component {
 
 
     componentDidMount() {
-        this.fetchData(this.state.filter);
+        const currentSeason = this.props.seasons?.find(s => s.is_current);
 
-        api.get('/seasons?current=true')
-            .then(response => {
-                const season = response.data;
-                this.setState(
-                    { currentAppsSeason: season },
-                    () => {
-                        const newFilter = {
-                            ...this.state.filter,
-                            season_id: season.id || ""
-                        };
-                        this.fetchData(newFilter);
-                    }
-                );
-            })
-            .catch(error => console.error("Erreur :", error));
+        if (currentSeason) {
+            this.setState(
+                { currentAppsSeason: currentSeason },
+                () => {
+                    const newFilter = {
+                        ...this.state.filter,
+                        season_id: currentSeason.id || ""
+                    };
+                    this.fetchData(newFilter);
+                }
+            );
+        } else {
+            this.fetchData(this.state.filter);
+        }
     }
 
     componentDidUpdate() {
@@ -327,7 +326,7 @@ export default class LessonList extends React.Component {
                 "value",
             );
             const season =
-                seasonId && this.props.seasons.find(s => s.id == seasonId);
+                seasonId && this.props.seasons?.find(s => s.id == seasonId);
             const refDateFilter = _.find(
                 filter.filtered,
                 f => f.id === "reference_date",
@@ -596,7 +595,7 @@ export default class LessonList extends React.Component {
             t => t.last_name,
         ).map(optionMapper({ label: t => `${t.last_name} ${t.first_name}` }));
 
-        const seasonsOptions = _.sortBy(this.props.seasons, s => s.label).map(
+        const seasonsOptions = _.sortBy(this.props.seasons || [], s => s.label).map(
             optionMapper(),
         );
 
@@ -792,7 +791,7 @@ export default class LessonList extends React.Component {
                     </select>
                 ),
             },
-            {
+            ...(!this.props.isTeacherView ? [{
                 Header: "Professeur",
                 id: "teacher_id",
                 maxWidth: 200,
@@ -807,7 +806,7 @@ export default class LessonList extends React.Component {
                         {teachersOptions}
                     </select>
                 ),
-            },
+            }] : []),
             {
                 Header: "Salle",
                 id: "room",
@@ -963,7 +962,7 @@ export default class LessonList extends React.Component {
                 Cell: c =>
                     TimeIntervalHelpers.levelDisplayForActivity(
                         c.value,
-                        this.props.seasons,
+                        this.props.seasons || [],
                     ),
             },
             {
@@ -974,7 +973,7 @@ export default class LessonList extends React.Component {
                 Cell: c => {
                     const season = TimeIntervalHelpers.getSeasonFromDate(
                         c.value && c.value.start,
-                        this.props.seasons
+                        this.props.seasons || []
                     );
                     return (season && season.label) || "ø";
                 },
