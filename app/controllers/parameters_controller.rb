@@ -284,29 +284,46 @@ class ParametersController < ApplicationController
   end
 
   def teachers_parameters_edit
+    @current_user = current_user
     @authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
     @teacher_can_edit_planning = Parameter.get_value("planning.teacher_can_edit_planning", default: false)
     @show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
+    @teacher_can_manage_courses = Parameter.get_value("teachers.teacher_can_manage_courses", default: false)
+
+    authorize! :manage, @current_user.is_admin
   end
 
   def teachers_parameters_update
-    authorize_teachers = Parameter.find_or_create_by label: "activity_applications.authorize_teachers", value_type: "boolean"
-    authorize_teachers.value = (params[:authorize_teachers]&.to_s == "true").to_s
-    res = authorize_teachers.save
+    authorize! :manage, current_user.is_admin
 
-    teacher_can_edit_planning = Parameter.find_or_create_by label: "planning.teacher_can_edit_planning", value_type: "boolean"
-    teacher_can_edit_planning.value = (params[:teacher_can_edit_planning]&.to_s == "true").to_s
-    teacher_can_edit_planning.save!
+    begin
+      authorize_teachers = Parameter.find_or_create_by label: "activity_applications.authorize_teachers", value_type: "boolean"
+      authorize_teachers.value = (params[:authorize_teachers]&.to_s == "true").to_s
+      authorize_teachers.save!
 
-    show_teacher_contacts = Parameter.find_or_create_by(label: "teachers.show_teacher_contacts", value_type: "boolean")
-    show_teacher_contacts.value = (params[:show_teacher_contacts]&.to_s == "true").to_s
-    show_teacher_contacts.save!
+      teacher_can_edit_planning = Parameter.find_or_create_by label: "planning.teacher_can_edit_planning", value_type: "boolean"
+      teacher_can_edit_planning.value = (params[:teacher_can_edit_planning]&.to_s == "true").to_s
+      teacher_can_edit_planning.save!
 
-    if res
-      MenuGenerator.regenerate_menus
+      show_teacher_contacts = Parameter.find_or_create_by(label: "teachers.show_teacher_contacts", value_type: "boolean")
+      show_teacher_contacts.value = (params[:show_teacher_contacts]&.to_s == "true").to_s
+      show_teacher_contacts.save!
+
+      teacher_can_manage_courses = Parameter.find_or_create_by(label: "teachers.teacher_can_manage_courses", value_type: "boolean")
+      teacher_can_manage_courses.value = (params[:teacher_can_manage_courses]&.to_s == "true").to_s
+      teacher_can_manage_courses.save!
+
+      begin
+        MenuGenerator.regenerate_menus
+      rescue => menu_error
+        Rails.logger.warn "Problème lors de la régénération des menus (ignoré): #{menu_error.message}"
+      end
+
+      render json: { success: true }
+    rescue => e
+      Rails.logger.error "Erreur lors de la sauvegarde des paramètres professeurs: #{e.message}"
+      render json: { success: false }
     end
-
-    render json: { success: res }
   end
 
   private
