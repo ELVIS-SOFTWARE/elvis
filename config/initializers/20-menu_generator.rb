@@ -281,6 +281,13 @@ module MenuGenerator
       { id: current_user&.id }
     end
 
+    teacher_courses = Elvis::MenuManager::MenuItem.new(
+      :teacher_courses,
+      "activity",
+      "index",
+      { caption: "Liste des cours", icon: "fa-list", user_role: "!!teacher", position: 6 }
+    )
+
 
     Elvis::MenuManager.prepend_menu_item :side_menu, planning
     Elvis::MenuManager.prepend_menu_item :side_menu, teacher_inscriptions if Parameter.get_value("activity_applications.authorize_teachers", default: false)
@@ -288,6 +295,7 @@ module MenuGenerator
     Elvis::MenuManager.prepend_menu_item :side_menu, disponibility
     Elvis::MenuManager.prepend_menu_item :side_menu, evaluation
     Elvis::MenuManager.prepend_menu_item :side_menu, planning_simulation
+    Elvis::MenuManager.prepend_menu_item :side_menu, teacher_courses if Parameter.get_value("teachers.teacher_can_manage_courses", default: false)
 
     # User menu
 

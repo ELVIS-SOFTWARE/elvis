@@ -1,10 +1,11 @@
 <div class="row wrapper border-bottom white-bg page-heading m-b-md">
     <h2>
         Liste des cours
-        <%= link_to addCourse_path, class: "btn btn-sm btn-primary pull-right" do %>
-            <i class="fas fa-plus"></i> Ajouter un cours
+        <% unless @current_user.is_teacher && !@current_user.is_admin %>
+            <%= link_to addCourse_path, class: "btn btn-sm btn-primary pull-right" do %>
+                <i class="fas fa-plus"></i> Ajouter un cours
+            <% end %>
         <% end %>
-
     </h2>
 </div>
 
@@ -24,6 +25,8 @@
                     rooms: @rooms,
                     locations: @locations,
                     evaluationLevelRefs: @evaluation_level_refs,
+                    currentUser: @current_user,
+                    isTeacherView: @current_user.is_teacher && !@current_user.is_admin
                 } %>
             </div>
         </div>
