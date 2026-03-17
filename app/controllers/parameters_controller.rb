@@ -309,6 +309,20 @@ class ParametersController < ApplicationController
     render json: { success: res }
   end
 
+  def formules_parameters_edit
+    @show_formules = Parameter.get_value("activity.show_formules", default: false)
+  end
+
+  def formules_parameters_update
+    show_formules = Parameter.find_or_create_by(label: "activity.show_formules", value_type: "boolean")
+    show_formules.value = (params[:show_formules]&.to_s == "true").to_s
+    show_formules.save!
+
+    MenuGenerator.regenerate_menus
+
+    render json: { success: true }
+  end
+
   private
 
   def set_base_parameters
@@ -338,6 +352,11 @@ class ParametersController < ApplicationController
         title: "Notifications",
         text: "Paramétrez et modifiez vos templates emails.",
         link: url_for(controller: 'notification_templates', action: 'index', only_path: true)
+      },
+      {
+        title: "Formules",
+        text: "Activez ou désactivez l'affichage des formules.",
+        link: url_for(action: :formules_parameters_edit, only_path: true)
       },
       {
         title: "Professeurs",
