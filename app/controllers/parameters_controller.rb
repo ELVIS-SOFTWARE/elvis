@@ -284,46 +284,77 @@ class ParametersController < ApplicationController
   end
 
   def teachers_parameters_edit
+    @current_user = current_user
     @authorize_teachers = Parameter.get_value("activity_applications.authorize_teachers", default: false)
     @teacher_can_edit_planning = Parameter.get_value("planning.teacher_can_edit_planning", default: false)
     @show_teacher_contacts = Parameter.get_value("teachers.show_teacher_contacts", default: false)
+    @teacher_can_manage_courses = Parameter.get_value("teachers.teacher_can_manage_courses", default: false)
+
+    authorize! :manage, @current_user.is_admin
   end
 
   def teachers_parameters_update
-    authorize_teachers = Parameter.find_or_create_by label: "activity_applications.authorize_teachers", value_type: "boolean"
-    authorize_teachers.value = (params[:authorize_teachers]&.to_s == "true").to_s
-    res = authorize_teachers.save
+    authorize! :manage, current_user.is_admin
 
-    teacher_can_edit_planning = Parameter.find_or_create_by label: "planning.teacher_can_edit_planning", value_type: "boolean"
-    teacher_can_edit_planning.value = (params[:teacher_can_edit_planning]&.to_s == "true").to_s
-    teacher_can_edit_planning.save!
+    begin
+      authorize_teachers = Parameter.find_or_create_by label: "activity_applications.authorize_teachers", value_type: "boolean"
+      authorize_teachers.value = (params[:authorize_teachers]&.to_s == "true").to_s
+      authorize_teachers.save!
 
-    show_teacher_contacts = Parameter.find_or_create_by(label: "teachers.show_teacher_contacts", value_type: "boolean")
-    show_teacher_contacts.value = (params[:show_teacher_contacts]&.to_s == "true").to_s
-    show_teacher_contacts.save!
+      teacher_can_edit_planning = Parameter.find_or_create_by label: "planning.teacher_can_edit_planning", value_type: "boolean"
+      teacher_can_edit_planning.value = (params[:teacher_can_edit_planning]&.to_s == "true").to_s
+      teacher_can_edit_planning.save!
 
-    if res
-      MenuGenerator.regenerate_menus
+      show_teacher_contacts = Parameter.find_or_create_by(label: "teachers.show_teacher_contacts", value_type: "boolean")
+      show_teacher_contacts.value = (params[:show_teacher_contacts]&.to_s == "true").to_s
+      show_teacher_contacts.save!
+
+      teacher_can_manage_courses = Parameter.find_or_create_by(label: "teachers.teacher_can_manage_courses", value_type: "boolean")
+      teacher_can_manage_courses.value = (params[:teacher_can_manage_courses]&.to_s == "true").to_s
+      teacher_can_manage_courses.save!
+
+
+      begin
+        MenuGenerator.regenerate_menus
+      rescue => menu_error
+        Rails.logger.warn "Problème lors de la régénération des menus (ignoré): #{menu_error.message}"
+      end
+
+      render json: { success: true }
+    rescue => e
+      Rails.logger.error "Erreur lors de la sauvegarde des paramètres professeurs: #{e.message}"
+      render json: { success: false }
     end
-
-    render json: { success: res }
   end
 
   def formules_parameters_edit
+    @current_user = current_user
     @show_formules = Parameter.get_value("activity.show_formules", default: false)
+
+    authorize! :manage, @current_user.is_admin
   end
 
   def formules_parameters_update
-    show_formules = Parameter.find_or_create_by(label: "activity.show_formules", value_type: "boolean")
-    show_formules.value = (params[:show_formules]&.to_s == "true").to_s
-    show_formules.save!
+    authorize! :manage, current_user.is_admin
 
-    MenuGenerator.regenerate_menus
+    begin
+      show_formules = Parameter.find_or_create_by(label: "activity.show_formules", value_type: "boolean")
+      show_formules.value = (params[:show_formules]&.to_s == "true").to_s
+      show_formules.save!
 
-    render json: { success: true }
+      begin
+        MenuGenerator.regenerate_menus
+      rescue => menu_error
+        Rails.logger.warn "Problème lors de la régénération des menus (ignoré): #{menu_error.message}"
+      end
+
+      render json: { success: true }
+    rescue => e
+      Rails.logger.error "Erreur lors de la sauvegarde des paramètres formules: #{e.message}"
+      render json: { success: false }
+    end
   end
 
-  private
 
   def set_base_parameters
     @parameters ||= {}
@@ -337,33 +368,36 @@ class ParametersController < ApplicationController
                                     link: url_for(action: :school_parameters_edit, only_path: true)
                                   })
 
-    @parameters[:personnalisation].prepend(
-      {
-        title: "Emails",
-        text: "Paramétrez votre serveur d'envoi de mails, l'adresse de l'expéditeur et vos destinataires.",
-        link: url_for(action: :mails_parameters_edit, only_path: true)
-      },
-      {
-        title: "Exports CSV",
-        text: "Paramétrez vos exports CSV.",
-        link: url_for(action: :csv_parameters_edit, only_path: true)
-      },
-      {
-        title: "Notifications",
-        text: "Paramétrez et modifiez vos templates emails.",
-        link: url_for(controller: 'notification_templates', action: 'index', only_path: true)
-      },
-      {
-        title: "Formules",
-        text: "Activez ou désactivez l'affichage des formules.",
-        link: url_for(action: :formules_parameters_edit, only_path: true)
-      },
-      {
-        title: "Professeurs",
-        text: "Gérez les permissions au planning et les informations affichées à l'élève.",
-        link: url_for(action: :teachers_parameters_edit, only_path: true)
-      }
-    )
+    @parameters[:personnalisation] << {
+      title: "Emails",
+      text: "Paramétrez votre serveur d'envoi de mails, l'adresse de l'expéditeur et vos destinataires.",
+      link: url_for(action: :mails_parameters_edit, only_path: true)
+    }
+
+    @parameters[:personnalisation] << {
+      title: "Exports CSV",
+      text: "Paramétrez vos exports CSV.",
+      link: url_for(action: :csv_parameters_edit, only_path: true)
+    }
+
+    @parameters[:personnalisation] << {
+      title: "Notifications",
+      text: "Paramétrez et modifiez vos templates emails.",
+      link: url_for(controller: 'notification_templates', action: 'index', only_path: true)
+    }
+
+
+    @parameters[:personnalisation] << {
+      title: "Professeurs",
+      text: "Gérez les permissions au planning et les informations affichées à l'élève.",
+      link: url_for(action: :teachers_parameters_edit, only_path: true)
+    }
+
+    @parameters[:personnalisation] << {
+      title: "Formules",
+      text: "Activez ou désactivez l'affichage des formules.",
+      link: url_for(action: :formules_parameters_edit, only_path: true)
+    }
 
   end
 end
