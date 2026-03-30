@@ -36,8 +36,9 @@ class Ability
         # can :manage, PracticeSession
     elsif user.teacher?
       can [:read, :edit], Planning, user_id: user.id
-        can :manage, User, id: user.id
-        can [:read], User
+      can :manage, User, id: user.id
+      can [:read], User
+      can :write, Message
     end
     # for all users :
     family_ids = user.family.uniq.pluck(:id)
