@@ -1334,7 +1334,7 @@ end
         "family_members:user_#{reference_user.id}:season_#{@season.id}",
         expires_in: 15.minutes
       ) do
-        get_all_family_members(reference_user)
+        get_all_attached_users(reference_user)
       end
 
       member_ids = all_family_members.map(&:id)
@@ -1497,30 +1497,30 @@ end
     @default_activity_status_id = set_status&.parse&.positive? ? set_status.parse : ActivityApplicationStatus::TREATMENT_PENDING_ID
   end
 
-  def get_all_family_members(reference_user)
+  def get_all_attached_users(reference_user)
     family_member_ids = Set.new([reference_user.id])
 
-    family_member_ids.merge(
-      FamilyMemberUser.for_season_id(@season.id)
-                      .where(user_id: reference_user.id)
-                      .pluck(:member_id)
-    )
+    # family_member_ids.merge(
+    #   FamilyMemberUser.for_season_id(@season.id)
+    #                   .where(user_id: reference_user.id)
+    #                   .pluck(:member_id)
+    # )
 
     family_member_ids.merge(
       reference_user.attached_accounts.pluck(:id)
     )
 
-    if reference_user.attached_to_id && (@current_user.is_admin || reference_user.attached_to_id == @current_user.id)
-      family_member_ids.add(reference_user.attached_to_id)
-    end
+    # if reference_user.attached_to_id && (@current_user.is_admin || reference_user.attached_to_id == @current_user.id)
+    #   family_member_ids.add(reference_user.attached_to_id)
+    # end
 
-    paying_user_ids = reference_user.get_users_paying_for_self.pluck(:id) - [reference_user.id]
+    # paying_user_ids = reference_user.get_users_paying_for_self.pluck(:id) - [reference_user.id]
 
-    if @current_user.is_admin
-      family_member_ids.merge(paying_user_ids)
-    elsif paying_user_ids.include?(@current_user.id)
-      family_member_ids.add(@current_user.id)
-    end
+    # if @current_user.is_admin
+    #   family_member_ids.merge(paying_user_ids)
+    # elsif paying_user_ids.include?(@current_user.id)
+    #   family_member_ids.add(@current_user.id)
+    # end
 
     User.where(id: family_member_ids.to_a).to_a
   end

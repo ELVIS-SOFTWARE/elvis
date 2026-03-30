@@ -177,8 +177,8 @@ class PreApplication extends React.Component {
                 {hasFamilyCurrentActivities && (
                     <div className="row col-md-12 mb-4 p-0">
                         <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
-                            Activités actuelles de la famille
-                            (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
+                            Activités actuelles pour votre compte (et vos comptes rattachés) -
+                            saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`}
                         </h3>
                         <div className="col-sm-12 col-xl-6 p-0">
                             <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
