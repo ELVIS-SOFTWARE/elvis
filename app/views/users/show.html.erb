@@ -223,7 +223,7 @@
           </div>
         <% end %>
       <% end %>
-      <% if current_user.admin? and !@user.teacher? and !@user.admin? %>
+      <% if current_user.admin? %> <%# and !@user.teacher? and !@user.admin? %>
           <div class="ibox-content">
             <%# PAYMENT %>
             <%# <div class="info-group"> %>
@@ -233,19 +233,17 @@
             <%# </p> %>
             <%# </div> %>
             <%# ACTIVITY APPLICATION LINK %>
-            <% if current_user.admin? and !@user.teacher? and !@user.admin? %>
-              <% unless @user.activity_applications.empty? %> <%# si l'utilisateur a des demandes d'inscription %>
-                <%= link_to(activities_application_path(@user.activity_applications.sort_by { |aa| aa.created_at }.last), class: "btn btn-primary btn-block") do %>
-                  <i class="fas  fa-clipboard"></i>
-                  Demande d'inscription
+            <% unless @user.activity_applications.empty? %> <%# si l'utilisateur a des demandes d'inscription %>
+              <%= link_to(activities_application_path(@user.activity_applications.sort_by { |aa| aa.created_at }.last), class: "btn btn-primary btn-block") do %>
+                <i class="fas  fa-clipboard"></i>
+                Demande d'inscription
+              <% end %>
+            <% end %>
+            <% if @user.attached_to_id.nil? %> <%# si l'utilisateur n'est pas un compte rattaché %>
+                <%= link_to(new_application_path(@user), class: "btn btn-primary btn-block m-t-sm") do %>
+                  <%# <i class="fas  fa-plus"></i> %>
+                  Pré-inscriptions
                 <% end %>
-              <% end %>
-              <% if @user.attached_to_id.nil? %> <%# si l'utilisateur n'est pas un compte rattaché %>
-                  <%= link_to(new_application_path(@user), class: "btn btn-primary btn-block m-t-sm") do %>
-                    <%# <i class="fas  fa-plus"></i> %>
-                    Pré-inscriptions
-                  <% end %>
-              <% end %>
             <% end %>
           </div>
       <% end %>
