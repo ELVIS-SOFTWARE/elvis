@@ -553,6 +553,8 @@ Rails.application.routes.draw do
   post "/parameters/rules_of_procedure", to: "parameters#rules_parameters_update"
   get "/parameters/csv_export", to: "parameters#csv_parameters_edit"
   post "/parameters/csv_export", to: "parameters#csv_parameters_update"
+  get "/parameters/formules", to: "parameters#formules_parameters_edit"
+  post "/parameters/formules", to: "parameters#formules_parameters_update"
   get "/parameters/teachers", to: "parameters#teachers_parameters_edit"
   post "/parameters/teachers", to: "parameters#teachers_parameters_update"
 
