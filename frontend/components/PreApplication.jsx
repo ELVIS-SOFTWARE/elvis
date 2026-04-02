@@ -125,10 +125,17 @@ class PreApplication extends React.Component {
                     {isMainAccount ? this.renderMainAccountView(allowPreApplication) : this.renderAttachedAccountView(allowPreApplication)}
 
                     <div className="row">
-                        <a href={user_path} className="btn btn-primary btn-sm btn-outline mt-5"
-                           style={{borderRadius: "8px"}}>
-                            <i className="fas fa-users"/> Retour vers mon profil
-                        </a>
+                        {this.props.user.id == this.props.current_user.id ? 
+                            <a href={user_path} className="btn btn-primary btn-sm btn-outline mt-5"
+                                style={{borderRadius: "8px"}}>
+                                <i className="fas fa-users"/> Retour vers mon profil
+                            </a>
+                        :
+                            <a href={'/users/' + this.props.user.id} className="btn btn-primary btn-sm btn-outline mt-5"
+                                style={{borderRadius: "8px"}}>
+                                <i className="fas fa-users"/> Retour vers le profil
+                            </a>
+                        }
                     </div>
                 </div>
             </React.Fragment>
@@ -177,8 +184,12 @@ class PreApplication extends React.Component {
                 {hasFamilyCurrentActivities && (
                     <div className="row col-md-12 mb-4 p-0">
                         <h3 style={{color: "#8AA4B1", fontWeight: "bold"}}>
-                            Activités actuelles de la famille
-                            (saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`})
+                            {this.props.user.id == this.props.current_user.id ? 
+                            'Activités actuelles pour mon compte (et mes comptes rattachés) - '
+                            :
+                            'Activités actuelles pour le compte (et ses comptes rattachés) - '
+                            }
+                            saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`}
                         </h3>
                         <div className="col-sm-12 col-xl-6 p-0">
                             <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
