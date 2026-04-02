@@ -495,12 +495,12 @@ export default class LessonList extends React.Component {
                         >
                             Envoyer un message
                         </button>
-                        <button
+                       {/* <button
                             className="btn btn-sm btn-danger m-r"
                             onClick={() => this.bulkDelete()}
                         >
                             Supprimer
-                        </button>
+                        </button>*/}
                     </div>
                 </div>
             </div>
