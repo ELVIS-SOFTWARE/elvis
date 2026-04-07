@@ -54,7 +54,7 @@
     "isomorphic-dompurify": "0.20.0",
     "isomorphic-fetch": "^2.2.1",
     "isomorphic-unfetch": "^3.0.0",
-    "jQuery-QueryBuilder": "https://github.com/SIXMON/jQuery-QueryBuilder#master",
+    "jQuery-QueryBuilder": "3.0.0",
     "jQuery-QueryBuilder-Elasticsearch": "https://github.com/piotch/jQuery-QueryBuilder-Elasticsearch",
     "jquery": "^3.3.1",
     "jquery-ujs": "^1.2.2",
