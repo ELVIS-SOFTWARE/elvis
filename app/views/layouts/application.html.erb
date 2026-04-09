@@ -47,18 +47,18 @@
           <div class="nav-header dropdown profile-element">
 
             <% if @school_informations&.logo&.attached? %>
-              <span><%= image_tag @school_informations.logo, class: "img-circle", width: 64, height: 64 %></span>
+              <span><%= image_tag @school_informations.logo, class: "img-circle", width: 48, height: 48 %></span>
             <% else %>
-              <span><img alt="Elvis" src="/powered_by.png" width="64" height="64" class="img-circle"/></span>
+              <span><img alt="Elvis" src="/powered_by.png" width="48" height="48" class="img-circle"/></span>
             <% end %>
 
           </div>
 
           <div class="logo-element">
             <% if @school_informations&.logo&.attached? %>
-              <%= image_tag @school_informations.logo, class: "img-circle", width: 40 %>
+              <%= image_tag @school_informations.logo, class: "img-circle", width: 32 %>
             <% else %>
-              <img src="/powered_by.png" alt="Elvis" width="40">
+              <img src="/powered_by.png" alt="Elvis" width="32">
             <% end %></div>
         </li>
 
