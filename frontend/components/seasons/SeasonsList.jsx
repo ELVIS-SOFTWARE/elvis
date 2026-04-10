@@ -5,7 +5,6 @@ require("moment/locale/fr");
 
 import ReactTable from "react-table";
 import { csrfToken } from "../utils";
-import SeasonSwitch from "./SeasonSwitch";
 import RemoveComponent from "../RemoveComponent";
 
 class SeasonsList extends React.Component {
@@ -152,13 +151,13 @@ class SeasonsList extends React.Component {
 
     render() {
         const columns = [
-            {
-                id: "id",
-                Header: "#",
-                accessor: d => d.id,
-                width: 50,
-                maxWidth: 100
-            },
+            // {
+            //     id: "id",
+            //     Header: "#",
+            //     accessor: d => d.id,
+            //     width: 50,
+            //     maxWidth: 100
+            // },
             {
                 id: "label",
                 Header: "Label",
@@ -182,20 +181,37 @@ class SeasonsList extends React.Component {
             },
             {
                 id: "is_current",
-                Header: "En cours ?",
+                Header: "Statut",
                 accessor: d => d.is_current,
                 Cell: props => {
+                    if (props.original.is_current) {
+                        return (
+                            <div style={{ 'textAlign': 'center' }}>
+                                <span style={{
+                                    backgroundColor: '#27ae60',
+                                    color: 'white',
+                                    padding: '6px 12px',
+                                    borderRadius: '4px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    display: 'inline-block'
+                                }}>
+                                    <i className="fas fa-check-circle"></i> Active
+                                </span>
+                            </div>
+                        );
+                    }
 
                     return (
                         <div style={{ 'textAlign': 'center' }}>
-                            <SeasonSwitch
-                                season_id={props.original.id}
-                                checked={props.original.is_current}
-                                disabled={props.original.is_current}
-                                handleSwitch={() => this.switchToSeason(props.original.id)} />
+                            <button
+                                className="btn btn-xs btn-info"
+                                onClick={() => this.switchToSeason(props.original.id)}
+                            >
+                                <i className="fas fa-play-circle"></i> Activer
+                            </button>
                         </div>
-
-                    )
+                    );
                 },
                 sortable: false,
                 filterable: false,
@@ -205,13 +221,13 @@ class SeasonsList extends React.Component {
                 Header: "Suivante",
                 accessor: d => d.next_season_id ? d.next_season.label : "-",
             },
-            {
-                id: "is_off",
-                Header: "Archivée ?",
-                accessor: d => d.is_off ? "oui" : "non",
-                sortable: false,
-                filterable: false,
-            },
+            // {
+            //     id: "is_off",
+            //     Header: "Archivée ?",
+            //     accessor: d => d.is_off ? "oui" : "non",
+            //     sortable: false,
+            //     filterable: false,
+            // },
             {
                 id: "actions",
                 Header: "Actions",
