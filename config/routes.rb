@@ -265,6 +265,11 @@ Rails.application.routes.draw do
 
   post "/users/createStudent", to: "users#createStudent"
 
+  # attach view
+
+  get "/users/:id/attach_view", to: "users#attach_view"
+  get "/users/:id/get_attached_users", to: "users#get_attached_users"
+
   #  ===================
   # ADHESIONS
   #  ===================

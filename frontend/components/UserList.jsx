@@ -353,6 +353,7 @@ class UserList extends React.Component {
                 ),
             },
             {
+                width: 200,
                 id: "attached",
                 Header: "Type de compte",
                 sortable: false,
@@ -398,6 +399,7 @@ class UserList extends React.Component {
                 Header: "Date de naissance",
                 id: "birthday",
                 accessor: "birthday",
+                width: 150,
                 Cell: props => {
                     if (props.original.birthday) {
                         return (
@@ -441,6 +443,7 @@ class UserList extends React.Component {
                             </div>
 
                             <div
+                                className="m-r"
                                 style={{
                                     width: "85px",
                                     display: "inline-block",
@@ -459,6 +462,23 @@ class UserList extends React.Component {
                                     ) : (
                                         ""
                                     )}
+                            </div>
+                            <div
+                                style={{
+                                    display: "inline-block",
+                                }}
+                            >
+                                { !props.original.attached_to_id ?
+                                <a
+                                    href={`/users/${props.original.id}/attach_view`}
+                                    className="btn btn-xs btn-primary m-r-sm m-b-sm"
+                                >
+                                    <i className="fas fa-user-friends"/>
+                                    &nbsp; Rattachements
+                                </a>
+                                :
+                                ''
+                                }
                             </div>
                         </div>
                     );
