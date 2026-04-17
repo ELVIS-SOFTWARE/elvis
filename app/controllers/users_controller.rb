@@ -159,6 +159,8 @@ class UsersController < ApplicationController
         end
       when "adherent_number"
         query = query.where("adherent_number = ?", filter[:value].to_i)
+      when "id"
+        query = query.where("id = ?", filter[:value].to_i)
       when "attached"
         query = filter[:value] == "true" ? query.where(attached_to_id: nil) : query.where.not(attached_to_id: nil) unless "#{filter[:value]}".empty?
       else
@@ -1745,7 +1747,8 @@ end
     ActiveRecord::Base.transaction do
       (params[:users] || []).each do |u|
         user_to_attach = User.find(u[:id])
-        next if user_to_attach.nil? || user_to_attach.attached? || user_to_attach.id == user.id
+        #next if user_to_attach.nil? || user_to_attach.attached? || user_to_attach.id == user.id
+        next if user_to_attach.nil? || user_to_attach.id == user.id
 
         user_to_attach.attached_to = user
         user_to_attach.email = u[:email]
@@ -1758,6 +1761,8 @@ end
   end
 
   def detach_user
+    authorize! :manage, @current_user.is_admin
+
     user_to_detach = User.find(params[:id])
 
     render json: {message: "user not found"}, status: :not_found and return if user_to_detach.nil?
@@ -1769,36 +1774,54 @@ end
 
     if user_to_detach.save
 
-      DeviseMailer.confirmation_instructions(user_to_detach, user_to_detach.confirmation_token).deliver_later
-
-      if params[:from] == "family_link"
-        unless params[:addFamilyLink]
-          family_links = user_to_detach.family_links
-
-          links_to_deletes = family_links.select { |fl| fl.user_id == old_main_user.id || fl.member_id == old_main_user.id }
-
-          FamilyMemberUser.where(id: links_to_deletes.map(&:id)).delete_all
-        end
-      else
-        if params[:addFamilyLink]
-          is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
-            [ActiveSupport::HashWithIndifferentAccess.new(old_main_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
-            user_to_detach,
-            Season.current,
-            send_confirmation: true
-          )
-
-          unless is_created
-            render json: { message: "Le lien familial n'as pus être créer mais l'utilisateur à bien été détaché" }, status: :unprocessable_entity
-            return
-          end
-        end
+      if params[:sendemail]
+        DeviseMailer.confirmation_instructions(user_to_detach, user_to_detach.confirmation_token).deliver_later
       end
+
+      # if params[:from] == "family_link"
+      #   unless params[:addFamilyLink]
+      #     family_links = user_to_detach.family_links
+
+      #     links_to_deletes = family_links.select { |fl| fl.user_id == old_main_user.id || fl.member_id == old_main_user.id }
+
+      #     FamilyMemberUser.where(id: links_to_deletes.map(&:id)).delete_all
+      #   end
+      # else
+      #   if params[:addFamilyLink]
+      #     is_created = FamilyMemberUsers.addFamilyMemberWithConfirmation(
+      #       [ActiveSupport::HashWithIndifferentAccess.new(old_main_user.as_json.merge({link: params[:link], is_paying_for: params[:is_paying_for], is_legal_referent: params[:is_legal_referent]}))],
+      #       user_to_detach,
+      #       Season.current,
+      #       send_confirmation: true
+      #     )
+
+      #     unless is_created
+      #       render json: { message: "Le lien familial n'a pu être créé mais l'utilisateur à bien été détaché" }, status: :unprocessable_entity
+      #       return
+      #     end
+      #   end
+      # end
 
       render json: {message: "success"}, status: :ok
     else
       render json: {message: user_to_detach.errors.full_messages}, status: :unprocessable_entity
     end
+  end
+
+  def attach_view
+    authorize! :manage, @current_user.is_admin
+    @current_user = current_user
+    @user = User.find(params[:id])
+    @referent_user = @user.attached_to #si compte rattaché, on trouve le compte principal
+  end
+
+  def get_attached_users
+    authorize! :manage, @current_user.is_admin
+    user_id = params[:id]
+
+    attached_users = User.where(attached_to_id: user_id).select(:id, :first_name, :last_name, :email, :attached_to_id)
+
+    render json: {attached_users: attached_users}
   end
 
   private

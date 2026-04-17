@@ -91,16 +91,16 @@
                     </div>
 
                     <% if @current_user.is_admin or (@user.id == @current_user.id) or (data[:user].id == @current_user.id) %>
-                        <% if @current_user.is_admin %>
+                        <!--<% if @current_user.is_admin %>
                           <div class="col-sm-2 lienFamilial border-right py-1" style="flex:1">
                             <% if data[:attached_to].present? %>
                               <h4> Rattachement </h4>
-                              <%= react_component("detachAccount", {from: "family_link", user: data[:user].as_json(methods: %i[family_links_with_user attached_to]) }) %>
+                              <%= react_component("DetachAccount", {from: "family_link", user: data[:user].as_json(methods: %i[family_links_with_user attached_to]) }) %>
                             <% else %>
                               <h4>Utilisateur autonome</h4>
                             <% end %>
                           </div>
-                        <% end %>
+                        <% end %>-->
 
                         <div class="col-sm-3 lienFamilial py-1" style="flex:1">
                           <% if data[:fml].present? %>

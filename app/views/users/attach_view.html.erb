@@ -1,0 +1,29 @@
+<div class="row wrapper border-bottom white-bg page-heading m-b-md">
+    <h2>
+        Rattachements de
+        <a href="/users/<%= @user.id %>">
+            <%= @user.first_name %> <%= @user.last_name.upcase %>
+        </a>
+    </h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <% if @user.attached_to_id && @referent_user %>
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h4>Ce compte est rattaché à
+                        <a href="/users/<%= @user.attached_to_id %>/attach_view">
+                            <%= @referent_user.first_name %> <%= @referent_user.last_name %>
+                        </a>
+                    </h4>
+                </div>
+            </div>
+        <% else %>
+            <%= react_component("UserAttach",
+            {  current_user: @current_user,
+                user: @user,
+            }) %>
+        <% end %>
+    </div>
+</div>
