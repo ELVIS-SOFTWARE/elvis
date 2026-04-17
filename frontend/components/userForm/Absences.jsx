@@ -186,7 +186,7 @@ export default class Absences extends React.Component
                 <h4 className="font-bold my-4">{this.state.absences.length} absences au total</h4>
             </div>
             <div className="col-sm-6 text-right my-3">
-                <select className="custom-select" onChange={(event) => {
+                <select className="custom-select" defaultValue={this.state.current_season.id} onChange={(event) => {
                     this.setState({current_season: this.props.seasons.filter(season => season.id === parseInt(event.target.value))[0]}, () => {
                         this.fetchData(this.state.filter, null);
                     });
@@ -200,7 +200,7 @@ export default class Absences extends React.Component
                     data={this.state.absences}
                     columns={this.state.tabCols}
                     filterable
-                    defaultPageSize={10}
+                    defaultPageSize={100}
                     previousText="Précédent"
                     nextText="Suivant"
                     loadingText="Chargement..."
