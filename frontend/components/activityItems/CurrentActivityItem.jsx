@@ -138,6 +138,8 @@ class CurrentActivityItem extends React.Component {
             authToken,
         } = this.props;
 
+        let inlineButton = false;
+
         let isPreapplicationEnabled = false;
         if (this.state.preApplicationActivity !== undefined) {
             isPreapplicationEnabled =
@@ -187,21 +189,27 @@ class CurrentActivityItem extends React.Component {
                 nextActivityRefKinds = nextActivityRefKinds.concat(timeslotActivities);
                 nextActivityRefKinds = _.uniqBy(nextActivityRefKinds, "id");
 
+                inlineButton = false;
+
                 actionButtons =
                     <Fragment>
-                        {StopButton}
+                        <div className="d-flex flex-column flex-space-between align-items-end">
                         {nextActivityRefKinds.map(activity =>
-                            <a
+                            <a  key={activity.to.id}
                                 href={`/inscriptions/new/${user.id}/${this.state.preApplicationActivity.id
                                 }/${activity.to.id}/${PRE_APPLICATION_ACTIONS.PURSUE_CHILDHOOD}?auth_token=${csrfToken}`}
-                                className="btn btn-info ml-2 font-weight-bold">
-                                S'inscrire à l'activité&nbsp;
-                                {activity.to.display_name}
+                                className="btn btn-info mb-2 font-weight-bold">
+                                <div className="flex-xl-row flex-lg-row flex-column">
+                                    <div className="mr-xl-2 mr-lg-2 m-0">S'inscrire à l'activité</div>
+                                    <div>{activity.to.display_name}</div>
+                                </div>
                             </a>
                         )}
-
+                        </div>
                     </Fragment>;
             } else {
+                inlineButton = true;
+
                 actionButtons =
                     <React.Fragment>
                         {StopButton}
@@ -219,7 +227,7 @@ class CurrentActivityItem extends React.Component {
 
         return (
             <React.Fragment>
-                <tr>
+                <tr className="border-top">
                     <td className="font-weight-bold" style={{color: "#00283B"}}>
                         {data.activity_ref.label}
                     </td>
@@ -227,9 +235,20 @@ class CurrentActivityItem extends React.Component {
                         {this.props.user.first_name} {this.props.user.last_name}
                     </td>
                     <td className="text-right">
-                        {actionButtons}
+                        {inlineButton ?
+                            <div>{actionButtons}</div> // actionButtons including a StopButton
+                            :
+                            <div>{StopButton}</div> // StopButton only
+                        }
                     </td>
                 </tr>
+                {!inlineButton && actionButtons ?
+                    <tr>
+                        <td colSpan="3">
+                            {actionButtons} {/* actionButtons without a StopButton (already in the tr above) */}
+                        </td>
+                    </tr>
+                :null}
 
                 <Modal
                     isOpen={this.state.isStopModalOpen}

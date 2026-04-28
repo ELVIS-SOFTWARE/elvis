@@ -192,7 +192,7 @@ class PreApplication extends React.Component {
                             saison {`${moment(this.props.previous_season.start).format("YYYY")}/${moment(this.props.previous_season.end).format("YYYY")}`}
                         </h3>
                         <div className="col-sm-12 col-xl-6 p-0">
-                            <table className="table table-striped" style={{borderRadius: '12px', overflow: 'hidden'}}>
+                            <table className="table table-borderless bg-white" style={{borderRadius: '12px', overflow: 'hidden'}}>
                                 <thead>
                                 <tr style={{backgroundColor: "#00334A", color: "white"}}>
                                     <th style={{borderRadius: "12px 0 0 0"}}>Activité</th>
