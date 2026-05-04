@@ -133,7 +133,11 @@ class Summary extends React.Component
             return Promise.resolve(false);
         }
 
-        if (parseInt(this.state.status_id, 10) === ActivityApplicationStatus.CANCELED_ID)
+        let status_id = parseInt(this.state.status_id, 10);
+
+        let adhesion_delete_ids = [ActivityApplicationStatus.CANCELED_ID, ActivityApplicationStatus.TREATMENT_IMPOSSIBLE_ID]
+
+        if (adhesion_delete_ids.includes(status_id))
         {
             return new Promise((resolve) => {
                 swal.fire({

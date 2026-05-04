@@ -1453,7 +1453,10 @@ class ActivitiesApplicationsController < ApplicationController
       end
     end
 
-    if activity_application.activity_application_status_id == ActivityApplicationStatus::CANCELED_ID
+    status_id = activity_application.activity_application_status_id
+
+    if status_id == ActivityApplicationStatus::CANCELED_ID || status_id == ActivityApplicationStatus::TREATMENT_IMPOSSIBLE_ID
+
       user = activity_application.user
       current_season = activity_application.season
 
