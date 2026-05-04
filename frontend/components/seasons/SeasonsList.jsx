@@ -6,16 +6,15 @@ require("moment/locale/fr");
 import ReactTable from "react-table";
 import { csrfToken } from "../utils";
 import RemoveComponent from "../RemoveComponent";
+import SeasonActivationModal from "./SeasonActivationModal";
 
 class SeasonsList extends React.Component {
     constructor(props) {
         super(props);
 
-        //current_id = 
-
         this.state = {
             seasons: this.props.seasons,
-            // current_id: current_id,
+            modalRef: React.createRef(),
         };
     }
 
@@ -73,81 +72,34 @@ class SeasonsList extends React.Component {
     }
 
     switchToSeason(new_current_id) {
-        swal({
-            title: "Vous allez définir cette saison comme 'en cours'",
-            text: "Êtes-vous sûr ?",
-            type: "warning",
-            showCancelButton: true,
-            cancelButtonText: "Annuler",
-            confirmButtonText: "Confirmer",
-        }).then(a => {
-            if (a.value) {
-                fetch(`/season/${new_current_id}/make_active`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-Token": csrfToken,
-                    },
-                }).then(res => {
-                    if (res.ok) {
-                        res.json().then(datas =>
-                        {
-                            this.setState(function (previousState, currentProps) {
-                                const state = Object.assign({}, previousState);
-                                state.seasons
-                                    .find(s => s.is_current)
-                                    .is_current = false;
-
-                                const new_current = state.seasons
-                                    .find(s => s.id == new_current_id);
-
-                                new_current.is_current = true;
-
-                                if (datas.new_next_season)
-                                {
-                                    state.seasons.sort((a, b) => a.start < b.start);
-                                    new_current.next_season = datas.next;
-                                    new_current.next_season_id = datas.next.id;
-                                    state.seasons.push(datas.next);
-
-                                    swal({
-                                        type: 'success',
-                                        title: 'Information',
-                                        text: 'Puisque vous avez défini cette saison comme "en cours" et qu\'il n\'y a pas de saison suivante, la saison suivante a été créée automatiquement. Vous pouvez la modifier si nécessaire.',
-                                    });
-                                }
-
-                                return state;
-                            });
-                        });
-                    } else {
-                        // il faut mettre à jour le switch qui a été toggled
-                        this.setState(function (previousState, currentProps) {
-                            const state = Object.assign({}, previousState);
-
-                            state.seasons
-                                .find(s => s.id == new_current_id)
-                                .is_current = false;
-
-                            return state;
-                        })
-                        swal("Echec", "L'opération a échoué", "error");
-                    }
-                });
-            } else {
-                // il faut mettre à jour le switch qui a été toggled
-                this.setState(function (previousState, currentProps) {
-                    const state = Object.assign({}, previousState);
-
-                    state.seasons
-                        .find(s => s.id == new_current_id)
-                        .is_current = false;
-
-                    return state;
-                });
-            }
-        });
-
+        if (this.state.modalRef.current) {
+            this.state.modalRef.current.openModal(new_current_id);
+        }
     }
+
+    onActivationSuccess = (data) => {
+        this.setState(function (previousState) {
+            const state = Object.assign({}, previousState);
+            const currentSeason = state.seasons.find(s => s.is_current);
+            if (currentSeason) {
+                currentSeason.is_current = false;
+            }
+
+            const newCurrent = state.seasons.find(s => s.id === data.id);
+            if (newCurrent) {
+                newCurrent.is_current = true;
+            }
+
+            if (data.new_next_season) {
+                state.seasons.sort((a, b) => a.start < b.start);
+                newCurrent.next_season = data.next;
+                newCurrent.next_season_id = data.next.id;
+                state.seasons.push(data.next);
+            }
+
+            return state;
+        });
+    };
 
     render() {
         const columns = [
@@ -289,6 +241,10 @@ class SeasonsList extends React.Component {
 
         return (
             <div>
+                <SeasonActivationModal
+                    ref={this.state.modalRef}
+                    onSuccess={this.onActivationSuccess}
+                />
                 <ReactTable
                     data={this.state.seasons}
                     columns={columns}
