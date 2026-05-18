@@ -45,6 +45,63 @@ class SeasonActivationModal extends React.Component {
         });
 
         this.fetchSeasonData(seasonId);
+        this.fetchExistingHolidays(seasonId);
+    };
+
+    fetchExistingHolidays = async (seasonId) => {
+        try {
+            const response = await fetch(`/seasons/${seasonId}.json`, {
+                method: "GET",
+                headers: {
+                    "X-CSRF-Token": csrfToken,
+                    "Accept": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const data = await response.json();
+
+            // Récupérer les vacances existantes de la saison
+            if (data.holidays && data.holidays.length > 0) {
+                // Les vacances arrivent comme des dates individuelles
+                // Les transformer en plages par label
+                const holidaysByLabel = {};
+
+                data.holidays.forEach(h => {
+                    const label = h.label || h.name || "Sans nom";
+                    const date = h.date ? h.date.split('T')[0] : "";
+
+                    if (!holidaysByLabel[label]) {
+                        holidaysByLabel[label] = [];
+                    }
+                    holidaysByLabel[label].push(date);
+                });
+
+                // Créer les plages consolidées
+                const consolidatedHolidays = Object.entries(holidaysByLabel).map(([label, dates]) => {
+                    // Trier et déduplicer les dates
+                    const uniqueDates = [...new Set(dates)].sort();
+
+                    if (uniqueDates.length === 0) return null;
+
+                    return {
+                        label: label,
+                        start: uniqueDates[0],      // Première date
+                        end: uniqueDates[uniqueDates.length - 1],  // Dernière date
+                    };
+                }).filter(Boolean);
+
+
+                this.setState({
+                    holidays: consolidatedHolidays,
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching existing holidays:", error);
+        }
     };
 
     fetchSeasonData = async (seasonId) => {
@@ -128,7 +185,11 @@ class SeasonActivationModal extends React.Component {
                 holidaysLoading: false,
             });
 
-            this.goToStep(2);
+            swal({
+                type: "success",
+                title: "Succès",
+                text: "Les vacances ont été importées avec succès",
+            });
         } catch (error) {
             this.setState({
                 holidaysError: error.message,
@@ -144,7 +205,25 @@ class SeasonActivationModal extends React.Component {
     };
 
     goToStep = (step) => {
-        this.setState({ step });
+        const { holidays } = this.state;
+
+        // Si on essaie d'aller à l'étape 2 sans vacances configurées, demander une confirmation
+        if (step === 2 && (!holidays || holidays.length === 0)) {
+            swal({
+                type: "warning",
+                title: "Aucune vacance configurée",
+                text: "Vous n'avez pas configuré de vacances pour cette saison. Voulez-vous continuer malgré tout ?",
+                showCancelButton: true,
+                confirmButtonText: "Oui, continuer",
+                cancelButtonText: "Non, revenir",
+            }).then((result) => {
+                if (result.value) {
+                    this.setState({ step });
+                }
+            });
+        } else {
+            this.setState({ step });
+        }
     };
 
     addManualHoliday = async () => {
@@ -220,10 +299,37 @@ class SeasonActivationModal extends React.Component {
     };
 
     confirmActivation = async () => {
-        const { seasonId } = this.state;
+        const { seasonId, seasonData } = this.state;
         this.setState({ loading: true });
 
         try {
+            // Première étape : mettre à jour les dates de la saison si elles existent
+            if (seasonData && seasonId) {
+                const updatePayload = {
+                    season: {
+                        start: seasonData.start || null,
+                        end: seasonData.end || null,
+                        opening_date_for_applications: seasonData.reopen_at || null,
+                        opening_date_for_new_applications: seasonData.open_at || null,
+                        closing_date_for_applications: seasonData.close_at || null,
+                    }
+                };
+
+                const updateResponse = await fetch(`/seasons/${seasonId}`, {
+                    method: "PUT",
+                    headers: {
+                        "X-CSRF-Token": csrfToken,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(updatePayload),
+                });
+
+                if (!updateResponse.ok) {
+                    console.warn(`Season update returned ${updateResponse.status}, but continuing with activation`);
+                }
+            }
+
+            // Deuxième étape : activer la saison
             const response = await fetch(`/season/${seasonId}/make_active`, {
                 method: "POST",
                 headers: {
@@ -235,12 +341,22 @@ class SeasonActivationModal extends React.Component {
                 throw new Error("Erreur lors de l'activation de la saison");
             }
 
-            const data = await response.json();
+            let data = null;
+            const contentType = response.headers.get("content-type");
+            
+            if (contentType && contentType.includes("application/json")) {
+                const text = await response.text();
+                if (text) {
+                    data = JSON.parse(text);
+                }
+            }
 
             this.setState({ loading: false });
             this.closeModal();
 
-            this.props.onSuccess(data);
+            if (this.props.onSuccess) {
+                this.props.onSuccess(data);
+            }
 
             swal({
                 type: "success",
@@ -248,7 +364,7 @@ class SeasonActivationModal extends React.Component {
                 text: "La saison a été activée avec succès",
             });
 
-            if (data.new_next_season) {
+            if (data && data.new_next_season) {
                 swal({
                     type: "success",
                     title: "Information",
@@ -258,16 +374,17 @@ class SeasonActivationModal extends React.Component {
         } catch (error) {
             this.setState({ loading: false });
 
+
             swal({
                 type: "error",
                 title: "Erreur",
-                text: error.message,
+                text: error.message || "Une erreur est survenue",
             });
         }
     };
 
     renderStep1 = () => {
-        const { holidaysLoading, showManualForm, manualLabel, manualStart, manualEnd, manualError } = this.state;
+        const { holidaysLoading, showManualForm, manualLabel, manualStart, manualEnd, manualError, holidays } = this.state;
 
         return (
             <div>
@@ -295,13 +412,6 @@ class SeasonActivationModal extends React.Component {
                         onClick={() => this.setState({ showManualForm: !showManualForm })}
                     >
                         <i className="fas fa-plus-circle"></i> Ajouter manuellement
-                    </button>
-                    <button
-                        className="btn btn-default"
-                        onClick={() => this.goToStep(2)}
-                        style={{ marginLeft: "10px" }}
-                    >
-                        <i className="fas fa-skip-forward"></i> Passer cette étape
                     </button>
                 </div>
 
@@ -373,8 +483,107 @@ class SeasonActivationModal extends React.Component {
                         </button>
                     </div>
                 )}
+
+                {/* Section Récapitulatif des vacances */}
+                <div style={{ marginTop: "20px" }}>
+                    <h4 style={{ margin: "0 0 10px 0" }}>Récapitulatif des vacances & jours fériés</h4>
+
+                    {holidays && holidays.length > 0 && (
+                        <div style={{
+                            backgroundColor: "#fff",
+                            border: "1px solid #ddd",
+                            borderRadius: "4px",
+                            padding: "10px",
+                        }}>
+                            <p style={{ fontSize: "12px", color: "#666", marginBottom: "10px" }}>
+                                {holidays.length} période{holidays.length > 1 ? 's' : ''} • impact : ~{Math.ceil(holidays.length * 3)} leçons
+                            </p>
+                            {this.consolidateHolidays(holidays).map((holiday, index) => (
+                                <div key={index} style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    padding: "8px",
+                                    borderBottom: index < this.consolidateHolidays(holidays).length - 1 ? "1px solid #eee" : "none",
+                                }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <div style={{
+                                            backgroundColor: "#ff9999",
+                                            width: "12px",
+                                            height: "12px",
+                                            borderRadius: "2px",
+                                        }}></div>
+                                        <strong style={{ fontSize: "12px" }}>{holiday.label}</strong>
+                                    </div>
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                        <span style={{ fontSize: "12px", color: "#666" }}>
+                                            {holiday.start} → {holiday.end}
+                                        </span>
+                                        <button
+                                            className="btn btn-xs btn-danger"
+                                            onClick={() => this.deleteHoliday(holiday.label, holiday.start, holiday.end)}
+                                            disabled={holidaysLoading}
+                                            style={{ padding: "2px 6px" }}
+                                        >
+                                            <i className="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {(!holidays || holidays.length === 0) && (
+                        <div style={{
+                            backgroundColor: "#f0f4f8",
+                            border: "1px solid #bcc4d1",
+                            borderRadius: "4px",
+                            padding: "12px",
+                            textAlign: "center",
+                            color: "#666",
+                            fontSize: "12px",
+                        }}>
+                            <i className="fas fa-calendar-times"></i> Aucune période de vacances configurée pour le moment
+                        </div>
+                    )}
+                </div>
             </div>
         );
+    };
+
+    consolidateHolidays = (holidays) => {
+        if (!holidays || holidays.length === 0) return [];
+
+        // Trier les vacances par date de début
+        const sorted = [...holidays].sort((a, b) => new Date(a.start) - new Date(b.start));
+
+        const consolidated = [];
+        let current = { ...sorted[0] };
+
+        for (let i = 1; i < sorted.length; i++) {
+            const holiday = sorted[i];
+
+            // Vérifier si c'est le même label et si les dates sont consécutives
+            const currentEnd = new Date(current.end);
+            const nextStart = new Date(holiday.start);
+
+            // Ajouter 1 jour à currentEnd pour vérifier la consécutivité
+            const nextDay = new Date(currentEnd);
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            if (current.label === holiday.label && nextDay.toDateString() === nextStart.toDateString()) {
+                // Étendre la plage actuelle
+                current.end = holiday.end;
+            } else {
+                // Ajouter la plage actuelle et commencer une nouvelle
+                consolidated.push(current);
+                current = { ...holiday };
+            }
+        }
+
+        // Ajouter la dernière plage
+        consolidated.push(current);
+
+        return consolidated;
     };
 
     deleteHoliday = async (label, start, end) => {
@@ -505,9 +714,12 @@ class SeasonActivationModal extends React.Component {
                                     className="form-control"
                                     value={seasonData.start || ""}
                                     disabled={!editingDates}
-                                    onChange={(e) => this.setState((prev) => ({
-                                        seasonData: { ...prev.seasonData, start: e.target.value }
-                                    }))}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        this.setState((prev) => ({
+                                            seasonData: { ...prev.seasonData, start: value }
+                                        }));
+                                    }}
                                 />
                             </div>
                         </div>
@@ -521,9 +733,12 @@ class SeasonActivationModal extends React.Component {
                                 className="form-control"
                                 value={seasonData.end || ""}
                                 disabled={!editingDates}
-                                onChange={(e) => this.setState((prev) => ({
-                                    seasonData: { ...prev.seasonData, end: e.target.value }
-                                }))}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    this.setState((prev) => ({
+                                        seasonData: { ...prev.seasonData, end: value }
+                                    }));
+                                }}
                             />
                         </div>
 
@@ -536,9 +751,12 @@ class SeasonActivationModal extends React.Component {
                                 className="form-control"
                                 value={seasonData.reopen_at || ""}
                                 disabled={!editingDates}
-                                onChange={(e) => this.setState((prev) => ({
-                                    seasonData: { ...prev.seasonData, reopen_at: e.target.value }
-                                }))}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    this.setState((prev) => ({
+                                        seasonData: { ...prev.seasonData, reopen_at: value }
+                                    }));
+                                }}
                             />
                         </div>
 
@@ -551,9 +769,12 @@ class SeasonActivationModal extends React.Component {
                                 className="form-control"
                                 value={seasonData.open_at || ""}
                                 disabled={!editingDates}
-                                onChange={(e) => this.setState((prev) => ({
-                                    seasonData: { ...prev.seasonData, open_at: e.target.value }
-                                }))}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    this.setState((prev) => ({
+                                        seasonData: { ...prev.seasonData, open_at: value }
+                                    }));
+                                }}
                             />
                         </div>
 
@@ -566,9 +787,12 @@ class SeasonActivationModal extends React.Component {
                                 className="form-control"
                                 value={seasonData.close_at || ""}
                                 disabled={!editingDates}
-                                onChange={(e) => this.setState((prev) => ({
-                                    seasonData: { ...prev.seasonData, close_at: e.target.value }
-                                }))}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    this.setState((prev) => ({
+                                        seasonData: { ...prev.seasonData, close_at: value }
+                                    }));
+                                }}
                             />
                         </div>
 
@@ -682,13 +906,13 @@ class SeasonActivationModal extends React.Component {
                             <p style={{ fontSize: "12px", color: "#666", marginBottom: "10px" }}>
                                 {holidays.length} période{holidays.length > 1 ? 's' : ''} • impact : ~{Math.ceil(holidays.length * 3)} leçons
                             </p>
-                            {holidays.map((holiday, index) => (
+                            {this.consolidateHolidays(holidays).map((holiday, index) => (
                                 <div key={index} style={{
                                     display: "flex",
                                     justifyContent: "space-between",
                                     alignItems: "center",
                                     padding: "8px",
-                                    borderBottom: index < holidays.length - 1 ? "1px solid #eee" : "none",
+                                    borderBottom: index < this.consolidateHolidays(holidays).length - 1 ? "1px solid #eee" : "none",
                                 }}>
                                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                                         <div style={{
