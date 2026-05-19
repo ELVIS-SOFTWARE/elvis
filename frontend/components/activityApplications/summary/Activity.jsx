@@ -37,7 +37,7 @@ const LevelCell = ({
 
         api
             .set()
-            .get(`/desired_activities/user/${user.id}/activity/${activityId}`)
+            .get(`/desired_activities/user/${user.id}/activity/${activityId}/ref/${activityRefId}/time/${timeInterval.id}`)
             .then(response => {
                 if (isMounted) {
                     const apiLevel = response?.data?.evaluation_level_ref;
@@ -82,7 +82,7 @@ const LevelCell = ({
         return () => {
             isMounted = false;
         };
-    }, [user.id, activityId, initialLevel, activityRefId, timeInterval, activityRef, seasons]);
+    }, [user.id, activityId, initialLevel, activityRefId, timeInterval, activityRef, seasons, timeInterval.id]);
 
     if (isLoading) {
         return <>Chargement...</>;

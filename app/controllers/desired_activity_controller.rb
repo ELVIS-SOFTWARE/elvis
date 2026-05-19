@@ -46,14 +46,32 @@ class DesiredActivityController < ApplicationController
     def find_by_user_and_activity
         user_id     = params[:user_id]
         activity_id = params[:activity_id]
+        activity_ref_id = params[:activity_ref_id]
+        time_interval_id = params[:time_interval_id]
+
+        # utiliser l'activity_ref_id ?
 
         # On récupère la DesiredActivity, qu’elle vienne d’une inscription « active »
         # ou d’une option
+
+        # On cherche avec l'activity_id
         desired_activity = DesiredActivity
                              .joins(:activity_application)
                              .where("activity_applications.user_id = ? AND desired_activities.activity_id = ?", user_id, activity_id)
                              .first
 
+        # Si pas trouvé on cherche avec l'activity_ref_id et la saison (via le time_interval_id)
+        if desired_activity.nil? && activity_ref_id && time_interval_id
+            ti = TimeInterval.find(time_interval_id)
+            s = Season.from_interval(ti).first
+
+            desired_activity = DesiredActivity
+                                .joins(:activity_application)
+                                .where("activity_applications.user_id = ? AND desired_activities.activity_ref_id = ? AND activity_applications.season_id = ?", user_id, activity_ref_id, s.id)
+                                .first
+        end
+
+        # Si toujours pas trouvé on cherche dans les options
         if desired_activity.nil?
             option = Option.find_by(activity_id: activity_id)
             desired_activity = option&.desired_activity
