@@ -606,9 +606,9 @@ class ActivitiesApplicationsController < ApplicationController
                             .uniq
 
     @current_user_is_admin = current_user ? current_user.is_admin : false
-    @activity_refs = display_activity_refs.flatten.sort_by(&:kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
-    @activity_refs_childhood = display_activity_refs_childhood.flatten.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
-    @all_activity_refs = ActivityRef.all.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @activity_refs = display_activity_refs.flatten.sort_by(&:kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season, :highest_pricing])
+    @activity_refs_childhood = display_activity_refs_childhood.flatten.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season, :highest_pricing])
+    @all_activity_refs = ActivityRef.all.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season, :highest_pricing])
     @all_activity_ref_kinds = ActivityRefKind.all.as_json
     @activity_refs_cham = []
     @season = season.as_json({ include: :holidays })

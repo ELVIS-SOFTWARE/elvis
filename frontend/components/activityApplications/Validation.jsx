@@ -171,7 +171,8 @@ const Validation = ({
     }
 
     const totalActivitiesCost = selectedActivities.reduce((total, act) => {
-        return total + (act && act.display_price ? parseFloat(act.display_price) : 0);
+        let price = act.highest_pricing || act.display_price;
+        return total + (act && price ? parseFloat(price) : 0);
     }, 0);
 
     const totalFormulasCost = application.selectedFormulas.reduce((total, formulaId) => {
