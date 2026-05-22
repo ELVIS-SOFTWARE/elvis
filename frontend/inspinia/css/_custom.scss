@@ -8,3 +8,49 @@
 .weekCalendar__content {
   max-height: none;
 }
+
+/* Sidebar scrollbar */
+.sidebar-collapse {
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
+
+/* Reduce logo and margins */
+.nav-header {
+  padding: 20px 25px;
+
+  .profile-element {
+    margin-bottom: 8px;
+  }
+
+  img {
+    &.img-circle {
+      margin: 0;
+    }
+  }
+}
+
+.logo-element {
+  img {
+    margin: 0;
+  }
+}
+
