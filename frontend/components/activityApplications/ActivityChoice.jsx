@@ -52,7 +52,7 @@ const ActivityChoice = ({
                             handleRemovePack,
                             handleAddPack,
                             selectedPacks,
-                            infoText,
+                            pricingInfo,
                             selectedFormulas,
                             formulas,
                             selectedFormulaActivities,
@@ -344,20 +344,21 @@ const ActivityChoice = ({
 
     return (
         <Fragment>
-            <div>
-                {infoText && (
-                    <div className="alert alert-info col-md-8 d-inline-flex align-items-center p-1"
-                         style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
-                        <div className="col-sm-1 p-0 text-center">
+            {/*Message modifiable dans les paramètres de parcours d'inscription*/}
+            {pricingInfo && (
+                <div className="row pl-3 ml-0">
+                    <div className="alert alert-info col-12 row d-inline-flex align-items-center p-3 w-100"
+                            style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
+                        <div className="col-1 p-0 text-center">
                             <i className="fas fa-info-circle"></i>
                         </div>
                         <WysiwygViewer
-                            className="col-sm p-0"
-                            wysiwygStrData={infoText}
+                            className="col-11 p-0"
+                            wysiwygStrData={pricingInfo}
                         />
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             <div className="row">
                 <div className="col-xs-12 col-lg-6">

@@ -919,7 +919,7 @@ class Wizard extends React.Component {
                         selectedFormulaActivities={this.state.selectedFormulaActivities}
                         selectedPacks={this.state.selectedPacks}
                         validation={null}
-                        infoText={this.props.activityChoiceDisplayText}
+                        pricingInfo={this.props.applicationMessages["pricing_info_application"]}
                     />
                 ),
             },
@@ -968,6 +968,7 @@ class Wizard extends React.Component {
                             this.handleUpdateChildhoodPreferences(prefs)
                         }
                         availabilityMessage={this.props.availabilityMessage}
+                        availabilityInfo={this.props.applicationMessages["availability_info_application"]}
                     />
                 ),
             },
@@ -1054,6 +1055,7 @@ class Wizard extends React.Component {
                         selectedFormulas={this.state.selectedFormulas}
                         selectedFormulaActivities={this.state.selectedFormulaActivities}
                         formulas={this.props.formulas}
+                        pricingInfo={this.props.applicationMessages["pricing_info_application"]}
                     />
                 ),
             },

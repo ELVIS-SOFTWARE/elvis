@@ -469,8 +469,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     @adhesion_prices = AdhesionPrice.all.as_json
 
-    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
-    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
+    @application_messages = get_messages()
 
     @packs = Elvis::CacheUtils.cache_block_if_enabled("activity_refs_packs:season_#{Season.current.id}") do
       ActivityRefPricing
@@ -665,8 +664,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     @adhesion_prices = Adhesion.all.as_json
 
-    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
-    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
+    @application_messages = get_messages()
   end
 
   def create
@@ -1543,6 +1541,19 @@ class ActivitiesApplicationsController < ApplicationController
     respond_to do |format|
       format.json { render json: { success: res } }
     end
+  end
+
+  def get_messages
+    application_messages = {"pricing_info_application"=>"", "availability_info_application"=>""}
+
+    application_messages.each do |label, value|
+      test = Parameter.get_value(label + ".activated")
+      if test
+        application_messages[label] = Parameter.get_value(label + ".display_text")
+      end
+    end
+
+    return application_messages
   end
 
   private

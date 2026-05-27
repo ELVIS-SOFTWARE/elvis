@@ -13,7 +13,20 @@ export default function ActivityApplicationsParameters() {
             <ApplicationStatusTable />,
             <ConsentDocumentsList />,
             <ApplicationParameters />,
-            <ApplicationStepParameters />
+            <div>
+                {/*Liste des messages modifiables dans les paramètres de parcours d'inscription (update or create)*/}
+                <ApplicationStepParameters
+                    key='pricing_info'
+                    parameter_label='pricing_info_application'
+                    desc='Message tarifs'
+                />
+                <hr></hr>
+                <ApplicationStepParameters
+                    key='availability_info'
+                    parameter_label='availability_info_application'
+                    desc='Message disponibilités'
+                />
+            </div>
         ]}
     />
 }

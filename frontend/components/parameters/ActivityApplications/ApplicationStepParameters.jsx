@@ -5,7 +5,7 @@ import {toast} from "react-toastify";
 import {EditorState, convertToRaw, convertFromRaw, ContentState} from 'draft-js';
 import {Editor} from 'react-draft-wysiwyg';
 
-export default function ApplicationStepParameters() {
+export default function ApplicationStepParameters({parameter_label, desc}) {
     const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
     const [visibilityActivated, setVisibilityActivated] = useState(false);
     const [init, setInit] = useState(true);
@@ -31,7 +31,7 @@ export default function ApplicationStepParameters() {
             .error(err => {
                 swal("Une erreur est survenue lors du chargement des paramètres du parcours d'inscription", res.error, "error");
             })
-            .get("activity_application_parameters/get_application_step_parameters", {});
+            .get(`activity_application_parameters/get_application_step_parameters/${parameter_label}`, {});
     }, []);
 
     useEffect(() => {
@@ -40,7 +40,7 @@ export default function ApplicationStepParameters() {
                 .error(res => {
                     swal("Une erreur est survenue lors de la sauvegarde des paramètres du parcours d'inscription", res.error, "error");
                 })
-                .post("activity_application_parameters/change_activated_param", {activated: visibilityActivated});
+                .post("activity_application_parameters/change_activated_param", {parameter_label: parameter_label, activated: visibilityActivated});
         }
     }, [visibilityActivated]);
 
@@ -52,30 +52,27 @@ export default function ApplicationStepParameters() {
             .error(res => {
                 swal("Une erreur est survenue lors de la sauvegarde des paramètres du parcours d'inscription", res.error, "error");
             })
-            .post("activity_application_parameters/change_display_text_param", {display_text: JSON.stringify(convertToRaw(editorState.getCurrentContent()))});
+            .post("activity_application_parameters/change_display_text_param", {parameter_label: parameter_label, display_text: JSON.stringify(convertToRaw(editorState.getCurrentContent()))});
     }
 
 
     return <div className="m-3">
         <div className="mb-5">
-            <h3>Visibilité</h3>
+            <h3>{desc}</h3>
             <div className="checkbox checkbox-primary">
                 <input
                     type="checkbox"
-                    id={"paymentScheduleOptionsActivated"}
+                    id={`${parameter_label}.paymentScheduleOptionsActivated`}
                     className=""
                     checked={visibilityActivated}
                     onChange={(e) => setVisibilityActivated(e.target.checked)}
                 />
-                <label htmlFor={"paymentScheduleOptionsActivated"}>Afficher le texte dans le parcours d'inscription.</label>
+                <label htmlFor={`${parameter_label}.paymentScheduleOptionsActivated`}>Afficher le texte</label>
             </div>
         </div>
 
         <div>
-            <h3>Choix de l'activité</h3>
             <form onSubmit={e => {e.preventDefault();onSaveDisplayText()}}>
-                <p>Editer le texte présent dans l'étape 3.</p>
-
                 <div className="form-group mb-5">
                     <Editor
                         wrapperStyle={{border: "1px solid #e7eaec", padding: "5px", borderRadius: "5px"}}
@@ -85,7 +82,7 @@ export default function ApplicationStepParameters() {
                         wrapperClassName="wrapperClassName"
                         editorClassName="editorClassName"
                         toolbar={{
-                            options: ['inline', 'blockType', 'emoji', 'list',],
+                            options: ['inline', 'blockType', 'emoji', 'list', 'link'],
                             inline: {
                                 options: ['bold', 'italic', 'underline', 'strikethrough'],
                             },
