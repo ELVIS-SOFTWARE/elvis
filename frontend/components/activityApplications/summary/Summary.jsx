@@ -142,7 +142,7 @@ class Summary extends React.Component
             return new Promise((resolve) => {
                 swal.fire({
                     title: 'Attention !',
-                    text: 'L\'adhésion associée va être supprimée en validant. Êtes-vous sûr de continuer ?',
+                    text: 'L\'adhésion associée sera supprimée si aucune autre inscription n\'est en cours pour cette personne. Êtes-vous sûr·e de continuer ?',
                     type: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Oui, continuer',

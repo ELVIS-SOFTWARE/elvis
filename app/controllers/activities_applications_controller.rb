@@ -1453,15 +1453,32 @@ class ActivitiesApplicationsController < ApplicationController
 
     status_id = activity_application.activity_application_status_id
 
-    if status_id == ActivityApplicationStatus::CANCELED_ID || status_id == ActivityApplicationStatus::TREATMENT_IMPOSSIBLE_ID
+    adh_del_status_ids = [ActivityApplicationStatus::CANCELED_ID, ActivityApplicationStatus::TREATMENT_IMPOSSIBLE_ID]
 
-      user = activity_application.user
-      current_season = activity_application.season
+    user = activity_application.user
+    current_season = activity_application.season
 
-      active_adhesion = user.adhesions.where(season_id: current_season.id, is_active: true).first
+    active_adhesion = user.adhesions.find_by(season_id: current_season.id, is_active: true)
 
-      if active_adhesion
+    if adh_del_status_ids.include?(status_id)
+
+      # on chercher les demandes d'inscription
+      user_applications = ActivityApplication.joins(:activity_application_status)
+                                              .where(season_id: current_season.id, user_id: user.id)
+                                              .where.not(id: params[:id]) # pas celle que l'on update
+                                              .where.not(activity_application_statuses: { id: adh_del_status_ids }) # pas celles qui sont annulées ou non satisfaites
+
+
+      # si pas d'autre demande d'inscription, on supprime l'adhésion
+      if active_adhesion && (user_applications.count == 0)
         active_adhesion.destroy
+      end
+    else
+      # en cas de changement du statut de la demande pour autre chose qu'annulée ou non statisfaite, si l'adhésion n'existe pas/plus, on la (re)crée
+      unless active_adhesion
+        deleted_adhesion = Adhesion.only_deleted.find_by(season_id: current_season.id, user_id: user.id)
+
+        deleted_adhesion ? deleted_adhesion.recover : Adhesions::CreateAdhesion.new(user.id).execute
       end
     end
 
