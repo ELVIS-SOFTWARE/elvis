@@ -1363,8 +1363,8 @@ const UserRow = ({
 
                 setActivityApplicationId(data.activity_application_id);
             })
-            .get(`/desired_activities/user/${user.id}/activity/${activity.id}`);
-    }, [user.id, activity.id]);
+            .get(`/desired_activities/user/${user.id}/activity/${activity.id}/ref/${activity.activity_ref_id}/time/${activity.time_interval_id}`);
+    }, [user.id, activity.id, activity.activity_ref_id, activity.time_interval_id]);
 
     const inscriptionUrl = activityApplicationId ? `/inscriptions/${activityApplicationId}` : "#";
 

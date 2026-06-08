@@ -55,6 +55,8 @@ module Scripts
             attendances_data = inst_to_dup.student_attendances.pluck(:user_id, :is_option)
             new_instance.student_attendances << attendances_data.map { |user_id, is_option| StudentAttendance.new(user_id: user_id, is_option: is_option) }
 
+            student_ids = attendances_data.map { |a| a[0] } # a[0] = user_id
+
             teacher_id = inst_to_dup.teachers_activity_instances.pick(:user_id)
             new_instance.teachers_activity_instances.new(user_id: teacher_id, is_main: true) if teacher_id
             new_instance.save!

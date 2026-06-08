@@ -31,7 +31,7 @@ function createDisplayItems(groupedItems) {
         return {
             display_name: group[0].display_name,
             duration: group[0].duration, // all items have the same duration
-            display_price: group.reduce((total, item) => total + item.display_price, 0),
+            display_price: group.reduce((total, item) => total + (item.highest_pricing || item.display_price), 0),
             amount: group.length
         };
     });

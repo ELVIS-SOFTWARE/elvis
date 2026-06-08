@@ -4,6 +4,7 @@ import TimePreferencesTable from "./TimePreferencesTable";
 import SelectedActivitiesTable from "./SelectedActivitiesTable";
 import EvaluationChoiceTable from "./EvaluationChoiceTable";
 import UserAvatar from "../UserAvatar";
+import WysiwygViewer from "../utils/WysiwygViewer";
 
 
 const moment = require("moment");
@@ -26,6 +27,7 @@ const Validation = ({
                         availPaymentMethods,
                         selectedFormulas,
                         selectedFormulaActivities,
+                        pricingInfo
                     }) => {
     const addStudents = [...additionalStudents];
 
@@ -171,7 +173,8 @@ const Validation = ({
     }
 
     const totalActivitiesCost = selectedActivities.reduce((total, act) => {
-        return total + (act && act.display_price ? parseFloat(act.display_price) : 0);
+        let price = act.highest_pricing || act.display_price;
+        return total + (act && price ? parseFloat(price) : 0);
     }, 0);
 
     const totalFormulasCost = application.selectedFormulas.reduce((total, formulaId) => {
@@ -382,7 +385,21 @@ const Validation = ({
                         </div>
                     </div>
 
-
+                    {/*Message modifiable dans les paramètres de parcours d'inscription*/}
+                    {pricingInfo && (
+                        <div className="row pl-3 ml-0 mt-3">
+                            <div className="alert alert-info col-12 row d-inline-flex align-items-center p-4 w-100"
+                                    style={{border: "1px solid #0079BF", borderRadius: "5px", color: "#0079BF"}}>
+                                <div className="col-1 p-0 text-center">
+                                    <i className="fas fa-info-circle"></i>
+                                </div>
+                                <WysiwygViewer
+                                    className="col-11 p-0"
+                                    wysiwygStrData={pricingInfo}
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {/*Disponibilités*/}
                     {showTimePreferences ? (

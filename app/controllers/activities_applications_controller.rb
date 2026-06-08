@@ -469,8 +469,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     @adhesion_prices = AdhesionPrice.all.as_json
 
-    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
-    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
+    @application_messages = get_messages()
 
     @packs = Elvis::CacheUtils.cache_block_if_enabled("activity_refs_packs:season_#{Season.current.id}") do
       ActivityRefPricing
@@ -606,9 +605,9 @@ class ActivitiesApplicationsController < ApplicationController
                             .uniq
 
     @current_user_is_admin = current_user ? current_user.is_admin : false
-    @activity_refs = display_activity_refs.flatten.sort_by(&:kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
-    @activity_refs_childhood = display_activity_refs_childhood.flatten.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
-    @all_activity_refs = ActivityRef.all.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season])
+    @activity_refs = display_activity_refs.flatten.sort_by(&:kind).as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season, :highest_pricing])
+    @activity_refs_childhood = display_activity_refs_childhood.flatten.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season, :highest_pricing])
+    @all_activity_refs = ActivityRef.all.as_json(methods: [:display_price, :display_name, :kind, :display_prices_by_season, :highest_pricing])
     @all_activity_ref_kinds = ActivityRefKind.all.as_json
     @activity_refs_cham = []
     @season = season.as_json({ include: :holidays })
@@ -665,8 +664,7 @@ class ActivitiesApplicationsController < ApplicationController
 
     @adhesion_prices = Adhesion.all.as_json
 
-    show_activity_choice_option = Parameter.get_value("activity_choice_step.activated")
-    @activitychoice_display_text = show_activity_choice_option ? Parameter.get_value("activity_choice_step.display_text") : ""
+    @application_messages = get_messages()
   end
 
   def create
@@ -1453,14 +1451,34 @@ class ActivitiesApplicationsController < ApplicationController
       end
     end
 
-    if activity_application.activity_application_status_id == ActivityApplicationStatus::CANCELED_ID
-      user = activity_application.user
-      current_season = activity_application.season
+    status_id = activity_application.activity_application_status_id
 
-      active_adhesion = user.adhesions.where(season_id: current_season.id, is_active: true).first
+    adh_del_status_ids = [ActivityApplicationStatus::CANCELED_ID, ActivityApplicationStatus::TREATMENT_IMPOSSIBLE_ID]
 
-      if active_adhesion
+    user = activity_application.user
+    current_season = activity_application.season
+
+    active_adhesion = user.adhesions.find_by(season_id: current_season.id, is_active: true)
+
+    if adh_del_status_ids.include?(status_id)
+
+      # on chercher les demandes d'inscription
+      user_applications = ActivityApplication.joins(:activity_application_status)
+                                              .where(season_id: current_season.id, user_id: user.id)
+                                              .where.not(id: params[:id]) # pas celle que l'on update
+                                              .where.not(activity_application_statuses: { id: adh_del_status_ids }) # pas celles qui sont annulées ou non satisfaites
+
+
+      # si pas d'autre demande d'inscription, on supprime l'adhésion
+      if active_adhesion && (user_applications.count == 0)
         active_adhesion.destroy
+      end
+    else
+      # en cas de changement du statut de la demande pour autre chose qu'annulée ou non statisfaite, si l'adhésion n'existe pas/plus, on la (re)crée
+      unless active_adhesion
+        deleted_adhesion = Adhesion.only_deleted.find_by(season_id: current_season.id, user_id: user.id)
+
+        deleted_adhesion ? deleted_adhesion.recover : Adhesions::CreateAdhesion.new(user.id).execute
       end
     end
 
@@ -1540,6 +1558,19 @@ class ActivitiesApplicationsController < ApplicationController
     respond_to do |format|
       format.json { render json: { success: res } }
     end
+  end
+
+  def get_messages
+    application_messages = {"pricing_info_application"=>"", "availability_info_application"=>""}
+
+    application_messages.each do |label, value|
+      test = Parameter.get_value(label + ".activated")
+      if test
+        application_messages[label] = Parameter.get_value(label + ".display_text")
+      end
+    end
+
+    return application_messages
   end
 
   private

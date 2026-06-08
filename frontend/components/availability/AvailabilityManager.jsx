@@ -8,6 +8,7 @@ import {INTERVAL_KINDS} from "../../tools/constants";
 import AvailabilityCommentModal from "./AvailabilityCommentModal";
 import moment from "moment";
 import _ from "lodash";
+import WysiwygViewer from "../utils/WysiwygViewer";
 
 const kindsForSeason = [
     INTERVAL_KINDS.LESSON,
@@ -195,6 +196,22 @@ class AvailabilityManager extends PureComponent {
         return (
             <Fragment>
                 <ErrorList errors={errors}/>
+
+                {/*Message modifiable dans les paramètres de parcours d'inscription*/}
+                {this.props.availabilityInfo && (
+                    <div className="p-xs">
+                        <div className="alert alert-danger row d-inline-flex align-items-center p-3 m-0 w-100"
+                                style={{border: "1px solid #a94442", borderRadius: "5px", color: "#a94442"}}>
+                            <div className="col-1 p-0 text-center">
+                                <i className="fas fa-info-circle"></i>
+                            </div>
+                            <WysiwygViewer
+                                className="col-11 p-0"
+                                wysiwygStrData={this.props.availabilityInfo}
+                            />
+                        </div>
+                    </div>
+                )}
 
                 <div className="p-xs">
                     {!locked ? (

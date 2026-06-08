@@ -24,7 +24,7 @@ Rails.application.routes.draw do
     get "activity_application_parameters", to: "activity_application_parameters#index"
     post "activity_application_parameters/list_status", to: "activity_application_parameters#list_status"
 
-    get "activity_application_parameters/get_application_step_parameters", to: "activity_application_parameters#get_application_step_parameters"
+    get "activity_application_parameters/get_application_step_parameters/:parameter_label", to: "activity_application_parameters#get_application_step_parameters"
     post "activity_application_parameters/change_activated_param", to: "activity_application_parameters#change_activated_param"
     post "activity_application_parameters/change_display_text_param", to: "activity_application_parameters#change_display_text_param"
 
@@ -160,7 +160,7 @@ Rails.application.routes.draw do
   # ACTIVITY APPLICATIONS
   #  =====================
   get "/applications/:id/desired_activities/:des_id/suggestions", to: "activities_applications#find_activity_suggestions"
-  get '/desired_activities/user/:user_id/activity/:activity_id', to: 'desired_activity#find_by_user_and_activity'
+  get '/desired_activities/user/:user_id/activity/:activity_id/ref/:activity_ref_id/time/:time_interval_id', to: 'desired_activity#find_by_user_and_activity'
 
   # (pour élève/admin) pour un élève déjà inscrit et possédant une préinscription, renvoie vers le Wizard
   get "/inscriptions/new/:user_id/:pre_application_activity_id/:activity_ref_id(/:action_type)",

@@ -20,7 +20,8 @@ export default function TimePreferencesStep({
                                                 childhoodPreferences,
                                                 selectionLabels,
                                                 disableLiveReload = true,
-                                                availabilityMessage
+                                                availabilityMessage,
+                                                availabilityInfo
                                             })
 {
     const availabilityRef = useRef();
@@ -57,6 +58,7 @@ export default function TimePreferencesStep({
                 onAdd={onAvailabilityAdd}
                 onDelete={onAvailabilityDelete}
                 availabilityMessage={availabilityMessage}
+                availabilityInfo={availabilityInfo}
             />;
         case PREFERENCES_MODE:
             return <IntervalPreferencesEditor

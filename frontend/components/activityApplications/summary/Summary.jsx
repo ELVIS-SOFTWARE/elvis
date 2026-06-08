@@ -133,12 +133,16 @@ class Summary extends React.Component
             return Promise.resolve(false);
         }
 
-        if (parseInt(this.state.status_id, 10) === ActivityApplicationStatus.CANCELED_ID)
+        let status_id = parseInt(this.state.status_id, 10);
+
+        let adhesion_delete_ids = [ActivityApplicationStatus.CANCELED_ID, ActivityApplicationStatus.TREATMENT_IMPOSSIBLE_ID]
+
+        if (adhesion_delete_ids.includes(status_id))
         {
             return new Promise((resolve) => {
                 swal.fire({
                     title: 'Attention !',
-                    text: 'L\'adhésion associée va être supprimée en validant. Êtes-vous sûr de continuer ?',
+                    text: 'L\'adhésion associée sera supprimée si aucune autre inscription n\'est en cours pour cette personne. Êtes-vous sûr·e de continuer ?',
                     type: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Oui, continuer',
