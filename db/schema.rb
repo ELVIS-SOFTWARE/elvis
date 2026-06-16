@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_09_23_134054) do
+ActiveRecord::Schema.define(version: 2025_11_17_094232) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -18,7 +18,7 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
-    t.string "record_id", null: false
+    t.bigint "record_id", null: false
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
     t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
@@ -65,6 +65,20 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.bigint "user_id"
     t.boolean "is_validated", default: false
     t.datetime "attempt_date"
+  end
+
+  create_table "activities_with_season", id: false, force: :cascade do |t|
+    t.bigint "id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.bigint "time_interval_id"
+    t.bigint "activity_ref_id"
+    t.bigint "room_id"
+    t.bigint "location_id"
+    t.string "group_name"
+    t.bigint "evaluation_level_ref_id"
+    t.bigint "next_season_evaluation_level_ref_id"
+    t.bigint "season_id"
   end
 
   create_table "activity_application_statuses", force: :cascade do |t|
@@ -114,6 +128,11 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.bigint "to_activity_ref_id"
   end
 
+  create_table "activity_ref_dolibarr_links", id: false, force: :cascade do |t|
+    t.bigint "dolibarr_id"
+    t.bigint "activity_ref_pricing_id", null: false
+  end
+
   create_table "activity_ref_kinds", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
@@ -136,6 +155,14 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.index ["activity_ref_id"], name: "index_activity_ref_pricings_on_activity_ref_id"
     t.index ["deleted_at"], name: "index_activity_ref_pricings_on_deleted_at"
     t.index ["pricing_category_id"], name: "index_activity_ref_pricings_on_pricing_category_id"
+  end
+
+  create_table "activity_ref_season_pricings", force: :cascade do |t|
+    t.bigint "activity_ref_id", null: false
+    t.bigint "season_id", null: false
+    t.bigint "pricing_id"
+    t.float "price", default: 0.0
+    t.index ["activity_ref_id", "season_id", "pricing_id"], name: "activity_ref_season_pricing_index_on_associations"
   end
 
   create_table "activity_refs", force: :cascade do |t|
@@ -164,6 +191,7 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.integer "nb_lessons"
     t.boolean "substitutable", default: true
     t.integer "duration"
+    t.string "color_code"
     t.index ["activity_ref_kind_id"], name: "index_activity_refs_on_activity_ref_kind_id"
     t.index ["is_lesson"], name: "index_activity_refs_on_is_lesson"
   end
@@ -199,6 +227,11 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "kind"
+  end
+
+  create_table "adhesion_price_dolibarr_links", id: false, force: :cascade do |t|
+    t.bigint "adhesion_price_id", null: false
+    t.bigint "dolibarr_id"
   end
 
   create_table "adhesion_prices", force: :cascade do |t|
@@ -366,6 +399,16 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.index ["coupon_id"], name: "index_discounts_on_coupon_id"
     t.index ["discountable_type", "discountable_id"], name: "index_discounts_on_discountable"
     t.index ["discountable_type", "discountable_id"], name: "index_discounts_on_discountable_type_and_discountable_id", unique: true
+  end
+
+  create_table "dolibarr_proposals", primary_key: "dolibarr_proposal_id", id: :bigint, default: nil, force: :cascade do |t|
+    t.bigint "payer_id", null: false
+    t.bigint "season_id", null: false
+  end
+
+  create_table "dolibarr_users", primary_key: ["user_id", "dolibarr_user_id"], force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "dolibarr_user_id", null: false
   end
 
   create_table "due_payment_statuses", force: :cascade do |t|
@@ -860,8 +903,8 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "deleted_at"
-    t.bigint "pricing_category_id"
     t.integer "index"
+    t.bigint "pricing_category_id"
     t.index ["pricing_category_id"], name: "index_payment_schedule_options_on_pricing_category_id"
   end
 
@@ -1273,8 +1316,8 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.boolean "checked_gdpr", default: false
     t.boolean "checked_image_right"
     t.boolean "checked_newsletter"
-    t.bigint "organization_id"
     t.boolean "is_creator", default: false
+    t.bigint "organization_id"
     t.string "identification_number"
     t.bigint "attached_to_id"
     t.index ["address_id"], name: "index_users_on_address_id"
@@ -1295,12 +1338,7 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
     t.bigint "instrument_id"
   end
 
-  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "activity_applications", "formules"
-  add_foreign_key "activity_instances", "activities"
-  add_foreign_key "activity_instances", "locations"
-  add_foreign_key "activity_instances", "rooms"
-  add_foreign_key "activity_instances", "time_intervals"
   add_foreign_key "activity_ref_kinds", "activity_refs", column: "default_activity_ref_id", on_delete: :nullify
   add_foreign_key "activity_ref_pricings", "activity_refs"
   add_foreign_key "activity_ref_pricings", "pricing_categories"
@@ -1308,16 +1346,6 @@ ActiveRecord::Schema.define(version: 2025_09_23_134054) do
   add_foreign_key "activity_ref_pricings", "seasons", column: "to_season_id"
   add_foreign_key "activity_refs", "activity_ref_kinds"
   add_foreign_key "adhesion_prices", "seasons"
-  add_foreign_key "adhesions", "adhesion_prices"
-  add_foreign_key "bands", "band_types"
-  add_foreign_key "bands", "music_genres"
-  add_foreign_key "consent_document_users", "consent_documents"
-  add_foreign_key "consent_document_users", "users"
-  add_foreign_key "desired_activities", "pricing_categories", on_delete: :restrict
-  add_foreign_key "discounts", "coupons"
-  add_foreign_key "due_payments", "payment_schedules"
-  add_foreign_key "error_histories", "error_codes"
-  add_foreign_key "evaluation_appointments", "activity_applications"
   add_foreign_key "export_templates", "users"
   add_foreign_key "formule_items", "formules"
   add_foreign_key "formule_pricings", "formules"
