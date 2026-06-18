@@ -74,6 +74,14 @@ function renderActivityAction(actionLabel) {
                     </div>
                 </React.Fragment>
             );
+        case "Sur liste d'attente":
+            return (
+                <React.Fragment>
+                    <div className="badge badge-pill badge-info text-white">
+                        <i className="fas fa-hourglass mr-2"/>Sur liste d'attente
+                    </div>
+                </React.Fragment>
+            );
         default:
             return (
                 <React.Fragment>
