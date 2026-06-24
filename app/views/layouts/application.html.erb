@@ -89,11 +89,11 @@
 
         <%# Le numéro de version %>
         <li id="nav-footer" class="text-center">
-          <% if ENV["RELEASE_NUMBER"].nil? %>
+          <% if ENV["RAILS_ENV"] == "development" %>
             <p class="nav-label img-rounded">version dev</p>
           <% else %>
-            <a class="nav-label img-rounded" target="_blank" href="https://github.com/ELVIS-SOFTWARE/elvis/releases/tag/<%= ENV["RELEASE_NUMBER"] %>">
-              version <%= ENV["RELEASE_NUMBER"] %>
+            <a class="nav-label img-rounded" target="_blank" href="https://github.com/ELVIS-SOFTWARE/elvis/releases/tag/<%= Elvis::VERSION %>">
+              version <%= Elvis::VERSION %>
             </a>
           <% end %>
           <span class="nav-label img-rounded" style="vertical-align: text-bottom">propulsé par <img src="/powered_by.png" height="20" alt="Elvis"/> </span>
