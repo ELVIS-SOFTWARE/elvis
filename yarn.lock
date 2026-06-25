@@ -6796,11 +6796,6 @@ jsprim@^1.2.2:
     json-schema "0.4.0"
     verror "1.10.0"
 
-jsvat@2.5.3:
-  version "2.5.3"
-  resolved "https://registry.yarnpkg.com/jsvat/-/jsvat-2.5.3.tgz#44d41d80b8d04a6b98cf721668a872ab35b6009e"
-  integrity sha512-jra/1qujP+vrrCgLcGRRHwLrKj69cLvWUMeFwhwoD/AeHSZ9BY9Bf59GNOtDdDmGhchNwasrWjnKBTbL19FHsg==
-
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-3.2.2.tgz#31ea21a734bab9bbb0f32466d893aea51e4a3c64"

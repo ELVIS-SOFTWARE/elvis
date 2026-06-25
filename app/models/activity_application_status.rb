@@ -29,8 +29,9 @@ class ActivityApplicationStatus < ApplicationRecord
     PROPOSAL_ACCEPTED_ID = 17
     ASSESSMENT_PENDING_ID = 10
     ACTIVITY_PROPOSED_ID = 19
+    WAITING_LIST_ID = 20
 
-    BUILTIN_IDS = [TREATMENT_PENDING_ID, ACTIVITY_PENDING_ID, ACTIVITY_ATTRIBUTED_ID, STOPPED_ID, CANCELED_ID, TREATMENT_IMPOSSIBLE_ID, PROPOSAL_REFUSED_ID, PROPOSAL_ACCEPTED_ID, ASSESSMENT_PENDING_ID, ACTIVITY_PROPOSED_ID, TREATMENT_IN_PROGRESS_ID].freeze
+    BUILTIN_IDS = [TREATMENT_PENDING_ID, ACTIVITY_PENDING_ID, ACTIVITY_ATTRIBUTED_ID, STOPPED_ID, CANCELED_ID, TREATMENT_IMPOSSIBLE_ID, PROPOSAL_REFUSED_ID, PROPOSAL_ACCEPTED_ID, ASSESSMENT_PENDING_ID, ACTIVITY_PROPOSED_ID, TREATMENT_IN_PROGRESS_ID, WAITING_LIST_ID].freeze
 
     TREATMENT_PENDING = find_or_create_by!(id: TREATMENT_PENDING_ID, label: 'En attente de traitement', is_stopping: false, is_active: true)
     TREATMENT_IN_PROGRESS = find_or_create_by!(id: TREATMENT_IN_PROGRESS_ID, label: 'En cours de traitement', is_stopping: false, is_active: true)
@@ -43,8 +44,9 @@ class ActivityApplicationStatus < ApplicationRecord
     PROPOSAL_ACCEPTED = find_or_create_by!(id: PROPOSAL_ACCEPTED_ID, label: 'Proposition acceptée', is_stopping: false, is_active: true)
     ASSESSMENT_PENDING = find_or_create_by!(id: ASSESSMENT_PENDING_ID, label: 'Attente résultat évaluation', is_stopping: false, is_active: true)
     ACTIVITY_PROPOSED = find_or_create_by!(id: ACTIVITY_PROPOSED_ID, label: 'Cours proposé', is_stopping: false, is_active: true)
+    WAITING_LIST = find_or_create_by!(id: WAITING_LIST_ID, label: 'Sur liste d\'attente', is_stopping: false, is_active: true)
 
-    BUILTINS = [TREATMENT_PENDING, ACTIVITY_PENDING, ACTIVITY_ATTRIBUTED, STOPPED, CANCELED, TREATMENT_IMPOSSIBLE, PROPOSAL_REFUSED, PROPOSAL_ACCEPTED, ASSESSMENT_PENDING, ACTIVITY_PROPOSED, TREATMENT_IN_PROGRESS].freeze
+    BUILTINS = [TREATMENT_PENDING, ACTIVITY_PENDING, ACTIVITY_ATTRIBUTED, STOPPED, CANCELED, TREATMENT_IMPOSSIBLE, PROPOSAL_REFUSED, PROPOSAL_ACCEPTED, ASSESSMENT_PENDING, ACTIVITY_PROPOSED, TREATMENT_IN_PROGRESS, WAITING_LIST].freeze
 
     # réinitialise la séquence de l'ID pour permettre de créer des prochains objets en base
     reset_pk_sequence

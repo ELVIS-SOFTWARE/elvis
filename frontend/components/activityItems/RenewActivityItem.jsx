@@ -170,6 +170,9 @@ class RenewActivityItem extends React.Component {
                 else
                     actionLabel = "En traitement";
             }
+
+            if (this.state.preApplicationActivity.activity_application.activity_application_status.label === "Sur liste d'attente")
+                actionLabel = "Sur liste d'attente"
         }
 
         /**
