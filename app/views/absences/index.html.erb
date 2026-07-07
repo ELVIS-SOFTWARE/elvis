@@ -1,0 +1,7 @@
+<div class="wrapper wrapper-content">
+  <%= react_component("AbsencesTracking", {
+    seasons: @seasons.as_json(only: [:id, :label, :is_current, :start, :end]),
+    teachers: @teachers.as_json(only: [:id, :first_name, :last_name]),
+    activities: @activities.as_json(only: [:id, :label])
+  }) %>
+</div>

@@ -123,6 +123,19 @@ module MenuGenerator
       { caption: "Paramétrage" }
     ))
 
+    monitoring = Elvis::MenuManager::MenuItem.new(
+      :monitoring,
+      "absences",
+      "",
+      { caption: "Suivi", icon: "fa-clipboard-list", user_role: "admin", position: 2.5 }
+    )
+    monitoring.add(Elvis::MenuManager::MenuItem.new(
+      :absences,
+      "absences",
+      "index",
+      { caption: "Suivi des absences" }
+    ))
+
     payments = Elvis::MenuManager::MenuItem.new(
       :payments,
       "payments",
@@ -225,6 +238,7 @@ module MenuGenerator
     Elvis::MenuManager.insert_menu_item :side_menu, users
     Elvis::MenuManager.insert_menu_item :side_menu, inscriptions
     Elvis::MenuManager.insert_menu_item :side_menu, plannings
+    Elvis::MenuManager.insert_menu_item :side_menu, monitoring
     Elvis::MenuManager.insert_menu_item :side_menu, payments
     Elvis::MenuManager.insert_menu_item :side_menu, locations
     Elvis::MenuManager.insert_menu_item :side_menu, activities

@@ -245,6 +245,11 @@ Rails.application.routes.draw do
   post "/users/:id/absences_list", to: "users#list_abscences"
   patch '/student_attendances/:id/update_remarks', to: 'student_attendances#update_remarks'
 
+  # Suivi des absences (vue globale)
+  get "/absences", to: "absences#index"
+  get "/absences/data", to: "absences#data"
+  get "/absences/export", to: "absences#export"
+
   get "users/:id/all_doc_consented", to: "users#all_doc_consented"
 
   # delete "/users/:id/members/:member_id", to: "family_member_users#destroy"
