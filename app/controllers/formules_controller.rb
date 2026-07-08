@@ -176,11 +176,7 @@ class FormulesController < ApplicationController
     pages = query.total_pages
 
     @formules = query.as_json(
-<<<<<<< HEAD
-      methods: :used?,
-=======
-      methods: :archived?,
->>>>>>> origin/main
+      methods: %i[used? archived?],
       include: {
         activities: {
           only: %i[id display_name]

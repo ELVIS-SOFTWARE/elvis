@@ -88,18 +88,20 @@ export default function Formules() {
                 id: "actions",
                 Header: "Actions",
                 Cell: props => {
-<<<<<<< HEAD
                     const isUsed = props.original["used?"];
-=======
                     const isArchived = props.original["archived?"];
->>>>>>> origin/main
                     return (
                         <div className="btn-wrapper">
                             <a className="btn-sm btn-primary m-r-sm" href={'/formules/' + props.original.id + "/edit"}>
                                 <i className="fas fa-edit"/>
                             </a>
 
-<<<<<<< HEAD
+                            <a className="btn-sm btn-info m-r-sm"
+                               title={isArchived ? "Désarchiver" : "Archiver"}
+                               onClick={() => archiveFormule(props.original)}>
+                                <i className={isArchived ? "fas fa-box-open" : "fas fa-archive"}/>
+                            </a>
+
                             {isUsed ? (
                                 <span className="btn-sm btn-warning disabled"
                                       style={{opacity: 0.5, cursor: "not-allowed"}}
@@ -111,17 +113,6 @@ export default function Formules() {
                                     <i className="fas fa-trash"/>
                                 </a>
                             )}
-=======
-                            <a className="btn-sm btn-info m-r-sm"
-                               title={isArchived ? "Désarchiver" : "Archiver"}
-                               onClick={() => archiveFormule(props.original)}>
-                                <i className={isArchived ? "fas fa-box-open" : "fas fa-archive"}/>
-                            </a>
-
-                            <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
-                                <i className="fas fa-trash"/>
-                            </a>
->>>>>>> origin/main
                         </div>
                     );
                 },
