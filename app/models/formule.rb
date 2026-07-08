@@ -10,6 +10,15 @@ class Formule < ApplicationRecord
   validates :name, presence: true
   validates :number_of_items, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1 }
 
+  # Une formule archivée reste liée aux inscriptions existantes mais n'est plus
+  # proposée dans le parcours d'inscription.
+  scope :not_archived, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
+
+  def archived?
+    archived_at.present?
+  end
+
   has_many :max_prices, as: :target, dependent: :destroy, class_name: "MaxActivityRefPriceForSeason"
 
   # validate count of items equals to number_of_items

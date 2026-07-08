@@ -132,6 +132,18 @@ class FormulesController < ApplicationController
     render json: { message: "Formule deleted" }
   end
 
+  # Archive / désarchive une formule. Une formule archivée n'est plus proposée
+  # dans le parcours d'inscription mais reste liée aux inscriptions existantes.
+  def archive
+    formule = Formule.find(params[:id])
+
+    authorize! :edit, formule
+
+    formule.update!(archived_at: formule.archived? ? nil : Time.current)
+
+    render json: formule.as_json(methods: :archived?)
+  end
+
   private
 
   def list
@@ -164,7 +176,11 @@ class FormulesController < ApplicationController
     pages = query.total_pages
 
     @formules = query.as_json(
+<<<<<<< HEAD
       methods: :used?,
+=======
+      methods: :archived?,
+>>>>>>> origin/main
       include: {
         activities: {
           only: %i[id display_name]

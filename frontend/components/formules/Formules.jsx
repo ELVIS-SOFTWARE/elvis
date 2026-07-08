@@ -43,6 +43,27 @@ export default function Formules() {
         });
     }
 
+    function archiveFormule(formule)
+    {
+        const isArchived = formule["archived?"];
+        api.set()
+            .success(() => {
+                fetchData({page: 0, pageSize: 10, sorted: [], filtered: {}}, null);
+                swal({
+                    title: isArchived ? "Formule désarchivée" : "Formule archivée",
+                    text: isArchived
+                        ? "La formule est de nouveau proposée à l'inscription."
+                        : "La formule n'est plus proposée à l'inscription. Les inscriptions existantes ne sont pas impactées.",
+                    type: "success",
+                    timer: 2500,
+                });
+            })
+            .error(res => {
+                swal("Une erreur est survenue lors de l'archivage de la formule", res.error, "error");
+            })
+            .patch('/formules/' + formule.id + '/archive', {});
+    }
+
     function columns()
     {
         return [
@@ -50,6 +71,13 @@ export default function Formules() {
                 id: "name",
                 Header: "Nom de la formule",
                 accessor: d => d.name,
+                Cell: props => (
+                    <span>
+                        {props.original.name}
+                        {props.original["archived?"] &&
+                            <span className="badge badge-secondary m-l-sm">Archivée</span>}
+                    </span>
+                ),
             },
             {
                 id: "activites",
@@ -60,13 +88,18 @@ export default function Formules() {
                 id: "actions",
                 Header: "Actions",
                 Cell: props => {
+<<<<<<< HEAD
                     const isUsed = props.original["used?"];
+=======
+                    const isArchived = props.original["archived?"];
+>>>>>>> origin/main
                     return (
                         <div className="btn-wrapper">
                             <a className="btn-sm btn-primary m-r-sm" href={'/formules/' + props.original.id + "/edit"}>
                                 <i className="fas fa-edit"/>
                             </a>
 
+<<<<<<< HEAD
                             {isUsed ? (
                                 <span className="btn-sm btn-warning disabled"
                                       style={{opacity: 0.5, cursor: "not-allowed"}}
@@ -78,6 +111,17 @@ export default function Formules() {
                                     <i className="fas fa-trash"/>
                                 </a>
                             )}
+=======
+                            <a className="btn-sm btn-info m-r-sm"
+                               title={isArchived ? "Désarchiver" : "Archiver"}
+                               onClick={() => archiveFormule(props.original)}>
+                                <i className={isArchived ? "fas fa-box-open" : "fas fa-archive"}/>
+                            </a>
+
+                            <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
+                                <i className="fas fa-trash"/>
+                            </a>
+>>>>>>> origin/main
                         </div>
                     );
                 },

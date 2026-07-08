@@ -296,9 +296,7 @@
       <ul class="nav nav-tabs flex" role="tablist">
         <li style="height: auto;" class="<%= @tab.nil? || @tab == "act" ? "active" : "" %>"><a class="nav-link" data-toggle="tab" href="#tab-act">Activités</a> </li>
         <li style="height: auto;" class="<%= @tab == "family" ? "active" : "" %>"><a class="nav-link" data-toggle="tab" href="#tab-family">Liens familiaux</a></li>
-        <% if @any_abs %>
-          <li style="height: auto;" class="<%= @tab == "abs" ? "active" : "" %>"><a class="nav-link" data-toggle="tab" href="#tab-abs">Absences</a></li>
-        <% end %>
+        <li style="height: auto;" class="<%= @tab == "abs" ? "active" : "" %>"><a class="nav-link" data-toggle="tab" href="#tab-abs">Absences</a></li>
       </ul>
 
       <div class="tab-content p-2 bg-white" style="border-color: #e7eaec; border-style: solid; border-width: 0px 1px 1px 1px;">
@@ -432,14 +430,12 @@
           <% end %>
         </div>
 
-        <% if @any_abs %>
-          <div class="tab-pane pt-1 <%= @tab == "abs" ? "active" : "" %>" id="tab-abs" role="tabpanel">
-            <%= react_component('userForm/Absences', {
-              user_id: @user.id,
-              seasons: @seasons.as_json
-            }) %>
-          </div>
-        <% end %>
+        <div class="tab-pane pt-1 <%= @tab == "abs" ? "active" : "" %>" id="tab-abs" role="tabpanel">
+          <%= react_component('userForm/Absences', {
+            user_id: @user.id,
+            seasons: @seasons.as_json
+          }) %>
+        </div>
       </div>
     </div>
 

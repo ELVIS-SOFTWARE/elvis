@@ -9,6 +9,9 @@ import { Field } from "react-final-form";
 import AlertCheckbox from "./AlertCheckbox";
 import Input from "./Input";
 
+// Valeur spéciale de l'option "tout sélectionner" (activée via la prop allowSelectAll).
+const SELECT_ALL_VALUE = "__select_all__";
+
 /**
  * Il y as quelques restrictions pour utiliser ce SelectMultiple.
  *
@@ -60,6 +63,12 @@ export default class SelectMultiple extends React.Component
         if(actionMeta.action === 'select-option')
         {
             const newFeature = this.props.isMulti ? _.last(values) : values;
+
+            // Option "tout sélectionner" : bascule toutes les options disponibles.
+            if(newFeature && newFeature.value === SELECT_ALL_VALUE)
+            {
+                return this.selectAll();
+            }
 
             if(this.props.isMulti)
                 _.remove(this.state.features, newFeature);
@@ -131,8 +140,36 @@ export default class SelectMultiple extends React.Component
         }
     }
 
+    selectAll()
+    {
+        const selectedFeatures = [...this.state.selectedFeatures, ...this.state.features];
+
+        if(this.props.mutators && this.props.name)
+        {
+            selectedFeatures.forEach((f, i) => this.props.mutators.update(this.props.name, i, f.value));
+        }
+
+        this.setState({
+            selectedFeatures,
+            features: [],
+        });
+    }
+
     render()
     {
+        const canSelectAll =
+            this.props.allowSelectAll && this.props.isMulti && this.state.features.length > 0;
+
+        const options = canSelectAll
+            ? [
+                {
+                    label: this.props.selectAllLabel || `Ajouter toutes les ${this.props.title.toLowerCase()}`,
+                    value: SELECT_ALL_VALUE,
+                },
+                ...this.state.features,
+            ]
+            : this.state.features;
+
         return <div>
             <input
                 type="hidden"
@@ -147,7 +184,7 @@ export default class SelectMultiple extends React.Component
             <CreatableSelect
                 isMulti={this.props.isMulti}
                 isClearable={this.props.isClearable || this.props.isMulti}
-                options={this.state.features}
+                options={options}
                 value={this.state.selectedFeatures}
                 onChange={this.handleChange.bind(this)}/>
         </div>
@@ -163,4 +200,6 @@ SelectMultiple.propTypes = {
     isMulti: PropTypes.bool,
     isClearable: PropTypes.bool,
     confirmBeforeClear: PropTypes.bool,
+    allowSelectAll: PropTypes.bool,
+    selectAllLabel: PropTypes.string,
 }
