@@ -1,0 +1,17 @@
+<%
+  # Champ date de saison avec affichage des erreurs de validation en rouge.
+  # Locals attendues : f (form builder), attr (symbol), label (string), required (bool)
+  errs = @season&.errors ? @season.errors[attr] : []
+  errs ||= []
+  field_class = "form-control#{' is-invalid' if errs.any?}"
+  field_style = errs.any? ? "border: 1px solid #e74c3c;" : nil
+%>
+<div class="form-group">
+  <%= f.label label, for: attr.to_s %><br />
+  <%= f.date_field attr, autofocus: false, id: attr.to_s, class: field_class, style: field_style, required: required %>
+  <% if errs.any? %>
+    <div class="text-danger small" style="margin-top: 4px;">
+      <%= errs.join(", ") %>
+    </div>
+  <% end %>
+</div>
