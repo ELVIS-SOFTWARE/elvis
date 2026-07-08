@@ -645,6 +645,7 @@ Rails.application.routes.draw do
   #  ===================
 
   resources :formules
+  patch "/formules/:id/archive", to: "formules#archive"
 
   resources :formule_pricings, :path => "/formules/:formule_id/formule_pricings"
   post "/formules/:formule_id/formule_pricings/list", to: "formule_pricings#list"
