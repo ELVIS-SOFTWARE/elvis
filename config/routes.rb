@@ -243,7 +243,13 @@ Rails.application.routes.draw do
    # Utilisé pour peupler un select
   post "/users/simple_list", to: "users#simple_list"
   post "/users/:id/absences_list", to: "users#list_abscences"
+  get "/users/:id/absences_summary", to: "users#absences_summary"
   patch '/student_attendances/:id/update_remarks', to: 'student_attendances#update_remarks'
+
+  # Suivi des absences (vue globale)
+  get "/absences", to: "absences#index"
+  get "/absences/data", to: "absences#data"
+  get "/absences/export", to: "absences#export"
 
   get "users/:id/all_doc_consented", to: "users#all_doc_consented"
 
@@ -645,6 +651,7 @@ Rails.application.routes.draw do
   #  ===================
 
   resources :formules
+  patch "/formules/:id/archive", to: "formules#archive"
 
   resources :formule_pricings, :path => "/formules/:formule_id/formule_pricings"
   post "/formules/:formule_id/formule_pricings/list", to: "formule_pricings#list"

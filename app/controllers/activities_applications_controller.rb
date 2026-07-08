@@ -498,7 +498,7 @@ class ActivitiesApplicationsController < ApplicationController
     # on retire les packs qui n'ont pas de tarifs
     @packs = @packs.select { |_key, value| value.any? }
 
-    @formules = Formule.all.as_json(
+    @formules = Formule.not_archived.as_json(
       include: {
         formule_items: { include: { item: { only: %i[id display_name] } } },
         formule_pricings: {

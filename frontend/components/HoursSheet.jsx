@@ -247,7 +247,7 @@ export default class HoursSheet extends React.Component {
                 </div>
 
                 <div className="row">
-                    <div className="col-xs-12 col-md-10 col-lg-8">
+                    <div className="col-xs-12">
                         <div className="ibox">
                             <div className="ibox-title">
                                 <h3>
@@ -259,7 +259,8 @@ export default class HoursSheet extends React.Component {
                                 </h3>
                             </div>
                             <div className="ibox-content">
-                                <table className="table table-bordered">
+                                <div className="table-responsive" style={{ overflowX: "auto", width: "100%" }}>
+                                <table className="table table-bordered" style={{ width: "100%", marginBottom: 0 }}>
                                     <thead>
                                         <tr>
                                             <th>SEMAINE</th>
@@ -433,6 +434,7 @@ export default class HoursSheet extends React.Component {
                                         </tr>
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                             <div className="ibox-footer">
                                 <p>

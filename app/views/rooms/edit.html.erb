@@ -44,7 +44,7 @@
           </div>
 
           <div class="form-group">
-            <%= react_component("common/SelectMultiple", {all_features: ActivityRef.all.collect {|ar| [ar.label, ar.id]}, name: "room[activity_refs]", title: "Activités", features: @room.activity_refs.collect { |a| a.id }, isMulti: true}) %>
+            <%= react_component("common/SelectMultiple", {all_features: ActivityRef.all.collect {|ar| [ar.label, ar.id]}, name: "room[activity_refs]", title: "Activités", features: @room.activity_refs.collect { |a| a.id }, isMulti: true, allowSelectAll: true}) %>
           </div>
 
           <!--<div class="form-group">

@@ -49,21 +49,21 @@
         seasons = []
         # on ajoute, en 1ère position, un élément "aucune saison", avec next_season_id=0
         seasons.unshift (Season.new(id: 0, label: "<aucune>"))
-        # on ajoute ensuite la saison suivante, si elle est déclarée
         seasons << @season.next_season if @season.next_season_id
-        # on ajoute enfin les saisons candidates (celles qui ne sont pas déjà saisons suivantes d'une autre)
         seasons.concat Season.get_next_season_candidates(exclude_id: @season.id).to_a
       %>
       <%= f.collection_select(:next_season_id, seasons, :id, :label, {:selected => @season.next_season_id }, { class: 'form-control' }) %>
     </div>
   </div>
 
+  <!--
   <div class="form-group">
     <div class="checkbox checkbox-primary">
       <%= f.check_box :is_off, autocomplete: "off", id: "is_off", disabled: @season.is_current%>
       <%= f.label "Archivée", for: "is_off", class: "control-label" %>
     </div>
   </div>
+  -->
   <div class="form-group">
     <%= f.submit "Sauvegarder", class: "btn btn-primary block full-width m-b" %>
   </div>

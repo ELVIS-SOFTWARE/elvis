@@ -33,11 +33,19 @@ class SeasonsController < ApplicationController
     authorize! :manage, @current_user.is_admin
   end
 
-  def show
-    @season = Season.find(params[:id])
+   def show
+     @season = Season.find(params[:id])
 
-    redirect_to edit_season_path @season
-  end
+     respond_to do |format|
+       format.html { redirect_to edit_season_path @season }
+       format.json do
+         render json: @season.as_json(
+           include: :holidays,
+           except: [:created_at, :updated_at, :deleted_at]
+         )
+       end
+     end
+   end
 
   def get_season_weeks
     render json: Seasons::GetSeasonWeeks.new.execute
@@ -153,7 +161,7 @@ class SeasonsController < ApplicationController
     result = Seasons::SeasonSwitcher.execute(season)
 
     if result
-      render json: {new_next_season: next_season.nil?, next: (next_season || season.next)&.as_json(except: [:created_at, :updated_at, :deleted_at], include: :next_season, methods: [:start_formatted, :end_formatted])}, status: :ok
+      render json: {id: season.id, new_next_season: next_season.nil?, next: (next_season || season.next)&.as_json(except: [:created_at, :updated_at, :deleted_at], include: :next_season, methods: [:start_formatted, :end_formatted])}, status: :ok
     else
       head :unprocessable_entity
     end
