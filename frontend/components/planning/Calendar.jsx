@@ -17,12 +17,38 @@ const EVENT_TYPES = [
     "clickSchedule",
 ];
 
-function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=false, isRoomCalendar=false, seasons=[], user=null,}) {
+function getTimeTemplate(schedule, isMultiView, show_activity_code, {isAllDay=false, isRoomCalendar=false, seasons=[], user=null, isMonthView=false,}) {
     let html = [];
     const start = day(schedule.start.toUTCString());
     const end = day(schedule.end.toUTCString());
 
     const duration = end.diff(start, "minutes");
+
+    // Vue mensuelle : affichage compact sur une seule ligne (façon Google Agenda)
+    // pour éviter que le contenu multiligne ne déborde et se chevauche dans les cellules.
+    if (isMonthView && !isAllDay) {
+        const timeStr = start.format("HH:mm");
+
+        let monthTitle;
+        if (schedule.isPrivate) {
+            monthTitle = "Private";
+        } else if (schedule.isValidated) {
+            monthTitle = schedule.title;
+        } else {
+            switch (schedule.kind) {
+                case "o": monthTitle = "Dispo. Option"; break;
+                case "c": monthTitle = "Dispo. Cours"; break;
+                case "e": monthTitle = "Dispo. Evaluation"; break;
+                case "p": monthTitle = "Pause"; break;
+                default: monthTitle = "Disponibilité";
+            }
+        }
+
+        const comment = _.get(schedule, "raw.comment") ? ' <i class="fa fa-comment"></i>' : "";
+        const label = `${timeStr} - ${monthTitle}${comment}`;
+
+        return `<span class="ti-month-line" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</span>`;
+    }
 
     // construct lines
 
@@ -209,6 +235,10 @@ class CustomCalendar extends React.Component {
                         "</span>";
                     return template;
                 },
+                monthGridHeaderExceed(hiddenSchedules) {
+                    return '<span class="tui-full-calendar-weekday-grid-more-schedules">' +
+                        hiddenSchedules + " autres</span>";
+                },
                 weekDayname(dayname) {
                     return `<div class="flex">
                         <div class="m-r-md">
@@ -247,7 +277,8 @@ class CustomCalendar extends React.Component {
                             isAllDay:false,
                             isRoomCalendar: props.isRoomCalendar,
                             seasons: props.seasons,
-                            user: props.user
+                            user: props.user,
+                            isMonthView: this.props.view === "month"
                         }
                     );
                 },
