@@ -60,15 +60,24 @@ export default function Formules() {
                 id: "actions",
                 Header: "Actions",
                 Cell: props => {
+                    const isUsed = props.original["used?"];
                     return (
                         <div className="btn-wrapper">
                             <a className="btn-sm btn-primary m-r-sm" href={'/formules/' + props.original.id + "/edit"}>
                                 <i className="fas fa-edit"/>
                             </a>
 
-                            <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
-                                <i className="fas fa-trash"/>
-                            </a>
+                            {isUsed ? (
+                                <span className="btn-sm btn-warning disabled"
+                                      style={{opacity: 0.5, cursor: "not-allowed"}}
+                                      title="Impossible de supprimer une formule utilisée">
+                                    <i className="fas fa-trash"/>
+                                </span>
+                            ) : (
+                                <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
+                                    <i className="fas fa-trash"/>
+                                </a>
+                            )}
                         </div>
                     );
                 },

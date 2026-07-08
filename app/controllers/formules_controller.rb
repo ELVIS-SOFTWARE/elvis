@@ -121,6 +121,13 @@ class FormulesController < ApplicationController
 
     authorize! :destroy, formule
 
+    if formule.used?
+      render json: {
+        error: "Cette formule est utilisée par une ou plusieurs inscriptions : elle ne peut pas être supprimée."
+      }, status: :unprocessable_entity
+      return
+    end
+
     formule.destroy
     render json: { message: "Formule deleted" }
   end
@@ -156,11 +163,14 @@ class FormulesController < ApplicationController
 
     pages = query.total_pages
 
-    @formules = query.as_json(include: {
-      activities: {
-        only: %i[id display_name]
+    @formules = query.as_json(
+      methods: :used?,
+      include: {
+        activities: {
+          only: %i[id display_name]
+        }
       }
-    })
+    )
     authorize! :read, @formules
 
     {
