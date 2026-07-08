@@ -6,21 +6,6 @@
 <div class="row">
   <div class="col-sm-12">
 
-    <%
-      if flash.any? && flash.alert.is_a?(Hash)
-        @invalid = flash.alert[:errors]
-        @invalid = {} if @invalid.nil? || ! @invalid.is_a?(Hash)
-
-    %>
-      <div class="m-t h-auto bg-danger rounded p-sm text-white">
-        Impossible de sauvegarder la saison
-      </div>
-    <%
-      else
-        @invalid = {}
-      end
-    %>
-
     <br />
 
     <div class="row">
