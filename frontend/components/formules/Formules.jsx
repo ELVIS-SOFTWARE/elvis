@@ -88,6 +88,7 @@ export default function Formules() {
                 id: "actions",
                 Header: "Actions",
                 Cell: props => {
+                    const isUsed = props.original["used?"];
                     const isArchived = props.original["archived?"];
                     return (
                         <div className="btn-wrapper">
@@ -101,9 +102,17 @@ export default function Formules() {
                                 <i className={isArchived ? "fas fa-box-open" : "fas fa-archive"}/>
                             </a>
 
-                            <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
-                                <i className="fas fa-trash"/>
-                            </a>
+                            {isUsed ? (
+                                <span className="btn-sm btn-warning disabled"
+                                      style={{opacity: 0.5, cursor: "not-allowed"}}
+                                      title="Impossible de supprimer une formule utilisée">
+                                    <i className="fas fa-trash"/>
+                                </span>
+                            ) : (
+                                <a className="btn-sm btn-warning" onClick={() => deleteFormule(props.original)}>
+                                    <i className="fas fa-trash"/>
+                                </a>
+                            )}
                         </div>
                     );
                 },

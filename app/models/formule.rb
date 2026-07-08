@@ -24,6 +24,12 @@ class Formule < ApplicationRecord
   # validate count of items equals to number_of_items
   validate :validate_number_of_items
 
+  # Une formule est "utilisée" dès qu'une inscription y est rattachée.
+  # Une formule utilisée ne doit pas pouvoir être supprimée (casserait la page règlement).
+  def used?
+    activity_applications.exists?
+  end
+
   def self.display_class_name(singular= true)
     singular ? "Formule" : "Formules"
   end
