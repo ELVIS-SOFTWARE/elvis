@@ -463,6 +463,61 @@ class UsersController < ApplicationController
     }
   end
 
+  # Liste complète des absences d'un élève pour une saison (sans pagination serveur).
+  # Le filtrage, la recherche, les KPIs et la pagination sont réalisés côté client.
+  def absences_summary
+    user = User.find(params[:id])
+    authorize! :read, user
+
+    # @type Season
+    season = params[:sid].present? ? Season.find(params[:sid]) : Season.current_apps_season
+
+    render json: { absences: [], courses: [] } and return if season.nil?
+
+    absences = user
+                 .student_attendances
+                 .joins(:activity_instance)
+                 .joins("INNER JOIN time_intervals ON activity_instances.time_interval_id = time_intervals.id")
+                 .joins("INNER JOIN activities ON activity_instances.activity_id = activities.id")
+                 .joins("INNER JOIN activity_refs ON activities.activity_ref_id = activity_refs.id")
+                 .where("attended != 1")
+                 .where("time_intervals.start >= :start", start: season.start)
+                 .where("time_intervals.start <= :end", end: season.end)
+                 .order("time_intervals.start DESC")
+                 .includes(
+                   activity_instance: {
+                     activity: { activity_ref: {}, teachers_activities: :teacher },
+                     time_interval: {},
+                   }
+                 )
+
+    serialized = absences.map do |abs|
+      instance = abs.activity_instance
+      start = instance.time_interval.start.in_time_zone("Europe/Paris")
+      activity_ref = instance.activity.activity_ref
+
+      {
+        id: abs.id,
+        date: start.strftime("%d/%m/%Y"),
+        date_iso: start.strftime("%Y-%m-%d"),
+        activity: activity_ref&.label,
+        activity_ref_id: activity_ref&.id,
+        teacher: instance.activity.teacher&.full_name,
+        type: abs.attended,
+        justified: abs.attended == 3,
+        remarks: abs.remarks,
+      }
+    end
+
+    courses = serialized
+                .reject { |a| a[:activity_ref_id].nil? }
+                .map { |a| { id: a[:activity_ref_id], label: a[:activity] } }
+                .uniq { |c| c[:id] }
+                .sort_by { |c| c[:label].to_s }
+
+    render json: { absences: serialized, courses: courses }
+  end
+
   def family
     @current_user = current_user
     user = if params[:user_id]

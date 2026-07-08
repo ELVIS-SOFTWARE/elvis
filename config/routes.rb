@@ -243,6 +243,7 @@ Rails.application.routes.draw do
    # Utilisé pour peupler un select
   post "/users/simple_list", to: "users#simple_list"
   post "/users/:id/absences_list", to: "users#list_abscences"
+  get "/users/:id/absences_summary", to: "users#absences_summary"
   patch '/student_attendances/:id/update_remarks', to: 'student_attendances#update_remarks'
 
   # Suivi des absences (vue globale)
