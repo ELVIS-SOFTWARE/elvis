@@ -515,7 +515,22 @@ class UsersController < ApplicationController
                 .uniq { |c| c[:id] }
                 .sort_by { |c| c[:label].to_s }
 
-    render json: { absences: serialized, courses: courses }
+    # Vision globale : présences (séances passées pointées présent) et
+    # cours restants (séances à venir à partir d'aujourd'hui).
+    today = Date.today
+    base = user
+             .student_attendances
+             .joins(:activity_instance)
+             .joins("INNER JOIN time_intervals ON activity_instances.time_interval_id = time_intervals.id")
+             .where("time_intervals.start >= :start", start: season.start)
+             .where("time_intervals.start <= :end", end: season.end)
+
+    stats = {
+      present: base.where("time_intervals.start < ?", today).where(attended: 1).count,
+      remaining: base.where("time_intervals.start >= ?", today).count,
+    }
+
+    render json: { absences: serialized, courses: courses, stats: stats }
   end
 
   def family

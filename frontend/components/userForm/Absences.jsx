@@ -30,6 +30,7 @@ export default function Absences({ user_id, seasons = [] }) {
     const [seasonId, setSeasonId] = useState(currentSeason ? currentSeason.id : null);
     const [absences, setAbsences] = useState([]);
     const [courses, setCourses] = useState([]);
+    const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(false);
 
     const [type, setType] = useState("all");
@@ -48,6 +49,7 @@ export default function Absences({ user_id, seasons = [] }) {
             .then(({ data }) => {
                 setAbsences((data && data.absences) || []);
                 setCourses((data && data.courses) || []);
+                setStats((data && data.stats) || null);
                 setPage(0);
             })
             .finally(() => setLoading(false));
@@ -120,13 +122,17 @@ export default function Absences({ user_id, seasons = [] }) {
             </div>
 
             {/* KPIs */}
-            <div style={S.kpiRow}>
+            <div style={{ ...S.kpiRow, flexWrap: "wrap" }}>
+                <KpiCard icon="fa-user-check" iconBg={COLORS.successBg} iconColor={COLORS.successText}
+                    label="Présences" value={stats ? stats.present : "…"} sub="Séances suivies" />
                 <KpiCard icon="fa-calendar-times" iconBg={COLORS.dangerBg} iconColor={COLORS.dangerText}
                     label="Total absences" value={kpis.total} sub="sur la période" />
                 <KpiCard icon="fa-check-circle" iconBg={COLORS.successBg} iconColor={COLORS.successText}
                     label="Justifiées" value={kpis.justified} sub={`${kpis.justifiedPct}% du total`} />
                 <KpiCard icon="fa-exclamation-triangle" iconBg={COLORS.warnBg} iconColor={COLORS.warnText}
                     label="Injustifiées" value={kpis.unjustified} sub={`${kpis.unjustifiedPct}% du total`} />
+                <KpiCard icon="fa-hourglass-half" iconBg="#eef1fb" iconColor={COLORS.primary}
+                    label="Cours restants" value={stats ? stats.remaining : "…"} sub="À venir sur la saison" />
             </div>
 
             {/* Barre d'actions */}
